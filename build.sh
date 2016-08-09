@@ -12,7 +12,7 @@ arachne-pnr -d 1k -o ./build/example.asc -p example.pcf ./build/example.blif || 
 icepack ./build/example.asc ./build/example.bin || exit
 
 
-# think it will be just this... to send to the device
-# iceprog ./build/example.bin
+# send to device
+iceprog ./build/example.bin
 
 
