@@ -13,6 +13,6 @@ icepack ./build/example.asc ./build/example.bin || exit
 
 
 # send to device
-iceprog ./build/example.bin
+# iceprog ./build/example.bin
 
 

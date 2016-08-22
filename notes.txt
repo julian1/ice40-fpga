@@ -1,0 +1,50 @@
+
+verilog in one day tutorial,
+
+http://www.asic-world.com/verilog/verilog_one_day.html
+
+http://www.asic-world.com/verilog/veritut.html
+
+s apt-get install yosys
+s apt-get install arachne-pnr
+s apt-get install fpga-icestorm   (already installed)
+
+---
+
+touch example.v
+touch example.pcf
+
+
+yosys -p 'synth_ice40 -top top -blif example.blif' example.v
+less example.blif
+
+arachne-pnr -d 1k -o example.asc -p example.pcf example.blif
+less example.asc
+
+# not needed...
+icebox_explain example.asc
+
+icepack example.asc example.bin
+less example.bin
+
+
+# think it will be just this... to send to the device
+iceprog example.bin
+
+
+meteo@dell-work:~/ice40$ iceprog example.bin 
+init..
+cdone: high
+reset..
+cdone: low
+flash ID: 0x20 0xBA 0x16 0x10 0x00 0x00 0x23 0x50 0x81 0x14 0x24 0x00 0x13 0x00 0x22 0x10 0x04 0x15 0xF1 0xE6
+file size: 32220
+erase 64kB sector at 0x000000..
+programming..
+reading..
+VERIFY OK
+cdone: high
+Bye.
+....
+
+
