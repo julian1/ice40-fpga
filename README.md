@@ -1,38 +1,34 @@
 
+# Minimal ice40, yosys, arachne-pnr, icestorm example for ICEStick
+
+#### verilog
+
 verilog in one day tutorial,
 
 http://www.asic-world.com/verilog/verilog_one_day.html
 
 http://www.asic-world.com/verilog/veritut.html
 
+#### install
+```
 s apt-get install yosys
 s apt-get install arachne-pnr
 s apt-get install fpga-icestorm   (already installed)
+```
 
 ---
+#### run
+```
+./build.sh
 
-touch example.v
-touch example.pcf
-
-
-yosys -p 'synth_ice40 -top top -blif example.blif' example.v
-less example.blif
-
-arachne-pnr -d 1k -o example.asc -p example.pcf example.blif
-less example.asc
-
-# not needed...
-icebox_explain example.asc
-
-icepack example.asc example.bin
-less example.bin
+```
 
 
-# think it will be just this... to send to the device
-iceprog example.bin
+#### send to the device
 
+```
 
-meteo@dell-work:~/ice40$ iceprog example.bin 
+:~/ice40$ iceprog example.bin
 init..
 cdone: high
 reset..
@@ -46,5 +42,5 @@ VERIFY OK
 cdone: high
 Bye.
 ....
-
+```
 
