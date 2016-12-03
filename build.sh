@@ -11,6 +11,7 @@ arachne-pnr -d 1k -o ./build/example.asc -p example.pcf ./build/example.blif || 
 
 icepack ./build/example.asc ./build/example.bin || exit
 
+icetime ./build/example.asc -d hx1k
 
 # send to device
 # iceprog ./build/example.bin

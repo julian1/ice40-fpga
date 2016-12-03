@@ -5,9 +5,27 @@
 
 verilog in one day tutorial,
 
+
 http://www.asic-world.com/verilog/verilog_one_day.html
 
 http://www.asic-world.com/verilog/veritut.html
+
+
+http://hackaday.com/2015/08/19/learning-verilog-on-a-25-fpga-part-i/
+
+
+#### IO
+  - needs 10k pull down resistors
+  - need to find out what Voltage limits are - 
+
+  - ahhh very important Might use a DG444 switch for the feedback from the op-amp as well.
+    actually perhaps avoid a second op-amp altogether...
+
+#### vim
+
+set filetype=verilog
+syntax on
+
 
 #### install
 ```
@@ -28,7 +46,7 @@ s apt-get install fpga-icestorm   (already installed)
 
 ```
 
-:~/ice40$ iceprog example.bin
+:~/ice40$ iceprog build/example.bin
 init..
 cdone: high
 reset..

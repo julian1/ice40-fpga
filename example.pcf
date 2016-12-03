@@ -4,6 +4,8 @@
 # set_io b 10
 # set_io y 11
 
+set_io a    62 
+set_io b    61 
 
 set_io LED1 99
 set_io LED2 98
