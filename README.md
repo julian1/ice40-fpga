@@ -41,6 +41,9 @@ s apt-get install fpga-icestorm   (already installed)
 
 ```
 
+#### pll speed
+
+https://www.reddit.com/r/yosys/comments/3yrq6d/are_plls_supported_on_the_icestick_hw/cykd3oo/
 
 #### send to the device
 
