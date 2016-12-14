@@ -14,7 +14,7 @@ module blinkmodule (
 endmodule
 
 
-
+// works!
 
 module SPI_slave(clk, SCK, MOSI, MISO, SSEL, LED);
 
