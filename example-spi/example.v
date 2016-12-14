@@ -87,7 +87,7 @@ module SPI_slave(clk, SCK, MOSI, MISO, SSEL, LED);
   if(SSEL_active)
     begin
       if(SSEL_startmessage)
-        byte_data_sent <= { byte_data_received, byte_data_received } ;  // first byte sent in a message is the message count
+        byte_data_sent <= { byte_data_received, 8'hdd } ;  // first byte sent in a message is the message count
       else
       if(SCK_fallingedge)
       begin
