@@ -42,7 +42,7 @@ module SPI_slave(clk, SCK, MOSI, MISO, SSEL, LED);
   reg [1:0] MOSIr;  always @(posedge clk) MOSIr <= {MOSIr[0], MOSI};
   wire MOSI_data = MOSIr[1];
 
-
+/*
 
   // we handle SPI in 8-bits format, so we need a 3 bits counter to count the bits as they come in
   reg [2:0] bitcnt;
@@ -69,7 +69,7 @@ module SPI_slave(clk, SCK, MOSI, MISO, SSEL, LED);
   // we use the LSB of the data received to control an LED
   reg LED;
   always @(posedge clk) if(byte_received) LED <= byte_data_received[0];
-
+*/
 
 
   reg [23:0] byte_data_sent;
