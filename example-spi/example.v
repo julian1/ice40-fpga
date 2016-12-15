@@ -42,11 +42,10 @@ module SPI_slave(clk, SCK, MOSI, MISO, SSEL, LED);
   reg [1:0] MOSIr;  always @(posedge clk) MOSIr <= {MOSIr[0], MOSI};
   wire MOSI_data = MOSIr[1];
 
-  // we handle SPI in 8-bits format, so we need a 3 bits counter to count the bits as they come in
-  // reg [2:0] bitcnt;
 
-  // change to 24 bits out 
-  reg [4:0] bitcnt;
+
+  // we handle SPI in 8-bits format, so we need a 3 bits counter to count the bits as they come in
+  reg [2:0] bitcnt;
 
   reg byte_received;  // high when a byte has been received
   reg [7:0] byte_data_received;
@@ -71,34 +70,36 @@ module SPI_slave(clk, SCK, MOSI, MISO, SSEL, LED);
   reg LED;
   always @(posedge clk) if(byte_received) LED <= byte_data_received[0];
 
-  reg [15:0] byte_data_sent;
+
+
+  reg [23:0] byte_data_sent;
 
 //  reg [7:0] cnt;
 //  always @(posedge clk) if(SSEL_startmessage) cnt<=cnt+8'h1;  // count the messages
 
-// we are going to need 24 bit return value, for timer... possibly more...
-
-// think we want a different count for writing...
-
-  // IMPORTANT - we can simplify this by setting the byte_data_sent to be 3 bytes length
-  // rather than interpret individual bytes...
+// if we did 32 bit, then we could send back a current clock
 
   always @(posedge clk)
   if(SSEL_active)
+  begin
+    if(SSEL_startmessage)
+      // byte_data_sent <= cnt;  // first byte sent in a message is the message count
+      byte_data_sent <= { 8'hee, 8'hdd, 8'hcc };  // first byte sent in a message is the message count
+    else
+    if(SCK_fallingedge)
     begin
-      if(SSEL_startmessage)
-        byte_data_sent <= { byte_data_received, byte_data_received } ;  // first byte sent in a message is the message count
-      else
-      if(SCK_fallingedge)
-      begin
-        byte_data_sent <= {byte_data_sent[14:0], 1'b0};
-      end
+//      if(bitcnt==3'b000)
+//        byte_data_sent <= 8'h00;  // after that, we send 0s
+//      else
+        byte_data_sent <= {byte_data_sent[22:0], 1'b0};
+    end
   end
 
-  assign MISO = byte_data_sent[15];  // send MSB first
+  assign MISO = byte_data_sent[23];  // send MSB first
   // we assume that there is only one slave on the SPI bus
   // so we don't bother with a tri-state buffer for MISO
   // otherwise we would need to tri-state MISO when SSEL is inactive
+
 
 endmodule
 
