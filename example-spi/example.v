@@ -44,6 +44,7 @@ module SPI_slave(clk, SCK, MOSI, MISO, SSEL, LED);
 
 
   /////////////////////////////////////
+  // read in 8bit message
   // we handle SPI in 8-bits format, so we need a 3 bits counter to count the bits as they come in
   reg [2:0] bitcnt;
   reg byte_received;  // high when a byte has been received
@@ -72,10 +73,9 @@ module SPI_slave(clk, SCK, MOSI, MISO, SSEL, LED);
   reg [31:0] count = 0;
 
 
-  // we use the LSB of the data received to control an LED
 
-  // turning the led off/on should be independent of incrementing the clock. 
-
+  //////////////////////////////////////////////
+  // decode messages and process
   reg LED;
   always @(posedge clk) 
 
@@ -102,26 +102,17 @@ module SPI_slave(clk, SCK, MOSI, MISO, SSEL, LED);
 
 
   //////////////////////////////////////////////
+  // write count as output
   reg [31:0] byte_data_sent;
-
-//  reg [7:0] cnt;
-//  always @(posedge clk) if(SSEL_startmessage) cnt<=cnt+8'h1;  // count the messages
-
-// if we did 32 bit, then we could send back a current clock
 
   always @(posedge clk)
   if(SSEL_active)
   begin
     if(SSEL_startmessage)
-      // byte_data_sent <= cnt;  // first byte sent in a message is the message count
-      // byte_data_sent <= { 8'hee, 8'hdd, 8'hcc,8'hbb };  // first byte sent in a message is the message count
       byte_data_sent <= count; 
     else
     if(SCK_fallingedge)
     begin
-//      if(bitcnt==3'b000)
-//        byte_data_sent <= 8'h00;  // after that, we send 0s
-//      else
         byte_data_sent <= {byte_data_sent[30:0], 1'b0};
     end
   end
