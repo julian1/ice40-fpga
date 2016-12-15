@@ -42,11 +42,10 @@ module SPI_slave(clk, SCK, MOSI, MISO, SSEL, LED);
   reg [1:0] MOSIr;  always @(posedge clk) MOSIr <= {MOSIr[0], MOSI};
   wire MOSI_data = MOSIr[1];
 
-/*
 
+  /////////////////////////////////////
   // we handle SPI in 8-bits format, so we need a 3 bits counter to count the bits as they come in
   reg [2:0] bitcnt;
-
   reg byte_received;  // high when a byte has been received
   reg [7:0] byte_data_received;
 
@@ -66,22 +65,43 @@ module SPI_slave(clk, SCK, MOSI, MISO, SSEL, LED);
 
   always @(posedge clk) byte_received <= SSEL_active && SCK_risingedge && (bitcnt==3'b111);
 
-  // we use the LSB of the data received to control an LED
-  reg LED;
-  always @(posedge clk) if(byte_received) LED <= byte_data_received[0];
-*/
 
 
-
+  //////////////////////////////////////////////
+  // global clock...
   reg [31:0] count = 0;
 
-  always@(posedge clk) begin
-    count <= count + 1;
-  end
+
+  // we use the LSB of the data received to control an LED
+
+  // turning the led off/on should be independent of incrementing the clock. 
+
+  reg LED;
+  always @(posedge clk) 
+
+    if(byte_received && byte_data_received == 8'hcc) 
+    begin 
+        // if message 0xcc to reset
+        count <= 0;   
+    end
+    else
+    begin
+        // always increment clock
+        count <= count + 1;
+
+        if(byte_received) 
+        begin 
+          if(byte_data_received == 8'hcd)
+            LED <= 1'b1; 
+          else if (byte_data_received == 8'hce)
+            LED <= 1'b0; 
+        end
+    end
 
 
 
 
+  //////////////////////////////////////////////
   reg [31:0] byte_data_sent;
 
 //  reg [7:0] cnt;
