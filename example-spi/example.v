@@ -72,6 +72,16 @@ module SPI_slave(clk, SCK, MOSI, MISO, SSEL, LED);
 */
 
 
+
+  reg [31:0] count = 0;
+
+  always@(posedge clk) begin
+    count <= count + 1;
+  end
+
+
+
+
   reg [31:0] byte_data_sent;
 
 //  reg [7:0] cnt;
@@ -84,7 +94,8 @@ module SPI_slave(clk, SCK, MOSI, MISO, SSEL, LED);
   begin
     if(SSEL_startmessage)
       // byte_data_sent <= cnt;  // first byte sent in a message is the message count
-      byte_data_sent <= { 8'hee, 8'hdd, 8'hcc,8'hbb };  // first byte sent in a message is the message count
+      // byte_data_sent <= { 8'hee, 8'hdd, 8'hcc,8'hbb };  // first byte sent in a message is the message count
+      byte_data_sent <= count; 
     else
     if(SCK_fallingedge)
     begin
