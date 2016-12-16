@@ -1,15 +1,15 @@
 
 # example.pcf
-# set_io a 1
-# set_io b 10
-# set_io y 11
+# set_io a  1
+# set_io b  10
+# set_io y  11
 
-# inputs
+# spi inputs
 # SCK, MOSI, MISO, SSEL,
-set_io sck    87 
-set_io mosi   88 
-set_io miso   90 
-set_io ssel   91 
+set_io sck  87 
+set_io mosi 88 
+set_io miso 90 
+set_io ssel 91 
 
 # leds
 set_io LED1 99
@@ -19,5 +19,8 @@ set_io LED4 96
 set_io LED5 95
 
 # clock
-set_io clk 21
+set_io clk  21
+
+
+set_io a    62
 

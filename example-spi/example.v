@@ -17,12 +17,13 @@ endmodule
 
 // works!
 
-module SPI_slave(clk, SCK, MOSI, MISO, SSEL, LED);
+module SPI_slave(clk, SCK, MOSI, MISO, SSEL, LED, a);
 
   input clk;
   input SCK, SSEL, MOSI;  // ssel is slave select
   output MISO;
   output LED;
+  output a;
 
   // ahhh - this works by storing the last two sck states, and then compare them to
   // to determine if it's rising or falling.
@@ -92,9 +93,15 @@ module SPI_slave(clk, SCK, MOSI, MISO, SSEL, LED);
         if(byte_received) 
         begin 
           if(byte_data_received == 8'hcd)
+          begin
             LED <= 1'b1; 
+            a <=   1'b1;
+          end
           else if (byte_data_received == 8'hce)
+          begin
             LED <= 1'b0; 
+            a <=   1'b0;
+          end
         end
     end
 
@@ -135,6 +142,7 @@ module top (
   output LED3,
   output LED4,
   output LED5,
+  output a,
 
   input sck,
   input mosi,
@@ -158,7 +166,8 @@ module top (
     .MOSI(mosi),
     .MISO(miso),
     .SSEL(ssel),
-    .LED(LED2)
+    .LED(LED2),
+    .a(a)
   );
 
 
