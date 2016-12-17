@@ -154,7 +154,8 @@ module top (
   output miso,
 
   output a,
-  output b
+  output b,
+  output c
 );
 
   blinkmodule #()
@@ -179,6 +180,9 @@ module top (
     .a(a)
   );
 
+
+  // set the logic voltage reference, VL of dg444 
+  assign c = 1'b1;
 
   // SPI_slave(clk, SCK, MOSI, MISO, SSEL, LED);
 
