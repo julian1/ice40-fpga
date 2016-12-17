@@ -1,0 +1,6 @@
+
+BUS=="usb",ACTION=="add",SYSFS{idVendor}=="0403",SYSFS{idProduct}=="6010",MODE=="0660",GROUP=="plugdev",SYMLINK+="ftdi-0"
+
+SUBSYSTEM=="usb",DRIVER=="ftdi_sio",ATTRS{idVendor}=="0403",SYSFS{idProduct}=="6010",ATTR{bInterfaceNumber}=="00",RUN+="/bin/sh -c 'echo `basename %p` >/sys/bus/usb/drivers/ftdi_sio/unbind'"
+
+
