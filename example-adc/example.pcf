@@ -1,0 +1,28 @@
+
+# should create two constraint files...
+
+# clock
+# set_io clk  21
+set_io --warn-no-port clk J3
+
+# https://github.com/nesl/ice40_examples/blob/master/blinky/pinmap.pcf
+
+# leds
+set_io --warn-no-port led1 B5
+set_io --warn-no-port led2 B4
+set_io --warn-no-port led3 A2
+set_io --warn-no-port led4 A1
+set_io --warn-no-port led5 C5
+set_io --warn-no-port led6 C4
+set_io --warn-no-port led7 B3
+set_io --warn-no-port led8 C3
+
+
+set_io --warn-no-port sck  C16
+set_io --warn-no-port ssel D16
+set_io --warn-no-port mosi E16
+set_io --warn-no-port miso F16 
+
+
+set_io --warn-no-port a     J15
+
