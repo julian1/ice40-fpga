@@ -24,7 +24,7 @@ set_io --warn-no-port mosi E16
 set_io --warn-no-port miso F16 
 
 
-# m for multiplexor
+# m for multiplexor - dg444
 
 set_io --warn-no-port m_vl     P16       #  c
 

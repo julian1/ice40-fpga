@@ -6,35 +6,52 @@ module blinkmodule (
   input  clk,
   output LED,
   output m_0V, 
-  output m_plus,
+  output m_plus
 );
   reg [31:0] counter2 = 0;
 
+ 
   // we need to control this more carefully 
   // being able to control several input is a good thing...
   // as well as ref
-
   // might want to control the switching - just with spi commands...
   // to test...
 
   always@(posedge clk) begin
     counter2 <= counter2 + 1;
+    
   end
-  assign {LED} = counter2 >> 27;
-  assign m_0V = LED;
-  assign m_plus = ~LED;
+  assign {LED} = counter2 >> 22;
+  // assign m_0V = LED;
+  // assign m_plus = ~LED;
 endmodule
+
+
+
 
 
 // works!
 
-module SPI_slave(clk, SCK, SSEL, MOSI, MISO,  LED);
+module SPI_slave(
+  input clk, 
+  input SCK, 
+  input SSEL, 
+  input MOSI, 
+  output MISO,  
+  output LED, 
+  output m_reset 
+);
 
-  input clk;
+  /*input clk;
   input SCK, SSEL, MOSI;  // ssel is slave select
   output MISO;
   output LED;
-  // output a;
+
+  output m_reset;
+*/
+
+
+  reg m_reset =  1'b0;      // short the cap
 
   // ahhh - this works by storing the last two sck states, and then compare them to
   // to determine if it's rising or falling.
@@ -98,25 +115,27 @@ module SPI_slave(clk, SCK, SSEL, MOSI, MISO,  LED);
     end
     else
     begin
-        // always increment clock
+        // otherwise always increment clock
         count <= count + 1;
 
         if(byte_received) 
         begin 
           if(byte_data_received == 8'hcd)
           begin
+            // can just assign LED to m_reset
             LED <= 1'b1; 
-            // a <=   1'b1;
+            // m_reset <= LED;
           end
           else if (byte_data_received == 8'hce)
           begin
             LED <= 1'b0; 
-            // a <=   1'b0;
+            // m_reset <= LED;
           end
         end
     end
 
 
+  // assign m_reset = LED ;
 
 
   //////////////////////////////////////////////
@@ -184,15 +203,27 @@ module top (
     .MOSI(mosi),
     .MISO(miso),
     .SSEL(ssel),
-    .LED(led2)//,
-    //.a(a)
+    .LED(led2),
+    .m_reset(m_reset)// .m_reset(m_reset)
   );
 
 
   // set the logic voltage reference, VL of dg444 
   assign m_vl = 1'b1;
 
-  assign m_reset = 1'b1;   // it's not a reset, it's actually m_short
+  //  reg or wire,
+  // reg [31:0] counter2 = 0;
+
+
+
+/*
+  reg [1:0] m_reset = 1'b0;      // set reset to false
+on
+
+initial data_reg = 8'b10101011;
+*/
+
+  // assign m_reset = 1'b1;   // it's not a reset, it's actually m_short
                             // pull high to allow to conduct
 
 // issue of polarity?
