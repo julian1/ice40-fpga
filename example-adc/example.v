@@ -40,18 +40,7 @@ module SPI_slave(
   output m_ref
 );
 
-  /*input clk;
-  input SCK, SSEL, MOSI;  // ssel is slave select
-  output MISO;
-  output LED;
-
-  output m_reset;
-*/
-
-
-  // reg m_reset =  1'b0;      // short the cap
-
-  // ahhh - this works by storing the last two sck states, and then compare them to
+  // clk domain crossing - this works by storing the last two sck states, and then compare them to
   // to determine if it's rising or falling.
 
   // sync SCK to the FPGA clock using a 3-bits shift register
@@ -72,7 +61,7 @@ module SPI_slave(
 
   /////////////////////////////////////
   // read in 8bit message
-  // IT would be easy to make this longer 
+  // IT would be easy to make this longer
   // we handle SPI in 8-bits format, so we need a 3 bits counter to count the bits as they come in
   reg [2:0] bitcnt;
   reg byte_received;  // high when a byte has been received
@@ -120,7 +109,7 @@ module SPI_slave(
     begin
       init_ <= 1;
       m_reset <= 0;
-      m_in <= 0;   // assert m_in 
+      m_in <= 0;   // assert m_in
     end
     else if(byte_received && byte_data_received == 8'hcc)
     begin
@@ -140,7 +129,7 @@ module SPI_slave(
           else if (byte_data_received == 8'hcb)   // short cap/reset
             m_reset <= 1'b0;
 
-          else if (byte_data_received == 8'hcd)   // 0V 
+          else if (byte_data_received == 8'hcd)   // 0V
             m_in <= 1'b1;
           else if (byte_data_received == 8'hce)   // 5V
             m_in <= 1'b0;
@@ -200,11 +189,6 @@ module top (
   output m_reset
 );
 
-
-
-
-
-
   blinkmodule #()
   blinkmodule
     (
@@ -231,33 +215,10 @@ module top (
     .m_ref(m_ref)
   );
 
-  // need data structure...
+  // need data structure?
 
   // set the logic voltage reference, VL of dg444
   assign m_vl = 1'b1;
-
-  // need to set all this stuff in the init section
-//  assign m_in = 1'b1;
-//  assign m_ref = 1'b0;
-
-  //  reg or wire,
-  // reg [31:0] counter2 = 0;
-
-
-
-/*
-  reg [1:0] m_reset = 1'b0;      // set reset to false
-on
-
-initial data_reg = 8'b10101011;
-*/
-
-  // assign m_reset = 1'b1;   // it's not a reset, it's actually m_short
-                            // pull high to allow to conduct
-
-// issue of polarity?
-
-  // SPI_slave(clk, SCK, MOSI, MISO, SSEL, LED);
 
 endmodule
 
