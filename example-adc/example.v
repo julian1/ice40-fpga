@@ -7,8 +7,8 @@ module blinkmodule (
   output LED
 );
   reg [31:0] counter2 = 0;
- 
-  // we need to control this more carefully 
+
+  // we need to control this more carefully
   // being able to control several input is a good thing...
   // as well as ref
   // might want to control the switching - just with spi commands...
@@ -25,13 +25,15 @@ endmodule
 // works!
 
 module SPI_slave(
-  input clk, 
-  input SCK, 
-  input SSEL, 
-  input MOSI, 
-  output MISO,  
-  output LED, 
-  output m_reset 
+  input clk,
+  input SCK,
+  input SSEL,
+  input MOSI,
+  output MISO,
+
+  output LED,
+
+  output m_reset
 );
 
   /*input clk;
@@ -85,7 +87,7 @@ module SPI_slave(
     end
   end
 
-  always @(posedge clk) 
+  always @(posedge clk)
     byte_received <= SSEL_active && SCK_risingedge && (bitcnt==3'b111);
 
 
@@ -98,33 +100,36 @@ module SPI_slave(
 
   //////////////////////////////////////////////
   // decode messages and process
-  reg LED; 
+  reg LED;
 
-  // reg init_ = 0;           // https://github.com/cliffordwolf/yosys/issues/103
-             // init_ialized to zero
-  always @(posedge clk) 
+  // we could set the 5v power separatee
 
+  reg init_ = 0;            // https://github.com/cliffordwolf/yosys/issues/103
+                            // init_ialized to zero
+                            // note - reset can lead to lower f(max)..
+                            // 1MHz in this case,
+  always @(posedge clk)
     if(!init_)
-    begin   
+    begin
       init_ <= 1;
-      m_reset <= 1;    
+      m_reset <= 0;
     end
-    else if(byte_received && byte_data_received == 8'hcc) 
-    begin 
+    else if(byte_received && byte_data_received == 8'hcc)
+    begin
         // if message 0xcc to reset
-        count <= 0;   
+        count <= 0;
     end
     else
     begin
         // otherwise always increment clock
         count <= count + 1;
 
-        if(byte_received) 
-        begin 
+        if(byte_received)
+        begin
           if(byte_data_received == 8'hcd)
-            m_reset <= 1'b1; 
+            m_reset <= 1'b1;
           else if (byte_data_received == 8'hce)
-            m_reset <= 1'b0; 
+            m_reset <= 1'b0;
         end
     end
 
@@ -140,7 +145,7 @@ module SPI_slave(
   if(SSEL_active)
   begin
     if(SSEL_startmessage)
-      byte_data_sent <= count; 
+      byte_data_sent <= count;
     else
     if(SCK_fallingedge)
     begin
@@ -174,7 +179,7 @@ module top (
   output miso,
 
   output m_vl,
-  output m_0V,
+  output m_gnd,
   output m_plus,
   output m_reset
 );
@@ -204,12 +209,14 @@ module top (
     .m_reset(m_reset)// .m_reset(m_reset)
   );
 
+  // need data structure...
 
-  // set the logic voltage reference, VL of dg444 
+  // set the logic voltage reference, VL of dg444
   assign m_vl = 1'b1;
 
+  // need to set all this stuff in the init section
   assign m_plus = 1'b1;
-  assign m_0V = 1'b0;
+  assign m_gnd = 1'b0;
 
   //  reg or wire,
   // reg [31:0] counter2 = 0;
