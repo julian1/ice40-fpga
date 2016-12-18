@@ -87,7 +87,8 @@ module SPI_slave(
     end
   end
 
-  always @(posedge clk) byte_received <= SSEL_active && SCK_risingedge && (bitcnt==3'b111);
+  always @(posedge clk) 
+    byte_received <= SSEL_active && SCK_risingedge && (bitcnt==3'b111);
 
 
 
@@ -115,16 +116,9 @@ module SPI_slave(
         if(byte_received) 
         begin 
           if(byte_data_received == 8'hcd)
-          begin
-            // can just assign LED to m_reset
             LED <= 1'b1; 
-            // m_reset <= LED;
-          end
           else if (byte_data_received == 8'hce)
-          begin
             LED <= 1'b0; 
-            // m_reset <= LED;
-          end
         end
     end
 
