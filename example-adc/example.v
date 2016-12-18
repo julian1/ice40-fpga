@@ -5,29 +5,36 @@
 module blinkmodule (
   input  clk,
   output LED,
-  output a, 
-  output b
+  output m_0V, 
+  output m_plus,
 );
   reg [31:0] counter2 = 0;
+
+  // we need to control this more carefully 
+  // being able to control several input is a good thing...
+  // as well as ref
+
+  // might want to control the switching - just with spi commands...
+  // to test...
 
   always@(posedge clk) begin
     counter2 <= counter2 + 1;
   end
   assign {LED} = counter2 >> 27;
-  assign a = LED;
-  assign b = ~LED;
+  assign m_0V = LED;
+  assign m_plus = ~LED;
 endmodule
 
 
 // works!
 
-module SPI_slave(clk, SCK, SSEL, MOSI, MISO,  LED, a);
+module SPI_slave(clk, SCK, SSEL, MOSI, MISO,  LED);
 
   input clk;
   input SCK, SSEL, MOSI;  // ssel is slave select
   output MISO;
   output LED;
-  output a;
+  // output a;
 
   // ahhh - this works by storing the last two sck states, and then compare them to
   // to determine if it's rising or falling.
@@ -153,9 +160,10 @@ module top (
   input mosi,
   output miso,
 
-  output a,
-  output b,
-  output c
+  output m_vl,
+  output m_0V,
+  output m_plus,
+  output m_reset
 );
 
   blinkmodule #()
@@ -163,8 +171,8 @@ module top (
     (
     .clk(clk),
     .LED(led1),
-    .a(a),
-    .b(b)
+    .m_0V(m_0V),
+    .m_plus(m_plus)
   );
 
 
@@ -176,13 +184,18 @@ module top (
     .MOSI(mosi),
     .MISO(miso),
     .SSEL(ssel),
-    .LED(led2),
-    .a(a)
+    .LED(led2)//,
+    //.a(a)
   );
 
 
   // set the logic voltage reference, VL of dg444 
-  assign c = 1'b1;
+  assign m_vl = 1'b1;
+
+  assign m_reset = 1'b1;   // it's not a reset, it's actually m_short
+                            // pull high to allow to conduct
+
+// issue of polarity?
 
   // SPI_slave(clk, SCK, MOSI, MISO, SSEL, LED);
 
