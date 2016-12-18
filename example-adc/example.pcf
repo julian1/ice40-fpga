@@ -28,8 +28,8 @@ set_io --warn-no-port miso F16
 
 set_io --warn-no-port m_vl     P16       #  c
 
-set_io --warn-no-port m_gnd      J15   # a
-set_io --warn-no-port m_plus    G14   # b
+set_io --warn-no-port m_ref      J15   # a
+set_io --warn-no-port m_in    G14   # b
 set_io --warn-no-port m_reset   K14
 
 

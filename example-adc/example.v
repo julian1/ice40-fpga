@@ -34,8 +34,8 @@ module SPI_slave(
   output LED,
 
   output m_reset,
-  output m_plus,
-  output m_gnd
+  output m_in,
+  output m_ref
 );
 
   /*input clk;
@@ -111,14 +111,14 @@ module SPI_slave(
                             // note - reset can lead to lower f(max)..
                             // 1MHz in this case,
 
-  assign m_gnd = !m_plus;
+  assign m_ref = !m_in;
 
   always @(posedge clk)
     if(!init_)
     begin
       init_ <= 1;
       m_reset <= 0;
-      m_plus <= 0;   // assert m_plus 
+      m_in <= 0;   // assert m_in 
     end
     else if(byte_received && byte_data_received == 8'hcc)
     begin
@@ -128,6 +128,7 @@ module SPI_slave(
     else
     begin
         // we have to get off of the rail voltage - eg. use 1V or similar...
+        // ok that kind of works.:
         // otherwise always increment clock
         count <= count + 1;
 
@@ -140,9 +141,9 @@ module SPI_slave(
             m_reset <= 1'b0;
 
           else if (byte_data_received == 8'hcd)   // 0V 
-            m_plus <= 1'b1;
+            m_in <= 1'b1;
           else if (byte_data_received == 8'hce)   // 5V
-            m_plus <= 1'b0;
+            m_in <= 1'b0;
         end
     end
 
@@ -192,8 +193,8 @@ module top (
   output miso,
 
   output m_vl,
-  output m_gnd,
-  output m_plus,
+  output m_ref,
+  output m_in,
   output m_reset
 );
 
@@ -220,8 +221,8 @@ module top (
     .SSEL(ssel),
     .LED(led2),
     .m_reset(m_reset),
-    .m_plus(m_plus),
-    .m_gnd(m_gnd)
+    .m_in(m_in),
+    .m_ref(m_ref)
   );
 
   // need data structure...
@@ -230,8 +231,8 @@ module top (
   assign m_vl = 1'b1;
 
   // need to set all this stuff in the init section
-//  assign m_plus = 1'b1;
-//  assign m_gnd = 1'b0;
+//  assign m_in = 1'b1;
+//  assign m_ref = 1'b0;
 
   //  reg or wire,
   // reg [31:0] counter2 = 0;
