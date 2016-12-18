@@ -31,7 +31,9 @@ module SPI_slave(
   input MOSI,
   output MISO,
 
-  output LED,
+  output led1,
+  output led2,
+  output led3,
 
   output m_reset,
   output m_in,
@@ -70,6 +72,7 @@ module SPI_slave(
 
   /////////////////////////////////////
   // read in 8bit message
+  // IT would be easy to make this longer 
   // we handle SPI in 8-bits format, so we need a 3 bits counter to count the bits as they come in
   reg [2:0] bitcnt;
   reg byte_received;  // high when a byte has been received
@@ -102,15 +105,14 @@ module SPI_slave(
 
   //////////////////////////////////////////////
   // decode messages and process
-  reg LED;
 
   // we could set the 5v power separatee
-
   reg init_ = 0;            // https://github.com/cliffordwolf/yosys/issues/103
                             // init_ialized to zero
                             // note - reset can lead to lower f(max)..
                             // 1MHz in this case,
 
+  // dg444 is switched either ref or in
   assign m_ref = !m_in;
 
   always @(posedge clk)
@@ -127,8 +129,6 @@ module SPI_slave(
     end
     else
     begin
-        // we have to get off of the rail voltage - eg. use 1V or similar...
-        // ok that kind of works.:
         // otherwise always increment clock
         count <= count + 1;
 
@@ -148,7 +148,9 @@ module SPI_slave(
     end
 
   // led follows m_reset
-  assign LED  = m_reset;
+  assign led1 = m_reset;
+  assign led2 = m_in;
+  assign led3 = m_ref;
 
 
   //////////////////////////////////////////////
@@ -219,7 +221,11 @@ module top (
     .MOSI(mosi),
     .MISO(miso),
     .SSEL(ssel),
-    .LED(led2),
+
+    .led1(led2),
+    .led2(led3),
+    .led3(led4),
+
     .m_reset(m_reset),
     .m_in(m_in),
     .m_ref(m_ref)
