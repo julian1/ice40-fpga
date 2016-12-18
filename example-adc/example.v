@@ -4,12 +4,9 @@
 
 module blinkmodule (
   input  clk,
-  output LED,
-  output m_0V, 
-  output m_plus
+  output LED
 );
   reg [31:0] counter2 = 0;
-
  
   // we need to control this more carefully 
   // being able to control several input is a good thing...
@@ -19,11 +16,8 @@ module blinkmodule (
 
   always@(posedge clk) begin
     counter2 <= counter2 + 1;
-    
   end
   assign {LED} = counter2 >> 22;
-  // assign m_0V = LED;
-  // assign m_plus = ~LED;
 endmodule
 
 
@@ -51,7 +45,7 @@ module SPI_slave(
 */
 
 
-  reg m_reset =  1'b0;      // short the cap
+  // reg m_reset =  1'b0;      // short the cap
 
   // ahhh - this works by storing the last two sck states, and then compare them to
   // to determine if it's rising or falling.
@@ -135,7 +129,7 @@ module SPI_slave(
     end
 
 
-  // assign m_reset = LED ;
+  assign m_reset = LED ;
 
 
   //////////////////////////////////////////////
@@ -189,9 +183,7 @@ module top (
   blinkmodule
     (
     .clk(clk),
-    .LED(led1),
-    .m_0V(m_0V),
-    .m_plus(m_plus)
+    .LED(led1)
   );
 
 
@@ -210,6 +202,9 @@ module top (
 
   // set the logic voltage reference, VL of dg444 
   assign m_vl = 1'b1;
+
+  assign m_plus = 1'b1;
+  assign m_0V = 1'b0;
 
   //  reg or wire,
   // reg [31:0] counter2 = 0;
