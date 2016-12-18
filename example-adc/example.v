@@ -22,8 +22,6 @@ endmodule
 
 
 
-
-
 // works!
 
 module SPI_slave(
@@ -100,10 +98,18 @@ module SPI_slave(
 
   //////////////////////////////////////////////
   // decode messages and process
-  reg LED;
+  reg LED; 
+
+  // reg init_ = 0;           // https://github.com/cliffordwolf/yosys/issues/103
+             // init_ialized to zero
   always @(posedge clk) 
 
-    if(byte_received && byte_data_received == 8'hcc) 
+    if(!init_)
+    begin   
+      init_ <= 1;
+      m_reset <= 1;    
+    end
+    else if(byte_received && byte_data_received == 8'hcc) 
     begin 
         // if message 0xcc to reset
         count <= 0;   
@@ -116,14 +122,14 @@ module SPI_slave(
         if(byte_received) 
         begin 
           if(byte_data_received == 8'hcd)
-            LED <= 1'b1; 
+            m_reset <= 1'b1; 
           else if (byte_data_received == 8'hce)
-            LED <= 1'b0; 
+            m_reset <= 1'b0; 
         end
     end
 
-
-  assign m_reset = LED ;
+  // led follows m_reset
+  assign LED  = m_reset;
 
 
   //////////////////////////////////////////////
@@ -172,6 +178,11 @@ module top (
   output m_plus,
   output m_reset
 );
+
+
+
+
+
 
   blinkmodule #()
   blinkmodule
