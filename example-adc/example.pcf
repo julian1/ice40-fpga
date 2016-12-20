@@ -26,11 +26,15 @@ set_io --warn-no-port miso F16
 
 # m for multiplexor - dg444
 
-set_io --warn-no-port m_vl     P16       #  c
+set_io --warn-no-port m_vl      P16       #  c
 
-set_io --warn-no-port m_ref      J15   # a
-set_io --warn-no-port m_in    G14   # b
+set_io --warn-no-port m_ref     J15   # a
+set_io --warn-no-port m_in      G14   # b
 set_io --warn-no-port m_reset   K14
 
+set_io --warn-no-port t_trigger K15    # 
+
+
+# how do you name your pin?
 
 

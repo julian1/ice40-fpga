@@ -1,4 +1,31 @@
 
+// Important rather than use a diode - to drop - use two npns. emitter follower - and then common emitter
+
+// IMPORTANT - if use the output as 3.3 ref voltage - then we need to know we have enough current
+// IMPORTANT could use another op-amp as 3.3V ref power supply....  to avoid using the main 3.3 rail. 
+
+// 3.6 sysIO Single-Ended DC Electrical Characteristics
+// for 3.3V says 8mA.... with 16 and 24 being led driver pins only. 
+// can drive a led via 1k (eg 3.3mA) but the voltage goes from 3.2V to 2.95V
+
+// input pin definitely appears to be floating. 55mV. just connecting it
+// to the high-impedance of a multimeter input and it will flip.  
+
+/*
+See page 25 of this document: http://www.latticesemi.com/view_document?document_id=50666
+8 mA for LVCMOS 3.3, 6 mA for LVCMOS 2.5, and 4 mA for LVCMOS 1.8.
+*/
+
+// how to handle the input - npn has lower turn-on voltage compared with mosfet.
+// and can adjust with a 1n4148 .
+// think they will have internal pull ups.
+
+// we don't need hysterysis on the op-amp - because we can use digital hysterysis. 
+
+// inputs probably have internal pullups so 
+  // -- just test 
+  // 
+
 // OK, be nice to separate out the module...
 
 
@@ -34,10 +61,12 @@ module SPI_slave(
   output led1,
   output led2,
   output led3,
+  output led4,
 
   output m_reset,
   output m_in,
   output m_ref
+
 );
 
   // clk domain crossing - this works by storing the last two sck states, and then compare them to
@@ -121,6 +150,9 @@ module SPI_slave(
         // otherwise always increment clock
         count <= count + 1;
 
+        // OK, we need to feed the ouput into second op-amp, 
+        // and then into npn transistor and input... 
+
         if(byte_received)
         begin
           // reset
@@ -186,8 +218,12 @@ module top (
   output m_vl,
   output m_ref,
   output m_in,
-  output m_reset
+  output m_reset,
+  
+  input t_trigger
 );
+
+  assign led5 = t_trigger; 
 
   blinkmodule #()
   blinkmodule
