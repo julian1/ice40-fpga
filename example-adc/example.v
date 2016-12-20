@@ -153,6 +153,11 @@ module SPI_slave(
         // OK, we need to feed the ouput into second op-amp, 
         // and then into npn transistor and input... 
 
+        // ok, now we only want to freeze the clock count when the 
+        // or only integrate when running 
+        // or have two clocks...
+        // so we have a state variable run_up , run_down
+
         if(byte_received)
         begin
           // reset

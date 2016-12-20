@@ -17,22 +17,22 @@ set_io --warn-no-port led6 C4
 set_io --warn-no-port led7 B3
 set_io --warn-no-port led8 C3
 
-
+# spi
 set_io --warn-no-port sck  C16
 set_io --warn-no-port ssel D16
 set_io --warn-no-port mosi E16
-set_io --warn-no-port miso F16 
+set_io --warn-no-port miso F16
 
 
 # m for multiplexor - dg444
+set_io --warn-no-port m_vl      P16
 
-set_io --warn-no-port m_vl      P16       #  c
-
-set_io --warn-no-port m_ref     J15   # a
-set_io --warn-no-port m_in      G14   # b
+set_io --warn-no-port m_ref     J15
+set_io --warn-no-port m_in      G14
 set_io --warn-no-port m_reset   K14
 
-set_io --warn-no-port t_trigger K15    # 
+# 0 crossing trigger
+set_io --warn-no-port t_trigger K15    #
 
 
 # how do you name your pin?
