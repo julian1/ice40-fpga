@@ -132,12 +132,6 @@ module SPI_slave(
   wire zerocross_up     = (zerocrossr[2:1]==2'b10);  // message starts at falling edge
   wire zerocross_down   = (zerocrossr[2:1]==2'b01);  // message stops at rising edge
 
-/*
-  reg [2:0] SCKr;  always @(posedge clk) SCKr <= {SCKr[1:0], SCK};
-  wire SCK_risingedge = (SCKr[2:1]==2'b01);  // now we can detect SCK rising edges
-  wire SCK_fallingedge = (SCKr[2:1]==2'b10);  // and falling edges
-*/
-
 
   // we could set the 5v power separatee
   reg init_ = 0;            // https://github.com/cliffordwolf/yosys/issues/103
@@ -151,10 +145,10 @@ module SPI_slave(
   always @(posedge clk)
     if(!init_)
     begin
-      init_ <= 1;
-      m_reset <= 0;
-      m_in <= 0;
-      runup_count <= 1000000;
+        init_ <= 1;
+        m_reset <= 0;
+        m_in <= 0;
+        runup_count <= 1000000;
     end
     // start integration,
     else if(byte_received && byte_data_received == 8'hcc)
@@ -162,23 +156,26 @@ module SPI_slave(
         count <= 0;
         integration_count <= 0;   // clear ... to indicate not readable state
         m_in <= 1'b0;       // for 5V
-        m_reset <= 1'b1;    // TODO first step should perhaps be to short for 100 count...
-        // actually we need to set to short to reset
+        m_reset <= 1'b0;    // set reset 
     end
     else
     begin
-        // runup - count a certain amount of time...
-        // NEED TO TRY WITH PREC INPUTS???
-
-        // otherwise always increment clock
+        // increment clock
         count <= count + 1;
 
+        // start integration
+        if(count == 10000)
+        begin
+            m_reset <= 1'b1;   // clear reset
+        end
+
         // finish runup
-        if(count == runup_count)
+        else if(count == runup_count)
         begin
             m_in <= 1'b1;       // swap to other input
         end
-
+      
+        // finish rundown
         if(zerocross_down)
         begin
             // we're done, so record count...
