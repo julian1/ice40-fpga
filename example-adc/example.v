@@ -178,7 +178,7 @@ module SPI_slave(
             m_in <= 1'b1;       // for 0V
         end
 
-        if(zerocross_down) // doesn't work...
+        if(zerocross_down) 
         begin
             // finish
             m_reset <= 1'b0;
