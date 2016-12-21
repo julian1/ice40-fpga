@@ -172,15 +172,16 @@ module SPI_slave(
 
         // finish runup
         else if(count == runup_count)
-            m_in <= 1'b1;       // swap to other input, for rundown
+            m_in <= 1'b1;       // swap to reference input for rundown
       
         // finish rundown
         if(zerocross_down)
         begin
             // we're done, so record count...
+            integration_count <= count;
+            // and reset line values
             m_reset <= 0;
             m_in <= 0;       // for 5V
-            integration_count <= count;
         end
 
 /*        if(byte_received)
@@ -201,6 +202,8 @@ module SPI_slave(
   assign led1 = m_reset;
   assign led2 = m_in;
   assign led3 = m_ref;
+  assign led4 = t_trigger;
+
 
 
   //////////////////////////////////////////////
@@ -252,8 +255,6 @@ module top (
   input t_trigger
 );
 
-  // move inside SPI_slave
-  assign led5 = t_trigger;
 
   blinkmodule #()
   blinkmodule
@@ -275,6 +276,7 @@ module top (
     .led1(led2),
     .led2(led3),
     .led3(led4),
+    .led4(led5),
 
     .m_reset(m_reset),
     .m_in(m_in),

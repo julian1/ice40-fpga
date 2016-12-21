@@ -3,7 +3,7 @@
 # to connect to bus pirate,
 rlwrap ~/reactor/examples/serial.out -d /dev/ttyUSB2 -s 115200 -p 8n1
 
-choose 5, defaults, then 2 for normal output
+choose 5 spi, defaults, then 2 for normal output
 
 # do integration
 SPI>[ 0xcc ]
