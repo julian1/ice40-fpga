@@ -2,14 +2,14 @@
 // Important rather than use a diode - to drop - use two npns. emitter follower - and then common emitter
 
 // IMPORTANT - if use the output as 3.3 ref voltage - then we need to know we have enough current
-// IMPORTANT could use another op-amp as 3.3V ref power supply....  to avoid using the main 3.3 rail. 
+// IMPORTANT could use another op-amp as 3.3V ref power supply....  to avoid using the main 3.3 rail.
 
 // 3.6 sysIO Single-Ended DC Electrical Characteristics
-// for 3.3V says 8mA.... with 16 and 24 being led driver pins only. 
+// for 3.3V says 8mA.... with 16 and 24 being led driver pins only.
 // can drive a led via 1k (eg 3.3mA) but the voltage goes from 3.2V to 2.95V
 
 // input pin definitely appears to be floating. 55mV. just connecting it
-// to the high-impedance of a multimeter input and it will flip.  
+// to the high-impedance of a multimeter input and it will flip.
 
 /*
 See page 25 of this document: http://www.latticesemi.com/view_document?document_id=50666
@@ -20,11 +20,11 @@ See page 25 of this document: http://www.latticesemi.com/view_document?document_
 // and can adjust with a 1n4148 .
 // think they will have internal pull ups.
 
-// we don't need hysterysis on the op-amp - because we can use digital hysterysis. 
+// we don't need hysterysis on the op-amp - because we can use digital hysterysis.
 
-// inputs probably have internal pullups so 
-  // -- just test 
-  // 
+// inputs probably have internal pullups so
+  // -- just test
+  //
 
 // OK, be nice to separate out the module...
 
@@ -66,7 +66,7 @@ module SPI_slave(
   output m_reset,
   output m_in,
   output m_ref,
-  
+
   input t_trigger  // it's not zero cross trigger - it's state
 
 );
@@ -121,7 +121,8 @@ module SPI_slave(
   // counter clock...
   reg [31:0] count = 0;
 
-  reg [31:0] integration_count = 0;  // change name? complete_count
+  reg [31:0] integration_count = 0;
+  reg [31:0] runup_count = 0;         // set by user - should default...
 
   //////////////////////////////////////////////
   // decode messages and process
@@ -152,12 +153,13 @@ module SPI_slave(
     begin
       init_ <= 1;
       m_reset <= 0;
-      m_in <= 0;   // assert m_in
+      m_in <= 0;
+      runup_count <= 1000000;
     end
     // start integration,
     else if(byte_received && byte_data_received == 8'hcc)
     begin
-        count <= 0;                 
+        count <= 0;
         integration_count <= 0;   // clear ... to indicate not readable state
         m_in <= 1'b0;       // for 5V
         m_reset <= 1'b1;    // TODO first step should perhaps be to short for 100 count...
@@ -165,29 +167,24 @@ module SPI_slave(
     end
     else
     begin
-        // runup - count a certain amount of time... 
+        // runup - count a certain amount of time...
+        // NEED TO TRY WITH PREC INPUTS???
 
         // otherwise always increment clock
-        // should only integrate count when cap is not shorted...
         count <= count + 1;
 
-        // stop integration - actually do we really want to stop...
-        if(count == 1000000)
+        // finish runup
+        if(count == runup_count)
         begin
-            m_in <= 1'b1;       // swap for 0V
+            m_in <= 1'b1;       // swap to other input
         end
 
-        if(zerocross_down) 
+        if(zerocross_down)
         begin
-            // we're done , so we need to record the count... 
+            // we're done, so record count...
             m_reset <= 1'b0;
             integration_count <= count;
         end
-
-        // TODO - should support setting the initial integration period...
-        // and the initial short time? perhaps...
-        // - also perhaps fire a signal when we've read a value...
-        // - also support querying any of the variables...
 
 /*        if(byte_received)
         begin
@@ -254,12 +251,12 @@ module top (
   output m_ref,
   output m_in,
   output m_reset,
-  
+
   input t_trigger
 );
 
   // move inside SPI_slave
-  assign led5 = t_trigger; 
+  assign led5 = t_trigger;
 
   blinkmodule #()
   blinkmodule
@@ -285,7 +282,7 @@ module top (
     .m_reset(m_reset),
     .m_in(m_in),
     .m_ref(m_ref),
-    
+
     .t_trigger(t_trigger)
   );
 
