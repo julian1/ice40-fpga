@@ -65,7 +65,9 @@ module SPI_slave(
 
   output m_reset,
   output m_in,
-  output m_ref
+  output m_ref,
+  
+  input t_trigger  // it's not zero cross trigger - it's state
 
 );
 
@@ -130,6 +132,11 @@ module SPI_slave(
   wire zerocross_up     = (zerocrossr[2:1]==2'b10);  // message starts at falling edge
   wire zerocross_down   = (zerocrossr[2:1]==2'b01);  // message stops at rising edge
 
+/*
+  reg [2:0] SCKr;  always @(posedge clk) SCKr <= {SCKr[1:0], SCK};
+  wire SCK_risingedge = (SCKr[2:1]==2'b01);  // now we can detect SCK rising edges
+  wire SCK_fallingedge = (SCKr[2:1]==2'b10);  // and falling edges
+*/
 
 
   // we could set the 5v power separatee
@@ -151,8 +158,10 @@ module SPI_slave(
     // start integration,
     else if(byte_received && byte_data_received == 8'hcc)
     begin
-        m_reset <= 1'b1;
         count <= 0;                 
+        m_in <= 1'b0;       // for 5V
+        m_reset <= 1'b1;
+        // actually we need to set to short to reset
     end
     else
     begin
@@ -162,9 +171,18 @@ module SPI_slave(
         // should only integrate count when cap is not shorted...
         count <= count + 1;
 
-        // finish
+        // stop integration - actually do we really want to stop...
         if(count == 1000000)
+        begin
+            // m_reset <= 1'b0;
+            m_in <= 1'b1;       // for 0V
+        end
+
+        if(zerocross_down) // doesn't work...
+        begin
+            // finish
             m_reset <= 1'b0;
+        end
 
         if(byte_received)
         begin
@@ -234,6 +252,7 @@ module top (
   input t_trigger
 );
 
+  // move inside SPI_slave
   assign led5 = t_trigger; 
 
   blinkmodule #()
@@ -259,7 +278,9 @@ module top (
 
     .m_reset(m_reset),
     .m_in(m_in),
-    .m_ref(m_ref)
+    .m_ref(m_ref),
+    
+    .t_trigger(t_trigger)
   );
 
   // need data structure?
