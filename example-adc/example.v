@@ -118,16 +118,15 @@ module SPI_slave(
 
 
   //////////////////////////////////////////////
-  // global clock...
+  // counter clock...
   reg [31:0] count = 0;
 
-
+  reg [31:0] integration_count = 0;  // change name? complete_count
 
   //////////////////////////////////////////////
   // decode messages and process
 
-
-  // zerocross
+  // trigger zerocross
   reg [2:0] zerocrossr;  always @(posedge clk) zerocrossr <= {zerocrossr[1:0], t_trigger};
   wire zerocross_up     = (zerocrossr[2:1]==2'b10);  // message starts at falling edge
   wire zerocross_down   = (zerocrossr[2:1]==2'b01);  // message stops at rising edge
@@ -159,8 +158,9 @@ module SPI_slave(
     else if(byte_received && byte_data_received == 8'hcc)
     begin
         count <= 0;                 
+        integration_count <= 0;   // clear ... to indicate not readable state
         m_in <= 1'b0;       // for 5V
-        m_reset <= 1'b1;
+        m_reset <= 1'b1;    // TODO first step should perhaps be to short for 100 count...
         // actually we need to set to short to reset
     end
     else
@@ -174,17 +174,22 @@ module SPI_slave(
         // stop integration - actually do we really want to stop...
         if(count == 1000000)
         begin
-            // m_reset <= 1'b0;
-            m_in <= 1'b1;       // for 0V
+            m_in <= 1'b1;       // swap for 0V
         end
 
         if(zerocross_down) 
         begin
-            // finish
+            // we're done , so we need to record the count... 
             m_reset <= 1'b0;
+            integration_count <= count;
         end
 
-        if(byte_received)
+        // TODO - should support setting the initial integration period...
+        // and the initial short time? perhaps...
+        // - also perhaps fire a signal when we've read a value...
+        // - also support querying any of the variables...
+
+/*        if(byte_received)
         begin
           // reset
           if (byte_data_received == 8'hcb)   // short cap/reset
@@ -195,6 +200,7 @@ module SPI_slave(
           else if (byte_data_received == 8'hce)   // 5V
             m_in <= 1'b0;
         end
+*/
     end
 
   // led follows m_reset
@@ -211,7 +217,7 @@ module SPI_slave(
   if(SSEL_active)
   begin
     if(SSEL_startmessage)
-      byte_data_sent <= count;
+      byte_data_sent <= integration_count;
     else
     if(SCK_fallingedge)
     begin
