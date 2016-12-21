@@ -124,6 +124,14 @@ module SPI_slave(
   //////////////////////////////////////////////
   // decode messages and process
 
+
+  // zerocross
+  reg [2:0] zerocrossr;  always @(posedge clk) zerocrossr <= {zerocrossr[1:0], t_trigger};
+  wire zerocross_up     = (zerocrossr[2:1]==2'b10);  // message starts at falling edge
+  wire zerocross_down   = (zerocrossr[2:1]==2'b01);  // message stops at rising edge
+
+
+
   // we could set the 5v power separatee
   reg init_ = 0;            // https://github.com/cliffordwolf/yosys/issues/103
                             // init_ialized to zero
@@ -140,30 +148,28 @@ module SPI_slave(
       m_reset <= 0;
       m_in <= 0;   // assert m_in
     end
+    // start integration,
     else if(byte_received && byte_data_received == 8'hcc)
     begin
-        // if message 0xcc to reset
-        count <= 0;
+        m_reset <= 1'b1;
+        count <= 0;                 
     end
     else
     begin
+        // runup - count a certain amount of time... 
+
         // otherwise always increment clock
+        // should only integrate count when cap is not shorted...
         count <= count + 1;
 
-        // OK, we need to feed the ouput into second op-amp, 
-        // and then into npn transistor and input... 
-
-        // ok, now we only want to freeze the clock count when the 
-        // or only integrate when running 
-        // or have two clocks...
-        // so we have a state variable run_up , run_down
+        // finish
+        if(count == 1000000)
+            m_reset <= 1'b0;
 
         if(byte_received)
         begin
           // reset
-          if(byte_data_received == 8'hca)         // integrate
-            m_reset <= 1'b1;
-          else if (byte_data_received == 8'hcb)   // short cap/reset
+          if (byte_data_received == 8'hcb)   // short cap/reset
             m_reset <= 1'b0;
 
           else if (byte_data_received == 8'hcd)   // 0V
