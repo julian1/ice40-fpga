@@ -145,13 +145,14 @@ module SPI_slave(
   always @(posedge clk)
     if(!init_)
     begin
+        // set defaults
         init_ <= 1;
         reset_count <= 10000;   // 10ms approx
         runup_count <= 1000000; // 0.1 sec approx
         m_reset <= 0;
         m_in <= 0;
     end
-    // start integration,
+    // begin sequence of integration,
     else if(byte_received && byte_data_received == 8'hcc)
     begin
         count <= 0;
