@@ -2,14 +2,14 @@
 // Important rather than use a diode - to drop - use two npns. emitter follower - and then common emitter
 
 // IMPORTANT - if use the output as 3.3 ref voltage - then we need to know we have enough current
-// IMPORTANT could use another op-amp as 3.3V ref power supply....  to avoid using the main 3.3 rail. 
+// IMPORTANT could use another op-amp as 3.3V ref power supply....  to avoid using the main 3.3 rail.
 
 // 3.6 sysIO Single-Ended DC Electrical Characteristics
-// for 3.3V says 8mA.... with 16 and 24 being led driver pins only. 
+// for 3.3V says 8mA.... with 16 and 24 being led driver pins only.
 // can drive a led via 1k (eg 3.3mA) but the voltage goes from 3.2V to 2.95V
 
 // input pin definitely appears to be floating. 55mV. just connecting it
-// to the high-impedance of a multimeter input and it will flip.  
+// to the high-impedance of a multimeter input and it will flip.
 
 /*
 See page 25 of this document: http://www.latticesemi.com/view_document?document_id=50666
@@ -20,11 +20,11 @@ See page 25 of this document: http://www.latticesemi.com/view_document?document_
 // and can adjust with a 1n4148 .
 // think they will have internal pull ups.
 
-// we don't need hysterysis on the op-amp - because we can use digital hysterysis. 
+// we don't need hysterysis on the op-amp - because we can use digital hysterysis.
 
-// inputs probably have internal pullups so 
-  // -- just test 
-  // 
+// inputs probably have internal pullups so
+  // -- just test
+  //
 
 // OK, be nice to separate out the module...
 
@@ -65,7 +65,9 @@ module SPI_slave(
 
   output m_reset,
   output m_in,
-  output m_ref
+  output m_ref,
+
+  input t_trigger  // it's not zero cross trigger - it's state
 
 );
 
@@ -116,13 +118,20 @@ module SPI_slave(
 
 
   //////////////////////////////////////////////
-  // global clock...
+  // counters and settings  ...
   reg [31:0] count = 0;
-
-
+  reg [31:0] reset_count = 0;         // set by user - should default...
+  reg [31:0] runup_count = 0;         // set by user - should default...
+  reg [31:0] integration_count = 0;
 
   //////////////////////////////////////////////
   // decode messages and process
+
+  // trigger zerocross
+  reg [2:0] zerocrossr;  always @(posedge clk) zerocrossr <= {zerocrossr[1:0], t_trigger};
+  wire zerocross_up     = (zerocrossr[2:1]==2'b10);  // message starts at falling edge
+  wire zerocross_down   = (zerocrossr[2:1]==2'b01);  // message stops at rising edge
+
 
   // we could set the 5v power separatee
   reg init_ = 0;            // https://github.com/cliffordwolf/yosys/issues/103
@@ -136,34 +145,48 @@ module SPI_slave(
   always @(posedge clk)
     if(!init_)
     begin
-      init_ <= 1;
-      m_reset <= 0;
-      m_in <= 0;   // assert m_in
+        init_ <= 1;
+        reset_count <= 10000;   // 10ms approx
+        runup_count <= 1000000; // 0.1 sec approx
+        m_reset <= 0;
+        m_in <= 0;
     end
+    // start integration,
     else if(byte_received && byte_data_received == 8'hcc)
     begin
-        // if message 0xcc to reset
         count <= 0;
+        integration_count <= 0;   // clear ... to indicate not readable state
+        m_reset <= 0;    // set reset 
+        m_in <= 0;       // for 5V
     end
     else
     begin
-        // otherwise always increment clock
+        // there's an issue when the count ticks over - this fires automatically...
+
+        // increment clock
         count <= count + 1;
 
-        // OK, we need to feed the ouput into second op-amp, 
-        // and then into npn transistor and input... 
+        // start integration
+        if(count == reset_count)
+            m_reset <= 1'b1;   // clear reset to begin runup
 
-        // ok, now we only want to freeze the clock count when the 
-        // or only integrate when running 
-        // or have two clocks...
-        // so we have a state variable run_up , run_down
+        // finish runup
+        else if(count == runup_count)
+            m_in <= 1'b1;       // swap to other input, for rundown
+      
+        // finish rundown
+        if(zerocross_down)
+        begin
+            // we're done, so record count...
+            m_reset <= 0;
+            m_in <= 0;       // for 5V
+            integration_count <= count;
+        end
 
-        if(byte_received)
+/*        if(byte_received)
         begin
           // reset
-          if(byte_data_received == 8'hca)         // integrate
-            m_reset <= 1'b1;
-          else if (byte_data_received == 8'hcb)   // short cap/reset
+          if (byte_data_received == 8'hcb)   // short cap/reset
             m_reset <= 1'b0;
 
           else if (byte_data_received == 8'hcd)   // 0V
@@ -171,6 +194,7 @@ module SPI_slave(
           else if (byte_data_received == 8'hce)   // 5V
             m_in <= 1'b0;
         end
+*/
     end
 
   // led follows m_reset
@@ -187,7 +211,7 @@ module SPI_slave(
   if(SSEL_active)
   begin
     if(SSEL_startmessage)
-      byte_data_sent <= count;
+      byte_data_sent <= integration_count;
     else
     if(SCK_fallingedge)
     begin
@@ -224,11 +248,12 @@ module top (
   output m_ref,
   output m_in,
   output m_reset,
-  
+
   input t_trigger
 );
 
-  assign led5 = t_trigger; 
+  // move inside SPI_slave
+  assign led5 = t_trigger;
 
   blinkmodule #()
   blinkmodule
@@ -253,7 +278,9 @@ module top (
 
     .m_reset(m_reset),
     .m_in(m_in),
-    .m_ref(m_ref)
+    .m_ref(m_ref),
+
+    .t_trigger(t_trigger)
   );
 
   // need data structure?

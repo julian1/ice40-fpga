@@ -24,6 +24,8 @@ icepack ./build/example.asc ./build/example.bin || exit
 echo ------- icetime
 icetime ./build/example.asc -d hx8k || exit
 
-echo ------- iceprog
-iceprog build/example.bin
+if [ "x$1" = x"-prog" ]; then
+  echo ------- iceprog
+  iceprog build/example.bin
+fi
 
