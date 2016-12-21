@@ -17,6 +17,10 @@ READ: 0x00 0x2C 0x56 0xFC
 SPI> [ 0xcc ] %:200  [ r:4 ]
 
 
+ok, there was an apparent bad connection. we're now getting two bytes, and it's looking
+  much better. ...
+  
+
 # issues - the source isn't very accurate
   - ceramic not nco caps.
   - inductance on inputs ...

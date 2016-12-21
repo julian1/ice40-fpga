@@ -179,7 +179,9 @@ module SPI_slave(
         if(zerocross_down)
         begin
             // we're done, so record count...
-            integration_count <= count;
+            integration_count <= count - reset_count;  
+                    // doing the subtraction doesn't cost
+                    // goes from 105MHz to 95MHz
             // and reset line values
             m_reset <= 0;
             m_in <= 0;       // for 5V
