@@ -145,28 +145,20 @@ module SPI_slave(
 
   // TODO get rid of init and instead have a state PWR_UP
 
-  `define STATE_WAITING 0
-  `define STATE_RESET   1
-  `define STATE_RUNUP   2
-  `define STATE_RUNDOWN 3
+  `define STATE_HWRESET 0
+  `define STATE_WAITING 1
+  `define STATE_RESET   2
+  `define STATE_RUNUP   3
+  `define STATE_RUNDOWN 4
 
-  reg [4:0] state = 0;
+  reg [4:0] state = `STATE_HWRESET;
 
 
+  // ok, i think we want to set the scope to trigger off of the same thing... 
+  // also - we could actually count down.
 
   always @(posedge clk)
-    if(!init_)
-    begin
-        // set defaults
-        state <= `STATE_WAITING;
-
-        init_ <= 1;
-        reset_count <= 100000;   // 10ms approx
-        runup_count <= 1000000; // 0.1 sec approx
-        m_reset <= 0;
-        m_in <= 0;
-    end
-    else if(byte_received && byte_data_received == 8'hcc)
+    if(byte_received && byte_data_received == 8'hcc)
       begin
           count <= 0;
           integration_count <= 0;   // clear ... to indicate not readable state
@@ -180,6 +172,19 @@ module SPI_slave(
       count <= count + 1;
 
       case (state)
+
+        `STATE_HWRESET:
+          begin
+            // set defaults
+            state <= `STATE_WAITING;
+
+            init_ <= 1;
+            reset_count <= 100000;   // 10ms approx
+            runup_count <= 1000000; // 0.1 sec approx
+            m_reset <= 0;
+            m_in <= 0;
+          end
+
         `STATE_RESET:
           if(count == reset_count)
             begin
