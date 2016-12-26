@@ -131,9 +131,7 @@ module SPI_slave(
   reg [2:0] zerocrossr;  always @(posedge clk) zerocrossr <= {zerocrossr[1:0], t_trigger};
   wire zerocross_up     = (zerocrossr[2:1]==2'b10);  // message starts at falling edge
   wire zerocross_down   = (zerocrossr[2:1]==2'b01);  // message stops at rising edge
-
   wire zerocross_any    = zerocross_up || zerocross_down ;
-
 
 
   // dg444 is switched either ref or in
@@ -162,8 +160,8 @@ module SPI_slave(
         `STATE_HWRESET:
           begin
             // init defaults
-            reset_count <= 100000;   // 10ms approx
-            runup_count <= 1000000;  // 0.1 sec approx
+            reset_count <= 10000;   // 10ms approx
+            runup_count <= 1000000;  // 1m - 0.1 sec approx
             m_short <= 0;
             m_in <= 0;
 
@@ -174,11 +172,11 @@ module SPI_slave(
         `STATE_WAITING:
           if(byte_received && byte_data_received == 8'hcc)
             begin
-                count <= 0;
-                integration_count <= 0;   // clear ... to indicate not readable state
-                m_short <= 0;    // set reset
-                m_in <= 0;       // for 5V
-                state <= `STATE_RESET;
+              count <= 0;
+              integration_count <= 0;   // clear ... to indicate not readable state
+              m_short <= 0;    // set reset
+              m_in <= 0;       // for 5V
+              state <= `STATE_RESET;
             end
 
         `STATE_RESET:
@@ -189,6 +187,7 @@ module SPI_slave(
               m_short <= 1'b1;
               state <= `STATE_RUNUP;
             end
+
         `STATE_RUNUP:
           if(count == runup_count)
             begin
@@ -196,8 +195,9 @@ module SPI_slave(
               m_in <= 1'b1;       
               state <= `STATE_RUNDOWN;
             end
+
         `STATE_RUNDOWN:
-          if(zerocross_down)
+          if(zerocross_down || zerocross_up)
             begin
               // we're done, so record count...
               integration_count <= count;// - reset_count;
