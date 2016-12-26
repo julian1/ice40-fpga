@@ -132,6 +132,7 @@ module SPI_slave(
   wire zerocross_up     = (zerocrossr[2:1]==2'b10);  // message starts at falling edge
   wire zerocross_down   = (zerocrossr[2:1]==2'b01);  // message stops at rising edge
 
+  wire zerocross_any    = zerocross_up || zerocross_down ;
 
   // we could set the 5v power separatee
   reg init_ = 0;            // https://github.com/cliffordwolf/yosys/issues/103
@@ -142,63 +143,70 @@ module SPI_slave(
   // dg444 is switched either ref or in
   assign m_ref = !m_in;
 
+  // TODO get rid of init and instead have a state PWR_UP
+
+  `define STATE_WAITING 0
+  `define STATE_RESET   1
+  `define STATE_RUNUP   2
+  `define STATE_RUNDOWN 3
+
+  reg [4:0] state = 0;
+
+
+
   always @(posedge clk)
     if(!init_)
     begin
         // set defaults
+        state <= `STATE_WAITING;
+
         init_ <= 1;
-        reset_count <= 10000;   // 10ms approx
+        reset_count <= 100000;   // 10ms approx
         runup_count <= 1000000; // 0.1 sec approx
         m_reset <= 0;
         m_in <= 0;
     end
-    // begin sequence of integration,
     else if(byte_received && byte_data_received == 8'hcc)
-    begin
-        count <= 0;
-        integration_count <= 0;   // clear ... to indicate not readable state
-        m_reset <= 0;    // set reset 
-        m_in <= 0;       // for 5V
-    end
+      begin
+          count <= 0;
+          integration_count <= 0;   // clear ... to indicate not readable state
+          m_reset <= 0;    // set reset
+          m_in <= 0;       // for 5V
+          state = `STATE_RESET;
+      end
     else
     begin
-        // there's an issue when the count ticks over - this fires automatically...
+      // always increment clock
+      count <= count + 1;
 
-        // increment clock
-        count <= count + 1;
-
-        // start integration
-        if(count == reset_count)
-            m_reset <= 1'b1;   // clear reset to begin runup
-
-        // finish runup
-        else if(count == runup_count)
-            m_in <= 1'b1;       // swap to reference input for rundown
-      
-        // finish rundown
-        if(zerocross_down)
-        begin
-            // we're done, so record count...
-            integration_count <= count - reset_count;  
-                    // doing the subtraction doesn't cost
-                    // goes from 105MHz to 95MHz
-            // and reset line values
-            m_reset <= 0;
-            m_in <= 0;       // for 5V
-        end
-
-/*        if(byte_received)
-        begin
-          // reset
-          if (byte_data_received == 8'hcb)   // short cap/reset
-            m_reset <= 1'b0;
-
-          else if (byte_data_received == 8'hcd)   // 0V
-            m_in <= 1'b1;
-          else if (byte_data_received == 8'hce)   // 5V
-            m_in <= 1'b0;
-        end
-*/
+      case (state)
+        `STATE_RESET:
+          if(count == reset_count)
+            begin
+              // start integration
+              m_reset <= 1'b1;
+              state = `STATE_RUNUP;
+            end
+        `STATE_RUNUP:
+          if(count == runup_count)
+            begin
+              // swap to reference input for rundown
+              m_in <= 1'b1;       
+              state = `STATE_RUNDOWN;
+            end
+        `STATE_RUNDOWN:
+          if(zerocross_down)
+            begin
+              // we're done, so record count...
+              integration_count <= count - reset_count;
+    
+              // and clear
+              m_reset <= 0;
+              m_in <= 0;       // for 5V
+  
+              state = `STATE_WAITING;
+           end
+      endcase
     end
 
   // led follows m_reset

@@ -1,4 +1,9 @@
 
+TODO
+  - separate out the op-amps so can just drop a faster one in.
+  - faster pull-up?
+  - null adjust for op-amp
+
 
 # to connect to bus pirate,
 rlwrap ~/reactor/examples/serial.out -d /dev/ttyUSB2 -s 115200 -p 8n1
@@ -21,7 +26,11 @@ ok, there was an apparent bad connection. we're now getting two bytes, and it's 
   much better. ...
   
 
-# issues - the source isn't very accurate
+# issues - sources of error isn't very accurate
+
+  - 50Hz supply line multiple.
+  - noise from digital inputs - clock etc.
+
   - ceramic not nco caps.
   - inductance on inputs ...
   - we're using a 1M resistor.... should be ok... input is unbuffered... 
