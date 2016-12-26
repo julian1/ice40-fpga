@@ -29,7 +29,7 @@ set_io --warn-no-port m_vl      P16
 
 set_io --warn-no-port m_ref     J15
 set_io --warn-no-port m_in      G14
-set_io --warn-no-port m_reset   K14
+set_io --warn-no-port m_short   K14
 
 # 0 crossing trigger
 set_io --warn-no-port t_trigger K15    #

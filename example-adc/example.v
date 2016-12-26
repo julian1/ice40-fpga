@@ -63,7 +63,7 @@ module SPI_slave(
   output led3,
   output led4,
 
-  output m_reset,
+  output m_short,
   output m_in,
   output m_ref,
 
@@ -134,18 +134,14 @@ module SPI_slave(
 
   wire zerocross_any    = zerocross_up || zerocross_down ;
 
-  // we could set the 5v power separatee
-  //reg init_ = 0;            // https://github.com/cliffordwolf/yosys/issues/103
-                            // init_ialized to zero
-                            // note - reset can lead to lower f(max)..
-                            // 1MHz in this case,
+
 
   // dg444 is switched either ref or in
   assign m_ref = !m_in;
 
   // TODO get rid of init and instead have a state PWR_UP
 
-  `define STATE_HWRESET 0
+  `define STATE_HWRESET 0    // initialsation state
   `define STATE_WAITING 1
   `define STATE_RESET   2
   `define STATE_RUNUP   3
@@ -168,7 +164,7 @@ module SPI_slave(
             // init defaults
             reset_count <= 100000;   // 10ms approx
             runup_count <= 1000000;  // 0.1 sec approx
-            m_reset <= 0;
+            m_short <= 0;
             m_in <= 0;
 
             // set defaults
@@ -180,7 +176,7 @@ module SPI_slave(
             begin
                 count <= 0;
                 integration_count <= 0;   // clear ... to indicate not readable state
-                m_reset <= 0;    // set reset
+                m_short <= 0;    // set reset
                 m_in <= 0;       // for 5V
                 state <= `STATE_RESET;
             end
@@ -189,7 +185,8 @@ module SPI_slave(
           if(count == reset_count)
             begin
               // start integration
-              m_reset <= 1'b1;
+              count <= 0;
+              m_short <= 1'b1;
               state <= `STATE_RUNUP;
             end
         `STATE_RUNUP:
@@ -203,10 +200,10 @@ module SPI_slave(
           if(zerocross_down)
             begin
               // we're done, so record count...
-              integration_count <= count - reset_count;
+              integration_count <= count;// - reset_count;
     
               // and clear
-              m_reset <= 0;
+              m_short <= 0;
               m_in <= 0;       // for 5V
   
               state <= `STATE_WAITING;
@@ -214,8 +211,8 @@ module SPI_slave(
       endcase
     end
 
-  // led follows m_reset
-  assign led1 = m_reset;
+  // led follows m_short
+  assign led1 = m_short;
   assign led2 = m_in;
   assign led3 = m_ref;
   assign led4 = t_trigger;
@@ -266,7 +263,7 @@ module top (
   output m_vl,
   output m_ref,
   output m_in,
-  output m_reset,
+  output m_short,
 
   input t_trigger
 );
@@ -294,7 +291,7 @@ module top (
     .led3(led4),
     .led4(led5),
 
-    .m_reset(m_reset),
+    .m_short(m_short),
     .m_in(m_in),
     .m_ref(m_ref),
 
