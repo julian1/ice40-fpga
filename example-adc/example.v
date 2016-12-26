@@ -141,7 +141,7 @@ module SPI_slave(
 
   `define STATE_HWRESET 0    // initialsation state
   `define STATE_WAITING 1
-  `define STATE_RESET   2
+  `define STATE_SHORT   2
   `define STATE_RUNUP   3
   `define STATE_RUNDOWN 4
 
@@ -160,8 +160,8 @@ module SPI_slave(
         `STATE_HWRESET:
           begin
             // init defaults
-            reset_count <= 10000;   // 10ms approx
-            runup_count <= 1000000;  // 1m - 0.1 sec approx
+            reset_count <= 10000;     // 10ms approx
+            runup_count <= 1000000;   // 1m - 0.1 sec approx
             m_short <= 0;
             m_in <= 0;
 
@@ -176,10 +176,10 @@ module SPI_slave(
               integration_count <= 0;   // clear ... to indicate not readable state
               m_short <= 0;    // set reset
               m_in <= 0;       // for 5V
-              state <= `STATE_RESET;
+              state <= `STATE_SHORT;
             end
 
-        `STATE_RESET:
+        `STATE_SHORT:
           if(count == reset_count)
             begin
               // start integration
@@ -200,12 +200,11 @@ module SPI_slave(
           if(zerocross_down || zerocross_up)
             begin
               // we're done, so record count...
-              integration_count <= count;// - reset_count;
+              integration_count <= count;
     
               // and clear
               m_short <= 0;
               m_in <= 0;       // for 5V
-  
               state <= `STATE_WAITING;
            end
       endcase
