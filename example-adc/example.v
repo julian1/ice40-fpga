@@ -28,6 +28,24 @@ See page 25 of this document: http://www.latticesemi.com/view_document?document_
 
 // OK, be nice to separate out the module...
 
+/*
+  - there's an issue - in that its only integrating to -2V or something??
+    and it should go to supply??? i think... 
+    and seems independent of voltage.
+
+    is it the comparator... shorting.
+    or the op-amp shorting... or the inputs go to far?
+
+    we really need to be able to trigger on the initialisation...
+    when the switch is set.... 
+    and then we can unplug stuff.
+
+  IMPORTANT - the diodes might fix that by keeping the range reasonable...
+  op37 input voltage range - is +-10V so that's not a problem...
+
+  lf411 input voltage range is +-15V
+
+*/
 
 module blinkmodule (
   input  clk,
@@ -120,7 +138,7 @@ module SPI_slave(
   //////////////////////////////////////////////
   // counters and settings  ...
   reg [31:0] count = 0;
-  reg [31:0] reset_count = 0;         // set by user - should default...
+  reg [31:0] short_count = 0;         // set by user - should default...
   reg [31:0] runup_count = 0;         // set by user - should default...
   reg [31:0] integration_count = 0;
 
@@ -139,13 +157,13 @@ module SPI_slave(
 
   // TODO get rid of init and instead have a state PWR_UP
 
-  `define STATE_HWRESET 0    // initialsation state
+  `define STATE_HWSHORT 0    // initialsation state
   `define STATE_WAITING 1
   `define STATE_SHORT   2
   `define STATE_RUNUP   3
   `define STATE_RUNDOWN 4
 
-  reg [4:0] state = `STATE_HWRESET;
+  reg [4:0] state = `STATE_HWSHORT;
 
 
   // ok, i think we want to set the scope to trigger off of the same thing... 
@@ -153,15 +171,15 @@ module SPI_slave(
 
   always @(posedge clk)
     begin
-      // always increment clock
+      // we use the same count - always increment clock
       count <= count + 1;
 
       case (state)
-        `STATE_HWRESET:
+        `STATE_HWSHORT:
           begin
             // init defaults
-            reset_count <= 10000;     // 10ms approx
-            runup_count <= 1000000;   // 1m - 0.1 sec approx
+            short_count <= 10000;     // 10ms approx
+            runup_count <= 4000000;   // 1m - 0.1 sec approx
             m_short <= 0;
             m_in <= 0;
 
@@ -173,14 +191,14 @@ module SPI_slave(
           if(byte_received && byte_data_received == 8'hcc)
             begin
               count <= 0;
-              integration_count <= 0;   // clear ... to indicate not readable state
+              integration_count <= 0;   // clear ... to indicate reading would not be current
               m_short <= 0;    // set reset
               m_in <= 0;       // for 5V
               state <= `STATE_SHORT;
             end
 
         `STATE_SHORT:
-          if(count == reset_count)
+          if(count == short_count)
             begin
               // start integration
               count <= 0;
