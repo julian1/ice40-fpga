@@ -158,37 +158,16 @@ module SPI_slave(
   // also - we could actually count down.
 
   always @(posedge clk)
-/*    if(byte_received && byte_data_received == 8'hcc)
-      begin
-          count <= 0;
-          integration_count <= 0;   // clear ... to indicate not readable state
-          m_reset <= 0;    // set reset
-          m_in <= 0;       // for 5V
-          state = `STATE_RESET;
-      end
-    else
-*/    begin
+    begin
       // always increment clock
       count <= count + 1;
 
       case (state)
-
-        `STATE_WAITING:
-          begin
-            if(byte_received && byte_data_received == 8'hcc)
-              begin
-                  count <= 0;
-                  integration_count <= 0;   // clear ... to indicate not readable state
-                  m_reset <= 0;    // set reset
-                  m_in <= 0;       // for 5V
-                  state = `STATE_RESET;
-              end
-
-          end 
         `STATE_HWRESET:
           begin
+            // init defaults
             reset_count <= 100000;   // 10ms approx
-            runup_count <= 1000000; // 0.1 sec approx
+            runup_count <= 1000000;  // 0.1 sec approx
             m_reset <= 0;
             m_in <= 0;
 
@@ -196,19 +175,29 @@ module SPI_slave(
             state <= `STATE_WAITING;
           end
 
+        `STATE_WAITING:
+          if(byte_received && byte_data_received == 8'hcc)
+            begin
+                count <= 0;
+                integration_count <= 0;   // clear ... to indicate not readable state
+                m_reset <= 0;    // set reset
+                m_in <= 0;       // for 5V
+                state <= `STATE_RESET;
+            end
+
         `STATE_RESET:
           if(count == reset_count)
             begin
               // start integration
               m_reset <= 1'b1;
-              state = `STATE_RUNUP;
+              state <= `STATE_RUNUP;
             end
         `STATE_RUNUP:
           if(count == runup_count)
             begin
               // swap to reference input for rundown
               m_in <= 1'b1;       
-              state = `STATE_RUNDOWN;
+              state <= `STATE_RUNDOWN;
             end
         `STATE_RUNDOWN:
           if(zerocross_down)
@@ -220,7 +209,7 @@ module SPI_slave(
               m_reset <= 0;
               m_in <= 0;       // for 5V
   
-              state = `STATE_WAITING;
+              state <= `STATE_WAITING;
            end
       endcase
     end
