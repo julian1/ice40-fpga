@@ -135,7 +135,7 @@ module SPI_slave(
   wire zerocross_any    = zerocross_up || zerocross_down ;
 
   // we could set the 5v power separatee
-  reg init_ = 0;            // https://github.com/cliffordwolf/yosys/issues/103
+  //reg init_ = 0;            // https://github.com/cliffordwolf/yosys/issues/103
                             // init_ialized to zero
                             // note - reset can lead to lower f(max)..
                             // 1MHz in this case,
@@ -158,7 +158,7 @@ module SPI_slave(
   // also - we could actually count down.
 
   always @(posedge clk)
-    if(byte_received && byte_data_received == 8'hcc)
+/*    if(byte_received && byte_data_received == 8'hcc)
       begin
           count <= 0;
           integration_count <= 0;   // clear ... to indicate not readable state
@@ -167,22 +167,33 @@ module SPI_slave(
           state = `STATE_RESET;
       end
     else
-    begin
+*/    begin
       // always increment clock
       count <= count + 1;
 
       case (state)
 
+        `STATE_WAITING:
+          begin
+            if(byte_received && byte_data_received == 8'hcc)
+              begin
+                  count <= 0;
+                  integration_count <= 0;   // clear ... to indicate not readable state
+                  m_reset <= 0;    // set reset
+                  m_in <= 0;       // for 5V
+                  state = `STATE_RESET;
+              end
+
+          end 
         `STATE_HWRESET:
           begin
-            // set defaults
-            state <= `STATE_WAITING;
-
-            init_ <= 1;
             reset_count <= 100000;   // 10ms approx
             runup_count <= 1000000; // 0.1 sec approx
             m_reset <= 0;
             m_in <= 0;
+
+            // set defaults
+            state <= `STATE_WAITING;
           end
 
         `STATE_RESET:
