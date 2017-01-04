@@ -48,7 +48,7 @@ module top (
   output b
 );
 
-  anothermodule #()
+/*  anothermodule #()
   anothermodule
     (
     .clk(clk),
@@ -62,7 +62,7 @@ module top (
     .b(b),
     .LED1(LED1)
   );
-
+*/
   localparam BITS = 5;
   localparam LOG2DELAY = 21;
 
@@ -76,7 +76,7 @@ module top (
 
   // assign {LED1} = counter2 >> 22;
 
-  assign { LED5} = outcnt ^ (outcnt >> 1);
+  assign { LED1, LED2, LED3, LED4, LED5} = outcnt ^ (outcnt >> 1);
 
 endmodule
 
