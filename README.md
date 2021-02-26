@@ -50,7 +50,8 @@ nix-shell -p yosys arachne-pnr icestorm
 
 https://www.reddit.com/r/yosys/comments/3yrq6d/are_plls_supported_on_the_icestick_hw/cykd3oo/
 
-#### send to the device
+#### send to the device (iceprog CS is ft232h gpio).
+
 
 ```
 
@@ -70,7 +71,7 @@ Bye.
 ....
 ```
 
-using flashrom
+using flashrom (CS is ft232h SS).
 
 ```
 truncate -s 4194304 example.bin
