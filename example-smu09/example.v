@@ -52,20 +52,22 @@ module mymux   #(parameter MSB=8)   (
   // then in a separate module.
   // assign LED = CLK;
 
-   always @ (posedge clk)
+   // always @ (posedge clk)
+   always @ (negedge clk)
       /*
       if (!cs)
          out <= 0;        // this clears after de-assert... which is not what we want...
                           // instead we want nop.
       else begin
       */
-         if (cs)
+         if (!cs)         // chip select.
             out <= {out[MSB-2:0], d};
          else
             out <= out;
       // end
 endmodule
 
+// DAMMM need to add a pullup resistor... for CS/NSS.
 
 // The above should be good enough to test ... just wire the led to the lsb.
 
@@ -89,7 +91,7 @@ module top (
   //
 
 
-/*
+
   ////////////////////////////////////
   // sayss its empty????
   wire [8-1:0] out;
@@ -108,10 +110,10 @@ module top (
   );
 
   assign { LED1, LED2 } = out;    // lowest bits or highest?
-*/
+
 
   // want to swapt the led order.
-  assign LED1 = MOSI;
+  // assign LED1 = MOSI;
 
 /*
   blinker #(  )
