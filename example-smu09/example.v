@@ -12,6 +12,7 @@
 
 
 module blinker    (
+  input clk,
   output led1,
   output led2
 
@@ -110,6 +111,7 @@ module top (
   blinker #(  )
   blinker 
     (
+    .clk(clk),
     .led1(LED1),
     .led2(LED2)
   );
