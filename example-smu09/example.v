@@ -53,19 +53,21 @@ module mymux   #(parameter MSB=8)   (
   // assign LED = CLK;
 
    always @ (posedge clk)
+      /*
       if (!cs)
-         out <= 0;        // this clears after de-assert... which is not what we want... 
+         out <= 0;        // this clears after de-assert... which is not what we want...
                           // instead we want nop.
       else begin
-         if (en)
+      */
+         if (cs)
             out <= {out[MSB-2:0], d};
          else
             out <= out;
-      end
+      // end
 endmodule
 
 
-// The above should be good enough to test ... just wire the led to the lsb. 
+// The above should be good enough to test ... just wire the led to the lsb.
 
 
 module top (
@@ -75,7 +77,7 @@ module top (
   output LED1,
   output LED2,
 
-  // spi 
+  // spi
   input SCLK,
   input CS,
   input MOSI
@@ -84,14 +86,15 @@ module top (
 
   // top most module - should just deleegate to other modules.
   // should be able to assign extra stuff here.
-  // 
+  //
 
-/*
-  wire [8-1:0] out;   
+
+  ////////////////////////////////////
+  // sayss its empty????
+  wire [8-1:0] out;
   // reg [8-1:0] out = 0;
   // register [8-1:0] out = 0;
-
-  assign {LED1, LED2} = out;
+  // assign {LED1, LED2} = out;
 
   mymux #( 8 )
   mymux
@@ -100,26 +103,25 @@ module top (
     .cs(CS),
     .d(MOSI),
 
-    .out(out)   // what's goiing on here... is this not working?
+    .out(out)
   );
 
-*/
-  // OK. completely confused... 
+  assign { LED1, LED2 } = out;    // lowest bits or highest?
 
 
+/*
 
   blinker #(  )
-  blinker 
+  blinker
     (
     .clk(XTALCLK),
     .led1(LED1),
     .led2(LED2)
   );
+*/
 
 
 
-
-  // assign LED1 = SCLK;
 
 endmodule
 
