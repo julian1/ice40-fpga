@@ -1,5 +1,7 @@
 ##!/bin/bash
 
+# nix-shell -p yosys arachne-pnr icestorm usbutils
+
 # should add a trap for failure
 set -e
 
