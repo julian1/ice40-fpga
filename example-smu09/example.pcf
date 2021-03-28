@@ -2,22 +2,17 @@
 
 set_io clk 21
 
-# set_io a 1
-# set_io b 10
-# set_io y 11
 
-set_io a    62 
-set_io b    61 
+#set_io a    62 
+#set_io b    61 
 
-#set_io LED1 99
-#set_io LED2 98
+
+
+
 set_io LED1 106
 set_io LED2 107
 
 
 
 
-set_io LED3 97
-set_io LED4 96
-set_io LED5 95
 
