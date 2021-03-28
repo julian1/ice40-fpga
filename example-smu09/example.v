@@ -110,9 +110,10 @@ module top (
   assign { LED1, LED2 } = out;    // lowest bits or highest?
 */
 
+  // want to swapt the led order.
+  assign LED1 = MOSI;
 
-
-
+/*
   blinker #(  )
   blinker
     (
@@ -120,7 +121,7 @@ module top (
     .led1(LED1),
     .led2(LED2)
   );
-
+*/
 
 
 
