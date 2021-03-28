@@ -69,7 +69,7 @@ endmodule
 
 
 module top (
-  input  clk,
+  input  XTALCLK,
 
   // leds
   output LED1,
@@ -111,7 +111,7 @@ module top (
   blinker #(  )
   blinker 
     (
-    .clk(clk),
+    .clk(XTALCLK),
     .led1(LED1),
     .led2(LED2)
   );

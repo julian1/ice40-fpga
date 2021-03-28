@@ -1,6 +1,6 @@
 
 
-set_io clk 21
+set_io XTALCLK 21
 
 
 
