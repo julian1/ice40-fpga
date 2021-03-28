@@ -12,9 +12,8 @@
 
 
 module blinker    (
-  input  clk,
-  input  cs,
-  input  d
+  output led1,
+  output led2
 
 );
 
@@ -30,13 +29,9 @@ module blinker    (
     outcnt <= counter >> LOG2DELAY;
   end
 
-  // assign {LED1} = counter2 >> 22;
-  // assign { LED1, LED2, LED3, LED4, LED5 } = outcnt ^ (outcnt >> 1);
-  // assign {  LED1, LED2 } = outcnt ^ (outcnt >> 1);
-
-
-
-
+  // assign {led1} = counter2 >> 22;
+  // assign { led1, led2, LED3, LED4, LED5 } = outcnt ^ (outcnt >> 1);
+  assign {  led1, led2 } = outcnt ^ (outcnt >> 1);
 endmodule
 
 
@@ -86,10 +81,16 @@ module top (
   // output b
 );
 
+  // top most module - should just deleegate to other modules.
   // should be able to assign extra stuff here.
   // 
 
+/*
   wire [8-1:0] out;   
+  // reg [8-1:0] out = 0;
+  // register [8-1:0] out = 0;
+
+  assign {LED1, LED2} = out;
 
   mymux #( 8 )
   mymux
@@ -98,12 +99,25 @@ module top (
     .cs(CS),
     .d(MOSI),
 
-    .out(out)
+    .out(out)   // what's goiing on here... is this not working?
+  );
+
+*/
+  // OK. completely confused... 
+
+
+
+  blinker #(  )
+  blinker 
+    (
+    .led1(LED1),
+    .led2(LED2)
   );
 
 
 
-  assign LED1 = SCLK;
+
+  // assign LED1 = SCLK;
 
 endmodule
 
