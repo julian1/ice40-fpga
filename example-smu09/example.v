@@ -89,6 +89,7 @@ module top (
   //
 
 
+/*
   ////////////////////////////////////
   // sayss its empty????
   wire [8-1:0] out;
@@ -107,9 +108,10 @@ module top (
   );
 
   assign { LED1, LED2 } = out;    // lowest bits or highest?
+*/
 
 
-/*
+
 
   blinker #(  )
   blinker
@@ -118,7 +120,7 @@ module top (
     .led1(LED1),
     .led2(LED2)
   );
-*/
+
 
 
 
