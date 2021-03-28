@@ -40,11 +40,11 @@ endmodule
 module top (
   input  clk,
   output LED1,
-  output LED2//,
+  output LED2,
   // output LED3,
   // output LED4,
   // output LED5,
-  // input a,
+  input a//,
   // output b
 );
 
@@ -78,7 +78,10 @@ module top (
   // assign {LED1} = counter2 >> 22;
 
   // assign { LED1, LED2, LED3, LED4, LED5 } = outcnt ^ (outcnt >> 1);
-  assign {  LED1, LED2 } = outcnt ^ (outcnt >> 1);
+  // assign {  LED1, LED2 } = outcnt ^ (outcnt >> 1);
+
+
+  assign LED1 = a;
 
 endmodule
 

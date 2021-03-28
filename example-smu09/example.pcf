@@ -7,6 +7,8 @@ set_io clk 21
 #set_io b    61 
 
 
+# VOA=VIN=PA5=CLK
+set_io a    42 
 
 
 set_io LED1 106
