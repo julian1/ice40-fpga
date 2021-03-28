@@ -3,12 +3,18 @@
 set_io clk 21
 
 
-#set_io a    62 
-#set_io b    61 
 
 
-# VOA=VIN=PA5=CLK
-set_io a    42 
+#    pa5 = clk = via = voa  = pin 42. ice40. (MUST be VOA for GBIN).  or pin49 gbin.
+#    gnd?
+#    pa4 = nss.   vib = vob  = pin 43. 
+#    pa7 = mosi.  vic = voc  = pin 44. 
+#                 vid. extra pin.
+
+
+set_io SCLK   42 
+set_io CS     43 
+set_io MOSI   44 
 
 
 set_io LED1 106

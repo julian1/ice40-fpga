@@ -22,6 +22,6 @@ icetime ./build/example.asc -d hx1k
 echo "finished"
 
 # send to device
-iceprog ./build/example.bin
+#iceprog ./build/example.bin
 
 

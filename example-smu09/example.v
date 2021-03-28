@@ -2,67 +2,73 @@
 // from https://github.com/cliffordwolf/icestorm/tree/master/examples/icestick
 
 // example.v
-// module top (input a, b, output y);
-//   assign y = a & b;
-// endmodule
-
-/*
-module inputmodule (
-  input  a,
-  output b,
-  output LED1
-);
-
-  assign LED1 = a;
-  assign b = a;
-
-endmodule
 
 
+// HANG on how does register shadowing work???
 
-module anothermodule (
+// have separate modules for an 8 bit mux.
+// versus a 16 bit reg value
+// versus propagating.
+
+module mymux   #(parameter MSB=8)   (
   input  clk,
-  output LED1
+  input  cs,
+  input  d,
+
+  // output led
+  output reg [MSB-1:0] out
 );
 
-  reg [31:0] counter2 = 0;
+  // this should *not* take a led. it should just do the muxing
+  // should just signal a high - if get a valid 8 bit spi word.
+  // then in a separate module.
+  // assign LED = CLK;
 
-  always@(posedge clk) begin
-    counter2 <= counter2 + 1;
-  end
-
-  // assign {LED1} = counter2 >> 24;
+   always @ (posedge clk)
+      if (!cs)
+         out <= 0;
+      else begin
+         if (en)
+            out <= {out[MSB-2:0], d};
+         else
+            out <= out;
+      end
 endmodule
-*/
+
 
 
 
 module top (
   input  clk,
+
+  // leds
   output LED1,
   output LED2,
-  // output LED3,
-  // output LED4,
-  // output LED5,
-  input a//,
+
+  // spi 
+  input SCLK,
+  input CS,
+  input MOSI
   // output b
 );
 
-/*  anothermodule #()
-  anothermodule
+  // should be able to assign extra stuff here.
+  // 
+
+  wire [8-1:0] out;   
+
+  mymux #( 8 )
+  mymux
     (
-    .clk(clk),
-    .LED1(LED2)
+    .clk(SCLK),
+    .cs(CS),
+    .d(MOSI),
+
+    .out(out)
   );
 
-  inputmodule #()
-  inputmodule 
-  (
-    .a(a),
-    .b(b),
-    .LED1(LED1)
-  );
-*/
+
+
   localparam BITS = 5;
   // localparam LOG2DELAY = 21;
   localparam LOG2DELAY = 19;
@@ -76,12 +82,11 @@ module top (
   end
 
   // assign {LED1} = counter2 >> 22;
-
   // assign { LED1, LED2, LED3, LED4, LED5 } = outcnt ^ (outcnt >> 1);
   // assign {  LED1, LED2 } = outcnt ^ (outcnt >> 1);
 
 
-  assign LED1 = a;
+  assign LED1 = SCLK;
 
 endmodule
 
