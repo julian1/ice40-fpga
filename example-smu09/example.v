@@ -41,16 +41,11 @@ endmodule
 module mymux   #(parameter MSB=8)   (
   input  clk,
   input  cs,
-  input  d,
+  input  d,   // sdi
 
   // output led
   output reg [MSB-1:0] out
 );
-
-  // this should *not* take a led. it should just do the muxing
-  // should just signal a high - if get a valid 8 bit spi word.
-  // then in a separate module.
-  // assign LED = CLK;
 
    // always @ (posedge clk)
    always @ (negedge clk)
@@ -71,6 +66,10 @@ endmodule
 
 // The above should be good enough to test ... just wire the led to the lsb.
 
+/*
+  EXTREME
+    we ought should be able to do miso / sdo - easily - its the same as the other peripheral wires going to dac,adc etc.
+*/
 
 module top (
   input  XTALCLK,
