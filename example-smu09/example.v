@@ -47,28 +47,49 @@ module mymux   #(parameter MSB=8)   (
   output reg [MSB-1:0] out
 );
 
+  reg [31:0] counter = 0; // need to count to 8, so change to log2(MSB )... no issue. 
+                            // NO. have to handle non modulo(8) . eg. for long data sequence.
+                            // hmmmm. this is a prolem.
+
    // always @ (posedge clk)
-   always @ (negedge clk)
-      /*
-      if (!cs)
-         out <= 0;        // this clears after de-assert... which is not what we want...
-                          // instead we want nop.
-      else begin
-      */
-         if (!cs)         // chip select.
-            out <= {out[MSB-2:0], d};
-         else
-            out <= out;
-      // end
+  always @ (negedge clk)
+  begin
+      counter <= counter + 1;
+  
+      if (!cs)         // chip select.
+          out <= {out[MSB-2:0], d};
+      else
+          out <= out;
+  end
+
+  // neg edge cs, init the counter. pos edge check.
+  // neg edge start
+  // posedge finished.
+
+  always @ (negedge cs)
+    counter <= 0;
+  
+
+
+  always @ (posedge cs)
+  begin
+
+      if(counter == 8)
+        counter = 0;
+  
+  end
+
+
 endmodule
 
-// DAMMM need to add a pullup resistor... for CS/NSS.
 
-// The above should be good enough to test ... just wire the led to the lsb.
+// OK. we only want to latch the value in, on correct clock transition count.
+
 
 /*
   EXTREME
-    we ought should be able to do miso / sdo - easily - its the same as the other peripheral wires going to dac,adc etc.
+    - we ought should be able to do miso / sdo - easily - its the same as the other peripheral wires going to dac,adc etc.
+    - there may be an internal creset?
 */
 
 module top (
