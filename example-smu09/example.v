@@ -51,15 +51,17 @@ module mymux   #(parameter MSB=8)   (
                             // NO. have to handle non modulo(8) . eg. for long data sequence.
                             // hmmmm. this is a prolem.
 
-   // always @ (posedge clk)
+  reg [MSB-1:0] tmp;
+
+  // always @ (posedge clk)
   always @ (negedge clk)
   begin
       counter <= counter + 1;
   
       if (!cs)         // chip select.
-          out <= {out[MSB-2:0], d};
+          tmp <= {tmp[MSB-2:0], d};
       else
-          out <= out;
+          tmp <= tmp;
   end
 
   // neg edge cs, init the counter. pos edge check.
@@ -74,9 +76,15 @@ module mymux   #(parameter MSB=8)   (
   always @ (posedge cs)
   begin
 
-      if(counter == 8)
-        counter = 0;
-  
+
+    out <= tmp;
+/*
+      if(true counter == 8) // 
+        out <= tmp;
+      else
+        out <= out;
+        //counter = 0;
+ */ 
   end
 
 
