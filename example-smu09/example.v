@@ -51,7 +51,7 @@ module mylatch   #(parameter MSB=8)   (
   input  d,   // sdi
 
   // latched val, rename
-  output reg [MSB-1:0] out    // rename muxreg
+  output reg [MSB-1:0] out    // rename led register
 );
 
   reg [MSB-1:0] tmp;
@@ -70,17 +70,20 @@ module mylatch   #(parameter MSB=8)   (
 
   always @ (posedge cs)
   begin
+
+    // reg address = tmp[MSB-1:4 ];
+
     if(!special)    // special asserted
       //out <= tmp;
 
-      case (tmp)  // high byte for reg
-        1 :
+      case (tmp[ MSB-1:4 ])  // high byte for reg
+        1 :   // meaning register address....
         begin
-          out = 1;
+          out = tmp[ 4 - 1: 0 ];
         end
 
-        default:
-          out = 0;
+        // default:
+        //  out = 0;
 
       endcase
 
