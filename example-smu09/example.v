@@ -95,6 +95,32 @@ module mylatch   #(parameter MSB=8)   (
 endmodule
 
 
+
+
+module mymux    (
+  input  clk,
+  input  cs,
+  input  d,   
+
+  input wire [8-1:0] myreg,     // inputs are wires. cannot be reg.
+
+  output adc03_sclk
+);
+
+  always @ (posedge clk)
+    begin
+   
+      case (myreg )
+        1 :      adc03_sclk = clk;  
+        default: adc03_sclk = 0;
+      endcase
+
+    end
+
+endmodule
+
+
+
 // OK. we only want to latch the value in, on correct clock transition count.
 
 

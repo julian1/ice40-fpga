@@ -21,6 +21,8 @@ set_io LED1 106
 set_io LED2 107
 
 
+set_io ADC03_SCLK   87 
+
 
 
 
