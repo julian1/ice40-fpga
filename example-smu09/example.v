@@ -38,6 +38,12 @@ endmodule
 
 // ok. lets try to use the special flag.
 
+
+/*
+    we just want a register bank....
+*/
+
+
 module mylatch   #(parameter MSB=8)   (
   input  clk,
   input  cs,
@@ -49,7 +55,6 @@ module mylatch   #(parameter MSB=8)   (
 );
 
   reg [MSB-1:0] tmp;
-
 
   always @ (negedge clk)
   begin
@@ -63,14 +68,11 @@ module mylatch   #(parameter MSB=8)   (
     RIGHT. it doesn't like having both a negedge and posedge...
   */
 
-
   always @ (posedge cs)
   begin
     if(!special)    // special asserted
       out <= tmp;
   end
-
-
 endmodule
 
 
@@ -80,42 +82,52 @@ module mymux    (
 
   input wire [8-1:0] myreg,     // inputs are wires. cannot be reg.
 
-  input  clk,
   input  cs,
-  input  mosi,
 
-	// OK. hang on. what about muxing mosi?
-
-  output adc03_clk,
   output adc03_cs,
-  output adc03_mosi,
-  output adc03_miso,
+  output myregister_cs,
 
 );
 
+/*
+  we only really have to mux cs.
+  lets try that...
+*/
   // mux example, https://www.chipverify.com/verilog/verilog-case-statement
 
   always @ (myreg )     // eg. whenever myreg changes we update ... i think.
     begin
 
+    // I think this doesn't work. 
+    // It is assigning the value when myreg changes.
+    // not connecting a line.
+
+    // think we're going to have to do a clk.
+
       case (myreg )
         1 :
         begin
-          adc03_clk = clk;
           adc03_cs = cs;
-          adc03_mosi = mosi;		// freaking mosi doesn't even exit...
-          adc03_miso = miso;
+          myregister_cs = 1;  // deassert
+        end
+
+        2 :
+        begin
+          adc03_cs = 1;   // deassert
+          myregister_cs = cs;
         end
 
 
-
-        default: adc03_clk = 0;
+        default: 
+        begin
+          adc03_clk = 1;
+          myregister_cs = 1;
+        end
       endcase
 
     end
 
 endmodule
-
 
 
 // OK. we only want to latch the value in, on correct clock transition count.
@@ -148,12 +160,11 @@ module top (
 
   ////////////////////////////////////
   // sayss its empty????
-  wire [8-1:0] out;
-  // reg [8-1:0] out = 0;
-  // register [8-1:0] out = 0;
+  wire [8-1:0] muxreg;
 
+  wire [8-1:0] anotherreg;
 
-  assign {LED1, LED2} = out;
+  assign {LED1, LED2} = muxreg;
 
   mylatch #( 8 )
   mylatch
@@ -162,31 +173,20 @@ module top (
     .cs(CS),
     .special(SPECIAL),
     .d(MOSI),
-
-    .out(out)
+    .out(muxreg)
   );
 
-/*
-  input wire [8-1:0] myreg,     // inputs are wires. cannot be reg.
 
-  input  clk,
-  input  cs,
-  input  mosi,
-*/
+
+
 
   mymux #( )
   mymux
   (
-    . myreg( out ),
-
-    . clk(CLK),
+    . myreg(muxreg),
     . cs(CS),
-    . mosi(MOSI),
-
-    . adc03_clk(ADC03_CLK),
     . adc03_cs(ADC03_CS),
-    . adc03_mosi(ADC03_MOSI),
-    . adc03_miso(ADC03_MOSI)
+    . myregister_cs(myregister_cs),
   );
 
 
