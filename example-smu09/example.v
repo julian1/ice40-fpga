@@ -58,6 +58,13 @@ endmodule
 
 
 
+// Ok. put a scope on the CS. and see if we can write spi... and have it go through...
+
+// EXTREME
+// having this kind of transparent latching using only cs. means can actually employ different
+// spi parameters. eg. clock polarity. etc.
+
+
 module mymux    (
 
   input wire [8-1:0] reg_mux,     // inputs are wires. cannot be reg.
