@@ -36,7 +36,7 @@ module blinker    (
 endmodule
 
 
-
+// ok. lets try to use the special flag.
 
 module mylatch   #(parameter MSB=8)   (
   input  clk,
@@ -72,7 +72,7 @@ module mylatch   #(parameter MSB=8)   (
   always @ (posedge cs)
   begin
 
-    if(counter == 8 )  // == MSB
+    // if(counter == 8 )  // == MSB
         out <= tmp;
 //      else
 //       out <= out;
