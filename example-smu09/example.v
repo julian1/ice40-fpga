@@ -58,7 +58,8 @@ endmodule
 
 
 // EXTRME
-// put adc/dac creset - in its own register. then we can assert it, without having to do bitshifting  - on mcu.
+// put adc/dac creset - in its own register. then we can assert/toggle it, without having to do bitshifting  - on mcu.
+// eg. t 
 
 
 // Ok. put a scope on the CS. and see if we can write spi... and have it go through...
