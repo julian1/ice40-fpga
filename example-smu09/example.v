@@ -187,9 +187,8 @@ module top (
 
   ////////////////////////////////////
   // sayss its empty????
-  wire [8-1:0] muxreg;
+  wire [8-1:0] reg_mux;
 
-  wire [8-1:0] anotherreg;
 
   wire [8-1:0] reg_led;
 
@@ -212,7 +211,7 @@ module top (
   mymux #( )
   mymux
   (
-    . myreg(muxreg),
+    . myreg(reg_mux),
     . cs(CS),
     . adc03_cs(ADC03_CS),
     . myregister_cs(myregister_cs),
