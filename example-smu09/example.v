@@ -71,6 +71,11 @@ module mylatch   #(parameter MSB=16)   (
     RIGHT. it doesn't like having both a negedge and posedge...
   */
 
+
+
+  assign address = tmp[ MSB-1:8 ];
+  assign value   = tmp[ 8 - 1: 0 ];
+
   always @ (posedge cs)
   begin
 
