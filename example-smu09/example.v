@@ -55,11 +55,11 @@ module mylatch   #(parameter MSB=16)   (
         8 : reg_mux = tmp[ 8 - 1: 0 ];
 
         // leds
-        7 : reg_led = tmp[ 8 - 1: 0 ];
+        // 7 : reg_led = tmp[ 8 - 1: 0 ];
+        7 : reg_led = tmp;
 
         // dac
-        9 : dac_led = tmp[ 4 - 1: 0 ];  // should automatically truncate to lo bits.
-        // 9 : dac_led = tmp;  // should automatically truncate.
+        9 : reg_dac = tmp;  
 
       endcase
 
@@ -86,22 +86,37 @@ module mymux    (
 
   input  cs,
   output adc03_cs,
+  output dac_cs,
 
 );
+  
+  // OK. rather than having separate lines....
+  // why not have a single output....
 
                         // EXTREME this should be when cs changes. eg. we copy value.
   always @ (cs)     // eg. whenever reg_mux changes we update ... i think.
     begin
 
-      case (reg_mux )
+      case (reg_mux)
         1 :
         begin
           adc03_cs = cs;
+          dac_cs = 1;
         end
 
-        default  :
+
+        2 :
         begin
-          adc03_cs = 1;   // deassert
+          adc03_cs = 1;
+          dac_cs = cs;
+        end
+
+
+
+        default:
+        begin
+          adc03_cs = 1;   // active lo. so deassert
+          dac_cs = 1;
         end
       endcase
     end
