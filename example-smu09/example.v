@@ -29,6 +29,7 @@ module mylatch   #(parameter MSB=16)   (
   end
   /*
     RIGHT. it doesn't like having both a negedge and posedge...
+    ok. maybe count is necessary to include in sensitivity list?
   */
   /*
   // these don't work...
