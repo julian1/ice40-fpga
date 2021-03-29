@@ -12,7 +12,8 @@ set_io XTALCLK 21
 #    pa3 = special vid = vod = pin 45
 
 
-set_io SCLK   42 
+# should prefix these
+set_io CLK   42 
 set_io CS     43 
 set_io MOSI   44 
 set_io SPECIAL 45 
@@ -22,7 +23,10 @@ set_io LED1 106
 set_io LED2 107
 
 
-set_io ADC03_SCLK   87 
+set_io ADC03_CLK    87 
+set_io ADC03_MISO   88 
+set_io ADC03_MOSI   90
+set_io ADC03_CS     91
 
 
 

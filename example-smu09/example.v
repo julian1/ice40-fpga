@@ -81,7 +81,7 @@ module mymux    (
   input  cs,
   input  d,   
   input wire [8-1:0] myreg,     // inputs are wires. cannot be reg.
-  output adc03_sclk
+  output adc03_clk
 );
 
   // mux example, https://www.chipverify.com/verilog/verilog-case-statement
@@ -90,8 +90,8 @@ module mymux    (
     begin
    
       case (myreg )
-        1 :      adc03_sclk = clk;  
-        default: adc03_sclk = 0;
+        1 :      adc03_clk = clk;  
+        default: adc03_clk = 0;
       endcase
 
     end
@@ -117,7 +117,7 @@ module top (
   output LED2,
 
   // spi
-  input SCLK,
+  input CLK,
   input CS,
   input MOSI,
   input SPECIAL
@@ -140,7 +140,7 @@ module top (
   mylatch #( 8 )
   mylatch
     (
-    .clk(SCLK),
+    .clk(CLK),
     .cs(CS),
     .special(SPECIAL),
     .d(MOSI),
@@ -152,11 +152,11 @@ module top (
   mymux #( )
   mymux 
   (
-    .clk(SCLK),
+    .clk(CLK),
     .cs(CS),
     .d(MOSI),
     . myreg( out ),
-    . adc03_sclk(ADC03_SCLK)
+    . adc03_clk(ADC03_CLK)
   );
   
 
