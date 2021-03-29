@@ -74,61 +74,25 @@ endmodule
 // actually if we can read a register, then we can do a toggle fairly simply... toggle over spi.
 
 
-// Ok. put a scope on the CS. and see if we can write spi... and have it go through...
-
-// EXTREME
-// having this kind of transparent latching using only cs. means can actually employ different
-// spi parameters. eg. clock polarity. etc.
 
 
 module mymux    (
   input wire [8-1:0] reg_mux,     // inputs are wires. cannot be reg.
   input  cs,                      // wire?
   input  special,
-  output [8-1:0] cs_mux
+  output [8-1:0] cs_mux     // change name to vec.
 );
-
-  /*
-    1 = hi = off.  active lo.
-
-    reg_mux 00001000    cs=0(active),~cs  ==   00000000,   then invert the output
-    reg_mux 00001000    cs=1  ==   00001000
-
-    // think it's this.
-    ~(reg_mux & ~cs)
-
-    eg.
-    reg_mux 00001000    cs=0(active)
-        == ~ (11111111 & 00001000)
-        == 111101111
-  */
-
-  // https://stackoverflow.com/questions/50385144/how-to-expand-a-single-bit-to-multi-bits-depending-on-parameter-in-verilog
-  // assign excs = {{(8-1){1'b0}}, cs};    // will this be ready in time????
-
-  // cs_mux <= 1  ; // seems that cs is lo? ....... need to avoid special.
 
   always @ (cs) // both edges...
     begin
 
-    // as soon as we add this it doesn't work...
-    // timing issue?
-
-    // OK. because special is not passed in.
-
-    if(special)    // only if special hi,== deasserted 
+    if(special) // only if special == hi == deasserted 
       begin
-        // cs_mux = ~( reg_mux & ~excs );
-
-        //  (bitcnt==3'b111);
 
         if(cs) 
-          cs_mux = ~( reg_mux & 8'b00000000  );   
+          cs_mux = ~( reg_mux & 8'b00000000 );   
         else
           cs_mux = ~( reg_mux & 8'b11111111 );   
-
-
-        //cs_mux = ~( reg_mux & ~ ({{(8-1){1'b0}}, cs})  );   // works for the first digit.
 
         // forward to all
         // cs_mux = 1  ;    // dac. only hi.      seems that cs is lo? ....... need to avoid special.
@@ -137,9 +101,6 @@ module mymux    (
     end
 
 endmodule
-
-
-// OK. we only want to latch the value in, on correct clock transition count.
 
 
 
