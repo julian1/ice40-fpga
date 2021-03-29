@@ -109,12 +109,16 @@ module mymux    (
 
   always @ (cs)
     begin
-      // cs_mux = ~( reg_mux & ~excs );
-      cs_mux = ~( reg_mux & ~ ({{(8-1){1'b0}}, cs})  );
 
-      // forward to all
-      // cs_mux = 1  ; // seems that cs is lo? ....... need to avoid special.
-            // doesn't work.
+//    if(special)    // only if special deasserted 
+      begin
+        // cs_mux = ~( reg_mux & ~excs );
+        cs_mux = ~( reg_mux & ~ ({{(8-1){1'b0}}, cs})  );
+
+        // forward to all
+        // cs_mux = 1  ;    // dac. only hi.      seems that cs is lo? ....... need to avoid special.
+        // cs_mux = 1<<1  ; // adc03 only hi
+      end
     end
 
 endmodule
