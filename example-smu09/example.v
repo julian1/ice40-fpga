@@ -56,10 +56,12 @@ module mymux   #(parameter MSB=8)   (
   // always @ (posedge clk)
   always @ (negedge clk)
   begin
-      counter <= counter + 1;
   
       if (!cs)         // chip select.
+        begin
+          counter <= counter + 1;
           tmp <= {tmp[MSB-2:0], d};
+        end
       else
           tmp <= tmp;
   end
@@ -70,13 +72,15 @@ module mymux   #(parameter MSB=8)   (
 
   always @ (negedge cs)
     counter <= 0;
-  
+
+  // the counter is incremented in clk. domain.  
+  // and tested in cs domain.
 
 
   always @ (posedge cs)
   begin
 
-
+    counter <= 0;
     out <= tmp;
 /*
       if(true counter == 8) // 
