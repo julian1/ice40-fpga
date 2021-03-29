@@ -48,18 +48,12 @@ module mylatch   #(parameter MSB=8)   (
   output reg [MSB-1:0] out
 );
 
-  reg [31:0] counter = 0; // need to count to 8, so change to log2(MSB )... no issue. 
-                            // NO. have to handle non modulo(8) . eg. for long data sequence.
-                            // hmmmm. this is a prolem.
-
-
+  reg [31:0] counter = 0; // need to let it count past 8, so doesn't trigger on 16 or 24 etc.
   reg [MSB-1:0] tmp;
 
-  // always @ (posedge clk)
   always @ (negedge clk)
   begin
-  
-      if (!cs)         // chip select.
+      if (!cs)         // chip select asserted.
         begin
           counter <= counter + 1;
           tmp <= {tmp[MSB-2:0], d};
@@ -71,9 +65,8 @@ module mylatch   #(parameter MSB=8)   (
         end
   end
   /*
-    RIGHT. it doesn't like having negedge and posedge...
+    RIGHT. it doesn't like having both a negedge and posedge...
   */
-
 
 
   always @ (posedge cs)
