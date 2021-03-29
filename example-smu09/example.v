@@ -36,18 +36,18 @@ module mylatch   #(parameter MSB=16)   (
   // these don't work...
   assign address = tmp[ MSB-1:8 ];
   assign value   = tmp[ 8 - 1: 0 ];
-  
+
   need to put after the sequential block?
     see, http://referencedesigner.com/tutorials/verilog/verilog_32.php
   */
- 
+
   // need to prevent a peripheral writing mosi. in a different frame .
   // actually don't think it will. will only write mosi. with cs asserted.
 
   always @ (posedge cs)
   begin
 
-    if(!special)    // special asserted
+    if(!special)    // only if special asserted
 
       case (tmp[ MSB-1:8 ])  // high byte for reg, lo byte for val.
 
@@ -58,7 +58,8 @@ module mylatch   #(parameter MSB=16)   (
         7 : reg_led = tmp[ 8 - 1: 0 ];
 
         // dac
-        9 : dac_led = tmp[ 4 - 1: 0 ];  // should automatically truncate.
+        9 : dac_led = tmp[ 4 - 1: 0 ];  // should automatically truncate to lo bits.
+        // 9 : dac_led = tmp;  // should automatically truncate.
 
       endcase
 
@@ -69,7 +70,7 @@ endmodule
 
 // EXTRME
 // put adc/dac creset - in its own register. then we can assert/toggle it, without having to do bitshifting  - on mcu.
-// eg. t 
+// eg. t
 
 
 // Ok. put a scope on the CS. and see if we can write spi... and have it go through...
@@ -88,7 +89,7 @@ module mymux    (
 
 );
 
-                        // EXTREME this should be when cs changes. eg. we copy value. 
+                        // EXTREME this should be when cs changes. eg. we copy value.
   always @ (cs)     // eg. whenever reg_mux changes we update ... i think.
     begin
 
@@ -128,13 +129,13 @@ module top (
 
 
   // dac
-  output DAC_SPI_CS , 
-  output DAC_SPI_CLK, 
-  output DAC_SPI_SDI, 
-  output DAC_SPI_SDO, 
-  output DAC_LDAC, 
-  output DAC_RST, 
-  output DAC_UNI_BIP_A, 
+  output DAC_SPI_CS ,
+  output DAC_SPI_CLK,
+  output DAC_SPI_SDI,
+  output DAC_SPI_SDO,
+  output DAC_LDAC,
+  output DAC_RST,
+  output DAC_UNI_BIP_A,
   output DAC_UNI_BIP_B
 );
   // should be able to assign extra stuff here.
@@ -146,7 +147,7 @@ module top (
   // sayss its empty????
   wire [8-1:0] reg_mux;
   wire [8-1:0] reg_led;
-  
+
   wire [4-1:0] reg_dac;
 
   assign {LED1, LED2} = reg_led;
