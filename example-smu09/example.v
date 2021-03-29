@@ -48,17 +48,17 @@ module mylatch   #(parameter MSB=8)   (
   output reg [MSB-1:0] out
 );
 
-  reg [31:0] counter = 0; // need to let it count past 8, so doesn't trigger on 16 or 24 etc.
   reg [MSB-1:0] tmp;
+
 
   always @ (negedge clk)
   begin
-      if (!cs)         // chip select asserted.
-        begin
-          counter <= counter + 1;
-          tmp <= {tmp[MSB-2:0], d};
-        end
-    end
+    if (!cs && !special)         // chip select asserted.
+    // if (!cs )         // chip select asserted.
+      tmp <= {tmp[MSB-2:0], d};
+    // else
+    //  tmp <= tmp;
+  end
   /*
     RIGHT. it doesn't like having both a negedge and posedge...
   */
@@ -66,12 +66,8 @@ module mylatch   #(parameter MSB=8)   (
 
   always @ (posedge cs)
   begin
-
-    // if(counter == 8 )  // == MSB
-        out <= tmp;
-//      else
-//       out <= out;
-
+    if(!special)    // special asserted
+      out <= tmp;
   end
 
 
@@ -123,11 +119,10 @@ module top (
   // spi
   input SCLK,
   input CS,
-  input MOSI
+  input MOSI,
+  input SPECIAL
   // output b
 );
-
-  // top most module - should just deleegate to other modules.
   // should be able to assign extra stuff here.
   //
 
@@ -138,29 +133,21 @@ module top (
   wire [8-1:0] out;
   // reg [8-1:0] out = 0;
   // register [8-1:0] out = 0;
-  // assign {LED1, LED2} = out;
+
+
+  assign {LED1, LED2} = out;
 
   mylatch #( 8 )
   mylatch
     (
     .clk(SCLK),
     .cs(CS),
-    .special(1),
+    .special(SPECIAL),
     .d(MOSI),
 
     .out(out)
   );
 
-  assign { LED1, LED2 } = out;    // lowest bits or highest?
-
-/*
-  input  clk,
-  input  cs,
-  input  d,   
-  input wire [8-1:0] myreg,     // inputs are wires. cannot be reg.
-  output adc03_sclk
-
-*/
 
   mymux #( )
   mymux 
@@ -175,6 +162,8 @@ module top (
 
   // want to swapt the led order.
   // assign LED1 = MOSI;
+  // assign LED1 = MOSI;
+  // assign LED1 = SPECIAL;
 
 /*
   blinker #(  )
