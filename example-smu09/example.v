@@ -101,9 +101,7 @@ module mymux    (
   input  clk,
   input  cs,
   input  d,   
-
   input wire [8-1:0] myreg,     // inputs are wires. cannot be reg.
-
   output adc03_sclk
 );
 
@@ -172,6 +170,25 @@ module top (
 
   assign { LED1, LED2 } = out;    // lowest bits or highest?
 
+/*
+  input  clk,
+  input  cs,
+  input  d,   
+  input wire [8-1:0] myreg,     // inputs are wires. cannot be reg.
+  output adc03_sclk
+
+*/
+
+  mymux #( )
+  mymux 
+  (
+    .clk(SCLK),
+    .cs(CS),
+    .d(MOSI),
+    . myreg( out ),
+    . adc03_sclk(ADC03_SCLK)
+  );
+  
 
   // want to swapt the led order.
   // assign LED1 = MOSI;
