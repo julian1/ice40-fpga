@@ -44,7 +44,7 @@ module mylatch   #(parameter MSB=8)   (
   input  special,
   input  d,   // sdi
 
-  // output led
+  // latched val, rename
   output reg [MSB-1:0] out
 );
 
@@ -72,7 +72,7 @@ module mylatch   #(parameter MSB=8)   (
   always @ (posedge cs)
   begin
 
-    if(counter == 8 )
+    if(counter == 8 )  // == MSB
         out <= tmp;
 //      else
 //       out <= out;
