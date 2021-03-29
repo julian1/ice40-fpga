@@ -58,12 +58,7 @@ module mylatch   #(parameter MSB=8)   (
           counter <= counter + 1;
           tmp <= {tmp[MSB-2:0], d};
         end
-      else
-        begin
-          counter <= 0;
-          tmp <= tmp;
-        end
-  end
+    end
   /*
     RIGHT. it doesn't like having both a negedge and posedge...
   */
