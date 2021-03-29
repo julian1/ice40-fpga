@@ -84,6 +84,7 @@ endmodule
 module mymux    (
   input wire [8-1:0] reg_mux,     // inputs are wires. cannot be reg.
   input  cs,                      // wire?
+  input  special,
   output [8-1:0] cs_mux
 );
 
@@ -111,14 +112,18 @@ module mymux    (
     begin
 
     // as soon as we add this it doesn't work...
-    if(special)    // only if special deasserted 
+    // timing issue?
+
+    // OK. because special is not passed in.
+
+    if(special)    // only if special hi,== deasserted 
       begin
         // cs_mux = ~( reg_mux & ~excs );
-        cs_mux = ~( reg_mux & ~ ({{(8-1){1'b0}}, cs})  );
+        //cs_mux = ~( reg_mux & ~ ({{(8-1){1'b0}}, cs})  );
 
         // forward to all
         // cs_mux = 1  ;    // dac. only hi.      seems that cs is lo? ....... need to avoid special.
-        // cs_mux = 1<<1  ; // adc03 only hi
+        cs_mux = 1<<1  ; // adc03 only hi
       end
     end
 
@@ -210,6 +215,7 @@ module top (
   (
     . reg_mux(reg_mux),
     . cs(CS),
+    . special(SPECIAL),
     . cs_mux(cs_mux)
   );
 
