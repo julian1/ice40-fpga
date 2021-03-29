@@ -107,7 +107,9 @@ module mymux    (
   output adc03_sclk
 );
 
-  always @ (posedge clk)
+  // mux example, https://www.chipverify.com/verilog/verilog-case-statement
+
+  always @ (myreg )     // eg. whenever myreg changes we update ... i think.
     begin
    
       case (myreg )
