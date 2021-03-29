@@ -52,8 +52,6 @@ module mylatch   #(parameter MSB=8)   (
                             // NO. have to handle non modulo(8) . eg. for long data sequence.
                             // hmmmm. this is a prolem.
 
-  wire x;
-  assign x = counter == 8;
 
   reg [MSB-1:0] tmp;
 
@@ -67,34 +65,25 @@ module mylatch   #(parameter MSB=8)   (
           tmp <= {tmp[MSB-2:0], d};
         end
       else
+        begin
+          counter <= 0;
           tmp <= tmp;
+        end
   end
   /*
     RIGHT. it doesn't like having negedge and posedge...
   */
 
-  // neg edge cs, init the counter. pos edge check.
-  // neg edge start
-  // posedge finished.
-
-//  always @ (negedge cs)
- //   counter <= 0;
-
-  // the counter is incremented in clk. domain.  
-  // and tested in cs domain.
 
 
   always @ (posedge cs)
   begin
 
-    // out <= tmp;
-
-      if(counter == 8 ) // 
+    if(counter == 8 )
         out <= tmp;
-      else
-        out <= out;
-        //counter = 0;
- 
+//      else
+//       out <= out;
+
   end
 
 
