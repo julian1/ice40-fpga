@@ -38,9 +38,10 @@ endmodule
 
 
 
-module mymux   #(parameter MSB=8)   (
+module mylatch   #(parameter MSB=8)   (
   input  clk,
   input  cs,
+  input  special,
   input  d,   // sdi
 
   // output led
@@ -80,14 +81,14 @@ module mymux   #(parameter MSB=8)   (
   always @ (posedge cs)
   begin
 
-    out <= tmp;
-/*
-      if(true counter == 8) // 
+    // out <= tmp;
+
+      if(special ) // 
         out <= tmp;
       else
         out <= out;
         //counter = 0;
- */ 
+ 
   end
 
 
@@ -130,11 +131,12 @@ module top (
   // register [8-1:0] out = 0;
   // assign {LED1, LED2} = out;
 
-  mymux #( 8 )
-  mymux
+  mylatch #( 8 )
+  mylatch
     (
     .clk(SCLK),
     .cs(CS),
+    .special(1),
     .d(MOSI),
 
     .out(out)
