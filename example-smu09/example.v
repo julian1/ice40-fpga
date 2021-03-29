@@ -72,21 +72,23 @@ module mylatch   #(parameter MSB=16)   (
   */
 
 
-
+  /* 
+  // these don't work...
   assign address = tmp[ MSB-1:8 ];
   assign value   = tmp[ 8 - 1: 0 ];
+  */
 
   always @ (posedge cs)
   begin
 
-    // reg address = tmp[MSB-1:4 ];
 
     if(!special)    // special asserted
       //out <= tmp;
 
       case (tmp[ MSB-1:8 ])  // high byte for reg
-        1 :   // meaning register address....
+        7 :   // meaning register address....
         begin
+          // out <= value ;    // this doesn't work????
           out = tmp[ 8 - 1: 0 ];
         end
 
