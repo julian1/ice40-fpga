@@ -51,7 +51,7 @@ module mylatch   #(parameter MSB=16)   (
   input  d,   // sdi
 
   // latched val, rename
-  output reg [8-1:0] led_reg// rename led register
+  output reg [8-1:0] reg_led// rename led register
 );
 
   // if the clk count is wrong. it will make a big mess.
@@ -89,7 +89,7 @@ module mylatch   #(parameter MSB=16)   (
         7 :   // meaning register address....
         begin
           // out <= value ;    // this doesn't work????
-          led_reg = tmp[ 8 - 1: 0 ];
+          reg_led = tmp[ 8 - 1: 0 ];
         end
 
         // default:
@@ -191,7 +191,9 @@ module top (
 
   wire [8-1:0] anotherreg;
 
-  assign {LED1, LED2} = muxreg;
+  wire [8-1:0] reg_led;
+
+  assign {LED1, LED2} = reg_led;
 
   mylatch #( 16 )   // register bank
   mylatch
@@ -200,7 +202,7 @@ module top (
     .cs(CS),
     .special(SPECIAL),
     .d(MOSI),
-    .led_reg(muxreg)
+    .reg_led(reg_led)
   );
 
 
