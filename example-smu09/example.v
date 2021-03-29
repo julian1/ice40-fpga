@@ -73,7 +73,9 @@ module mymux    (
   output adc03_cs,
 
 );
-  always @ (reg_mux )     // eg. whenever reg_mux changes we update ... i think.
+
+                        // EXTREME this should be when cs changes. eg. we copy value. 
+  always @ (cs)     // eg. whenever reg_mux changes we update ... i think.
     begin
 
       case (reg_mux )
