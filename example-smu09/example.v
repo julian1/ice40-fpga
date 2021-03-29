@@ -84,32 +84,39 @@ endmodule
 module mymux    (
   input wire [8-1:0] reg_mux,     // inputs are wires. cannot be reg.
   input  cs,                      // wire?
-  output [8-1:0]    cs_mux,
+  output [8-1:0] cs_mux
 );
 
-/*
-  1 = hi = off.  active lo.
+  /*
+    1 = hi = off.  active lo.
 
-  reg_mux 00001000    cs=0(active),~cs  ==   00000000,   then invert the output
-  reg_mux 00001000    cs=1  ==   00001000
+    reg_mux 00001000    cs=0(active),~cs  ==   00000000,   then invert the output
+    reg_mux 00001000    cs=1  ==   00001000
 
-  // think it's this.
-  ~(reg_mux & ~cs)
+    // think it's this.
+    ~(reg_mux & ~cs)
 
-  eg.
-  reg_mux 00001000    cs=0(active)
-      == ~ (11111111 & 00001000)
-      == 111101111
-*/
+    eg.
+    reg_mux 00001000    cs=0(active)
+        == ~ (11111111 & 00001000)
+        == 111101111
+  */
 
   // https://stackoverflow.com/questions/50385144/how-to-expand-a-single-bit-to-multi-bits-depending-on-parameter-in-verilog
-  assign excs = {{(8-1){1'b0}}, cs};    // will this be ready in time????
+  // assign excs = {{(8-1){1'b0}}, cs};    // will this be ready in time????
 
+  // cs_mux <= 1  ; // seems that cs is lo? ....... need to avoid special.
 
   always @ (cs)
     begin
-      cs_mux = ~( reg_mux & ~excs );
+      // cs_mux = ~( reg_mux & ~excs );
+      cs_mux = ~( reg_mux & ~ ({{(8-1){1'b0}}, cs})  );
+
+      // forward to all
+      // cs_mux = 1  ; // seems that cs is lo? ....... need to avoid special.
+            // doesn't work.
     end
+
 endmodule
 
 
@@ -133,6 +140,14 @@ module top (
   // output b
 
 
+
+  output ADC03_CLK,
+  output ADC03_MISO,
+  output ADC03_MOSI,
+  output ADC03_CS,
+
+
+
   // dac
   output DAC_SPI_CS ,
   output DAC_SPI_CLK,
@@ -154,15 +169,19 @@ module top (
 
 
   wire [8-1:0] cs_mux ;
-  assign { DAC_SPI_CS, ADC03_CS } = cs_mux;
+  // assign { DAC_SPI_CS, ADC03_CS } = cs_mux;
+  assign { ADC03_CS , DAC_SPI_CS } = cs_mux;
 
+  // EXTREME - we haave the order of these things wrong....
 
   wire [8-1:0] reg_led;
-  assign {LED1, LED2} = reg_led;
+  // assign {LED1, LED2} = reg_led;
+  assign {LED1, LED2} = reg_led;    // schematic has these reversed...
 
 
   wire [4-1:0] reg_dac;
-  assign {DAC_LDAC, DAC_RST, DAC_UNI_BIP_A, DAC_UNI_BIP_B } = reg_dac;    // can put reset in separate reg, to make easy to toggle.
+  // assign {DAC_LDAC, DAC_RST, DAC_UNI_BIP_A, DAC_UNI_BIP_B } = reg_dac;    // can put reset in separate reg, to make easy to toggle.
+  assign {DAC_UNI_BIP_B , DAC_UNI_BIP_A, DAC_RST,  DAC_LDAC } = reg_dac;    // can put reset in separate reg, to make easy to toggle.
 
   mylatch #( 16 )   // register bank
   mylatch
@@ -178,9 +197,8 @@ module top (
   );
 
 
-
-
-
+  // assign cs_mux = 1;  // adc03 cs is high.
+  // assign cs_mux = 0;  // adc03 cs is lo.
 
   mymux #( )
   mymux
