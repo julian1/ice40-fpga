@@ -8,8 +8,9 @@ module mylatch   #(parameter MSB=16)   (
   input  d,   // sdi
 
   // latched val, rename
+  output reg [8-1:0] reg_mux,
   output reg [8-1:0] reg_led,
-  output reg [8-1:0] reg_mux
+  output reg [4-1:0] reg_dac
 );
 
   /*
@@ -50,11 +51,12 @@ module mylatch   #(parameter MSB=16)   (
 
       case (tmp[ MSB-1:8 ])  // high byte for reg, lo byte for val.
 
+        // mux
+        8 : reg_mux = tmp[ 8 - 1: 0 ];
+
         // leds
         7 : reg_led = tmp[ 8 - 1: 0 ];
 
-        // mux
-        8 : reg_mux = tmp[ 8 - 1: 0 ];
 
       endcase
 
@@ -119,8 +121,19 @@ module top (
   input CLK,
   input CS,
   input MOSI,
-  input SPECIAL
+  input SPECIAL,
   // output b
+
+
+  // dac
+  output DAC_SPI_CS , 
+  output DAC_SPI_CLK, 
+  output DAC_SPI_SDI, 
+  output DAC_SPI_SDO, 
+  output DAC_LDAC, 
+  output DAC_RST, 
+  output DAC_UNI_BIP_A, 
+  output DAC_UNI_BIP_B
 );
   // should be able to assign extra stuff here.
   //
@@ -131,8 +144,11 @@ module top (
   // sayss its empty????
   wire [8-1:0] reg_mux;
   wire [8-1:0] reg_led;
+  
+  wire [4-1:0] reg_dac;
 
   assign {LED1, LED2} = reg_led;
+  assign {DAC_LDAC, DAC_RST, DAC_UNI_BIP_A, DAC_UNI_BIP_B } = reg_dac;    // can put reset in separate reg, to make easy to toggle.
 
   mylatch #( 16 )   // register bank
   mylatch
@@ -141,8 +157,10 @@ module top (
     .cs(CS),
     .special(SPECIAL),
     .d(MOSI),
+
+    .reg_mux(reg_mux),
     .reg_led(reg_led),
-    .reg_mux(reg_mux)
+    .reg_dac(reg_dac)
   );
 
 
