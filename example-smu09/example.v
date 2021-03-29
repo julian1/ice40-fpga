@@ -44,15 +44,18 @@ endmodule
 */
 
 
-module mylatch   #(parameter MSB=8)   (
+module mylatch   #(parameter MSB=16)   (
   input  clk,
   input  cs,
   input  special,
   input  d,   // sdi
 
   // latched val, rename
-  output reg [MSB-1:0] out    // rename led register
+  output reg [8-1:0] out    // rename led register
 );
+
+  // if the clk count is wrong. it will make a big mess.
+  // would be much better if could validate.
 
   reg [MSB-1:0] tmp;
 
@@ -76,10 +79,10 @@ module mylatch   #(parameter MSB=8)   (
     if(!special)    // special asserted
       //out <= tmp;
 
-      case (tmp[ MSB-1:4 ])  // high byte for reg
+      case (tmp[ MSB-1:8 ])  // high byte for reg
         1 :   // meaning register address....
         begin
-          out = tmp[ 4 - 1: 0 ];
+          out = tmp[ 8 - 1: 0 ];
         end
 
         // default:
@@ -183,7 +186,7 @@ module top (
 
   assign {LED1, LED2} = muxreg;
 
-  mylatch #( 8 )
+  mylatch #( 16 )   // register bank
   mylatch
     (
     .clk(CLK),
