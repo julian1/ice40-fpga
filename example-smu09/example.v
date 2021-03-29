@@ -119,7 +119,16 @@ module mymux    (
     if(special)    // only if special hi,== deasserted 
       begin
         // cs_mux = ~( reg_mux & ~excs );
-        cs_mux = ~( reg_mux & ~ ({{(8-1){1'b0}}, cs})  );
+
+        //  (bitcnt==3'b111);
+
+        if(cs) 
+          cs_mux = ~( reg_mux & 8'b00000000  );   
+        else
+          cs_mux = ~( reg_mux & 8'b11111111 );   
+
+
+        //cs_mux = ~( reg_mux & ~ ({{(8-1){1'b0}}, cs})  );   // works for the first digit.
 
         // forward to all
         // cs_mux = 1  ;    // dac. only hi.      seems that cs is lo? ....... need to avoid special.
