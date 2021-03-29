@@ -35,6 +35,9 @@ module mylatch   #(parameter MSB=16)   (
   // these don't work...
   assign address = tmp[ MSB-1:8 ];
   assign value   = tmp[ 8 - 1: 0 ];
+  
+  need to put after the sequential block?
+    see, http://referencedesigner.com/tutorials/verilog/verilog_32.php
   */
 
   always @ (posedge cs)
