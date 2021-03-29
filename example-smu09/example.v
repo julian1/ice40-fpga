@@ -59,7 +59,7 @@ module mylatch   #(parameter MSB=16)   (
         7 : reg_led = tmp;
 
         // dac
-        9 : reg_dac = tmp;  
+        9 : reg_dac = tmp;
 
       endcase
 
@@ -71,6 +71,7 @@ endmodule
 // EXTRME
 // put adc/dac creset - in its own register. then we can assert/toggle it, without having to do bitshifting  - on mcu.
 // eg. t
+// actually if we can read a register, then we can do a toggle fairly simply... toggle over spi.
 
 
 // Ok. put a scope on the CS. and see if we can write spi... and have it go through...
@@ -81,44 +82,33 @@ endmodule
 
 
 module mymux    (
-
   input wire [8-1:0] reg_mux,     // inputs are wires. cannot be reg.
-
-  input  cs,
-  output adc03_cs,
-  output dac_cs,
-
+  input  cs,                      // wire?
+  output [8-1:0]    cs_mux,
 );
-  
-  // OK. rather than having separate lines....
-  // why not have a single output....
 
-                        // EXTREME this should be when cs changes. eg. we copy value.
-  always @ (cs)     // eg. whenever reg_mux changes we update ... i think.
+/*
+  1 = hi = off.  active lo.
+
+  reg_mux 00001000    cs=0(active),~cs  ==   00000000,   then invert the output
+  reg_mux 00001000    cs=1  ==   00001000
+
+  // think it's this.
+  ~(reg_mux & ~cs)
+
+  eg.
+  reg_mux 00001000    cs=0(active)
+      == ~ (11111111 & 00001000)
+      == 111101111
+*/
+
+  // https://stackoverflow.com/questions/50385144/how-to-expand-a-single-bit-to-multi-bits-depending-on-parameter-in-verilog
+  assign excs = {{(8-1){1'b0}}, cs};    // will this be ready in time????
+
+
+  always @ (cs)
     begin
-
-      case (reg_mux)
-        1 :
-        begin
-          adc03_cs = cs;
-          dac_cs = 1;
-        end
-
-
-        2 :
-        begin
-          adc03_cs = 1;
-          dac_cs = cs;
-        end
-
-
-
-        default:
-        begin
-          adc03_cs = 1;   // active lo. so deassert
-          dac_cs = 1;
-        end
-      endcase
+      cs_mux = ~( reg_mux & ~excs );
     end
 endmodule
 
@@ -161,11 +151,17 @@ module top (
   ////////////////////////////////////
   // sayss its empty????
   wire [8-1:0] reg_mux;
+
+
+  wire [8-1:0] cs_mux ;
+  assign { DAC_SPI_CS, ADC03_CS } = cs_mux;
+
+
   wire [8-1:0] reg_led;
+  assign {LED1, LED2} = reg_led;
+
 
   wire [4-1:0] reg_dac;
-
-  assign {LED1, LED2} = reg_led;
   assign {DAC_LDAC, DAC_RST, DAC_UNI_BIP_A, DAC_UNI_BIP_B } = reg_dac;    // can put reset in separate reg, to make easy to toggle.
 
   mylatch #( 16 )   // register bank
@@ -185,12 +181,13 @@ module top (
 
 
 
+
   mymux #( )
   mymux
   (
     . reg_mux(reg_mux),
     . cs(CS),
-    . adc03_cs(ADC03_CS)
+    . cs_mux(cs_mux)
   );
 
 
