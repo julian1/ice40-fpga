@@ -44,7 +44,7 @@ module mylatch   #(parameter MSB=16)   (
   // need to prevent a peripheral writing mosi. in a different frame .
   // actually don't think it will. will only write mosi. with cs asserted.
 
-  always @ (posedge cs)
+  always @ (posedge cs)   // cs done.
   begin
 
     if(!special)    // only if special asserted
@@ -107,10 +107,11 @@ module mymux    (
 
   // cs_mux <= 1  ; // seems that cs is lo? ....... need to avoid special.
 
-  always @ (cs)
+  always @ (cs) // both edges...
     begin
 
-//    if(special)    // only if special deasserted 
+    // as soon as we add this it doesn't work...
+    if(special)    // only if special deasserted 
       begin
         // cs_mux = ~( reg_mux & ~excs );
         cs_mux = ~( reg_mux & ~ ({{(8-1){1'b0}}, cs})  );
