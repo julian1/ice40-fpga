@@ -39,6 +39,9 @@ module mylatch   #(parameter MSB=16)   (
   need to put after the sequential block?
     see, http://referencedesigner.com/tutorials/verilog/verilog_32.php
   */
+ 
+  // need to prevent a peripheral writing mosi. in a different frame .
+  // actually don't think it will. will only write mosi. with cs asserted.
 
   always @ (posedge cs)
   begin
