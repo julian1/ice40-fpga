@@ -77,10 +77,14 @@ endmodule
 
 
 module mymux    (
+
+  input wire [8-1:0] myreg,     // inputs are wires. cannot be reg.
+
   input  clk,
   input  cs,
-  input  d,   
-  input wire [8-1:0] myreg,     // inputs are wires. cannot be reg.
+  input  mosi,
+
+	// OK. hang on. what about muxing mosi?
 
   output adc03_clk,
   output adc03_cs,
@@ -93,9 +97,16 @@ module mymux    (
 
   always @ (myreg )     // eg. whenever myreg changes we update ... i think.
     begin
-   
+
       case (myreg )
-		    1 :      adc03_clk = clk;
+        1 :
+        begin
+          adc03_clk = clk;
+          adc03_cs = cs;
+          adc03_mosi = mosi;		// freaking mosi doesn't even exit...
+          adc03_miso = miso;
+        end
+
 
 
         default: adc03_clk = 0;
@@ -155,21 +166,29 @@ module top (
     .out(out)
   );
 
+/*
+  input wire [8-1:0] myreg,     // inputs are wires. cannot be reg.
+
+  input  clk,
+  input  cs,
+  input  mosi,
+*/
 
   mymux #( )
-  mymux 
+  mymux
   (
-    .clk(CLK),
-    .cs(CS),
-    .d(MOSI),
     . myreg( out ),
+
+    . clk(CLK),
+    . cs(CS),
+    . mosi(MOSI),
 
     . adc03_clk(ADC03_CLK),
     . adc03_cs(ADC03_CS),
     . adc03_mosi(ADC03_MOSI),
     . adc03_miso(ADC03_MOSI)
   );
-  
+
 
   // want to swapt the led order.
   // assign LED1 = MOSI;
