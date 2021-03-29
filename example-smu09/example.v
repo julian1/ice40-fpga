@@ -80,7 +80,6 @@ module mymux   #(parameter MSB=8)   (
   always @ (posedge cs)
   begin
 
-    counter <= 0;
     out <= tmp;
 /*
       if(true counter == 8) // 
