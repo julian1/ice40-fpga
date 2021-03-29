@@ -1,47 +1,4 @@
 
-// from https://github.com/cliffordwolf/icestorm/tree/master/examples/icestick
-
-// example.v
-
-
-// HANG on how does register shadowing work???
-
-// have separate modules for an 8 bit mux.
-// versus a 16 bit reg value
-// versus propagating.
-
-
-module blinker    (
-  input clk,
-  output led1,
-  output led2
-
-);
-
-  localparam BITS = 5;
-  // localparam LOG2DELAY = 21;
-  localparam LOG2DELAY = 19;
-
-  reg [BITS+LOG2DELAY-1:0] counter = 0;
-  reg [BITS-1:0] outcnt;
-
-  always@(posedge clk) begin
-    counter <= counter + 1;
-    outcnt <= counter >> LOG2DELAY;
-  end
-
-  // assign {led1} = counter2 >> 22;
-  // assign { led1, led2, LED3, LED4, LED5 } = outcnt ^ (outcnt >> 1);
-  assign {  led1, led2 } = outcnt ^ (outcnt >> 1);
-endmodule
-
-
-// ok. lets try to use the special flag.
-
-
-/*
-    we just want a register bank....
-*/
 
 
 module mylatch   #(parameter MSB=16)   (
@@ -55,8 +12,10 @@ module mylatch   #(parameter MSB=16)   (
   output reg [8-1:0] reg_mux
 );
 
-  // if the clk count is wrong. it will make a big mess.
-  // would be much better if could validate.
+  /*
+    if the clk count is wrong. it will make a big mess of values.
+    really need to validate count = 16,.
+  */
 
   reg [MSB-1:0] tmp;
 
@@ -71,9 +30,7 @@ module mylatch   #(parameter MSB=16)   (
   /*
     RIGHT. it doesn't like having both a negedge and posedge...
   */
-
-
-  /* 
+  /*
   // these don't work...
   assign address = tmp[ MSB-1:8 ];
   assign value   = tmp[ 8 - 1: 0 ];
@@ -87,10 +44,10 @@ module mylatch   #(parameter MSB=16)   (
       case (tmp[ MSB-1:8 ])  // high byte for reg, lo byte for val.
 
         // leds
-        7 :   reg_led = tmp[ 8 - 1: 0 ];
+        7 : reg_led = tmp[ 8 - 1: 0 ];
 
         // mux
-        8 :   reg_mux = tmp[ 8 - 1: 0 ];
+        8 : reg_mux = tmp[ 8 - 1: 0 ];
 
       endcase
 
@@ -130,11 +87,7 @@ endmodule
 // OK. we only want to latch the value in, on correct clock transition count.
 
 
-/*
-  EXTREME
-    - we ought should be able to do miso / sdo - easily - its the same as the other peripheral wires going to dac,adc etc.
-    - there may be an internal creset?
-*/
+
 
 module top (
   input  XTALCLK,
