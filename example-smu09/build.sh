@@ -1,6 +1,9 @@
 ##!/bin/bash
 
+
 # nix-shell -p yosys arachne-pnr icestorm usbutils
+
+# ./build.sh  2>&1  | grep warning
 
 # should add a trap for failure
 set -e

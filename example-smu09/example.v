@@ -57,6 +57,8 @@ module mylatch   #(parameter MSB=16)   (
         // leds
         7 : reg_led = tmp[ 8 - 1: 0 ];
 
+        // dac
+        9 : dac_led = tmp[ 4 - 1: 0 ];  // should automatically truncate.
 
       endcase
 
