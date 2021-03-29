@@ -80,9 +80,12 @@ module mymux    (
   input wire [8-1:0] reg_mux,     // inputs are wires. cannot be reg.
   input  cs,                      // wire?
   input  special,
-  output [8-1:0] cs_mux     // change name to vec.
+  output [8-1:0] cs_vec     // change name to vec.
 );
 
+  // IMPORTANT - can have a mosi/miso vector etc as well... to determine what gets routed.
+  // if we need. don't have to break up the vec approach.
+  
   always @ (cs) // both edges...
     begin
 
@@ -90,13 +93,13 @@ module mymux    (
       begin
 
         if(cs) 
-          cs_mux = ~( reg_mux & 8'b00000000 );   
+          cs_vec = ~( reg_mux & 8'b00000000 );   
         else
-          cs_mux = ~( reg_mux & 8'b11111111 );   
+          cs_vec = ~( reg_mux & 8'b11111111 );   
 
         // forward to all
-        // cs_mux = 1  ;    // dac. only hi.      seems that cs is lo? ....... need to avoid special.
-        // cs_mux = 1<<1  ; // adc03 only hi
+        // cs_vec = 1  ;    // dac. only hi.      seems that cs is lo? ....... need to avoid special.
+        // cs_vec = 1<<1  ; // adc03 only hi
       end
     end
 
@@ -148,14 +151,14 @@ module top (
   wire [8-1:0] reg_mux;
 
 
-  wire [8-1:0] cs_mux ;
-  // assign { DAC_SPI_CS, ADC03_CS } = cs_mux;
-  assign { ADC03_CS , DAC_SPI_CS } = cs_mux;
+  wire [8-1:0] cs_vec ;
+  // assign { DAC_SPI_CS, ADC03_CS } = cs_vec;
+  assign { ADC03_CS , DAC_SPI_CS } = cs_vec;
 
   // EXTREME - we haave the order of these things wrong....
 
   wire [8-1:0] reg_led;
-  // assign {LED1, LED2} = reg_led;
+  // assign {LED2, LED1} = reg_led;
   assign {LED1, LED2} = reg_led;    // schematic has these reversed...
 
 
@@ -177,8 +180,8 @@ module top (
   );
 
 
-  // assign cs_mux = 1;  // adc03 cs is high.
-  // assign cs_mux = 0;  // adc03 cs is lo.
+  // assign cs_vec = 1;  // adc03 cs is high.
+  // assign cs_vec = 0;  // adc03 cs is lo.
 
   mymux #( )
   mymux
@@ -186,7 +189,7 @@ module top (
     . reg_mux(reg_mux),
     . cs(CS),
     . special(SPECIAL),
-    . cs_mux(cs_mux)
+    . cs_vec(cs_vec)
   );
 
 
