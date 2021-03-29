@@ -103,53 +103,27 @@ endmodule
 
 module mymux    (
 
-  input wire [8-1:0] myreg,     // inputs are wires. cannot be reg.
+  input wire [8-1:0] reg_mux,     // inputs are wires. cannot be reg.
 
   input  cs,
-
   output adc03_cs,
-  output myregister_cs,
 
 );
-
-/*
-  we only really have to mux cs.
-  lets try that...
-*/
-  // mux example, https://www.chipverify.com/verilog/verilog-case-statement
-
-  always @ (myreg )     // eg. whenever myreg changes we update ... i think.
+  always @ (reg_mux )     // eg. whenever reg_mux changes we update ... i think.
     begin
 
-    // I think this doesn't work. 
-    // It is assigning the value when myreg changes.
-    // not connecting a line.
-
-    // think we're going to have to do a clk.
-
-      case (myreg )
+      case (reg_mux )
         1 :
         begin
           adc03_cs = cs;
-          myregister_cs = 1;  // deassert
         end
 
-        2 :
+        default  :
         begin
           adc03_cs = 1;   // deassert
-          myregister_cs = cs;
-        end
-
-
-        default: 
-        begin
-          adc03_clk = 1;
-          myregister_cs = 1;
         end
       endcase
-
     end
-
 endmodule
 
 
@@ -206,10 +180,9 @@ module top (
   mymux #( )
   mymux
   (
-    . myreg(reg_mux),
+    . reg_mux(reg_mux),
     . cs(CS),
-    . adc03_cs(ADC03_CS),
-    . myregister_cs(myregister_cs),
+    . adc03_cs(ADC03_CS)
   );
 
 
