@@ -81,7 +81,12 @@ module mymux    (
   input  cs,
   input  d,   
   input wire [8-1:0] myreg,     // inputs are wires. cannot be reg.
-  output adc03_clk
+
+  output adc03_clk,
+  output adc03_cs,
+  output adc03_mosi,
+  output adc03_miso,
+
 );
 
   // mux example, https://www.chipverify.com/verilog/verilog-case-statement
@@ -90,7 +95,9 @@ module mymux    (
     begin
    
       case (myreg )
-        1 :      adc03_clk = clk;  
+		    1 :      adc03_clk = clk;
+
+
         default: adc03_clk = 0;
       endcase
 
@@ -156,7 +163,11 @@ module top (
     .cs(CS),
     .d(MOSI),
     . myreg( out ),
-    . adc03_clk(ADC03_CLK)
+
+    . adc03_clk(ADC03_CLK),
+    . adc03_cs(ADC03_CS),
+    . adc03_mosi(ADC03_MOSI),
+    . adc03_miso(ADC03_MOSI)
   );
   
 

@@ -22,7 +22,7 @@ set_io SPECIAL 45
 set_io LED1 106
 set_io LED2 107
 
-
+# these are badly ordered in schematic
 set_io ADC03_CLK    87 
 set_io ADC03_MISO   88 
 set_io ADC03_MOSI   90
