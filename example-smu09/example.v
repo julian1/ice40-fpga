@@ -87,7 +87,7 @@ module mymux    (
   // if we need. don't have to break up the vec approach.
   
   always @ (cs) // both edges...
-    begin
+//    begin
 
     // TODO. the special - has killed the timing analysis....
     // 4.7ns to 1000000ns.
@@ -109,7 +109,10 @@ module mymux    (
         // cs_vec = 1  ;    // dac. only hi.      seems that cs is lo? ....... need to avoid special.
         // cs_vec = 1<<1  ; // adc03 only hi
       end
-    end
+    else
+      cs_vec = 8'b11111111 ;      // OK. this brought it back down to 5.95ns.   must test.
+
+//    end
 
 endmodule
 
