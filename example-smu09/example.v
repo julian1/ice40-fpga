@@ -151,6 +151,8 @@ module top (
   wire [8-1:0] reg_mux;
 
 
+  // HOW can we initialize this so all CS are off... actually need another pin
+  // maybe just have a soft reset...
   wire [8-1:0] cs_vec ;
   // assign { DAC_SPI_CS, ADC03_CS } = cs_vec;
   assign { ADC03_CS , DAC_SPI_CS } = cs_vec;
