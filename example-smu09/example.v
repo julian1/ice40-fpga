@@ -106,6 +106,11 @@ module mymux    (
 endmodule
 
 
+/*
+  TODO
+  module myreset a soft reset module...
+  that decodes an spi command/address/value, and resets all lines.
+*/
 
 
 module top (
