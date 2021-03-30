@@ -136,18 +136,17 @@ module top (
   output DAC_SPI_CLK,
   output DAC_SPI_SDI,
   output DAC_SPI_SDO,
+
   output DAC_LDAC,
   output DAC_RST,
   output DAC_UNI_BIP_A,
   output DAC_UNI_BIP_B
 );
-  // should be able to assign extra stuff here.
-  //
 
 
 
   ////////////////////////////////////
-  // sayss its empty????
+  // change name reg_cs_mux.. 
   wire [8-1:0] reg_mux;
 
 
