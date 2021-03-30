@@ -1,3 +1,10 @@
+// assign cs_vec = 1;  // adc03 cs is high.
+  // assign cs_vec = 0;  // adc03 cs is lo.
+
+  // want to swapt the led order.
+  // assign LED1 = MOSI;
+  // assign LED1 = MOSI;
+  // assign LED1 = SPECIAL;
 
 
 

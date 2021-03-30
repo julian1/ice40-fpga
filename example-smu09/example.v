@@ -110,6 +110,8 @@ endmodule
   TODO
   module myreset a soft reset module...
   that decodes an spi command/address/value, and resets all lines.
+
+  need to think how to handle peripheral reset.
 */
 
 
@@ -186,9 +188,7 @@ module top (
   );
 
 
-  // assign cs_vec = 1;  // adc03 cs is high.
-  // assign cs_vec = 0;  // adc03 cs is lo.
-
+  
   mymux #( )
   mymux
   (
@@ -198,11 +198,6 @@ module top (
     . cs_vec(cs_vec)
   );
 
-
-  // want to swapt the led order.
-  // assign LED1 = MOSI;
-  // assign LED1 = MOSI;
-  // assign LED1 = SPECIAL;
 
 /*
   blinker #(  )
