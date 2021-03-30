@@ -115,7 +115,8 @@ module mymux    (
         // cs_vec = 1<<1  ; // adc03 only hi
       end
     else
-      cs_vec = 8'b11111111 ;      // OK. this brought it back down to 5.95ns.   must test.
+      cs_vec = 8'b11111111 ;      // OK. this brought timing back down to 5.95ns.   must test.
+                                  // test appears to work.
 
 //    end
 
