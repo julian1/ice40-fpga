@@ -6,25 +6,25 @@ set_io XTALCLK 21
 
 
 #    pa5 = clk = via = voa  = pin 42. ice40. (MUST be VOA for GBIN).  or pin49 gbin.
-#    gnd?
-#    pa4 = nss.   vib = vob  = pin 43. 
-#    pa7 = mosi.  vic = voc  = pin 44. 
+#    pa4 = nss.   vib = vob  = pin 43.
+#    pa7 = mosi.  vic = voc  = pin 44.
+#    pa6 = miso.
 #    pa3 = special vid = vod = pin 45
 
-
 # should prefix these
-set_io CLK   42 
-set_io CS     43 
-set_io MOSI   44 
-set_io SPECIAL 45 
+set_io CLK   42
+
+set_io CS     43
+set_io MOSI   44
+set_io SPECIAL 45
 
 
 set_io LED1 106
 set_io LED2 107
 
 # these are badly ordered in schematic
-set_io ADC03_CLK    87 
-set_io ADC03_MISO   88 
+set_io ADC03_CLK    87
+set_io ADC03_MISO   88
 set_io ADC03_MOSI   90
 set_io ADC03_CS     91
 
@@ -38,5 +38,11 @@ set_io DAC_LDAC     28
 set_io DAC_RST      29
 set_io DAC_UNI_BIP_A 31
 set_io DAC_UNI_BIP_B  32
+
+# flash
+set_io FLASH_CS     101     # flash_ss
+set_io FLASH_CLK    102     # flash_sck
+set_io FLASH_MOSI   104
+set_io FLASH_MISO   105
 
 

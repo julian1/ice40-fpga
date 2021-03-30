@@ -74,7 +74,7 @@ endmodule
 // actually if we can read a register, then we can do a toggle fairly simply... toggle over spi.
 
 /*
-    miso must be high-Z. if a peripheral does not have CS asserted. 
+    miso must be high-Z. if a peripheral does not have CS asserted.
     otherwise there will be contention if several peripherals try to manipulate.
     in which case we will need a mux vector.
 */
@@ -90,7 +90,7 @@ module mymux    (
 
   // IMPORTANT - can have a mosi/miso vector etc as well... to determine what gets routed.
   // if we need. don't have to break up the vec approach.
-  
+
   always @ (cs) // both edges...
 //    begin
 
@@ -99,16 +99,16 @@ module mymux    (
     // weirdly.
 
     // WE need special to avoid sending arbitrarry commands.
-    // anotherr way - would be to turn off all spi muxing when writing regs? 
+    // anotherr way - would be to turn off all spi muxing when writing regs?
 
-    if(special) // only if special == hi == deasserted 
+    if(special) // only if special == hi == deasserted
       begin
 
-        // problem this 
-        if(cs) 
-          cs_vec = ~( reg_mux & 8'b00000000 );   
+        // problem this
+        if(cs)
+          cs_vec = ~( reg_mux & 8'b00000000 );
         else
-          cs_vec = ~( reg_mux & 8'b11111111 );   
+          cs_vec = ~( reg_mux & 8'b11111111 );
 
         // forward to all
         // cs_vec = 1  ;    // dac. only hi.      seems that cs is lo? ....... need to avoid special.
@@ -147,12 +147,11 @@ module top (
   // output b
 
 
-
+  // adc 03
   output ADC03_CLK,
-  output ADC03_MISO,
+  output ADC03_MISO,    // input
   output ADC03_MOSI,
   output ADC03_CS,
-
 
 
   // dac
@@ -164,23 +163,26 @@ module top (
   output DAC_LDAC,
   output DAC_RST,
   output DAC_UNI_BIP_A,
-  output DAC_UNI_BIP_B
+  output DAC_UNI_BIP_B,
+
+  // flash
+  output FLASH_CS,
+  output FLASH_CLK,
+  output FLASH_MOSI,
+  output FLASH_MISO   // input
+
+
 );
 
 
 
   ////////////////////////////////////
-  // change name reg_cs_mux.. 
+  // maybe change name reg_cs_mux..
   wire [8-1:0] reg_mux;
-
-
-  // HOW can we initialize this so all CS are off... actually need another pin
-  // maybe just have a soft reset...
   wire [8-1:0] cs_vec ;
-  // assign { DAC_SPI_CS, ADC03_CS } = cs_vec;
-  assign { ADC03_CS , DAC_SPI_CS } = cs_vec;
+  assign { FLASH_CS, ADC03_CS , DAC_SPI_CS } = cs_vec;
 
-  // EXTREME - we haave the order of these things wrong....
+  //////////////////////////////////////////
 
   wire [8-1:0] reg_led;
   // assign {LED2, LED1} = reg_led;
@@ -205,7 +207,7 @@ module top (
   );
 
 
-  
+
   mymux #( )
   mymux
   (
