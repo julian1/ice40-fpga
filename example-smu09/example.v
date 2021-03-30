@@ -77,6 +77,11 @@ endmodule
     miso must be high-Z. if a peripheral does not have CS asserted.
     otherwise there will be contention if several peripherals try to manipulate.
     in which case we will need a mux vector.
+    -------------
+
+    we are going to have to do it anyway....  because its not a wire...
+
+    hang on. are we getting the clk propagating? kind of need to test.
 */
 
 
@@ -180,7 +185,7 @@ module top (
   // maybe change name reg_cs_mux..
   wire [8-1:0] reg_mux;
   wire [8-1:0] cs_vec ;
-  assign { FLASH_CS, ADC03_CS , DAC_SPI_CS } = cs_vec;
+  assign { FLASH_CS,  DAC_SPI_CS, ADC03_CS } = cs_vec;
 
   //////////////////////////////////////////
 
@@ -192,6 +197,14 @@ module top (
   wire [4-1:0] reg_dac;
   // assign {DAC_LDAC, DAC_RST, DAC_UNI_BIP_A, DAC_UNI_BIP_B } = reg_dac;    // can put reset in separate reg, to make easy to toggle.
   assign {DAC_UNI_BIP_B , DAC_UNI_BIP_A, DAC_RST,  DAC_LDAC } = reg_dac;    // can put reset in separate reg, to make easy to toggle.
+
+
+  // OK. this works.... to join these up
+  assign ADC03_CLK = CLK;
+  assign DAC_SPI_CLK = CLK;
+  assign FLASH_CLK = CLK;
+
+
 
   mylatch #( 16 )   // register bank
   mylatch
