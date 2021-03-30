@@ -89,9 +89,17 @@ module mymux    (
   always @ (cs) // both edges...
     begin
 
+    // TODO. the special - has killed the timing analysis....
+    // 4.7ns to 1000000ns.
+    // weirdly.
+
+    // WE need special to avoid sending arbitrarry commands.
+    // anotherr way - would be to turn off all spi muxing when writing regs? 
+
     if(special) // only if special == hi == deasserted 
       begin
 
+        // problem this 
         if(cs) 
           cs_vec = ~( reg_mux & 8'b00000000 );   
         else
