@@ -8,8 +8,9 @@ set_io XTALCLK 21
 #    pa5 = clk = via = voa  = pin 42. ice40. (MUST be VOA for GBIN).  or pin49 gbin.
 #    pa4 = nss.   vib = vob  = pin 43.
 #    pa7 = mosi.  vic = voc  = pin 44.
-#    pa6 = miso.
 #    pa3 = special vid = vod = pin 45
+
+#    pa6 = miso.  vie=voe  = pin 47
 
 # should prefix these
 set_io CLK   42
@@ -17,6 +18,7 @@ set_io CLK   42
 set_io CS     43
 set_io MOSI   44
 set_io SPECIAL 45
+set_io MISO    47     # output from fpga, input to mcu master. 
 
 
 set_io LED1 106

@@ -149,6 +149,7 @@ module top (
   input CS,
   input MOSI,
   input SPECIAL,
+  output MISO,
   // output b
 
 
@@ -163,7 +164,7 @@ module top (
   output DAC_SPI_CS ,
   output DAC_SPI_CLK,
   output DAC_SPI_SDI,
-  output DAC_SPI_SDO,
+  output DAC_SPI_SDO,   // input
 
   output DAC_LDAC,
   output DAC_RST,
