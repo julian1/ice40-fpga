@@ -73,6 +73,11 @@ endmodule
 // eg. t
 // actually if we can read a register, then we can do a toggle fairly simply... toggle over spi.
 
+/*
+    miso must be high-Z. if a peripheral does not have CS asserted. 
+    otherwise there will be contention if several peripherals try to manipulate.
+    in which case we will need a mux vector.
+*/
 
 
 
