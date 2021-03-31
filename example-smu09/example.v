@@ -111,7 +111,7 @@ endmodule
 
 
 
-module mymux    (
+module my_cs_mux    (
   input wire [8-1:0] reg_mux,     // inputs are wires. cannot be reg.
   input  cs,                      // wire?
   input  special,
@@ -153,6 +153,50 @@ module mymux    (
 endmodule
 
 
+
+
+module my_miso_mux    (
+  input wire [8-1:0] reg_mux,     // inputs are wires. cannot be reg.
+  input wire [8-1:0] miso_vec,                      // wire?
+  input  special,
+  output miso
+);
+
+ always @ (miso_vec)
+
+    // miso = (miso_vec == 8'b00000001);
+
+    // OK. straight assignment works.
+    miso = miso_vec ;
+
+  
+/*
+  always @ (miso_vec)
+    if(special)
+      begin
+        // hmmm....
+        // so we and the reg_mux and. set it if any value is high?
+        // if((reg_mux & miso_vec) != 0)
+        if( miso_vec == 1 )
+          miso = 1;
+        else
+          miso = 0;
+        // miso =  miso_vec == 1
+      end
+    else
+      // so if special is active. we are doing spii to fpga.
+      // so miso   needs to be driven by special miso.
+      // EXTREME so miso for fpga - may need to be a vec element.
+      // set the register to talk to fpga.... eg. to get miso. so we can read registers etc.
+      // OK. we may need
+      miso = 1 ;
+*/
+
+endmodule
+
+
+
+
 /*
   TODO
   module myreset a soft reset module...
@@ -189,7 +233,7 @@ module top (
   output DAC_SPI_CS ,
   output DAC_SPI_CLK,
   output DAC_SPI_SDI,
-  output DAC_SPI_SDO,   // input
+  input DAC_SPI_SDO,   // input
 
   output DAC_LDAC,
   output DAC_RST,
@@ -213,6 +257,8 @@ module top (
   wire [8-1:0] cs_vec ;
   assign { FLASH_CS,  DAC_SPI_CS, ADC03_CS } = cs_vec;
 
+  ///////////////////////
+
   //////////////////////////////////////////
 
   wire [8-1:0] reg_led;
@@ -224,28 +270,36 @@ module top (
   assign {DAC_UNI_BIP_B , DAC_UNI_BIP_A, DAC_RST,  DAC_LDAC } = reg_dac;    // can put reset in separate reg, to make easy to toggle.
 */
 
-/*
-  // OK. this works.... to join these up
-  assign ADC03_CLK = CLK;
-  assign DAC_SPI_CLK = CLK;
-  assign FLASH_CLK = CLK;
-*/
 
-/*
-  assign FLASH_CS = CS;
-  assign FLASH_CLK = CLK;
-  assign FLASH_MOSI = MOSI;
-  // assign FLASH_MISO = MISO;
-  assign MISO = FLASH_MISO ;
-*/
 
-  // pass-through adc03. 
+  wire [8-1:0] reg_mux = 8'b00000001; // test
+
+
+  wire [8-1:0] miso_vec ;
+  assign { FLASH_MISO,  DAC_SPI_SDO,  ADC03_MISO } = miso_vec;
+
+
+  // pass-through adc03.
   assign ADC03_CS = CS;
   assign ADC03_CLK = CLK;
   assign ADC03_MOSI = MOSI;
-  assign MISO = ADC03_MISO ;
+  // assign MISO = ADC03_MISO ;
+
+  // pass-through flash
+  // assign FLASH_CS = CS;
+  // assign FLASH_CLK = CLK;
+  // assign FLASH_MOSI = MOSI;
+  // assign MISO = FLASH_MISO ;
 
 
+  my_miso_mux #( )
+  my_miso_mux
+  (
+    . reg_mux(reg_mux),
+    . miso_vec(miso_vec),
+    . special(SPECIAL),
+    . miso(MISO)
+  );
 
 
 
@@ -266,8 +320,8 @@ module top (
 
 
 
-  mymux #( )
-  mymux
+  my_cs_mux #( )
+  my_cs_mux
   (
     . reg_mux(reg_mux),
     . cs(CS),
