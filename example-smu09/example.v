@@ -158,45 +158,13 @@ endmodule
 module my_miso_mux    (
   input wire [8-1:0] reg_mux,     // inputs are wires. cannot be reg.
   input wire [8-1:0] miso_vec,                      // wire?
-  input  special,
+  // input  special,
   output miso
 );
 
  always @ (miso_vec)
 
-    // miso = (miso_vec == 8'b00000001);
-
-    // OK. straight assignment works.
-    // miso = miso_vec ;
-
-    // and so does this
-    // at least for the first bit.
-    // lets try a different bit
     miso = (reg_mux & miso_vec) > 0 ;   // any bit. seems to work, while != doesn't.
-
-    // DO WE ACTUALLY NEED TO HANDLE special at all here?
-  
-/*
-  always @ (miso_vec)
-    if(special)
-      begin
-        // hmmm....
-        // so we and the reg_mux and. set it if any value is high?
-        // if((reg_mux & miso_vec) != 0)
-        if( miso_vec == 1 )
-          miso = 1;
-        else
-          miso = 0;
-        // miso =  miso_vec == 1
-      end
-    else
-      // so if special is active. we are doing spii to fpga.
-      // so miso   needs to be driven by special miso.
-      // EXTREME so miso for fpga - may need to be a vec element.
-      // set the register to talk to fpga.... eg. to get miso. so we can read registers etc.
-      // OK. we may need
-      miso = 1 ;
-*/
 
 endmodule
 
@@ -306,7 +274,7 @@ module top (
   (
     . reg_mux(reg_mux),
     . miso_vec(miso_vec),
-    . special(SPECIAL),
+//     . special(SPECIAL),
     . miso(MISO)
   );
 
