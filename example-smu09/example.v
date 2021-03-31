@@ -234,7 +234,8 @@ module top (
   assign FLASH_CS = CS;
   assign FLASH_CLK = CLK;
   assign FLASH_MOSI = MOSI;
-//  assign FLASH_MISO = MISO;
+  // assign FLASH_MISO = MISO;
+  assign MISO = FLASH_MISO ;
 
 
 /*
