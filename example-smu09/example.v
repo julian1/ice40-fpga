@@ -1,4 +1,29 @@
 
+module blinker    (
+  input clk,
+  output led1,
+  output led2
+
+);
+
+  localparam BITS = 5;
+  // localparam LOG2DELAY = 21;
+  localparam LOG2DELAY = 20;
+
+  reg [BITS+LOG2DELAY-1:0] counter = 0;
+  reg [BITS-1:0] outcnt;
+
+  always@(posedge clk) begin
+    counter <= counter + 1;
+    outcnt <= counter >> LOG2DELAY;
+  end
+
+  // assign { led1, led2, LED3, LED4, LED5 } = outcnt ^ (outcnt >> 1);
+  assign {  led1, led2 } = outcnt ^ (outcnt >> 1);
+endmodule
+
+
+
 
 
 module mylatch   #(parameter MSB=16)   (
@@ -174,13 +199,13 @@ module top (
   // flash
   output FLASH_CS,
   output FLASH_CLK,
-  output FLASH_MOSI,
-  output FLASH_MISO   // input
+  output FLASH_MOSI ,
+  input FLASH_MISO   // input
 
 
 );
 
-
+/*
 
   ////////////////////////////////////
   // maybe change name reg_cs_mux..
@@ -197,15 +222,22 @@ module top (
 
   wire [4-1:0] reg_dac;
   assign {DAC_UNI_BIP_B , DAC_UNI_BIP_A, DAC_RST,  DAC_LDAC } = reg_dac;    // can put reset in separate reg, to make easy to toggle.
+*/
 
-
+/*
   // OK. this works.... to join these up
   assign ADC03_CLK = CLK;
   assign DAC_SPI_CLK = CLK;
   assign FLASH_CLK = CLK;
+*/
+
+  assign FLASH_CS = CS;
+  assign FLASH_CLK = CLK;
+  assign FLASH_MOSI = MOSI;
+//  assign FLASH_MISO = MISO;
 
 
-
+/*
   mylatch #( 16 )   // register bank
   mylatch
     (
@@ -229,9 +261,10 @@ module top (
     . special(SPECIAL),
     . cs_vec(cs_vec)
   );
+*/
 
 
-/*
+
   blinker #(  )
   blinker
     (
@@ -239,7 +272,7 @@ module top (
     .led1(LED1),
     .led2(LED2)
   );
-*/
+
 
 
 
