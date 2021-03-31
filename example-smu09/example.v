@@ -180,7 +180,7 @@ module top (
 
   // adc 03
   output ADC03_CLK,
-  output ADC03_MISO,    // input
+  input ADC03_MISO,    // input
   output ADC03_MOSI,
   output ADC03_CS,
 
@@ -231,11 +231,23 @@ module top (
   assign FLASH_CLK = CLK;
 */
 
+/*
   assign FLASH_CS = CS;
   assign FLASH_CLK = CLK;
   assign FLASH_MOSI = MOSI;
   // assign FLASH_MISO = MISO;
   assign MISO = FLASH_MISO ;
+*/
+
+  // pass-through adc03. 
+  assign ADC03_CS = CS;
+  assign ADC03_CLK = CLK;
+  assign ADC03_MOSI = MOSI;
+  assign MISO = ADC03_MISO ;
+
+
+
+
 
 
 /*
