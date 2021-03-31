@@ -244,7 +244,7 @@ module top (
 
 
 
-  wire [8-1:0] reg_mux = 8'b00000001; // test
+  wire [8-1:0] reg_mux = 8'b00000100; // test
 
 
   wire [8-1:0] cs_vec ;
