@@ -260,8 +260,6 @@ module top (
   ////////////////////////////////////
   // maybe change name reg_cs_mux..
   wire [8-1:0] reg_mux;
-  wire [8-1:0] cs_vec ;
-  assign { FLASH_CS,  DAC_SPI_CS, ADC03_CS } = cs_vec;
 
   ///////////////////////
 
@@ -281,19 +279,23 @@ module top (
   wire [8-1:0] reg_mux = 8'b00000001; // test
 
 
+  wire [8-1:0] cs_vec ;
+  assign { FLASH_CS,  DAC_SPI_CS, ADC03_CS } = cs_vec;
+
+
   wire [8-1:0] miso_vec ;
   assign { FLASH_MISO,  DAC_SPI_SDO,  ADC03_MISO } = miso_vec;
   // assign { ADC03_MISO,  DAC_SPI_SDO,  FLASH_MISO } = miso_vec;
 
 
   // pass-through adc03.
-  assign ADC03_CS = CS;
+  // assign ADC03_CS = CS;
   assign ADC03_CLK = CLK;
   assign ADC03_MOSI = MOSI;
   // assign MISO = ADC03_MISO ;
 
   // pass-through flash
-  assign FLASH_CS = CS;
+  // assign FLASH_CS = CS;
   assign FLASH_CLK = CLK;
   assign FLASH_MOSI = MOSI;
   // assign MISO = FLASH_MISO ;
@@ -311,6 +313,15 @@ module top (
 
 
 
+  my_cs_mux #( )
+  my_cs_mux
+  (
+    . reg_mux(reg_mux),
+    . cs(CS),
+    . special(1 ),    // modified
+    . cs_vec(cs_vec)
+  );
+
 /*
   mylatch #( 16 )   // register bank
   mylatch
@@ -326,15 +337,6 @@ module top (
   );
 
 
-
-  my_cs_mux #( )
-  my_cs_mux
-  (
-    . reg_mux(reg_mux),
-    . cs(CS),
-    . special(SPECIAL),
-    . cs_vec(cs_vec)
-  );
 */
 
 
