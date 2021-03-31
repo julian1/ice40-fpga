@@ -172,8 +172,9 @@ module my_miso_mux    (
     // and so does this
     // at least for the first bit.
     // lets try a different bit
-    miso = (reg_mux & miso_vec) > 0 ;
+    miso = (reg_mux & miso_vec) > 0 ;   // any bit. seems to work, while != doesn't.
 
+    // DO WE ACTUALLY NEED TO HANDLE special at all here?
   
 /*
   always @ (miso_vec)
@@ -277,12 +278,12 @@ module top (
 
 
 
-  wire [8-1:0] reg_mux = 8'b00000100; // test
+  wire [8-1:0] reg_mux = 8'b00000001; // test
 
 
   wire [8-1:0] miso_vec ;
-  // assign { FLASH_MISO,  DAC_SPI_SDO,  ADC03_MISO } = miso_vec;
-  assign { ADC03_MISO,  DAC_SPI_SDO,  FLASH_MISO } = miso_vec;
+  assign { FLASH_MISO,  DAC_SPI_SDO,  ADC03_MISO } = miso_vec;
+  // assign { ADC03_MISO,  DAC_SPI_SDO,  FLASH_MISO } = miso_vec;
 
 
   // pass-through adc03.
@@ -292,9 +293,9 @@ module top (
   // assign MISO = ADC03_MISO ;
 
   // pass-through flash
-  // assign FLASH_CS = CS;
-  // assign FLASH_CLK = CLK;
-  // assign FLASH_MOSI = MOSI;
+  assign FLASH_CS = CS;
+  assign FLASH_CLK = CLK;
+  assign FLASH_MOSI = MOSI;
   // assign MISO = FLASH_MISO ;
 
 
