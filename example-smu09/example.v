@@ -112,9 +112,9 @@ endmodule
 
 
 module my_cs_mux    (
-  input wire [8-1:0] reg_mux,     
-  input  cs,                      
-  output [8-1:0] cs_vec     
+  input wire [8-1:0] reg_mux,
+  input  cs,
+  output [8-1:0] cs_vec
 );
 
   always @ (cs) // both edges...
@@ -131,9 +131,8 @@ endmodule
 
 
 module my_miso_mux    (
-  input wire [8-1:0] reg_mux,     // inputs are wires. cannot be reg.
-  input wire [8-1:0] miso_vec,                      // wire?
-  // input  special,
+  input wire [8-1:0] reg_mux,
+  input wire [8-1:0] miso_vec,
   output miso
 );
 
@@ -219,7 +218,7 @@ module top (
 
 
 
-  wire [8-1:0] reg_mux = 8'b00000100; // test
+  wire [8-1:0] reg_mux = 8'b00000001; // test
 
 
   wire [8-1:0] cs_vec ;
@@ -228,20 +227,15 @@ module top (
 
   wire [8-1:0] miso_vec ;
   assign { FLASH_MISO,  DAC_SPI_SDO,  ADC03_MISO } = miso_vec;
-  // assign { ADC03_MISO,  DAC_SPI_SDO,  FLASH_MISO } = miso_vec;
 
 
   // pass-through adc03.
-  // assign ADC03_CS = CS;
   assign ADC03_CLK = CLK;
   assign ADC03_MOSI = MOSI;
-  // assign MISO = ADC03_MISO ;
 
   // pass-through flash
-  // assign FLASH_CS = CS;
   assign FLASH_CLK = CLK;
   assign FLASH_MOSI = MOSI;
-  // assign MISO = FLASH_MISO ;
 
 
   my_miso_mux #( )
@@ -249,7 +243,6 @@ module top (
   (
     . reg_mux(reg_mux),
     . miso_vec(miso_vec),
-//     . special(SPECIAL),
     . miso(MISO)
   );
 
@@ -259,9 +252,9 @@ module top (
   (
     . reg_mux(reg_mux),
     . cs(CS),
-    // . special(1 ),    // modified. ARE WE SURE THIS IS NEEDED here? just let miso always go to the config register.
     . cs_vec(cs_vec)
   );
+
 
 /*
   mylatch #( 16 )   // register bank
