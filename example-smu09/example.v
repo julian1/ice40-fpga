@@ -112,43 +112,18 @@ endmodule
 
 
 module my_cs_mux    (
-  input wire [8-1:0] reg_mux,     // inputs are wires. cannot be reg.
-  input  cs,                      // wire?
-  input  special,
-  output [8-1:0] cs_vec     // change name to vec.
+  input wire [8-1:0] reg_mux,     
+  input  cs,                      
+  output [8-1:0] cs_vec     
 );
 
-  // IMPORTANT - can have a mosi/miso vector etc as well... to determine what gets routed.
-  // if we need. don't have to break up the vec approach.
-
   always @ (cs) // both edges...
-//    begin
-
-    // TODO. the special - has killed the timing analysis....
-    // 4.7ns to 1000000ns.
-    // weirdly.
-
-    // WE need special to avoid sending arbitrarry commands.
-    // anotherr way - would be to turn off all spi muxing when writing regs?
-
-    if(special) // only if special == hi == deasserted
-      begin
 
         // problem this
         if(cs)
           cs_vec = ~( reg_mux & 8'b00000000 );
         else
           cs_vec = ~( reg_mux & 8'b11111111 );
-
-        // forward to all
-        // cs_vec = 1  ;    // dac. only hi.      seems that cs is lo? ....... need to avoid special.
-        // cs_vec = 1<<1  ; // adc03 only hi
-      end
-    else
-      cs_vec = 8'b11111111 ;      // OK. this brought timing back down to 5.95ns.   must test.
-                                  // test appears to work.
-
-//    end
 
 endmodule
 
@@ -279,14 +254,12 @@ module top (
   );
 
 
-
-
   my_cs_mux #( )
   my_cs_mux
   (
     . reg_mux(reg_mux),
     . cs(CS),
-    . special(1 ),    // modified
+    // . special(1 ),    // modified. ARE WE SURE THIS IS NEEDED here? just let miso always go to the config register.
     . cs_vec(cs_vec)
   );
 
