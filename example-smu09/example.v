@@ -167,7 +167,12 @@ module my_miso_mux    (
     // miso = (miso_vec == 8'b00000001);
 
     // OK. straight assignment works.
-    miso = miso_vec ;
+    // miso = miso_vec ;
+
+    // and so does this
+    // at least for the first bit.
+    // lets try a different bit
+    miso = (reg_mux & miso_vec) > 0 ;
 
   
 /*
@@ -272,11 +277,12 @@ module top (
 
 
 
-  wire [8-1:0] reg_mux = 8'b00000001; // test
+  wire [8-1:0] reg_mux = 8'b00000100; // test
 
 
   wire [8-1:0] miso_vec ;
-  assign { FLASH_MISO,  DAC_SPI_SDO,  ADC03_MISO } = miso_vec;
+  // assign { FLASH_MISO,  DAC_SPI_SDO,  ADC03_MISO } = miso_vec;
+  assign { ADC03_MISO,  DAC_SPI_SDO,  FLASH_MISO } = miso_vec;
 
 
   // pass-through adc03.
