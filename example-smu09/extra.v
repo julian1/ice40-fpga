@@ -1,3 +1,24 @@
+
+
+
+  /*
+    RIGHT. it doesn't like having both a negedge and posedge...
+    ok. maybe count is necessary to include in sensitivity list?
+  */
+  /*
+  // these don't work...
+  assign address = tmp[ MSB-1:8 ];
+  assign value   = tmp[ 8 - 1: 0 ];
+
+  need to put after the sequential block?
+    see, http://referencedesigner.com/tutorials/verilog/verilog_32.php
+  */
+
+  // need to prevent a peripheral writing mosi. in a different frame .
+  // actually don't think it will. will only write mosi. with cs asserted.
+
+
+
 // assign cs_vec = 1;  // adc03 cs is high.
   // assign cs_vec = 0;  // adc03 cs is lo.
 

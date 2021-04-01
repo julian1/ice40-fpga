@@ -23,8 +23,14 @@ module blinker    (
 endmodule
 
 
+/*
+  rather than having register bank.
+  have one 'special' mux register.
 
-
+  and then have the register bank be it's own spi peripheral.
+  that should make reading simpler.
+  eg. the special only controls mux. 
+*/
 
 module my_register_bank   #(parameter MSB=16)   (
   input  clk,
@@ -45,39 +51,53 @@ module my_register_bank   #(parameter MSB=16)   (
 
   reg [MSB-1:0] tmp;
 
+  reg [8-1:0]   ret;
+
+  reg [8-1:0]   count;
+
+  // actually no. as soon as we have eight bits, then we know 
+  // the address and can start sending bits back.
+  // but we need a count.
+
   // clock value into tmp var
   always @ (negedge clk)
   begin
     if (!cs && !special)         // chip select asserted, and cspecial asserted.
-      tmp <= {tmp[MSB-2:0], d};
-    // else
-    //  tmp <= tmp;
+      begin
+  
+
+        tmp <= {tmp[MSB-2:0], d};
+
+  
+        // if count == 8. then read value (with case stmt) and set the value. to be returned
+        count <= count + 1;
+        if(count == 8)
+          ret = 123;  // use case here
+
+        dout <= ret; ret <= {0, ret[MSB-2:0] };         
+
+      end
+
   end
-  /*
-    RIGHT. it doesn't like having both a negedge and posedge...
-    ok. maybe count is necessary to include in sensitivity list?
-  */
-  /*
-  // these don't work...
-  assign address = tmp[ MSB-1:8 ];
-  assign value   = tmp[ 8 - 1: 0 ];
 
-  need to put after the sequential block?
-    see, http://referencedesigner.com/tutorials/verilog/verilog_32.php
-  */
 
-  // need to prevent a peripheral writing mosi. in a different frame .
-  // actually don't think it will. will only write mosi. with cs asserted.
+  always @ (negedge cs)   // cs start
+  begin
+    count <= 0;
+  end
 
   always @ (posedge cs)   // cs done.
   begin
 
     if(!special)    // only if special also asserted
+    // if(!special && count == 16 )    // only if special also asserted
+      begin
 
-      case (tmp[ MSB-1:8 ])  // high byte for reg, lo byte for val.
+      case (tmp[ MSB-1:8 ])  // high byte for reg/address, lo byte for val.
 
         // mux
-        8 : reg_mux = tmp[ 8 - 1: 0 ];
+        8 : 
+            reg_mux = tmp;
 
         // leds
         // 7 : reg_led = tmp[ 8 - 1: 0 ];
@@ -87,6 +107,8 @@ module my_register_bank   #(parameter MSB=16)   (
         9 : reg_dac = tmp;
 
       endcase
+
+      end
 
 
   end
