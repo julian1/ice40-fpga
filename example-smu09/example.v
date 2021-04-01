@@ -150,7 +150,12 @@ module my_miso_mux    (
 endmodule
 
 
-
+/*
+  Hmmm. with separate cs lines. 
+  remember that mcu only has one nss/cs.
+    so even if had separate cs line for each peripheral we would need to toggle.
+    but could be simpler than writing a register.
+*/
 
 /*
   TODO
