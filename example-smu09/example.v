@@ -29,7 +29,7 @@ endmodule
 
   and then have the register bank be it's own spi peripheral.
   that should make reading simpler.
-  eg. the special only controls mux. 
+  eg. the special only controls mux.
 */
 
 module my_register_bank   #(parameter MSB=16)   (
@@ -55,7 +55,7 @@ module my_register_bank   #(parameter MSB=16)   (
 
   reg [8-1:0]   count;
 
-  // actually no. as soon as we have eight bits, then we know 
+  // actually no. as soon as we have eight bits, then we know
   // the address and can start sending bits back.
   // but we need a count.
 
@@ -67,54 +67,38 @@ module my_register_bank   #(parameter MSB=16)   (
     else
     if ( !special)         // chip select asserted, and cspecial asserted.
       begin
-  
 
         tmp <= {tmp[MSB-2:0], d};
 
-  
         // if count == 8. then read value (with case stmt) and set the value. to be returned
         count <= count + 1;
         if(count == 8)
           ret = 123;  // use case here
 
-        dout <= ret; ret <= {0, ret[MSB-2:0] };         
-
+        dout <= ret; ret <= {0, ret[MSB-2:0] };
       end
-
   end
 
-/*
-  always @ (negedge cs)   // cs start
-  begin
-    count <= 0;
-  end
-*/
 
   always @ (posedge cs)   // cs done.
   begin
-
-    // if(!special)    // only if special also asserted
-    if(!special && count == 16 )    // only if special also asserted
+    if(!special && count == 16 )
       begin
+        case (tmp[ MSB-1:8 ])  // high byte for reg/address, lo byte for val.
 
-      case (tmp[ MSB-1:8 ])  // high byte for reg/address, lo byte for val.
+          // mux
+          8 :
+              reg_mux = tmp;
 
-        // mux
-        8 : 
-            reg_mux = tmp;
+          // leds
+          // 7 : reg_led = tmp[ 8 - 1: 0 ];
+          7 : reg_led = tmp;
 
-        // leds
-        // 7 : reg_led = tmp[ 8 - 1: 0 ];
-        7 : reg_led = tmp;
+          // dac
+          9 : reg_dac = tmp;
 
-        // dac
-        9 : reg_dac = tmp;
-
-      endcase
-
+        endcase
       end
-
-
   end
 endmodule
 
@@ -177,7 +161,7 @@ endmodule
 
 
 /*
-  Hmmm. with separate cs lines. 
+  Hmmm. with separate cs lines.
   remember that mcu only has one nss/cs.
     so even if had separate cs line for each peripheral we would need to toggle.
     but could be simpler than writing a register.
@@ -301,7 +285,7 @@ module top (
   assign {LED1, LED2} = reg_led;    // schematic has these reversed...
 
   wire [4-1:0] reg_dac;
-  assign {DAC_UNI_BIP_B , DAC_UNI_BIP_A, DAC_RST,  DAC_LDAC } = reg_dac;    
+  assign {DAC_UNI_BIP_B , DAC_UNI_BIP_A, DAC_RST,  DAC_LDAC } = reg_dac;
   // can/should put reset in separate reg, to make easy to toggle.
 
 
