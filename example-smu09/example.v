@@ -119,6 +119,7 @@ module my_cs_mux    (
 );
 
   // GAHHH. NO. if special is asserted. then we don't want cs being muxed to a peripheral...
+  // and that peripheral picking up spurious writes
 
   always @ (cs) // both edges...
 
