@@ -144,7 +144,8 @@ module my_miso_mux    (
 
  always @ (miso_vec)
 
-    miso = (reg_mux & miso_vec) > 0 ;   // any bit. seems to work, while != 0 doesn't.
+    // miso = (reg_mux & miso_vec) > 0 ;   // any bit. seems to work, while != 0 doesn't.
+    miso = (reg_mux & miso_vec) != 0 ;   // hmmm seems ok.
 
 endmodule
 
