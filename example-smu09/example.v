@@ -119,11 +119,10 @@ module my_cs_mux    (
 
   always @ (cs) // both edges...
 
-        // problem this
-        if(cs)
-          cs_vec = ~( reg_mux & 8'b00000000 );
-        else
-          cs_vec = ~( reg_mux & 8'b11111111 );
+    if(cs)
+      cs_vec = ~( reg_mux & 8'b00000000 );
+    else
+      cs_vec = ~( reg_mux & 8'b11111111 );
 
 endmodule
 
@@ -138,7 +137,7 @@ module my_miso_mux    (
 
  always @ (miso_vec)
 
-    miso = (reg_mux & miso_vec) > 0 ;   // any bit. seems to work, while != doesn't.
+    miso = (reg_mux & miso_vec) > 0 ;   // any bit. seems to work, while != 0 doesn't.
 
 endmodule
 
@@ -216,7 +215,6 @@ module top (
   ////////////////////////////////////////
   // spi muxing
 
-  /// wire [8-1:0] reg_mux = 8'b00000001; // test
   wire [8-1:0] reg_mux ;// = 8'b00000001; // test
 
 
