@@ -90,7 +90,6 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_mux = tmp;
 
           // leds
-          // 7 : reg_led = tmp[ 8 - 1: 0 ];
           7 : reg_led = tmp;
 
           // dac
