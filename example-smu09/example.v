@@ -114,15 +114,21 @@ endmodule
 module my_cs_mux    (
   input wire [8-1:0] reg_mux,
   input  cs,
+  input special,
   output [8-1:0] cs_vec
 );
 
+  // GAHHH. NO. if special is asserted. then we don't want cs being muxed to a peripheral...
+
   always @ (cs) // both edges...
 
-    if(cs)
-      cs_vec = ~( reg_mux & 8'b00000000 );
+    if(special)   // special = high = not asserted
+      if(cs)
+        cs_vec = ~( reg_mux & 8'b00000000 );
+      else
+        cs_vec = ~( reg_mux & 8'b11111111 );
     else
-      cs_vec = ~( reg_mux & 8'b11111111 );
+        cs_vec = 8'b11111111;
 
 endmodule
 
@@ -249,6 +255,7 @@ module top (
   (
     . reg_mux(reg_mux),
     . cs(CS),
+    . special(SPECIAL),
     . cs_vec(cs_vec)
   );
 
