@@ -26,7 +26,7 @@ endmodule
 
 
 
-module mylatch   #(parameter MSB=16)   (
+module my_register_bank   #(parameter MSB=16)   (
   input  clk,
   input  cs,
   input  special,
@@ -45,10 +45,10 @@ module mylatch   #(parameter MSB=16)   (
 
   reg [MSB-1:0] tmp;
 
+  // clock value into tmp var
   always @ (negedge clk)
   begin
-    if (!cs && !special)         // chip select asserted.
-    // if (!cs )         // chip select asserted.
+    if (!cs && !special)         // chip select asserted, and cspecial asserted.
       tmp <= {tmp[MSB-2:0], d};
     // else
     //  tmp <= tmp;
@@ -72,7 +72,7 @@ module mylatch   #(parameter MSB=16)   (
   always @ (posedge cs)   // cs done.
   begin
 
-    if(!special)    // only if special asserted
+    if(!special)    // only if special also asserted
 
       case (tmp[ MSB-1:8 ])  // high byte for reg, lo byte for val.
 
@@ -200,10 +200,7 @@ module top (
 /*
 
   ////////////////////////////////////
-  // maybe change name reg_cs_mux..
-  wire [8-1:0] reg_mux;
 
-  ///////////////////////
 
   //////////////////////////////////////////
 
@@ -216,9 +213,11 @@ module top (
   assign {DAC_UNI_BIP_B , DAC_UNI_BIP_A, DAC_RST,  DAC_LDAC } = reg_dac;    // can put reset in separate reg, to make easy to toggle.
 */
 
+  ////////////////////////////////////////
+  // spi muxing
 
-
-  wire [8-1:0] reg_mux = 8'b00000001; // test
+  /// wire [8-1:0] reg_mux = 8'b00000001; // test
+  wire [8-1:0] reg_mux ;// = 8'b00000001; // test
 
 
   wire [8-1:0] cs_vec ;
@@ -256,25 +255,33 @@ module top (
   );
 
 
-/*
-  mylatch #( 16 )   // register bank
-  mylatch
+  ////////////////////////////////////////
+  // register
+
+
+  wire [8-1:0] reg_led;
+  assign {LED1, LED2} = reg_led;    // schematic has these reversed...
+
+  wire [4-1:0] reg_dac;
+  assign {DAC_UNI_BIP_B , DAC_UNI_BIP_A, DAC_RST,  DAC_LDAC } = reg_dac;    
+  // can/should put reset in separate reg, to make easy to toggle.
+
+
+  my_register_bank #( 16 )   // register bank
+  my_register_bank
     (
     .clk(CLK),
     .cs(CS),
     .special(SPECIAL),
     .d(MOSI),
-
     .reg_mux(reg_mux),
     .reg_led(reg_led),
     .reg_dac(reg_dac)
   );
 
 
-*/
 
-
-
+/*
   blinker #(  )
   blinker
     (
@@ -282,7 +289,7 @@ module top (
     .led1(LED1),
     .led2(LED2)
   );
-
+*/
 
 
 
