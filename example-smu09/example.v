@@ -60,9 +60,12 @@ module my_register_bank   #(parameter MSB=16)   (
   // but we need a count.
 
   // clock value into tmp var
-  always @ (negedge clk)
+  always @ (negedge clk or posedge cs)
   begin
-    if (!cs && !special)         // chip select asserted, and cspecial asserted.
+    if(cs)
+      count <= 0;
+    else
+    if ( !special)         // chip select asserted, and cspecial asserted.
       begin
   
 
@@ -80,17 +83,18 @@ module my_register_bank   #(parameter MSB=16)   (
 
   end
 
-
+/*
   always @ (negedge cs)   // cs start
   begin
     count <= 0;
   end
+*/
 
   always @ (posedge cs)   // cs done.
   begin
 
-    if(!special)    // only if special also asserted
-    // if(!special && count == 16 )    // only if special also asserted
+    // if(!special)    // only if special also asserted
+    if(!special && count == 16 )    // only if special also asserted
       begin
 
       case (tmp[ MSB-1:8 ])  // high byte for reg/address, lo byte for val.
