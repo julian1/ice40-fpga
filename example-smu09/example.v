@@ -32,6 +32,10 @@ endmodule
   eg. the special only controls mux.
 */
 
+/*
+  CS - must be in clk domain. because it can be de/asserted without spi clk. and
+  we want to do stuff in response.
+*/
 module my_register_bank   #(parameter MSB=16)   (
   input  clk,
   input  cs,
@@ -44,15 +48,9 @@ module my_register_bank   #(parameter MSB=16)   (
   output reg [4-1:0] reg_dac
 );
 
-  /*
-    if the clk count is wrong. it will make a big mess of values.
-    really need to validate count = 16,.
-  */
 
   reg [MSB-1:0] tmp;
-
   reg [8-1:0]   ret;
-
   reg [8-1:0]   count;
 
   // actually no. as soon as we have eight bits, then we know
@@ -62,12 +60,13 @@ module my_register_bank   #(parameter MSB=16)   (
   // clock value into tmp var
   always @ (negedge clk or posedge cs)
   begin
-    if(cs)
+    if(cs)          // cs not asserted
       count <= 0;
     else
-    if ( !special)         // chip select asserted, and cspecial asserted.
+    if ( !special)  // cs asserted, and cspecial asserted.
       begin
 
+        // d into lsb, shift left toward msb
         tmp <= {tmp[MSB-2:0], d};
 
         // if count == 8. then read value (with case stmt) and set the value. to be returned
