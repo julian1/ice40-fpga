@@ -108,8 +108,9 @@ module my_register_bank   #(parameter MSB=16)   (
   wire [8-1:0] val   = tmp;  
 
 
-  wire [8-1:0] whoot = (reg_led | (val & 4'b1111) );           // set bits
-  wire [8-1:0] whoot2 = ~(~whoot | (val >> 4));   // clear bits
+// this doesn't work. because it needs the input value...
+//  wire [8-1:0] whoot = (reg_led | (val & 4'b1111) );           // set bits
+//  wire [8-1:0] whoot2 = ~(~whoot | (val >> 4));   // clear bits
 
 
   
@@ -125,17 +126,27 @@ module my_register_bank   #(parameter MSB=16)   (
         case (addr)// tmp[ MSB-1:8 ])  // high byte for reg/address, lo byte for val.
 
           // mux
-          8 : reg_mux = val ;
+          8 : 
+              begin
+              // reg_mux = whoot2 ;
+              // reg_mux = 1 ;   // adc03. works
+              // reg_mux = (1<<2);   // flash. works
+
+//              reg_mux = reg_mux | (val & 4'b1111) ; // set 
+ //             reg_mux = ~(~reg_mux | (val >> 4)); // clear 
+        
+                 reg_mux = val;
+              end
+ 
 
           // leds
           7 : 
             begin
               // reg_led = val ;
               // this ought to be able to be made a function.   actually just calculate it once...
-//              reg_led = reg_led | val ; // set 
- //             reg_led = ~(~reg_led | (val >> 4)); // clear 
+              reg_led = reg_led | (val & 4'b1111) ; // set 
+              reg_led = ~(~reg_led | (val >> 4)); // clear 
               
-              reg_led = whoot2;
 
               // reg_dac_rst = tmp;  // useful way to check a value . this works??? to toggle reset.
             end
