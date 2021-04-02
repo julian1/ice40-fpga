@@ -57,7 +57,7 @@ module my_register_bank   #(parameter MSB=16)   (
   reg [8-1:0]   count;
 
 
-  // 
+  //
 
   // clock value into tmp var
   always @ (negedge clk or posedge cs)
@@ -106,51 +106,50 @@ module my_register_bank   #(parameter MSB=16)   (
 
 
   // does this work? wire is effectively an alias in combinatorial code
-  wire [8-1:0] addr  = tmp[ MSB-1:8 ]; // high byte for reg/address, lo byte for val. 
-  wire [8-1:0] val   = tmp;  
+  wire [8-1:0] addr  = tmp[ MSB-1:8 ]; // high byte for reg/address, lo byte for val.
+  wire [8-1:0] val   = tmp;
 
 
 
   always @ (posedge cs)   // cs done.
   begin
     // we can assert a done flag here... and factor this code...
-
-
+    // special asserted, and 16 received bits
     if(/*cs &&*/ !special && count == 16 )
       begin
         case (addr)
           // leds
-          7 : 
+          7 :
             begin
-              reg_led = reg_led | (val & 4'b1111) ; // set 
-              reg_led = ~(~reg_led | (val >> 4)); // clear 
+              reg_led = reg_led | (val & 4'b1111) ; // set
+              reg_led = ~(~reg_led | (val >> 4)); // clear
             end
 
           // mux
-          8 : 
+          8 :
               begin
-              reg_mux = reg_mux | (val & 4'b1111) ; // set 
-              reg_mux = ~(~reg_mux | (val >> 4)); // clear 
+              reg_mux = reg_mux | (val & 4'b1111) ; // set
+              reg_mux = ~(~reg_mux | (val >> 4)); // clear
               end
 
 
           // dac
-          9  : 
+          9  :
             begin
-              reg_dac = reg_dac | (val & 4'b1111) ; // set 
-              reg_dac = ~(~reg_dac | (val >> 4)); // clear 
+              reg_dac = reg_dac | (val & 4'b1111) ; // set
+              reg_dac = ~(~reg_dac | (val >> 4)); // clear
                 // reg_dac = val;
             end
 
           // rails
           10 :
             begin
-              reg_rails = reg_rails | (val & 4'b1111) ; // set 
-              reg_rails = ~(~reg_rails | (val >> 4)); // clear 
+              reg_rails = reg_rails | (val & 4'b1111) ; // set
+              reg_rails = ~(~reg_rails | (val >> 4)); // clear
             end
 
-       
-          // soft reset 
+
+          // soft reset
           11 :
             begin
               reg_led = 0;
@@ -287,10 +286,10 @@ module top (
   input FLASH_MISO,   // input
 
   // rails
-  output RAILS_LP15V,  
-  output RAILS_LP30V,  
-  output RAILS_LP60V,  
-  output RAILS_OE     
+  output RAILS_LP15V,
+  output RAILS_LP30V,
+  output RAILS_LP60V,
+  output RAILS_OE
 
 
 
@@ -375,7 +374,7 @@ module top (
 
 
   wire [4-1:0] reg_rails;
-  assign {  RAILS_OE, RAILS_LP60V, RAILS_LP30V, RAILS_LP15V } = reg_rails; 
+  assign {  RAILS_OE, RAILS_LP60V, RAILS_LP30V, RAILS_LP15V } = reg_rails;
 
 
 
