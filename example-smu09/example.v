@@ -41,7 +41,7 @@ module my_register_bank   #(parameter MSB=16)   (
   input  cs,
   input  special,
   input  d,       // sdi
-  output reg dout,   // sdo
+  output dout,   // sdo
 
   // latched val, rename
   output reg [8-1:0] reg_mux,
@@ -51,7 +51,7 @@ module my_register_bank   #(parameter MSB=16)   (
 
 
   reg [MSB-1:0] tmp;
-  reg [MSB-1:0]   ret  ;
+  reg [MSB-1:0]   ret  ;    // padding bit
   reg [8-1:0]   count;
 
   // actually no. as soon as we have eight bits, then we know
@@ -65,13 +65,19 @@ module my_register_bank   #(parameter MSB=16)   (
       begin
         count <= 0;
 
-        // OK. this almost works. the issue is that the bits are reversed...
-        // ret <= 8'b00001110;
-        // ret <= 16'b0001000001101110;
+
         // ret <= 123 << 9 ;//16'b0001000001101110;
-        ret <= 123 << 9 ;// why 9 bits ?
-                          // because cs is being counted as clock cycle?
-                          //  
+
+        // this works values 1 to 127
+        // ret <= (255 << 8) ;// why 9 bits ?
+                          // it's dropping the bit...
+                          // so just add a padding bit...
+
+        // got 0000100000110111
+
+        ret <= 16'b0001000001101110 ;  // the bits are being reversed by spi ...
+  
+        ret <= 255;
       end
     else
     if ( !special)  // cs asserted, and cspecial asserted.
@@ -81,8 +87,9 @@ module my_register_bank   #(parameter MSB=16)   (
         tmp <= {tmp[MSB-2:0], d};
 
 
-        dout <= ret[MSB-1]; 
-        ret <= ret << 1; // {ret[MSB-2:0], 0};
+        dout <= ret[MSB-2]; 
+        ret <= ret << 1; 
+        // ret <= {ret[MSB-1:1], 0};   // zero extend
 
 
         count <= count + 1;
