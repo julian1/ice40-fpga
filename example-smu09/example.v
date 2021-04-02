@@ -103,27 +103,36 @@ module my_register_bank   #(parameter MSB=16)   (
       end
   end
 
+  // does this work? wire is effectively an alias in combinatorial code
+  wire [8-1:0] addr  = tmp[ MSB-1:8 ];  
+  wire [8-1:0] val   = tmp;  
+  // alias  addr  = tmp[ MSB-1:8 ];   alias = system verilog
 
   always @ (posedge cs)   // cs done.
   begin
     // we can assert a done flag here... and factor this code...
+
+
     if(/*cs &&*/ !special && count == 16 )
       begin
-        case (tmp[ MSB-1:8 ])  // high byte for reg/address, lo byte for val.
+        case (addr)// tmp[ MSB-1:8 ])  // high byte for reg/address, lo byte for val.
 
           // mux
-          8 : reg_mux = tmp;
+          8 : reg_mux = val ;
 
           // leds
           7 : 
             begin
-              reg_led = tmp;
+              // reg_led = val ;
+              reg_led = reg_led | val ; // set 
+              reg_led = ~(~reg_led | (val >> 4)); // clear 
+
               // reg_dac_rst = tmp;  // useful way to check a value . this works??? to toggle reset.
             end
 
           // dac
-          9  : reg_dac = tmp;
-          10 : reg_dac_rst = tmp;
+          9  : reg_dac = val;
+          10 : reg_dac_rst = val;
 
         endcase
       end
