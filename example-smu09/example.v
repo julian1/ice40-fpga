@@ -68,7 +68,10 @@ module my_register_bank   #(parameter MSB=16)   (
         // OK. this almost works. the issue is that the bits are reversed...
         // ret <= 8'b00001110;
         // ret <= 16'b0001000001101110;
-        ret <= 123 << 9 ;//16'b0001000001101110;
+        // ret <= 123 << 9 ;//16'b0001000001101110;
+        ret <= 123 << 9 ;// why 9 bits ?
+                          // because cs is being counted as clock cycle?
+                          //  
       end
     else
     if ( !special)  // cs asserted, and cspecial asserted.
@@ -78,7 +81,7 @@ module my_register_bank   #(parameter MSB=16)   (
         tmp <= {tmp[MSB-2:0], d};
 
 
-        dout <= ret[15]; 
+        dout <= ret[MSB-1]; 
         ret <= ret << 1; // {ret[MSB-2:0], 0};
 
 
