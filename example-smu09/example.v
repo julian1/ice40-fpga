@@ -103,18 +103,12 @@ module my_register_bank   #(parameter MSB=16)   (
       end
   end
 
+
   // does this work? wire is effectively an alias in combinatorial code
-  wire [8-1:0] addr  = tmp[ MSB-1:8 ];  
+  wire [8-1:0] addr  = tmp[ MSB-1:8 ]; // high byte for reg/address, lo byte for val. 
   wire [8-1:0] val   = tmp;  
 
 
-// this doesn't work. because it needs the input value...
-//  wire [8-1:0] whoot = (reg_led | (val & 4'b1111) );           // set bits
-//  wire [8-1:0] whoot2 = ~(~whoot | (val >> 4));   // clear bits
-
-
-  
-  // alias  addr  = tmp[ MSB-1:8 ];   alias = system verilog
 
   always @ (posedge cs)   // cs done.
   begin
@@ -123,32 +117,19 @@ module my_register_bank   #(parameter MSB=16)   (
 
     if(/*cs &&*/ !special && count == 16 )
       begin
-        case (addr)// tmp[ MSB-1:8 ])  // high byte for reg/address, lo byte for val.
-
+        case (addr)
           // mux
           8 : 
               begin
-              // reg_mux = whoot2 ;
-              // reg_mux = 1 ;   // adc03. works
-              // reg_mux = (1<<2);   // flash. works
-
               reg_mux = reg_mux | (val & 4'b1111) ; // set 
               reg_mux = ~(~reg_mux | (val >> 4)); // clear 
-        
-                // reg_mux = val;
               end
- 
 
           // leds
           7 : 
             begin
-              // reg_led = val ;
-              // this ought to be able to be made a function.   actually just calculate it once...
               reg_led = reg_led | (val & 4'b1111) ; // set 
               reg_led = ~(~reg_led | (val >> 4)); // clear 
-              
-
-              // reg_dac_rst = tmp;  // useful way to check a value . this works??? to toggle reset.
             end
 
           // dac
