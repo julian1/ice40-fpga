@@ -40,7 +40,7 @@ module my_register_bank   #(parameter MSB=16)   (
   input  clk,
   input  cs,
   input  special,
-  input  d,       // sdi
+  input  din,       // sdi
   output dout,   // sdo
 
   // latched val, rename
@@ -83,7 +83,7 @@ module my_register_bank   #(parameter MSB=16)   (
       begin
 
         // d into lsb, shift left toward msb
-        tmp = {tmp[MSB-2:0], d};
+        tmp = {tmp[MSB-2:0], din};
 
         /*
         // appears to work. actually we could return the address...
@@ -331,7 +331,7 @@ module top (
     .clk(CLK),
     .cs(CS),
     .special(SPECIAL),
-    .d(MOSI),
+    .din(MOSI),
     .dout( dout  ),
     .reg_mux(reg_mux),
     .reg_led(reg_led),
