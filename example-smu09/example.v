@@ -106,6 +106,12 @@ module my_register_bank   #(parameter MSB=16)   (
   // does this work? wire is effectively an alias in combinatorial code
   wire [8-1:0] addr  = tmp[ MSB-1:8 ];  
   wire [8-1:0] val   = tmp;  
+
+  wire [8-1:0] whoot = (reg_led | val);  
+  wire [8-1:0] whoot2 = ~(~whoot | (val >> 4));  
+
+
+  
   // alias  addr  = tmp[ MSB-1:8 ];   alias = system verilog
 
   always @ (posedge cs)   // cs done.
@@ -124,8 +130,11 @@ module my_register_bank   #(parameter MSB=16)   (
           7 : 
             begin
               // reg_led = val ;
-              reg_led = reg_led | val ; // set 
-              reg_led = ~(~reg_led | (val >> 4)); // clear 
+              // this ought to be able to be made a function.   actually just calculate it once...
+//              reg_led = reg_led | val ; // set 
+ //             reg_led = ~(~reg_led | (val >> 4)); // clear 
+              
+              reg_led = whoot2;
 
               // reg_dac_rst = tmp;  // useful way to check a value . this works??? to toggle reset.
             end
