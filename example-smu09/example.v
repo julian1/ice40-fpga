@@ -105,8 +105,8 @@ module my_register_bank   #(parameter MSB=16)   (
 
   always @ (posedge cs)   // cs done.
   begin
-    // we can assert a done flag here...
-    if(!special && count == 16 )
+    // we can assert a done flag here... and factor this code...
+    if(/*cs &&*/ !special && count == 16 )
       begin
         case (tmp[ MSB-1:8 ])  // high byte for reg/address, lo byte for val.
 
