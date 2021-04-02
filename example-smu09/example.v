@@ -46,7 +46,8 @@ module my_register_bank   #(parameter MSB=16)   (
   // latched val, rename
   output reg [8-1:0] reg_mux,
   output reg [8-1:0] reg_led,
-  output reg [4-1:0] reg_dac
+  output reg [3-1:0] reg_dac,
+  output reg  reg_dac_rst
 );
 
 
@@ -111,14 +112,18 @@ module my_register_bank   #(parameter MSB=16)   (
         case (tmp[ MSB-1:8 ])  // high byte for reg/address, lo byte for val.
 
           // mux
-          8 :
-              reg_mux = tmp;
+          8 : reg_mux = tmp;
 
           // leds
-          7 : reg_led = tmp;
+          7 : 
+            begin
+              reg_led = tmp;
+              // reg_dac_rst = tmp;  // ok. this works??? to toggle reset.
+            end
 
           // dac
           9 : reg_dac = tmp;
+          10 : reg_dac_rst = tmp;
 
         endcase
       end
@@ -316,12 +321,19 @@ module top (
   ////////////////////////////////////////
   // register
 
+  // wire = no state preserved between clocks.
 
   wire [8-1:0] reg_led;
   assign {LED1, LED2} = reg_led;    // schematic has these reversed...
 
-  wire [4-1:0] reg_dac;
-  assign {DAC_UNI_BIP_B , DAC_UNI_BIP_A, DAC_RST,  DAC_LDAC } = reg_dac;
+  wire [3-1:0] reg_dac;
+  assign {DAC_UNI_BIP_B , DAC_UNI_BIP_A,  DAC_LDAC } = reg_dac;
+
+  wire reg_dac_rst;
+  // assign DAC_RST = 1;//assigning manually pulls it high.
+  assign DAC_RST = reg_dac_rst;
+
+
   // can/should put reset in separate reg, to make easy to toggle.
 
 
@@ -335,7 +347,8 @@ module top (
     .dout( dout  ),
     .reg_mux(reg_mux),
     .reg_led(reg_led),
-    .reg_dac(reg_dac)
+    .reg_dac(reg_dac),
+    .reg_dac_rst(reg_dac_rst)
   );
 
 
