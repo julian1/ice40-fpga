@@ -118,11 +118,11 @@ module my_register_bank   #(parameter MSB=16)   (
           7 : 
             begin
               reg_led = tmp;
-              // reg_dac_rst = tmp;  // ok. this works??? to toggle reset.
+              // reg_dac_rst = tmp;  // useful way to check a value . this works??? to toggle reset.
             end
 
           // dac
-          9 : reg_dac = tmp;
+          9  : reg_dac = tmp;
           10 : reg_dac_rst = tmp;
 
         endcase
