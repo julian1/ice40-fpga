@@ -47,7 +47,8 @@ module my_register_bank   #(parameter MSB=16)   (
   output reg [4-1:0] reg_mux,
   output reg [4-1:0] reg_led,     // need to be very careful. only 4 bits. or else screws set/reset calculation ...
   output reg [4-1:0] reg_dac,
-  output reg  reg_dac_rst
+  output reg [4-1:0] reg_rails
+
 );
 
 
@@ -139,6 +140,14 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_dac = ~(~reg_dac | (val >> 4)); // clear 
                 // reg_dac = val;
             end
+
+          // rails
+          10 :
+            begin
+              reg_rails = reg_rails | (val & 4'b1111) ; // set 
+              reg_rails = ~(~reg_rails | (val >> 4)); // clear 
+            end
+
 
         endcase
       end
@@ -264,7 +273,14 @@ module top (
   output FLASH_CS,
   output FLASH_CLK,
   output FLASH_MOSI ,
-  input FLASH_MISO   // input
+  input FLASH_MISO,   // input
+
+  // rails
+  output RAILS_LP15V,  
+  output RAILS_LP30V,  
+  output RAILS_LP60V,  
+  output RAILS_OE     
+
 
 
 );
@@ -346,21 +362,27 @@ module top (
 
   // ADC_03... no configuration pins.
 
+
+  wire [4-1:0] reg_rails;
+  // assign { RAILS_LP15V, RAILS_LP30V, RAILS_LP60V, RAILS_OE } = reg_rails; 
+  assign {  RAILS_OE, RAILS_LP60V, RAILS_LP30V, RAILS_LP15V } = reg_rails; 
+
+
   // can/should put reset in separate reg, to make easy to toggle.
 
 
   my_register_bank #( 16 )   // register bank
   my_register_bank
     (
-    .clk(CLK),
-    .cs(CS),
-    .special(SPECIAL),
-    .din(MOSI),
-    .dout( dout  ),
-    .reg_mux(reg_mux),
-    .reg_led(reg_led),
-    .reg_dac(reg_dac),
-    .reg_dac_rst(reg_dac_rst)
+    . clk(CLK),
+    . cs(CS),
+    . special(SPECIAL),
+    . din(MOSI),
+    . dout(dout),
+    . reg_mux(reg_mux),
+    . reg_led(reg_led),
+    . reg_dac(reg_dac),
+    . reg_rails(reg_rails)
   );
 
 
