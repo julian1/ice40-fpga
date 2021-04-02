@@ -44,8 +44,8 @@ module my_register_bank   #(parameter MSB=16)   (
   output dout,   // sdo
 
   // latched val, rename
-  output reg [4-1:0] reg_mux,
   output reg [4-1:0] reg_led,     // need to be very careful. only 4 bits. or else screws set/reset calculation ...
+  output reg [4-1:0] reg_mux,
   output reg [4-1:0] reg_dac,
   output reg [4-1:0] reg_rails
 
@@ -119,6 +119,13 @@ module my_register_bank   #(parameter MSB=16)   (
     if(/*cs &&*/ !special && count == 16 )
       begin
         case (addr)
+          // leds
+          7 : 
+            begin
+              reg_led = reg_led | (val & 4'b1111) ; // set 
+              reg_led = ~(~reg_led | (val >> 4)); // clear 
+            end
+
           // mux
           8 : 
               begin
@@ -126,12 +133,6 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_mux = ~(~reg_mux | (val >> 4)); // clear 
               end
 
-          // leds
-          7 : 
-            begin
-              reg_led = reg_led | (val & 4'b1111) ; // set 
-              reg_led = ~(~reg_led | (val >> 4)); // clear 
-            end
 
           // dac
           9  : 
@@ -152,8 +153,8 @@ module my_register_bank   #(parameter MSB=16)   (
           // soft reset 
           11 :
             begin
-              reg_mux = 0;
               reg_led = 0;
+              reg_mux = 0;
               reg_dac = 0;
               reg_rails = 0;
             end
@@ -387,8 +388,8 @@ module top (
     . special(SPECIAL),
     . din(MOSI),
     . dout(dout),
-    . reg_mux(reg_mux),
     . reg_led(reg_led),
+    . reg_mux(reg_mux),
     . reg_dac(reg_dac),
     . reg_rails(reg_rails)
   );
