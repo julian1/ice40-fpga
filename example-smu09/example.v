@@ -51,48 +51,53 @@ module my_register_bank   #(parameter MSB=16)   (
 
 
   reg [MSB-1:0] tmp;
-  reg [MSB-1:0]   ret  ;    // padding bit
+  reg [MSB-1:0] ret  ;    // padding bit
   reg [8-1:0]   count;
 
-  // actually no. as soon as we have eight bits, then we know
-  // the address and can start sending bits back.
-  // but we need a count.
+
+  // 
 
   // clock value into tmp var
   always @ (negedge clk or posedge cs)
   begin
     if(cs)          // cs not asserted
       begin
-        count <= 0;
+        count = 0;
 
+        // dropping of the highest bit maybe cannot avoid...
+        // because it is the first bit.
 
-        // ret <= 123 << 9 ;//16'b0001000001101110;
+        // no. 255 is wrong. it overclocks it
 
-        // this works values 1 to 127
-        // ret <= (255 << 8) ;// why 9 bits ?
-                          // it's dropping the bit...
-                          // so just add a padding bit...
+        // ret = 16'b1111110111011010 ;
+        // ret = 255 ;
+        ret = 255 << 8;
+        //ret = 0;
+        //ret = 0;
 
-        // got 0000100000110111
-
-        ret <= 16'b0001000001101110 ;  // the bits are being reversed by spi ...
-  
-        ret <= 255;
+        // highest bit looks problematic...
+        // ret = 65535 ;
       end
     else
     if ( !special)  // cs asserted, and cspecial asserted.
       begin
 
         // d into lsb, shift left toward msb
-        tmp <= {tmp[MSB-2:0], d};
+        tmp = {tmp[MSB-2:0], d};
 
+        /*
+        // appears to work. actually we could return the address...
+        if(count == 0)
+          ret = 255 << 7;
+        // have the address, so can start sending current value back...
+        if(count == 7)
+          ret = 255 << 7;
+        */
+          // return value
+        dout = ret[MSB-2];    // OK. doing this gets our high bit. but loses the last bit... because its delayed??
+        ret = ret << 1; // this *is* zero fill operator.
 
-        dout <= ret[MSB-2]; 
-        ret <= ret << 1; 
-        // ret <= {ret[MSB-1:1], 0};   // zero extend
-
-
-        count <= count + 1;
+        count = count + 1;
 
       end
   end
@@ -100,6 +105,7 @@ module my_register_bank   #(parameter MSB=16)   (
 
   always @ (posedge cs)   // cs done.
   begin
+    // we can assert a done flag here...
     if(!special && count == 16 )
       begin
         case (tmp[ MSB-1:8 ])  // high byte for reg/address, lo byte for val.
@@ -173,10 +179,13 @@ module my_miso_mux    (
 
  always @ (miso_vec)
 
+// #FIXME change to blocking.
+    // if special is asserted just mux dout.
     if(!special)
-      miso <= dout ;//miso_veco[3];  // dout.
+      miso = dout;
+    // else use the vector
     else
-      miso <= (reg_mux & miso_vec) != 0 ;   // hmmm seems ok.
+      miso = (reg_mux & miso_vec) != 0 ;   // hmmm seems ok.
 
 endmodule
 
