@@ -107,8 +107,9 @@ module my_register_bank   #(parameter MSB=16)   (
   wire [8-1:0] addr  = tmp[ MSB-1:8 ];  
   wire [8-1:0] val   = tmp;  
 
-  wire [8-1:0] whoot = (reg_led | val);  
-  wire [8-1:0] whoot2 = ~(~whoot | (val >> 4));  
+
+  wire [8-1:0] whoot = (reg_led | (val & 4'b1111) );           // set bits
+  wire [8-1:0] whoot2 = ~(~whoot | (val >> 4));   // clear bits
 
 
   
