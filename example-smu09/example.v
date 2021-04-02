@@ -67,7 +67,8 @@ module my_register_bank   #(parameter MSB=16)   (
 
         // OK. this almost works. the issue is that the bits are reversed...
         // ret <= 8'b00001110;
-        ret <= 16'b0000000001101110;
+        // ret <= 16'b0001000001101110;
+        ret <= 123 << 9 ;//16'b0001000001101110;
       end
     else
     if ( !special)  // cs asserted, and cspecial asserted.
@@ -76,25 +77,11 @@ module my_register_bank   #(parameter MSB=16)   (
         // d into lsb, shift left toward msb
         tmp <= {tmp[MSB-2:0], d};
 
-        // value goes from 127 to 63???? makes no sense...
-
-        // dout <= ret[count]; 
-
-        // OK. this works. but the bytes are around the wrong way...
 
         dout <= ret[15]; 
         ret <= ret << 1; // {ret[MSB-2:0], 0};
 
-/*
-        dout <= ret; 
-        ret <= {0, ret[MSB-1:1]};
-*/
-        // ret <=  ret >> 1; // this leaves the same value each time
-                          // I think issue is that it rotates it rather than zero extends it.
-        // ret <=  ret >> 1;
 
-
-        // if count == 8. then read value (with case stmt) and set the value. to be returned
         count <= count + 1;
 
       end
