@@ -40,7 +40,8 @@ module my_register_bank   #(parameter MSB=16)   (
   input  clk,
   input  cs,
   input  special,
-  input  d,   // sdi
+  input  d,       // sdi
+  output reg dout,   // sdo
 
   // latched val, rename
   output reg [8-1:0] reg_mux,
@@ -50,7 +51,7 @@ module my_register_bank   #(parameter MSB=16)   (
 
 
   reg [MSB-1:0] tmp;
-  reg [8-1:0]   ret;
+  reg [MSB-1:0]   ret  ;
   reg [8-1:0]   count;
 
   // actually no. as soon as we have eight bits, then we know
@@ -61,7 +62,13 @@ module my_register_bank   #(parameter MSB=16)   (
   always @ (negedge clk or posedge cs)
   begin
     if(cs)          // cs not asserted
-      count <= 0;
+      begin
+        count <= 0;
+
+        // OK. this almost works. the issue is that the bits are reversed...
+        // ret <= 8'b00001110;
+        ret <= 16'b0000000001101110;
+      end
     else
     if ( !special)  // cs asserted, and cspecial asserted.
       begin
@@ -69,12 +76,27 @@ module my_register_bank   #(parameter MSB=16)   (
         // d into lsb, shift left toward msb
         tmp <= {tmp[MSB-2:0], d};
 
+        // value goes from 127 to 63???? makes no sense...
+
+        // dout <= ret[count]; 
+
+        // OK. this works. but the bytes are around the wrong way...
+
+        dout <= ret[15]; 
+        ret <= ret << 1; // {ret[MSB-2:0], 0};
+
+/*
+        dout <= ret; 
+        ret <= {0, ret[MSB-1:1]};
+*/
+        // ret <=  ret >> 1; // this leaves the same value each time
+                          // I think issue is that it rotates it rather than zero extends it.
+        // ret <=  ret >> 1;
+
+
         // if count == 8. then read value (with case stmt) and set the value. to be returned
         count <= count + 1;
-        if(count == 8)
-          ret = 123;  // use case here
 
-        dout <= ret; ret <= {0, ret[MSB-2:0] };
       end
   end
 
@@ -146,14 +168,18 @@ endmodule
 
 module my_miso_mux    (
   input wire [8-1:0] reg_mux,
+  input special,
+  input dout,
   input wire [8-1:0] miso_vec,
   output miso
 );
 
  always @ (miso_vec)
 
-    // miso = (reg_mux & miso_vec) > 0 ;   // any bit. seems to work, while != 0 doesn't.
-    miso = (reg_mux & miso_vec) != 0 ;   // hmmm seems ok.
+    if(!special)
+      miso <= dout ;//miso_veco[3];  // dout.
+    else
+      miso <= (reg_mux & miso_vec) != 0 ;   // hmmm seems ok.
 
 endmodule
 
@@ -256,10 +282,16 @@ module top (
   assign FLASH_MOSI = MOSI;
 
 
+  // need to rename. it's an internal dout... that can be muxed out.
+  reg dout ;
+
+
   my_miso_mux #( )
   my_miso_mux
   (
     . reg_mux(reg_mux),
+    . special(SPECIAL),
+    . dout(dout),
     . miso_vec(miso_vec),
     . miso(MISO)
   );
@@ -294,6 +326,7 @@ module top (
     .cs(CS),
     .special(SPECIAL),
     .d(MOSI),
+    .dout( dout  ),
     .reg_mux(reg_mux),
     .reg_led(reg_led),
     .reg_dac(reg_dac)
