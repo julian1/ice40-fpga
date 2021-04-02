@@ -133,8 +133,12 @@ module my_register_bank   #(parameter MSB=16)   (
             end
 
           // dac
-          9  : reg_dac = val;
-          10 : reg_dac_rst = val;
+          9  : 
+            begin
+              reg_dac = reg_dac | (val & 4'b1111) ; // set 
+              reg_dac = ~(~reg_dac | (val >> 4)); // clear 
+                // reg_dac = val;
+            end
 
         endcase
       end
@@ -334,16 +338,13 @@ module top (
 
   // wire = no state preserved between clocks.
 
-  wire [8-1:0] reg_led;
+  wire [4-1:0] reg_led;
   assign {LED1, LED2} = reg_led;    // schematic has these reversed...
 
   wire [4-1:0] reg_dac;
-  assign {DAC_UNI_BIP_B , DAC_UNI_BIP_A,  DAC_LDAC } = reg_dac;
+  assign {DAC_RST, DAC_UNI_BIP_B, DAC_UNI_BIP_A, DAC_LDAC } = reg_dac;
 
-  wire reg_dac_rst;
-  // assign DAC_RST = 1;//assigning manually pulls it high.
-  assign DAC_RST = reg_dac_rst;
-
+  // ADC_03... no configuration pins.
 
   // can/should put reset in separate reg, to make easy to toggle.
 
