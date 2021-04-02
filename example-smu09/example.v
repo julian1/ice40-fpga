@@ -44,9 +44,9 @@ module my_register_bank   #(parameter MSB=16)   (
   output dout,   // sdo
 
   // latched val, rename
-  output reg [8-1:0] reg_mux,
-  output reg [8-1:0] reg_led,
-  output reg [3-1:0] reg_dac,
+  output reg [4-1:0] reg_mux,
+  output reg [4-1:0] reg_led,     // need to be very careful. only 4 bits. or else screws set/reset calculation ...
+  output reg [4-1:0] reg_dac,
   output reg  reg_dac_rst
 );
 
@@ -132,10 +132,10 @@ module my_register_bank   #(parameter MSB=16)   (
               // reg_mux = 1 ;   // adc03. works
               // reg_mux = (1<<2);   // flash. works
 
-//              reg_mux = reg_mux | (val & 4'b1111) ; // set 
- //             reg_mux = ~(~reg_mux | (val >> 4)); // clear 
+              reg_mux = reg_mux | (val & 4'b1111) ; // set 
+              reg_mux = ~(~reg_mux | (val >> 4)); // clear 
         
-                 reg_mux = val;
+                // reg_mux = val;
               end
  
 
@@ -356,7 +356,7 @@ module top (
   wire [8-1:0] reg_led;
   assign {LED1, LED2} = reg_led;    // schematic has these reversed...
 
-  wire [3-1:0] reg_dac;
+  wire [4-1:0] reg_dac;
   assign {DAC_UNI_BIP_B , DAC_UNI_BIP_A,  DAC_LDAC } = reg_dac;
 
   wire reg_dac_rst;
