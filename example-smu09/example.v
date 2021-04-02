@@ -148,6 +148,16 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_rails = ~(~reg_rails | (val >> 4)); // clear 
             end
 
+       
+          // soft reset 
+          11 :
+            begin
+              reg_mux = 0;
+              reg_led = 0;
+              reg_dac = 0;
+              reg_rails = 0;
+            end
+
 
         endcase
       end
@@ -364,11 +374,9 @@ module top (
 
 
   wire [4-1:0] reg_rails;
-  // assign { RAILS_LP15V, RAILS_LP30V, RAILS_LP60V, RAILS_OE } = reg_rails; 
   assign {  RAILS_OE, RAILS_LP60V, RAILS_LP30V, RAILS_LP15V } = reg_rails; 
 
 
-  // can/should put reset in separate reg, to make easy to toggle.
 
 
   my_register_bank #( 16 )   // register bank
