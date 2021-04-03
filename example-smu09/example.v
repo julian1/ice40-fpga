@@ -155,7 +155,7 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_led = 0;
               reg_mux = 0;
               reg_dac = 0;
-              reg_rails = 0;
+              reg_rails = 0;      // TODO OE should come up high = deassert.
             end
 
 
