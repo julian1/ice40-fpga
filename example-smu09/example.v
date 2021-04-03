@@ -339,11 +339,6 @@ module top (
   assign DAC_SPI_CLK = CLK;
   assign DAC_SPI_SDI = MOSI;
 
-//   output DAC_SPI_CS ,
-//   output DAC_SPI_CLK,
- // output DAC_SPI_SDI,
-//  input DAC_SPI_SDO,   // input
-
 
 
   // need to rename. it's an internal dout... that can be muxed out.
