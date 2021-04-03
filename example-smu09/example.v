@@ -326,6 +326,7 @@ module top (
   assign { FLASH_MISO,  DAC_SPI_SDO,  ADC03_MISO } = miso_vec;
 
 
+  // we can mux these also if we want
   // pass-through adc03.
   assign ADC03_CLK = CLK;
   assign ADC03_MOSI = MOSI;
@@ -333,6 +334,16 @@ module top (
   // pass-through flash
   assign FLASH_CLK = CLK;
   assign FLASH_MOSI = MOSI;
+
+  // pass through dac.
+  assign DAC_SPI_CLK = CLK;
+  assign DAC_SPI_SDI = MOSI;
+
+//   output DAC_SPI_CS ,
+//   output DAC_SPI_CLK,
+ // output DAC_SPI_SDI,
+//  input DAC_SPI_SDO,   // input
+
 
 
   // need to rename. it's an internal dout... that can be muxed out.
