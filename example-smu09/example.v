@@ -144,6 +144,7 @@ module my_register_bank   #(parameter MSB=16)   (
           // rails
           10 :
             begin
+              // reg_rails = 4'b0111; // turn on oe, and turn on outputs
               reg_rails = reg_rails | (val & 4'b1111) ; // set
               reg_rails = ~(~reg_rails | (val >> 4)); // clear
             end
@@ -376,8 +377,7 @@ module top (
   wire [4-1:0] reg_rails;
   assign {  RAILS_OE, RAILS_LP60V, RAILS_LP30V, RAILS_LP15V } = reg_rails;
 
-
-
+  // ok.
 
   my_register_bank #( 16 )   // register bank
   my_register_bank
