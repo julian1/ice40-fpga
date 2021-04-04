@@ -47,12 +47,13 @@ module my_register_bank   #(parameter MSB=16)   (
   output reg [4-1:0] reg_led,     // need to be very careful. only 4 bits. or else screws set/reset calculation ...
   output reg [4-1:0] reg_mux,
   output reg [4-1:0] reg_dac,
-  output reg [4-1:0] reg_rails
+  output reg [4-1:0] reg_rails,
+  output reg [4-1:0] reg_dac_ref_mux
 
 );
 
 
-  reg [MSB-1:0] tmp;
+  reg [MSB-1:0] tmp;      // register used to read val
   reg [MSB-1:0] ret  ;    // padding bit
   reg [8-1:0]   count;
 
@@ -138,7 +139,6 @@ module my_register_bank   #(parameter MSB=16)   (
             begin
               reg_dac = reg_dac | (val & 4'b1111) ; // set
               reg_dac = ~(~reg_dac | (val >> 4)); // clear
-                // reg_dac = val;
             end
 
           // rails
@@ -156,8 +156,18 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_led = 0;
               reg_mux = 0;
               reg_dac = 0;
-              reg_rails = 0;      // TODO OE should come up high = deassert.
+              reg_rails = 0;      // preferrably, OE should come up high = deassert, 
+                                  // but it's ok, as pins will also be low.
             end
+
+          // dac ref mux
+          12 : 
+            begin
+              reg_dac_ref_mux = reg_dac_ref_mux | (val & 4'b1111) ; // set
+              reg_dac_ref_mux = ~(~reg_dac_ref_mux | (val >> 4)); // clear
+            end
+
+
 
 
         endcase
@@ -290,7 +300,11 @@ module top (
   output RAILS_LP15V,
   output RAILS_LP30V,
   output RAILS_LP60V,
-  output RAILS_OE
+  output RAILS_OE,
+
+  // dac ref mux
+  output DAC_REF_MUX_A,
+  output DAC_REF_MUX_B
 
 
 
@@ -383,8 +397,13 @@ module top (
   wire [4-1:0] reg_rails;
   assign {  RAILS_OE, RAILS_LP60V, RAILS_LP30V, RAILS_LP15V } = reg_rails;
 
-  // ok.
 
+  wire [4-1:0] reg_dac_ref_mux;
+  assign { DAC_REF_MUX_B, DAC_REF_MUX_A } = reg_dac_ref_mux;
+
+
+
+  // ok.
   my_register_bank #( 16 )   // register bank
   my_register_bank
     (
@@ -396,7 +415,8 @@ module top (
     . reg_led(reg_led),
     . reg_mux(reg_mux),
     . reg_dac(reg_dac),
-    . reg_rails(reg_rails)
+    . reg_rails(reg_rails),
+    . reg_dac_ref_mux(reg_dac_ref_mux)
   );
 
 

@@ -53,7 +53,9 @@ set_io RAILS_LP30V  39
 set_io RAILS_LP60V  41
 set_io RAILS_OE     37
 
-
+# ref mux
+set_io DAC_REF_MUX_A 33
+set_io DAC_REF_MUX_B 34
 
 
 
