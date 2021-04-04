@@ -1,4 +1,6 @@
 
+// can have heartbeat timer. over spi.
+
 module blinker    (
   input clk,
   output led1,
