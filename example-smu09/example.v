@@ -1,5 +1,7 @@
 
-// can have heartbeat timer. over spi.
+// - can have heartbeat timer. over spi.
+// - if have more than one dac. then just create another register. very clean.
+// - we can actually handle a toggle. if both set and clear bit is set, then toggle.
 
 module blinker    (
   input clk,
