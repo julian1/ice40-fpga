@@ -2,6 +2,7 @@
 // - can have heartbeat timer. over spi.
 // - if have more than one dac. then just create another register. very clean.
 // - we can actually handle a toggle. if both set and clear bit is set, then toggle.
+// - instead of !cs or !special.  would be good if can write asserted(cs)  asserted(special)
 
 module blinker    (
   input clk,
@@ -134,10 +135,10 @@ module my_register_bank   #(parameter MSB=16)   (
 
           // mux
           8 :
-              begin
-              reg_mux = reg_mux | (val & 4'b1111) ; // set
-              reg_mux = ~(~reg_mux | (val >> 4)); // clear
-              end
+            begin
+            reg_mux = reg_mux | (val & 4'b1111) ; // set
+            reg_mux = ~(~reg_mux | (val >> 4)); // clear
+            end
 
 
           // dac
