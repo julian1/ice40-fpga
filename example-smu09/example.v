@@ -1,7 +1,7 @@
 
 // - can have heartbeat timer. over spi.
 // - if have more than one dac. then just create another register. very clean.
-// - we can actually handle a toggle. if both set and clear bit is set, then toggle.
+// - we can actually handle a toggle. if both set and clear bit are hi then toggle
 // - instead of !cs or !special.  would be good if can write asserted(cs)  asserted(special)
 
 module blinker    (
@@ -26,6 +26,32 @@ module blinker    (
   // assign { led1, led2, LED3, LED4, LED5 } = outcnt ^ (outcnt >> 1);
   assign {  led1, led2 } = outcnt ^ (outcnt >> 1);
 endmodule
+
+
+// should be completely combinatorial.
+
+
+
+function [7:0] sum (input [7:0] a, b);
+  begin
+   sum = a + b;
+  end
+endfunction
+
+
+function [8-1:0] update (input [8-1:0] x, input [8-1:0]  val);
+  begin
+    tmp = x | (val & 4'b1111);    // set
+    update = ~(~tmp | (val >> 4));    // clear
+    // update = out;
+
+  end
+endfunction
+
+
+
+
+
 
 
 /*
@@ -102,7 +128,9 @@ module my_register_bank   #(parameter MSB=16)   (
         if(count == 7)
           ret = 255 << 7;
         */
-          // return value
+        // return value
+
+        // TODO generates a warning....
         dout = ret[MSB-2];    // OK. doing this gets our high bit. but loses the last bit... because its delayed??
         ret = ret << 1; // this *is* zero fill operator.
 
@@ -129,8 +157,17 @@ module my_register_bank   #(parameter MSB=16)   (
           // leds
           7 :
             begin
+             
+               
               reg_led = reg_led | (val & 4'b1111) ; // set
               reg_led = ~(~reg_led | (val >> 4)); // clear
+              /*
+              reg [8-1:0]   tmp;
+              tmp = reg_led;
+              // reg tmp = reg_led;
+              // this doesn't work...   module cannot be used like this... 
+              reg_led = update(tmp, val);
+                */     
             end
 
           // mux
