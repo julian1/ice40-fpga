@@ -58,4 +58,20 @@ set_io DAC_REF_MUX_A 33
 set_io DAC_REF_MUX_B 34
 
 
+# adc
+set_io ADC02_RST    1
+set_io ADC02_DONE   2
+set_io ADC02_DRDY   3
+set_io ADC02_MOSI   4
+set_io ADC02_MISO   7
+set_io ADC02_CLK    8
+set_io ADC02_CS     9
+set_io ADC02_M0     10
+set_io ADC02_M1     11
+set_io ADC02_M2     12
+
+
+
+
+
 

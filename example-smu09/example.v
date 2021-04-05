@@ -50,7 +50,8 @@ module my_register_bank   #(parameter MSB=16)   (
   output reg [4-1:0] reg_mux,
   output reg [4-1:0] reg_dac,
   output reg [4-1:0] reg_rails,
-  output reg [4-1:0] reg_dac_ref_mux
+  output reg [4-1:0] reg_dac_ref_mux,
+  output reg [4-1:0] reg_adc
 
 );
 
@@ -121,6 +122,7 @@ module my_register_bank   #(parameter MSB=16)   (
     if(/*cs &&*/ !special && count == 16 )
       begin
         case (addr)
+          // all this repetition seems wrong
           // leds
           7 :
             begin
@@ -158,18 +160,25 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_led = 0;
               reg_mux = 0;
               reg_dac = 0;
-              reg_rails = 0;      // preferrably, OE should come up high = deassert, 
+              reg_rails = 0;      // preferrably, OE should come up high = deassert,
                                   // but it's ok, as pins will also be low.
+              reg_dac_ref_mux = 0;
+              reg_adc = 0;
             end
 
           // dac ref mux
-          12 : 
+          12 :
             begin
               reg_dac_ref_mux = reg_dac_ref_mux | (val & 4'b1111) ; // set
               reg_dac_ref_mux = ~(~reg_dac_ref_mux | (val >> 4)); // clear
             end
 
-
+          // adc
+          14 :
+            begin
+              reg_adc = reg_adc | (val & 4'b1111) ; // set
+              reg_adc = ~(~reg_adc | (val >> 4)); // clear
+            end
 
 
         endcase
@@ -266,17 +275,17 @@ module top (
   output LED2,
 
   // spi
-  input CLK,
-  input CS,
-  input MOSI,
-  input SPECIAL,
+  input  CLK,
+  input  CS,
+  input  MOSI,
+  input  SPECIAL,
   output MISO,
   // output b
 
 
   // adc 03
   output ADC03_CLK,
-  input ADC03_MISO,    // input
+  input  ADC03_MISO,    // input
   output ADC03_MOSI,
   output ADC03_CS,
 
@@ -285,7 +294,7 @@ module top (
   output DAC_SPI_CS ,
   output DAC_SPI_CLK,
   output DAC_SPI_SDI,
-  input DAC_SPI_SDO,   // input
+  input  DAC_SPI_SDO,   // input
 
   output DAC_LDAC,
   output DAC_RST,
@@ -296,7 +305,7 @@ module top (
   output FLASH_CS,
   output FLASH_CLK,
   output FLASH_MOSI ,
-  input FLASH_MISO,   // input
+  input  FLASH_MISO,   // input
 
   // rails
   output RAILS_LP15V,
@@ -306,9 +315,19 @@ module top (
 
   // dac ref mux
   output DAC_REF_MUX_A,
-  output DAC_REF_MUX_B
+  output DAC_REF_MUX_B,
 
-
+  // adc
+  output ADC02_RST,
+  input  ADC02_DONE,  // input
+  input  ADC02_DRDY,    // input
+  output ADC02_MOSI,
+  input  ADC02_MISO,   // input
+  output ADC02_CLK,
+  output ADC02_CS,
+  output ADC02_M0,
+  output ADC02_M1,
+  output ADC02_M2
 
 );
 
@@ -335,11 +354,13 @@ module top (
 
 
   wire [8-1:0] cs_vec ;
-  assign { FLASH_CS,  DAC_SPI_CS, ADC03_CS } = cs_vec;
+  assign { ADC02_CS, FLASH_CS,  DAC_SPI_CS, ADC03_CS } = cs_vec;
 
 
   wire [8-1:0] miso_vec ;
-  assign { FLASH_MISO,  DAC_SPI_SDO,  ADC03_MISO } = miso_vec;
+  assign { ADC02_MISO, FLASH_MISO,  DAC_SPI_SDO,  ADC03_MISO } = miso_vec;
+
+
 
 
   // we can mux these also if we want
@@ -354,6 +375,11 @@ module top (
   // pass through dac.
   assign DAC_SPI_CLK = CLK;
   assign DAC_SPI_SDI = MOSI;
+
+  // pass through adc
+  assign ADC02_CLK = CLK;
+  assign ADC02_MOSI = MOSI;
+
 
 
 
@@ -404,6 +430,14 @@ module top (
   assign { DAC_REF_MUX_B, DAC_REF_MUX_A } = reg_dac_ref_mux;
 
 
+  wire [4-1:0] reg_adc; // reg_adc02? from adc03,
+  assign { ADC02_RST, ADC02_M2, ADC02_M1, ADC02_M0 } = reg_adc;
+
+
+/*
+  input  ADC02_DONE,  // input
+  input  ADC02_DRDY,    // input
+*/
 
   // ok.
   my_register_bank #( 16 )   // register bank
@@ -418,7 +452,8 @@ module top (
     . reg_mux(reg_mux),
     . reg_dac(reg_dac),
     . reg_rails(reg_rails),
-    . reg_dac_ref_mux(reg_dac_ref_mux)
+    . reg_dac_ref_mux(reg_dac_ref_mux),
+    . reg_adc(reg_adc)
   );
 
 
