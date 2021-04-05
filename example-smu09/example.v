@@ -331,21 +331,6 @@ module top (
 
 );
 
-/*
-
-  ////////////////////////////////////
-
-
-  //////////////////////////////////////////
-
-  wire [8-1:0] reg_led;
-  // assign {LED2, LED1} = reg_led;
-  assign {LED1, LED2} = reg_led;    // schematic has these reversed...
-
-
-  wire [4-1:0] reg_dac;
-  assign {DAC_UNI_BIP_B , DAC_UNI_BIP_A, DAC_RST,  DAC_LDAC } = reg_dac;    // can put reset in separate reg, to make easy to toggle.
-*/
 
   ////////////////////////////////////////
   // spi muxing
@@ -361,9 +346,10 @@ module top (
   assign { ADC02_MISO, FLASH_MISO,  DAC_SPI_SDO,  ADC03_MISO } = miso_vec;
 
 
+   ////////////////////////////////////////
+  // spi pass through
 
-
-  // we can mux these also if we want
+  // could mux these also, if we want
   // pass-through adc03.
   assign ADC03_CLK = CLK;
   assign ADC03_MOSI = MOSI;
@@ -382,7 +368,7 @@ module top (
 
 
 
-
+  // dout for fpga spi.
   // need to rename. it's an internal dout... that can be muxed out.
   reg dout ;
 
@@ -415,6 +401,7 @@ module top (
 
   wire [4-1:0] reg_led;
   assign {LED1, LED2} = reg_led;    // schematic has these reversed...
+  // assign {LED2, LED1} = reg_led;
 
   wire [4-1:0] reg_dac;
   assign {DAC_RST, DAC_UNI_BIP_B, DAC_UNI_BIP_A, DAC_LDAC } = reg_dac;
@@ -423,7 +410,7 @@ module top (
 
 
   wire [4-1:0] reg_rails;
-  assign {  RAILS_OE, RAILS_LP60V, RAILS_LP30V, RAILS_LP15V } = reg_rails;
+  assign { RAILS_OE, RAILS_LP60V, RAILS_LP30V, RAILS_LP15V } = reg_rails;
 
 
   wire [4-1:0] reg_dac_ref_mux;
@@ -434,10 +421,10 @@ module top (
   assign { ADC02_RST, ADC02_M2, ADC02_M1, ADC02_M0 } = reg_adc;
 
 
-/*
-  input  ADC02_DONE,  // input
-  input  ADC02_DRDY,    // input
-*/
+  /*
+    input  ADC02_DONE,  // input
+    input  ADC02_DRDY,    // input
+  */
 
   // ok.
   my_register_bank #( 16 )   // register bank
