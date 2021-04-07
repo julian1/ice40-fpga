@@ -217,6 +217,7 @@ module my_register_bank   #(parameter MSB=16)   (
           15 : reg_clamp1 = update(reg_clamp1, val);
           16 : reg_clamp2 = update(reg_clamp2, val);
 
+          // test byte. with pattern. to test spi read.
 
 
         endcase
