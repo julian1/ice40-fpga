@@ -42,7 +42,7 @@ endfunction
 
 function [8-1:0] update (input [8-1:0] x, input [8-1:0]  val);
   begin
-    if( (val & 4'b1111) & (val >> 4) /*!= 0*/  ) // both set and clear, then its a toggle
+    if( (val & 4'b1111) & (val >> 4) /*!= 0*/  ) // if both set and clear bits, then its a toggle
       update =  ((val & 4'b1111) & (val >> 4))  ^ x ; // xor. to toggle.
     else
       update = ~(~  (x | (val & 4'b1111)) | (val >> 4));
@@ -90,8 +90,9 @@ module my_register_bank   #(parameter MSB=16)   (
   output reg [4-1:0] reg_dac,
   output reg [4-1:0] reg_rails,
   output reg [4-1:0] reg_dac_ref_mux,
-  output reg [4-1:0] reg_adc
-
+  output reg [4-1:0] reg_adc,
+  output reg [4-1:0] reg_clamp1,
+  output reg [4-1:0] reg_clamp2
 );
 
 
@@ -201,6 +202,11 @@ module my_register_bank   #(parameter MSB=16)   (
 
           // adc
           14 : reg_adc = update(reg_adc, val);
+
+          // clamps
+          15 : reg_clamp1 = update(reg_clamp1, val);
+          16 : reg_clamp2 = update(reg_clamp2, val);
+
 
 
         endcase
@@ -352,7 +358,19 @@ module top (
   output ADC02_CS,
   output ADC02_M0,
   output ADC02_M1,
-  output ADC02_M2
+  output ADC02_M2,
+
+  // clamps
+  output CLAMP1_VSET,
+  output CLAMP1_ISET,
+  output CLAMP1_ISET_INV,
+  output CLAMP1_VSET_INV,
+
+  output CLAMP2_MIN,
+  output CLAMP2_INJECT_ERR,
+  output CLAMP2_INJECT_VFB,
+  output CLAMP2_MAX
+
 
 );
 
@@ -446,6 +464,16 @@ module top (
   assign { ADC02_RST, ADC02_M2, ADC02_M1, ADC02_M0 } = reg_adc;
 
 
+  wire [4-1:0] reg_clamp1;
+  assign { CLAMP1_VSET_INV, CLAMP1_ISET_INV, CLAMP1_ISET, CLAMP1_VSET } = reg_clamp1;
+
+  wire [4-1:0] reg_clamp2;
+  assign { CLAMP2_MAX, CLAMP2_INJECT_VFB, CLAMP2_INJECT_ERR, CLAMP2_MIN} = reg_clamp2;
+
+
+
+
+
   /*
     input  ADC02_DONE,  // input
     input  ADC02_DRDY,    // input
@@ -465,7 +493,9 @@ module top (
     . reg_dac(reg_dac),
     . reg_rails(reg_rails),
     . reg_dac_ref_mux(reg_dac_ref_mux),
-    . reg_adc(reg_adc)
+    . reg_adc(reg_adc),
+    . reg_clamp1(reg_clamp1),
+    . reg_clamp2(reg_clamp2)
   );
 
 

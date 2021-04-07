@@ -18,7 +18,7 @@ set_io CLK   42
 set_io CS     43
 set_io MOSI   44
 set_io SPECIAL 45
-set_io MISO    47     # output from fpga, input to mcu master. 
+set_io MISO    47     # output from fpga, input to mcu master.
 
 
 set_io LED1 106
@@ -69,6 +69,18 @@ set_io ADC02_CS     9
 set_io ADC02_M0     10
 set_io ADC02_M1     11
 set_io ADC02_M2     12
+
+
+# clamp1
+set_io CLAMP1_VSET     61
+set_io CLAMP1_ISET     64
+set_io CLAMP1_ISET_INV 63
+set_io CLAMP1_VSET_INV 62
+
+set_io CLAMP2_MIN        52
+set_io CLAMP2_INJECT_ERR 58
+set_io CLAMP2_INJECT_VFB 60
+set_io CLAMP2_MAX        56
 
 
 
