@@ -31,12 +31,22 @@ endmodule
 // should be completely combinatorial.
 
 
-
+/*
 function [7:0] sum (input [7:0] a, b);
   begin
    sum = a + b;
   end
 endfunction
+*/
+
+function [7:0] sum (input [7:0] a, b);
+  begin
+   j = a;   // issue is if try to use? 
+   sum = j + b;
+  end
+endfunction
+
+
 
 
 
