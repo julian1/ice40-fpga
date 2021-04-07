@@ -39,15 +39,22 @@ function [7:0] sum (input [7:0] a, b);
 endfunction
 
 
+
 function [8-1:0] update (input [8-1:0] x, input [8-1:0]  val);
   begin
-    tmp = x | (val & 4'b1111);    // set
-    update = ~(~tmp | (val >> 4));    // clear
-    // update = out;
-
+    update = ~(~  (x | (val & 4'b1111)) | (val >> 4));
   end
 endfunction
 
+/*
+
+function [8-1:0] update (input [8-1:0] x, input [8-1:0]  val);
+  begin
+    tmp = x | (val & 4'b1111);        // set
+    update = ~(~  (tmp) | (val >> 4));    // clear
+  end
+endfunction
+*/
 
 
 
@@ -157,41 +164,21 @@ module my_register_bank   #(parameter MSB=16)   (
           // leds
           7 :
             begin
-             
-               
-              reg_led = reg_led | (val & 4'b1111) ; // set
-              reg_led = ~(~reg_led | (val >> 4)); // clear
-              /*
-              reg [8-1:0]   tmp;
-              tmp = reg_led;
-              // reg tmp = reg_led;
-              // this doesn't work...   module cannot be used like this... 
-              reg_led = update(tmp, val);
-                */     
+              // reg_led = reg_led | (val & 4'b1111) ; // set
+              // reg_led = ~(~reg_led | (val >> 4)); // clear
+              reg_led = update(reg_led, val);
             end
 
           // mux
-          8 :
-            begin
-            reg_mux = reg_mux | (val & 4'b1111) ; // set
-            reg_mux = ~(~reg_mux | (val >> 4)); // clear
-            end
-
+          8 : reg_mux = update(reg_mux, val);
 
           // dac
-          9  :
-            begin
-              reg_dac = reg_dac | (val & 4'b1111) ; // set
-              reg_dac = ~(~reg_dac | (val >> 4)); // clear
-            end
+          9  : reg_dac = update(reg_dac, val);
 
           // rails
           10 :
-            begin
               // reg_rails = 4'b0111; // turn on oe, and turn on outputs
-              reg_rails = reg_rails | (val & 4'b1111) ; // set
-              reg_rails = ~(~reg_rails | (val >> 4)); // clear
-            end
+              reg_rails = update(reg_rails, val);
 
 
           // soft reset
@@ -207,18 +194,10 @@ module my_register_bank   #(parameter MSB=16)   (
             end
 
           // dac ref mux
-          12 :
-            begin
-              reg_dac_ref_mux = reg_dac_ref_mux | (val & 4'b1111) ; // set
-              reg_dac_ref_mux = ~(~reg_dac_ref_mux | (val >> 4)); // clear
-            end
+          12 : reg_dac_ref_mux = update(reg_dac_ref_mux, val);
 
           // adc
-          14 :
-            begin
-              reg_adc = reg_adc | (val & 4'b1111) ; // set
-              reg_adc = ~(~reg_adc | (val >> 4)); // clear
-            end
+          14 : reg_adc = update(reg_adc, val);
 
 
         endcase
