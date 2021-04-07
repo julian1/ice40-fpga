@@ -42,7 +42,10 @@ endfunction
 
 function [8-1:0] update (input [8-1:0] x, input [8-1:0]  val);
   begin
-    update = ~(~  (x | (val & 4'b1111)) | (val >> 4));
+    if( (val & 4'b1111) & (val >> 4) /*!= 0*/  ) // both set and clear, then its a toggle
+      update =  ((val & 4'b1111) & (val >> 4))  ^ x ; // xor. to toggle.
+    else
+      update = ~(~  (x | (val & 4'b1111)) | (val >> 4));
   end
 endfunction
 
@@ -266,6 +269,9 @@ module my_miso_mux    (
     // else use the vector
     else
       miso = (reg_mux & miso_vec) != 0 ;   // hmmm seems ok.
+                                          // TODO should just be able to express without !=
+                                          // eg. (reg_mux & miso_vec)
+                                            // NOPE.
 
 endmodule
 
