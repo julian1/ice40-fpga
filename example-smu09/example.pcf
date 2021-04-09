@@ -82,6 +82,10 @@ set_io CLAMP2_INJECT_ERR 58
 set_io CLAMP2_INJECT_VFB 60
 set_io CLAMP2_MAX        56
 
+# relay com
+set_io RELAY_COM_X  114
+set_io RELAY_COM_Y  115
+set_io RELAY_COM_Z  116
 
 
 

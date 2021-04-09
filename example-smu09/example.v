@@ -41,7 +41,7 @@ endfunction
 
 function [7:0] sum (input [7:0] a, b);
   begin
-   j = a;   // issue is if try to use? 
+   j = a;   // issue is if try to use?
    sum = j + b;
   end
 endfunction
@@ -102,7 +102,9 @@ module my_register_bank   #(parameter MSB=16)   (
   output reg [4-1:0] reg_dac_ref_mux,
   output reg [4-1:0] reg_adc,
   output reg [4-1:0] reg_clamp1,
-  output reg [4-1:0] reg_clamp2
+  output reg [4-1:0] reg_clamp2,
+  output reg [4-1:0] reg_relay_com
+
 );
 
 
@@ -209,14 +211,10 @@ module my_register_bank   #(parameter MSB=16)   (
 
           // dac ref mux
           12 : reg_dac_ref_mux = update(reg_dac_ref_mux, val);
-
-          // adc
-          14 : reg_adc = update(reg_adc, val);
-
-          // clamps
-          15 : reg_clamp1 = update(reg_clamp1, val);
-          16 : reg_clamp2 = update(reg_clamp2, val);
-
+          14 : reg_adc         = update(reg_adc, val);
+          15 : reg_clamp1      = update(reg_clamp1, val);
+          16 : reg_clamp2      = update(reg_clamp2, val);
+          17:  reg_relay_com   = update(reg_relay_com, val);
           // test byte. with pattern. to test spi read.
 
 
@@ -380,7 +378,13 @@ module top (
   output CLAMP2_MIN,
   output CLAMP2_INJECT_ERR,
   output CLAMP2_INJECT_VFB,
-  output CLAMP2_MAX
+  output CLAMP2_MAX,
+
+  // relay com
+  output RELAY_COM_X,
+  output RELAY_COM_Y,
+  output RELAY_COM_Z
+
 
 
 );
@@ -481,6 +485,8 @@ module top (
   wire [4-1:0] reg_clamp2;
   assign { CLAMP2_MAX, CLAMP2_INJECT_VFB, CLAMP2_INJECT_ERR, CLAMP2_MIN} = reg_clamp2;
 
+  wire [4-1:0] reg_relay_com;
+  assign { RELAY_COM_Z, RELAY_COM_Y, RELAY_COM_X } = reg_relay_com;
 
 
 
@@ -506,7 +512,8 @@ module top (
     . reg_dac_ref_mux(reg_dac_ref_mux),
     . reg_adc(reg_adc),
     . reg_clamp1(reg_clamp1),
-    . reg_clamp2(reg_clamp2)
+    . reg_clamp2(reg_clamp2),
+    . reg_relay_com(reg_relay_com)
   );
 
 
