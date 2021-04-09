@@ -208,15 +208,16 @@ module my_register_bank   #(parameter MSB=16)   (
             */
             begin
               // none of this is any good... we need mux ctl pulled high etc.
+              // does verilog expand 0 constant to fill all bits?
               reg_led = 0;
-              reg_mux = 0;
+              reg_mux = 0;          // should just be 0b
               reg_dac = 0;
-              reg_rails = 0;      // preferrably, OE should come up high = deassert,
-              reg_dac_ref_mux = 0;
+              reg_rails = 0;        // preferrably, OE should come up high = deassert,
+              reg_dac_ref_mux = 0;  // 4'b1111
               reg_adc = 0;
-              reg_clamp1 = 0;
-              reg_clamp2 = 0;
-              reg_relay_com = 0;
+              reg_clamp1 = 0;       // 4'b1111 eg.
+              reg_clamp2 = 0;       // 4'b1111
+              reg_relay_com = 0;    // 4'b0000
             end
 
           // dac ref mux
