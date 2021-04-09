@@ -87,7 +87,11 @@ set_io RELAY_COM_X  114
 set_io RELAY_COM_Y  115
 set_io RELAY_COM_Z  116
 
-
+# irangex
+set_io IRANGEX_SW1 117
+set_io IRANGEX_SW2 118
+set_io IRANGEX_SW3 119
+set_io IRANGEX_SW4 120
 
 
 

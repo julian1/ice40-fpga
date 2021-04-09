@@ -103,7 +103,8 @@ module my_register_bank   #(parameter MSB=16)   (
   output reg [4-1:0] reg_adc,
   output reg [4-1:0] reg_clamp1,
   output reg [4-1:0] reg_clamp2,
-  output reg [4-1:0] reg_relay_com
+  output reg [4-1:0] reg_relay_com,
+  output reg [4-1:0] reg_irangex_sw
 
 );
 
@@ -222,8 +223,8 @@ module my_register_bank   #(parameter MSB=16)   (
           15 : reg_clamp1      = update(reg_clamp1, val);
           16 : reg_clamp2      = update(reg_clamp2, val);
           17:  reg_relay_com   = update(reg_relay_com, val);
-          // test byte. with pattern. to test spi read.
 
+          18:  reg_irangex_sw  = update(reg_irangex_sw, val);
 
         endcase
       end
@@ -390,8 +391,13 @@ module top (
   // relay com
   output RELAY_COM_X,
   output RELAY_COM_Y,
-  output RELAY_COM_Z
+  output RELAY_COM_Z,
 
+  // irangex
+  output IRANGEX_SW1,
+  output IRANGEX_SW2,
+  output IRANGEX_SW3,
+  output IRANGEX_SW4
 
 
 );
@@ -495,6 +501,8 @@ module top (
   wire [4-1:0] reg_relay_com;
   assign { RELAY_COM_Z, RELAY_COM_Y, RELAY_COM_X } = reg_relay_com;
 
+  wire [4-1:0] reg_irangex_sw;
+  assign { IRANGEX_SW4, IRANGEX_SW3, IRANGEX_SW2, IRANGEX_SW1 } = reg_irangex_sw;
 
 
 
@@ -520,7 +528,8 @@ module top (
     . reg_adc(reg_adc),
     . reg_clamp1(reg_clamp1),
     . reg_clamp2(reg_clamp2),
-    . reg_relay_com(reg_relay_com)
+    . reg_relay_com(reg_relay_com),
+    . reg_irangex_sw(reg_irangex_sw)
   );
 
 
