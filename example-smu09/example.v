@@ -90,7 +90,7 @@ endfunction
 module my_register_bank   #(parameter MSB=16)   (
   input  clk,
   input  cs,
-  input  special,
+  input  special,     // TODO swap order specia/din
   input  din,       // sdi
   output dout,   // sdo
 
@@ -98,7 +98,7 @@ module my_register_bank   #(parameter MSB=16)   (
   output reg [4-1:0] reg_led,     // need to be very careful. only 4 bits. or else screws set/reset calculation ...
   output reg [4-1:0] reg_mux,
   output reg [4-1:0] reg_dac,
-  output reg [4-1:0] reg_rails,
+  output reg [4-1:0] reg_rails,   /* reg_rails_initital */
   output reg [4-1:0] reg_dac_ref_mux,
   output reg [4-1:0] reg_adc,
   output reg [4-1:0] reg_clamp1,
@@ -200,9 +200,11 @@ module my_register_bank   #(parameter MSB=16)   (
 
           // soft reset
           11 :
-            /* we just need to assert an output line.
-              and then we can set enumerated values from another module.
-              i think,
+            /*
+              No. just pass the reset value as a vec, just like pass the reg.
+              eg.  output reg_rails,  input reg_rails_init.
+              but. note that everything comes up hi anyway before flash load
+              OR. just those that are *not* to be set to zer.
             */
             begin
               // none of this is any good... we need mux ctl pulled high etc.
