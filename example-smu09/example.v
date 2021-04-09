@@ -199,12 +199,16 @@ module my_register_bank   #(parameter MSB=16)   (
 
           // soft reset
           11 :
+            /* we just need to assert an output line.
+              and then we can set enumerated values from another module.
+              i think,
+            */
             begin
+              // none of this is any good... we need mux ctl pulled high etc.
               reg_led = 0;
               reg_mux = 0;
               reg_dac = 0;
               reg_rails = 0;      // preferrably, OE should come up high = deassert,
-                                  // but it's ok, as pins will also be low.
               reg_dac_ref_mux = 0;
               reg_adc = 0;
               reg_clamp1 = 0;
