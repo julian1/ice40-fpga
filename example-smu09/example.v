@@ -207,6 +207,9 @@ module my_register_bank   #(parameter MSB=16)   (
                                   // but it's ok, as pins will also be low.
               reg_dac_ref_mux = 0;
               reg_adc = 0;
+              reg_clamp1 = 0;
+              reg_clamp2 = 0;
+              reg_relay_com = 0;
             end
 
           // dac ref mux
