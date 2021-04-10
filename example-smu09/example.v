@@ -104,7 +104,8 @@ module my_register_bank   #(parameter MSB=16)   (
   output reg [4-1:0] reg_clamp1,
   output reg [4-1:0] reg_clamp2,
   output reg [4-1:0] reg_relay_com,
-  output reg [4-1:0] reg_irangex_sw
+  output reg [4-1:0] reg_irangex_sw,
+  output reg [4-1:0] reg_relay
 
 );
 
@@ -187,15 +188,10 @@ module my_register_bank   #(parameter MSB=16)   (
             end
 
           // mux
-          8 : reg_mux = update(reg_mux, val);
-
-          // dac
-          9  : reg_dac = update(reg_dac, val);
-
-          // rails
-          10 :
+          8 :  reg_mux =    update(reg_mux, val);
+          9 :  reg_dac =    update(reg_dac, val);
+          10 : reg_rails =  update(reg_rails, val);
               // reg_rails = 4'b0111; // turn on oe, and turn on outputs
-              reg_rails = update(reg_rails, val);
 
 
           // soft reset
@@ -221,13 +217,13 @@ module my_register_bank   #(parameter MSB=16)   (
             end
 
           // dac ref mux
-          12 : reg_dac_ref_mux = update(reg_dac_ref_mux, val);
-          14 : reg_adc         = update(reg_adc, val);
-          15 : reg_clamp1      = update(reg_clamp1, val);
-          16 : reg_clamp2      = update(reg_clamp2, val);
-          17:  reg_relay_com   = update(reg_relay_com, val);
-
-          18:  reg_irangex_sw  = update(reg_irangex_sw, val);
+          12 : reg_dac_ref_mux  = update(reg_dac_ref_mux, val);
+          14 : reg_adc          = update(reg_adc, val);
+          15 : reg_clamp1       = update(reg_clamp1, val);
+          16 : reg_clamp2       = update(reg_clamp2, val);
+          17 : reg_relay_com    = update(reg_relay_com, val);
+          18 : reg_irangex_sw   = update(reg_irangex_sw, val);
+          19 : reg_relay        = update(reg_relay, val);
 
         endcase
       end
@@ -400,8 +396,12 @@ module top (
   output IRANGEX_SW1,
   output IRANGEX_SW2,
   output IRANGEX_SW3,
-  output IRANGEX_SW4
+  output IRANGEX_SW4,
 
+  // relay
+  output RELAY_VRANGE,
+  output RELAY_OUTCOM,
+  output RELAY_SENSE
 
 );
 
@@ -507,6 +507,9 @@ module top (
   wire [4-1:0] reg_irangex_sw;
   assign { IRANGEX_SW4, IRANGEX_SW3, IRANGEX_SW2, IRANGEX_SW1 } = reg_irangex_sw;
 
+  wire [4-1:0] reg_relay;
+  assign { RELAY_SENSE, RELAY_OUTCOM, RELAY_VRANGE } = reg_relay;
+
 
 
   /*
@@ -532,7 +535,8 @@ module top (
     . reg_clamp1(reg_clamp1),
     . reg_clamp2(reg_clamp2),
     . reg_relay_com(reg_relay_com),
-    . reg_irangex_sw(reg_irangex_sw)
+    . reg_irangex_sw(reg_irangex_sw),
+    . reg_relay(reg_relay)
   );
 
 

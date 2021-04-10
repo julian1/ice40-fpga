@@ -94,4 +94,12 @@ set_io IRANGEX_SW3 119
 set_io IRANGEX_SW4 120
 
 
+# relay
+set_io RELAY_VRANGE  113
+set_io RELAY_OUTCOM   95    # not monotonic
+set_io RELAY_SENSE   112
+
+
+
+
 
