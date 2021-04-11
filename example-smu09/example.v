@@ -105,7 +105,8 @@ module my_register_bank   #(parameter MSB=16)   (
   output reg [4-1:0] reg_clamp2,
   output reg [4-1:0] reg_relay_com,
   output reg [4-1:0] reg_irangex_sw,
-  output reg [4-1:0] reg_relay
+  output reg [4-1:0] reg_relay,
+  output reg [4-1:0] reg_irange_sense
 
 );
 
@@ -215,7 +216,8 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_clamp2 = 0;       // 4'b1111
               reg_relay_com = 0;    // 4'b0000
               reg_irangex_sw = 0;   // hi.
-              reg_relay = 0;        // lo 
+              reg_relay = 0;        // lo
+              reg_irange_sense = 4'b1111;
             end
 
           // dac ref mux
@@ -226,6 +228,7 @@ module my_register_bank   #(parameter MSB=16)   (
           17 : reg_relay_com    = update(reg_relay_com, val);
           18 : reg_irangex_sw   = update(reg_irangex_sw, val);
           19 : reg_relay        = update(reg_relay, val);
+          20 : reg_irange_sense = update(reg_irange_sense, val);
 
         endcase
       end
@@ -403,7 +406,15 @@ module top (
   // relay
   output RELAY_VRANGE,
   output RELAY_OUTCOM,
-  output RELAY_SENSE
+  output RELAY_SENSE,
+
+  // irange sense
+  output IRANGE_SENSE1,
+  output IRANGE_SENSE2,
+  output IRANGE_SENSE3,
+  output IRANGE_SENSE4
+
+
 
 );
 
@@ -512,6 +523,12 @@ module top (
   wire [4-1:0] reg_relay;
   assign { RELAY_SENSE, RELAY_OUTCOM, RELAY_VRANGE } = reg_relay;
 
+  wire [4-1:0] reg_irange_sense;
+  assign { IRANGE_SENSE4, IRANGE_SENSE3, IRANGE_SENSE2, IRANGE_SENSE1 } = reg_irange_sense;
+
+
+
+
 
 
   /*
@@ -538,7 +555,8 @@ module top (
     . reg_clamp2(reg_clamp2),
     . reg_relay_com(reg_relay_com),
     . reg_irangex_sw(reg_irangex_sw),
-    . reg_relay(reg_relay)
+    . reg_relay(reg_relay),
+    . reg_irange_sense(reg_irange_sense)
   );
 
 

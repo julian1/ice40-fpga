@@ -100,6 +100,11 @@ set_io RELAY_OUTCOM   95    # not monotonic
 set_io RELAY_SENSE   112
 
 
+# irange sense
+set_io IRANGE_SENSE1  78
+set_io IRANGE_SENSE2  79
+set_io IRANGE_SENSE3  80
+set_io IRANGE_SENSE4  81
 
 
 
