@@ -107,7 +107,8 @@ module my_register_bank   #(parameter MSB=16)   (
   output reg [4-1:0] reg_irangex_sw,
   output reg [4-1:0] reg_relay,
   output reg [4-1:0] reg_irange_sense,
-  output reg [4-1:0] reg_gain_fb
+  output reg [4-1:0] reg_gain_fb,
+  output reg [4-1:0] reg_irangex58_sw
 
 );
 
@@ -220,6 +221,8 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_relay = 0;        // lo
               reg_irange_sense = 4'b1111;
               reg_gain_fb = 0;
+              reg_irangex58_sw = 4'b1111;
+
             end
 
           // dac ref mux
@@ -232,7 +235,7 @@ module my_register_bank   #(parameter MSB=16)   (
           19 : reg_relay        = update(reg_relay, val);
           20 : reg_irange_sense = update(reg_irange_sense, val);
           21 : reg_gain_fb      = update(reg_gain_fb, val);
-
+          22 : reg_irangex58_sw = update(reg_irangex58_sw, val);
 
         endcase
       end
@@ -422,7 +425,13 @@ module top (
   output GAIN_FB_VRANGE_OP1,
   output GAIN_FB_VRANGE_OP2,
   output GAIN_FB_IRANGE_OP1,
-  output GAIN_FB_IRANGE_OP2
+  output GAIN_FB_IRANGE_OP2,
+
+  // irangex 58
+  output IRANGEX_SW5,
+  output IRANGEX_SW6,
+  output IRANGEX_SW7,
+  output IRANGEX_SW8
 
 
 );
@@ -539,6 +548,10 @@ module top (
   assign { GAIN_FB_IRANGE_OP2, GAIN_FB_IRANGE_OP1, GAIN_FB_VRANGE_OP2, GAIN_FB_VRANGE_OP1  } = reg_gain_fb;
 
 
+  wire [4-1:0] reg_irangex58_sw;
+  assign { IRANGEX_SW8, IRANGEX_SW7, IRANGEX_SW6, IRANGEX_SW5 } = reg_irangex58_sw;
+
+
 
 
 
@@ -568,7 +581,8 @@ module top (
     . reg_irangex_sw(reg_irangex_sw),
     . reg_relay(reg_relay),
     . reg_irange_sense(reg_irange_sense),
-    . reg_gain_fb(reg_gain_fb)
+    . reg_gain_fb(reg_gain_fb),
+    . reg_irangex58_sw(reg_irangex58_sw)
   );
 
 

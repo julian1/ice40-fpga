@@ -113,6 +113,12 @@ set_io GAIN_FB_VRANGE_OP2 76
 set_io GAIN_FB_IRANGE_OP1 73
 set_io GAIN_FB_IRANGE_OP2 74
 
+#// better name?
+# IRANGEX_SW58_REGISTER
+set_io IRANGEX_SW5   121
+set_io IRANGEX_SW6   122
+set_io IRANGEX_SW7   134
+set_io IRANGEX_SW8   135
 
 
 
