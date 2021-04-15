@@ -221,7 +221,7 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_relay = 0;        // lo
               reg_irange_sense = 4'b1111;
               reg_gain_fb = 0;
-              reg_irangex58_sw = 4'b1111;
+              reg_irangex58_sw = 0; // adg1334
 
             end
 
