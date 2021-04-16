@@ -107,8 +107,9 @@ module my_register_bank   #(parameter MSB=16)   (
   output reg [4-1:0] reg_irangex_sw,
   output reg [4-1:0] reg_relay,
   output reg [4-1:0] reg_irange_sense,
-  output reg [4-1:0] reg_gain_fb,
-  output reg [4-1:0] reg_irangex58_sw
+  output reg [4-1:0] reg_ifb_gain,  // 2 bits
+  output reg [4-1:0] reg_irangex58_sw,
+  output reg [4-1:0] reg_vfb_gain   // 2 bits
 
 );
 
@@ -220,8 +221,9 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_irangex_sw = 0;   // hi.
               reg_relay = 0;        // lo
               reg_irange_sense = 4'b1111;
-              reg_gain_fb = 0;
+              reg_ifb_gain = 0;
               reg_irangex58_sw = 0; // adg1334
+              reg_vfb_gain = 0;
 
             end
 
@@ -234,8 +236,9 @@ module my_register_bank   #(parameter MSB=16)   (
           18 : reg_irangex_sw   = update(reg_irangex_sw, val);
           19 : reg_relay        = update(reg_relay, val);
           20 : reg_irange_sense = update(reg_irange_sense, val);
-          21 : reg_gain_fb      = update(reg_gain_fb, val);
+          21 : reg_ifb_gain     = update(reg_ifb_gain, val);
           22 : reg_irangex58_sw = update(reg_irangex58_sw, val);
+          23 : reg_vfb_gain     = update(reg_vfb_gain, val);
 
         endcase
       end
@@ -422,10 +425,10 @@ module top (
   output IRANGE_SENSE4,
 
   // gain fb
-  output GAIN_FB_VRANGE_OP1,
-  output GAIN_FB_VRANGE_OP2,
-  output GAIN_FB_IRANGE_OP1,
-  output GAIN_FB_IRANGE_OP2,
+  output GAIN_VFB_OP1,
+  output GAIN_VFB_OP2,
+  output GAIN_IFB_OP1,
+  output GAIN_IFB_OP2,
 
   // irangex 58
   output IRANGEX_SW5,
@@ -544,13 +547,16 @@ module top (
   wire [4-1:0] reg_irange_sense;
   assign { IRANGE_SENSE4, IRANGE_SENSE3, IRANGE_SENSE2, IRANGE_SENSE1 } = reg_irange_sense;
 
-  wire [4-1:0] reg_gain_fb;
-  assign { GAIN_FB_IRANGE_OP2, GAIN_FB_IRANGE_OP1, GAIN_FB_VRANGE_OP2, GAIN_FB_VRANGE_OP1  } = reg_gain_fb;
+  wire [4-1:0] reg_ifb_gain;
+  assign { GAIN_IFB_OP2, GAIN_IFB_OP1 } = reg_ifb_gain;
 
 
   wire [4-1:0] reg_irangex58_sw;
   assign { IRANGEX_SW8, IRANGEX_SW7, IRANGEX_SW6, IRANGEX_SW5 } = reg_irangex58_sw;
 
+
+  wire [4-1:0] reg_vfb_gain;
+  assign { GAIN_VFB_OP2, GAIN_VFB_OP1  } = reg_vfb_gain;
 
 
 
@@ -581,8 +587,9 @@ module top (
     . reg_irangex_sw(reg_irangex_sw),
     . reg_relay(reg_relay),
     . reg_irange_sense(reg_irange_sense),
-    . reg_gain_fb(reg_gain_fb),
-    . reg_irangex58_sw(reg_irangex58_sw)
+    . reg_ifb_gain(reg_ifb_gain),
+    . reg_irangex58_sw(reg_irangex58_sw),
+    . reg_vfb_gain(reg_vfb_gain)
   );
 
 
