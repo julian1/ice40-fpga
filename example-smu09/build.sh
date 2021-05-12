@@ -2,6 +2,7 @@
 
 
 # nix-shell -p yosys arachne-pnr icestorm usbutils
+# nix-shell ~/nixos-config/examples/icestorm.nix
 
 # ./build.sh  2>&1  | grep warning
 
