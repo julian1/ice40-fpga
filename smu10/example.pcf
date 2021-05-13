@@ -48,10 +48,12 @@ set_io FLASH_MOSI   104
 set_io FLASH_MISO   105
 
 # rails
+set_io RAILS_OE     95    # smu10 not contig. 
+
+set_io RAILS_LP5V   37    # smu10
 set_io RAILS_LP15V  38
 set_io RAILS_LP30V  39
 set_io RAILS_LP60V  41
-set_io RAILS_OE     37
 
 # ref mux
 set_io DAC_REF_MUX_A 33
@@ -96,7 +98,7 @@ set_io IRANGEX_SW4 120
 
 # relay
 set_io RELAY_VRANGE  113
-set_io RELAY_OUTCOM   95    # not monotonic
+# set_io RELAY_OUTCOM   95    # not monotonic
 set_io RELAY_SENSE   112
 
 

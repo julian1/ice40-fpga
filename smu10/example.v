@@ -109,8 +109,9 @@ module my_register_bank   #(parameter MSB=16)   (
   output reg [4-1:0] reg_irange_sense,
   output reg [4-1:0] reg_ifb_gain,  // 2 bits
   output reg [4-1:0] reg_irangex58_sw,
-  output reg [4-1:0] reg_vfb_gain   // 2 bits
+  output reg [4-1:0] reg_vfb_gain,   // 2 bits
 
+  output reg [4-1:0] reg_rails_oe   /* reg_rails_initital */
 );
 
 
@@ -195,7 +196,6 @@ module my_register_bank   #(parameter MSB=16)   (
           8 :  reg_mux =    update(reg_mux, val);
           9 :  reg_dac =    update(reg_dac, val);
           10 : reg_rails =  update(reg_rails, val);
-              // reg_rails = 4'b0111; // turn on oe, and turn on outputs
 
 
           // soft reset
@@ -225,6 +225,7 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_irangex58_sw = 0; // adg1334
               reg_vfb_gain = 0;
 
+              reg_rails_oe = 0; 
             end
 
           // dac ref mux
@@ -239,6 +240,8 @@ module my_register_bank   #(parameter MSB=16)   (
           21 : reg_ifb_gain     = update(reg_ifb_gain, val);
           22 : reg_irangex58_sw = update(reg_irangex58_sw, val);
           23 : reg_vfb_gain     = update(reg_vfb_gain, val);
+
+          24 : reg_rails_oe =   update(reg_rails_oe, val);
 
         endcase
       end
@@ -370,9 +373,11 @@ module top (
   input  FLASH_MISO,   // input
 
   // rails
+  output RAILS_LP5V,
   output RAILS_LP15V,
   output RAILS_LP30V,
   output RAILS_LP60V,
+
   output RAILS_OE,
 
   // dac ref mux
@@ -415,7 +420,7 @@ module top (
 
   // relay
   output RELAY_VRANGE,
-  output RELAY_OUTCOM,
+  // output RELAY_OUTCOM,
   output RELAY_SENSE,
 
   // irange sense
@@ -518,7 +523,14 @@ module top (
 
 
   wire [4-1:0] reg_rails;
-  assign { RAILS_OE, RAILS_LP60V, RAILS_LP30V, RAILS_LP15V } = reg_rails;
+  assign { RAILS_LP60V, RAILS_LP30V, RAILS_LP15V, RAILS_LP5V } = reg_rails;
+
+  wire [4-1:0] reg_rails_oe;
+  assign { RAILS_OE  } = reg_rails_oe;
+
+
+
+
 
 
   wire [4-1:0] reg_dac_ref_mux;
@@ -542,7 +554,7 @@ module top (
   assign { IRANGEX_SW4, IRANGEX_SW3, IRANGEX_SW2, IRANGEX_SW1 } = reg_irangex_sw;
 
   wire [4-1:0] reg_relay;
-  assign { RELAY_SENSE, RELAY_OUTCOM, RELAY_VRANGE } = reg_relay;
+  assign { RELAY_SENSE, /*RELAY_OUTCOM, */ RELAY_VRANGE } = reg_relay;
 
   wire [4-1:0] reg_irange_sense;
   assign { IRANGE_SENSE4, IRANGE_SENSE3, IRANGE_SENSE2, IRANGE_SENSE1 } = reg_irange_sense;
@@ -589,7 +601,9 @@ module top (
     . reg_irange_sense(reg_irange_sense),
     . reg_ifb_gain(reg_ifb_gain),
     . reg_irangex58_sw(reg_irangex58_sw),
-    . reg_vfb_gain(reg_vfb_gain)
+    . reg_vfb_gain(reg_vfb_gain),
+
+    . reg_rails_oe(reg_rails_oe)
   );
 
 
