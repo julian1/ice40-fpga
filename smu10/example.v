@@ -212,7 +212,7 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_led = 0;
               reg_mux = 0;          // should just be 0b
               reg_dac = 0;
-              reg_rails = 0;        // preferrably, OE should come up high = deassert,
+              reg_rails = 0;
               reg_dac_ref_mux = 0;  // 4'b1111
               reg_adc = 0;
               reg_clamp1 = 0;       // 4'b1111 eg.
@@ -224,8 +224,7 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_ifb_gain = 0;
               reg_irangex58_sw = 0; // adg1334
               reg_vfb_gain = 0;
-
-              reg_rails_oe = 0; 
+              reg_rails_oe = 0;
             end
 
           // dac ref mux
@@ -522,7 +521,9 @@ module top (
   // ADC_03... no configuration pins.
 
 
-  wire [4-1:0] reg_rails;
+  // OK...
+  wire [4-1:0] reg_rails ;
+  // assign { RAILS_LP60V, RAILS_LP30V, RAILS_LP15V, RAILS_LP5V } = 4'b1111;   // OK. good way to test pins.
   assign { RAILS_LP60V, RAILS_LP30V, RAILS_LP15V, RAILS_LP5V } = reg_rails;
 
   wire [4-1:0] reg_rails_oe;
