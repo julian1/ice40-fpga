@@ -111,7 +111,9 @@ module my_register_bank   #(parameter MSB=16)   (
   // output reg [4-1:0] reg_irangex58_sw,
   output reg [4-1:0] reg_vfb_gain,   // 2 bits
 
-  output reg [4-1:0] reg_rails_oe   /* reg_rails_initital */
+  ////// smu10
+  output reg [4-1:0] reg_rails_oe,
+  output reg [4-1:0] reg_ina_vfb_sw
 );
 
 
@@ -224,7 +226,9 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_ifb_gain = 0;
               // reg_irangex58_sw = 0; // adg1334
               reg_vfb_gain = 0;
+              // smu10
               reg_rails_oe = 0;
+              reg_ina_vfb_sw = 0;
             end
 
           // dac ref mux
@@ -240,7 +244,9 @@ module my_register_bank   #(parameter MSB=16)   (
           // 22 : reg_irangex58_sw = update(reg_irangex58_sw, val);
           23 : reg_vfb_gain     = update(reg_vfb_gain, val);
 
-          24 : reg_rails_oe =   update(reg_rails_oe, val);
+          // smu10
+          24 : reg_rails_oe     = update(reg_rails_oe, val);
+          25 : reg_ina_vfb_sw   = update(reg_ina_vfb_sw, val);
 
         endcase
       end
@@ -438,9 +444,9 @@ module top (
   // deprecate
 
   // reg_ina_vfb_sw
-  output INA_VFB_SW3_CTL, 
-  output INA_VFB_SW2_CTL, 
-  output INA_VFB_SW1_CTL 
+  output INA_VFB_SW3_CTL,
+  output INA_VFB_SW2_CTL,
+  output INA_VFB_SW1_CTL
 );
 
 
@@ -608,7 +614,8 @@ module top (
     // . reg_irangex58_sw(reg_irangex58_sw),
     . reg_vfb_gain(reg_vfb_gain),
 
-    . reg_rails_oe(reg_rails_oe)
+    . reg_rails_oe(reg_rails_oe),
+    . reg_ina_vfb_sw(reg_ina_vfb_sw)
   );
 
 
