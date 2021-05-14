@@ -113,7 +113,9 @@ module my_register_bank   #(parameter MSB=16)   (
 
   ////// smu10
   output reg [4-1:0] reg_rails_oe,
-  output reg [4-1:0] reg_ina_vfb_sw
+  output reg [4-1:0] reg_ina_vfb_sw,
+  output reg [4-1:0] reg_ina_diff_sw
+
 );
 
 
@@ -231,6 +233,7 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_rails_oe = 4'b0001;   // active lo. IMPORTANT.  keep hi. until ready to turn on rails.
                                         // weird. for smu09, on first flash. ice40 pins came up hi.
               reg_ina_vfb_sw = 0;
+              reg_ina_diff_sw = 0;
             end
 
           // dac ref mux
@@ -249,6 +252,7 @@ module my_register_bank   #(parameter MSB=16)   (
           // smu10
           24 : reg_rails_oe     = update(reg_rails_oe, val);
           25 : reg_ina_vfb_sw   = update(reg_ina_vfb_sw, val);
+          26 : reg_ina_diff_sw  = update(reg_ina_diff_sw, val);
 
         endcase
       end
@@ -448,7 +452,13 @@ module top (
   // reg_ina_vfb_sw
   output INA_VFB_SW3_CTL,
   output INA_VFB_SW2_CTL,
-  output INA_VFB_SW1_CTL
+  output INA_VFB_SW1_CTL,
+
+  // reg_ina_diff_sw
+  output INA_DIFF_SW1_CTL,
+  output INA_DIFF_SW2_CTL
+
+
 );
 
 
@@ -579,9 +589,13 @@ module top (
   wire [4-1:0] reg_vfb_gain;
   assign { GAIN_VFB_OP2, GAIN_VFB_OP1  } = reg_vfb_gain;
 
-
+  //////////////
+  // smu10
   wire [4-1:0] reg_ina_vfb_sw;
   assign { INA_VFB_SW3_CTL, INA_VFB_SW2_CTL, INA_VFB_SW1_CTL } = reg_ina_vfb_sw;
+
+  wire [4-1:0] reg_ina_diff_sw;
+  assign { INA_DIFF_SW2_CTL, INA_DIFF_SW1_CTL } = reg_ina_diff_sw;
 
 
 
@@ -617,7 +631,9 @@ module top (
     . reg_vfb_gain(reg_vfb_gain),
 
     . reg_rails_oe(reg_rails_oe),
-    . reg_ina_vfb_sw(reg_ina_vfb_sw)
+    . reg_ina_vfb_sw(reg_ina_vfb_sw),
+    . reg_ina_diff_sw(reg_ina_diff_sw)
+
   );
 
 

@@ -48,7 +48,7 @@ set_io FLASH_MOSI   104
 set_io FLASH_MISO   105
 
 # rails
-set_io RAILS_OE     95    # smu10 not contig. 
+set_io RAILS_OE     95    # smu10 not contig.
 
 set_io RAILS_LP5V   37    # smu10
 set_io RAILS_LP15V  38
@@ -98,7 +98,7 @@ set_io IRANGEX_SW4 120
 
 # relay
 set_io RELAY_VRANGE  113
-# set_io RELAY_OUTCOM   95    # not monotonic
+# set_io RELAY_OUTCOM   95    # non contiguous.
 set_io RELAY_SENSE   112
 
 
@@ -131,6 +131,10 @@ set_io GAIN_VFB_OP2 76
 set_io INA_VFB_SW1_CTL 135
 set_io INA_VFB_SW2_CTL 136
 set_io INA_VFB_SW3_CTL 137
+
+# ina_diff_sw
+set_io INA_DIFF_SW1_CTL  138
+set_io INA_DIFF_SW2_CTL  96   # non. contiguous.
 
 
 
