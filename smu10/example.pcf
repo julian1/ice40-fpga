@@ -119,12 +119,23 @@ set_io GAIN_IFB_OP2   74
 
 #// better name?
 # IRANGEX_SW58_REGISTER
-set_io IRANGEX_SW5   121
-set_io IRANGEX_SW6   122
-set_io IRANGEX_SW7   134
-set_io IRANGEX_SW8   135
+
+
 
 # #define GAIN_VFB_REGISTER    23
 set_io GAIN_VFB_OP1 75
 set_io GAIN_VFB_OP2 76
+
+
+# ina_vfb_sw
+set_io INA_VFB_SW1_CTL 135
+set_io INA_VFB_SW2_CTL 136
+set_io INA_VFB_SW3_CTL 137
+
+
+
+
+
+
+
 

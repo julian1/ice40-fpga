@@ -108,7 +108,7 @@ module my_register_bank   #(parameter MSB=16)   (
   output reg [4-1:0] reg_relay,
   output reg [4-1:0] reg_irange_sense,
   output reg [4-1:0] reg_ifb_gain,  // 2 bits
-  output reg [4-1:0] reg_irangex58_sw,
+  // output reg [4-1:0] reg_irangex58_sw,
   output reg [4-1:0] reg_vfb_gain,   // 2 bits
 
   output reg [4-1:0] reg_rails_oe   /* reg_rails_initital */
@@ -222,7 +222,7 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_relay = 0;        // lo
               reg_irange_sense = 4'b1111;
               reg_ifb_gain = 0;
-              reg_irangex58_sw = 0; // adg1334
+              // reg_irangex58_sw = 0; // adg1334
               reg_vfb_gain = 0;
               reg_rails_oe = 0;
             end
@@ -237,7 +237,7 @@ module my_register_bank   #(parameter MSB=16)   (
           19 : reg_relay        = update(reg_relay, val);
           20 : reg_irange_sense = update(reg_irange_sense, val);
           21 : reg_ifb_gain     = update(reg_ifb_gain, val);
-          22 : reg_irangex58_sw = update(reg_irangex58_sw, val);
+          // 22 : reg_irangex58_sw = update(reg_irangex58_sw, val);
           23 : reg_vfb_gain     = update(reg_vfb_gain, val);
 
           24 : reg_rails_oe =   update(reg_rails_oe, val);
@@ -435,12 +435,12 @@ module top (
   output GAIN_IFB_OP2,
 
   // irangex 58
-  output IRANGEX_SW5,
-  output IRANGEX_SW6,
-  output IRANGEX_SW7,
-  output IRANGEX_SW8
+  // deprecate
 
-
+  // reg_ina_vfb_sw
+  output INA_VFB_SW3_CTL, 
+  output INA_VFB_SW2_CTL, 
+  output INA_VFB_SW1_CTL 
 );
 
 
@@ -564,12 +564,16 @@ module top (
   assign { GAIN_IFB_OP2, GAIN_IFB_OP1 } = reg_ifb_gain;
 
 
-  wire [4-1:0] reg_irangex58_sw;
-  assign { IRANGEX_SW8, IRANGEX_SW7, IRANGEX_SW6, IRANGEX_SW5 } = reg_irangex58_sw;
+  // wire [4-1:0] reg_irangex58_sw;
+  // assign { IRANGEX_SW8, IRANGEX_SW7, IRANGEX_SW6, IRANGEX_SW5 } = reg_irangex58_sw;
 
 
   wire [4-1:0] reg_vfb_gain;
   assign { GAIN_VFB_OP2, GAIN_VFB_OP1  } = reg_vfb_gain;
+
+
+  wire [4-1:0] reg_ina_vfb_sw;
+  assign { INA_VFB_SW3_CTL, INA_VFB_SW2_CTL, INA_VFB_SW1_CTL } = reg_ina_vfb_sw;
 
 
 
@@ -601,7 +605,7 @@ module top (
     . reg_relay(reg_relay),
     . reg_irange_sense(reg_irange_sense),
     . reg_ifb_gain(reg_ifb_gain),
-    . reg_irangex58_sw(reg_irangex58_sw),
+    // . reg_irangex58_sw(reg_irangex58_sw),
     . reg_vfb_gain(reg_vfb_gain),
 
     . reg_rails_oe(reg_rails_oe)
