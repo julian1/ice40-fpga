@@ -220,14 +220,16 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_clamp1 = 0;       // 4'b1111 eg.
               reg_clamp2 = 0;       // 4'b1111
               reg_relay_com = 0;    // 4'b0000
-              reg_irangex_sw = 0;   // hi.
+              reg_irangex_sw = 0;   // active hi?
               reg_relay = 0;        // lo
               reg_irange_sense = 4'b1111;
               reg_ifb_gain = 0;
               // reg_irangex58_sw = 0; // adg1334
               reg_vfb_gain = 0;
+              ///////////////////
               // smu10
-              reg_rails_oe = 0;
+              reg_rails_oe = 4'b0001;   // active lo. IMPORTANT.  keep hi. until ready to turn on rails.
+                                        // weird. for smu09, on first flash. ice40 pins came up hi.
               reg_ina_vfb_sw = 0;
             end
 
