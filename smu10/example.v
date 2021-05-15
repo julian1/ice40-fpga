@@ -261,6 +261,8 @@ module my_register_bank   #(parameter MSB=16)   (
           27 : reg_isense_sw    = update(reg_isense_sw, val);
           28 : reg_ina_ifb_sw   = update(reg_ina_ifb_sw, val);
 
+          // version... reg. for read only.
+
 
         endcase
       end
