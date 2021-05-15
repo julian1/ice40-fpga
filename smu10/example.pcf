@@ -134,15 +134,17 @@ set_io INA_DIFF_SW1_CTL  138
 set_io INA_DIFF_SW2_CTL  96   # non. contiguous.
 
 
-#  rename ISENSE_MUX_SW1_CTL in schematic
+# reg_isense_sw
+# rename ISENSE_MUX_SW1_CTL in schematic
 set_io ISENSE_SW1_CTL   78
 set_io ISENSE_SW2_CTL   79
 set_io ISENSE_SW3_CTL   80
 
-
+# reg_ina_ifb_sw
 set_io INA_IFB_SW1_CTL  121
 set_io INA_IFB_SW2_CTL  122
 set_io INA_IFB_SW3_CTL  134
+
 
 
 
