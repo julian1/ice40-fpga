@@ -103,10 +103,7 @@ set_io RELAY_SENSE   112
 
 
 # irange sense
-set_io IRANGE_SENSE1  78
-set_io IRANGE_SENSE2  79
-set_io IRANGE_SENSE3  80
-set_io IRANGE_SENSE4  81
+# deprecated
 
 # fb gain register
 # not monotonoic. order is inx order on dg444. TODO maybe swap on ice40
@@ -116,9 +113,8 @@ set_io GAIN_IFB_OP1   73
 set_io GAIN_IFB_OP2   74
 
 
-
-#// better name?
 # IRANGEX_SW58_REGISTER
+# deprecated
 
 
 
@@ -126,6 +122,7 @@ set_io GAIN_IFB_OP2   74
 set_io GAIN_VFB_OP1 75
 set_io GAIN_VFB_OP2 76
 
+#####################################
 
 # ina_vfb_sw
 set_io INA_VFB_SW1_CTL 135
@@ -137,8 +134,15 @@ set_io INA_DIFF_SW1_CTL  138
 set_io INA_DIFF_SW2_CTL  96   # non. contiguous.
 
 
+#  rename ISENSE_MUX_SW1_CTL in schematic
+set_io ISENSE_SW1_CTL   78
+set_io ISENSE_SW2_CTL   79
+set_io ISENSE_SW3_CTL   80
 
 
+set_io INA_IFB_SW1_CTL  121
+set_io INA_IFB_SW2_CTL  122
+set_io INA_IFB_SW3_CTL  134
 
 
 
