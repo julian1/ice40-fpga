@@ -42,10 +42,12 @@ set_io DAC_UNI_BIP_A 31
 set_io DAC_UNI_BIP_B  32
 
 # flash
-set_io FLASH_CS     101     # flash_ss
-set_io FLASH_CLK    102     # flash_sck
-set_io FLASH_MOSI   104
-set_io FLASH_MISO   105
+# smu11.
+# this is really bad. should not be in different io banks.
+set_io FLASH_CS     22     # flash_ss
+set_io FLASH_CLK    101     # flash_sck
+set_io FLASH_MOSI   144
+set_io FLASH_MISO   114
 
 # rails
 set_io RAILS_OE     95    # smu10 not contig.
@@ -85,15 +87,17 @@ set_io CLAMP2_INJECT_VFB 60
 set_io CLAMP2_MAX        56
 
 # relay com
-set_io RELAY_COM_X  114
-set_io RELAY_COM_Y  115
-set_io RELAY_COM_Z  116
+# smu11.
+set_io RELAY_COM_X  116    
+set_io RELAY_COM_Y  117
+set_io RELAY_COM_Z  118
 
 # irangex
-set_io IRANGEX_SW1 117
-set_io IRANGEX_SW2 118
-set_io IRANGEX_SW3 119
-set_io IRANGEX_SW4 120
+# smu11
+set_io IRANGEX_SW1 119
+set_io IRANGEX_SW2 120
+set_io IRANGEX_SW3 121
+set_io IRANGEX_SW4 122
 
 
 # relay
@@ -141,9 +145,10 @@ set_io ISENSE_SW2_CTL   79
 set_io ISENSE_SW3_CTL   80
 
 # reg_ina_ifb_sw
-set_io INA_IFB_SW1_CTL  121
-set_io INA_IFB_SW2_CTL  122
-set_io INA_IFB_SW3_CTL  134
+# smu11
+set_io INA_IFB_SW1_CTL  102
+set_io INA_IFB_SW2_CTL  104
+set_io INA_IFB_SW3_CTL  105
 
 
 
