@@ -27,6 +27,6 @@ echo "finished"
 
 # send to device - 
 # TODO pass arg?
-iceprog ./build/example.bin
+#iceprog ./build/example.bin
 
 

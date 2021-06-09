@@ -114,9 +114,12 @@ module my_register_bank   #(parameter MSB=16)   (
   ////// smu10
   output reg [4-1:0] reg_rails_oe,
   output reg [4-1:0] reg_ina_vfb_sw,
-  output reg [4-1:0] reg_ina_diff_sw,
+  // output reg [4-1:0] reg_ina_diff_sw,
   output reg [4-1:0] reg_isense_sw,
-  output reg [4-1:0] reg_ina_ifb_sw
+  output reg [4-1:0] reg_ina_ifb_sw,
+
+  // smu11
+   output reg [4-1:0] reg_ina_vfb_atten_sw
 
 );
 
@@ -235,10 +238,11 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_rails_oe      = 4'b0001;   // active lo. IMPORTANT.  keep hi. until ready to turn on rails.
                                         // weird. for smu09, on first flash. ice40 pins came up lo.
               reg_ina_vfb_sw    = 0;
-              reg_ina_diff_sw   = 0;
+              // reg_ina_diff_sw   = 0;
               reg_isense_sw     = 4'b1111;
               reg_ina_ifb_sw    = 4'b1111;
 
+              reg_ina_vfb_atten_sw = 0;
             end
 
           // dac ref mux
@@ -261,6 +265,8 @@ module my_register_bank   #(parameter MSB=16)   (
           27 : reg_isense_sw    = update(reg_isense_sw, val);
           28 : reg_ina_ifb_sw   = update(reg_ina_ifb_sw, val);
 
+          // smu11
+          29 : reg_ina_vfb_atten_sw = update(reg_ina_vfb_atten_sw, val);
           // version... reg. for read only.
 
 
@@ -467,8 +473,8 @@ module top (
   output INA_VFB_SW1_CTL,
 
   // reg_ina_diff_sw
-  output INA_DIFF_SW1_CTL,
-  output INA_DIFF_SW2_CTL,
+  // output INA_DIFF_SW1_CTL,
+  // output INA_DIFF_SW2_CTL,
 
   // reg_isense_sw
   output ISENSE_SW1_CTL,
@@ -479,6 +485,13 @@ module top (
   output INA_IFB_SW1_CTL,
   output INA_IFB_SW2_CTL,
   output INA_IFB_SW3_CTL,
+
+
+  // reg_ina_vfb_atten_sw
+  output INA_VFB_ATTEN_SW3_CTL,
+  output INA_VFB_ATTEN_SW2_CTL,
+  output INA_VFB_ATTEN_SW1_CTL
+
 
 
 );
@@ -496,6 +509,8 @@ module top (
 
   wire [8-1:0] miso_vec ;
   assign { ADC02_MISO, FLASH_MISO,  DAC_SPI_SDO,  ADC03_MISO } = miso_vec;
+
+
 
 
    ////////////////////////////////////////
@@ -616,14 +631,20 @@ module top (
   wire [4-1:0] reg_ina_vfb_sw;
   assign { INA_VFB_SW3_CTL, INA_VFB_SW2_CTL, INA_VFB_SW1_CTL } = reg_ina_vfb_sw;
 
-  wire [4-1:0] reg_ina_diff_sw;
-  assign { INA_DIFF_SW2_CTL, INA_DIFF_SW1_CTL } = reg_ina_diff_sw;
+  // wire [4-1:0] reg_ina_diff_sw;
+  // assign { INA_DIFF_SW2_CTL, INA_DIFF_SW1_CTL } = reg_ina_diff_sw;
 
   wire [4-1:0] reg_isense_sw;
   assign { ISENSE_SW3_CTL,  ISENSE_SW2_CTL, ISENSE_SW1_CTL } = reg_isense_sw;
 
   wire [4-1:0] reg_ina_ifb_sw;
   assign { INA_IFB_SW3_CTL, INA_IFB_SW2_CTL, INA_IFB_SW1_CTL } = reg_ina_ifb_sw;
+
+
+
+  wire [4-1:0] reg_ina_vfb_atten_sw;
+  assign { INA_VFB_ATTEN_SW3_CTL, INA_VFB_ATTEN_SW2_CTL, INA_VFB_ATTEN_SW1_CTL } = reg_ina_vfb_atten_sw;
+
 
 
 
@@ -661,9 +682,11 @@ module top (
 
     . reg_rails_oe(reg_rails_oe),
     . reg_ina_vfb_sw(reg_ina_vfb_sw),
-    . reg_ina_diff_sw(reg_ina_diff_sw),
+    // . reg_ina_diff_sw(reg_ina_diff_sw),
     . reg_isense_sw(reg_isense_sw),
-    . reg_ina_ifb_sw(reg_ina_ifb_sw)
+    . reg_ina_ifb_sw(reg_ina_ifb_sw),
+
+    . reg_ina_vfb_atten_sw(reg_ina_vfb_atten_sw)
 
   );
 
