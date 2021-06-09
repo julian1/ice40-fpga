@@ -242,7 +242,7 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_isense_sw     = 4'b1111;
               reg_ina_ifb_sw    = 4'b1111;
 
-              reg_ina_vfb_atten_sw = 0;
+              reg_ina_vfb_atten_sw = 4'b1111; // active lo. dg444 and 74hc04
             end
 
           // dac ref mux
