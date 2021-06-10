@@ -149,9 +149,9 @@ set_io INA_VFB_ATTEN_SW3_CTL 139
 
 # reg_isense_sw
 # rename ISENSE_MUX_SW1_CTL in schematic
-set_io ISENSE_SW1_CTL   78
-set_io ISENSE_SW2_CTL   79
-set_io ISENSE_SW3_CTL   80
+#set_io ISENSE_SW1_CTL   78
+#set_io ISENSE_SW2_CTL   79
+#set_io ISENSE_SW3_CTL   80
 
 # reg_ina_ifb_sw
 # smu11
@@ -160,6 +160,11 @@ set_io INA_IFB_SW2_CTL  104
 set_io INA_IFB_SW3_CTL  105
 
 
+# reg_isense_mux 
+# smu11
+set_io ISENSE_MUX1_CTL   78
+set_io ISENSE_MUX2_CTL   79
+set_io ISENSE_MUX3_CTL   80
 
 
 
