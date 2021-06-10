@@ -119,7 +119,10 @@ module my_register_bank   #(parameter MSB=16)   (
   output reg [4-1:0] reg_ina_ifb_sw,
 
   // smu11
-   output reg [4-1:0] reg_ina_vfb_atten_sw
+   output reg [4-1:0] reg_ina_vfb_atten_sw,
+   output reg [4-1:0] reg_isense_mux
+
+
 
 );
 
@@ -243,6 +246,7 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_ina_ifb_sw    = 4'b1111;
 
               reg_ina_vfb_atten_sw = 4'b1111; // active lo. dg444 and 74hc04
+              reg_isense_mux     = 4'b1111;
             end
 
           // dac ref mux
@@ -268,7 +272,7 @@ module my_register_bank   #(parameter MSB=16)   (
           // smu11
           29 : reg_ina_vfb_atten_sw = update(reg_ina_vfb_atten_sw, val);
           // version... reg. for read only.
-
+          30 : reg_isense_mux  = update(reg_isense_mux, val);
 
         endcase
       end
@@ -477,9 +481,9 @@ module top (
   // output INA_DIFF_SW2_CTL,
 
   // reg_isense_sw
-  output ISENSE_SW1_CTL,
-  output ISENSE_SW2_CTL,
-  output ISENSE_SW3_CTL,
+  // output ISENSE_SW1_CTL,
+  // output ISENSE_SW2_CTL,
+  // output ISENSE_SW3_CTL,
 
   // reg_ina_ifb
   output INA_IFB_SW1_CTL,
@@ -490,7 +494,12 @@ module top (
   // reg_ina_vfb_atten_sw
   output INA_VFB_ATTEN_SW3_CTL,
   output INA_VFB_ATTEN_SW2_CTL,
-  output INA_VFB_ATTEN_SW1_CTL
+  output INA_VFB_ATTEN_SW1_CTL,
+
+  // # reg_isense_mux 
+  output ISENSE_MUX1_CTL,   
+  output ISENSE_MUX2_CTL,
+  output ISENSE_MUX3_CTL
 
 
 
@@ -634,8 +643,8 @@ module top (
   // wire [4-1:0] reg_ina_diff_sw;
   // assign { INA_DIFF_SW2_CTL, INA_DIFF_SW1_CTL } = reg_ina_diff_sw;
 
-  wire [4-1:0] reg_isense_sw;
-  assign { ISENSE_SW3_CTL,  ISENSE_SW2_CTL, ISENSE_SW1_CTL } = reg_isense_sw;
+  // wire [4-1:0] reg_isense_sw;
+  // assign { ISENSE_SW3_CTL,  ISENSE_SW2_CTL, ISENSE_SW1_CTL } = reg_isense_sw;
 
   wire [4-1:0] reg_ina_ifb_sw;
   assign { INA_IFB_SW3_CTL, INA_IFB_SW2_CTL, INA_IFB_SW1_CTL } = reg_ina_ifb_sw;
@@ -644,6 +653,10 @@ module top (
 
   wire [4-1:0] reg_ina_vfb_atten_sw;
   assign { INA_VFB_ATTEN_SW3_CTL, INA_VFB_ATTEN_SW2_CTL, INA_VFB_ATTEN_SW1_CTL } = reg_ina_vfb_atten_sw;
+
+
+  wire [4-1:0] reg_isense_mux;
+  assign { ISENSE_MUX3_CTL,  ISENSE_MUX2_CTL , ISENSE_MUX1_CTL } = reg_isense_mux;
 
 
 
@@ -685,8 +698,8 @@ module top (
     // . reg_ina_diff_sw(reg_ina_diff_sw),
     . reg_isense_sw(reg_isense_sw),
     . reg_ina_ifb_sw(reg_ina_ifb_sw),
-
-    . reg_ina_vfb_atten_sw(reg_ina_vfb_atten_sw)
+    . reg_ina_vfb_atten_sw(reg_ina_vfb_atten_sw),
+    . reg_isense_mux(reg_isense_mux)
 
   );
 
