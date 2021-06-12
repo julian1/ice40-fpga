@@ -118,6 +118,7 @@ module my_register_bank   #(parameter MSB=16)   (
   output reg [4-1:0] reg_isense_sw,
   output reg [4-1:0] reg_ina_ifb_sw,
 
+  ///////////////////
   // smu11
    output reg [4-1:0] reg_ina_vfb_atten_sw,
    output reg [4-1:0] reg_isense_mux
@@ -225,7 +226,7 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_mux           = 0;  // should just be 0b
               reg_dac           = 0;
               reg_rails         = 0;
-              reg_dac_ref_mux   = 0;  // 4'b1111
+              reg_dac_ref_mux   = 4'b1111;  // dg444 active lo
               reg_adc           = 0;
               reg_clamp1        = 4'b1111;  // active lo. turn off
               reg_clamp2        = 4'b1111;  // active lo. turn off
