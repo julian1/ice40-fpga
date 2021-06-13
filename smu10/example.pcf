@@ -86,9 +86,10 @@ set_io CLAMP2_INJECT_ERR 58
 set_io CLAMP2_INJECT_VFB 60
 set_io CLAMP2_MAX        56
 
-# relay com
+# ranging relay com.  relay_range_ ...
 # smu11.
-set_io RELAY_COM_X  116    
+# reg_relay_com
+set_io RELAY_COM_X  116
 set_io RELAY_COM_Y  117
 set_io RELAY_COM_Z  118
 
@@ -101,9 +102,14 @@ set_io IRANGEX_SW4 122
 
 
 # relay
-set_io RELAY_VRANGE  113
+# set_io RELAY_VRANGE  113
 # set_io RELAY_OUTCOM   95    # non contiguous.
-set_io RELAY_SENSE   112
+
+# smu11
+# reg_relay_out
+set_io RELAY_OUT_COM_HC 112
+set_io RELAY_OUT_COM_LC 113
+set_io RELAY_OUT_SENSE  115
 
 
 # irange sense
@@ -160,7 +166,7 @@ set_io INA_IFB_SW2_CTL  104
 set_io INA_IFB_SW3_CTL  105
 
 
-# reg_isense_mux 
+# reg_isense_mux
 # smu11
 set_io ISENSE_MUX1_CTL   78
 set_io ISENSE_MUX2_CTL   79

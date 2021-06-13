@@ -121,7 +121,8 @@ module my_register_bank   #(parameter MSB=16)   (
   ///////////////////
   // smu11
    output reg [4-1:0] reg_ina_vfb_atten_sw,
-   output reg [4-1:0] reg_isense_mux
+   output reg [4-1:0] reg_isense_mux,
+   output reg [4-1:0] reg_relay_out
 
 
 
@@ -248,6 +249,7 @@ module my_register_bank   #(parameter MSB=16)   (
 
               reg_ina_vfb_atten_sw = 4'b1111; // active lo. dg444 and 74hc04
               reg_isense_mux     = 4'b1111;
+              reg_relay_out       = 0;
             end
 
           // dac ref mux
@@ -272,8 +274,10 @@ module my_register_bank   #(parameter MSB=16)   (
 
           // smu11
           29 : reg_ina_vfb_atten_sw = update(reg_ina_vfb_atten_sw, val);
-          // version... reg. for read only.
+          // need a readonly version... reg. for read only.
           30 : reg_isense_mux  = update(reg_isense_mux, val);
+          31 : reg_relay_out    = update(reg_relay_out, val);
+
 
         endcase
       end
@@ -451,9 +455,9 @@ module top (
   output IRANGEX_SW4,
 
   // relay
-  output RELAY_VRANGE,
+  // output RELAY_VRANGE,
   // output RELAY_OUTCOM,
-  output RELAY_SENSE,
+  // output RELAY_SENSE,
 
   // irange sense
   // output IRANGE_SENSE1,
@@ -497,11 +501,16 @@ module top (
   output INA_VFB_ATTEN_SW2_CTL,
   output INA_VFB_ATTEN_SW1_CTL,
 
-  // # reg_isense_mux 
-  output ISENSE_MUX1_CTL,   
+  // reg_isense_mux
+  // better name?
+  output ISENSE_MUX1_CTL,
   output ISENSE_MUX2_CTL,
-  output ISENSE_MUX3_CTL
+  output ISENSE_MUX3_CTL,
 
+  // reg_relay_out
+  output RELAY_OUT_COM_HC,
+  output RELAY_OUT_COM_LC,
+  output RELAY_OUT_SENSE
 
 
 );
@@ -613,14 +622,15 @@ module top (
   wire [4-1:0] reg_clamp2;
   assign { CLAMP2_MAX, CLAMP2_INJECT_VFB, CLAMP2_INJECT_ERR, CLAMP2_MIN} = reg_clamp2;
 
+  // ranging relays
   wire [4-1:0] reg_relay_com;
   assign { RELAY_COM_Z, RELAY_COM_Y, RELAY_COM_X } = reg_relay_com;
 
   wire [4-1:0] reg_irangex_sw;
   assign { IRANGEX_SW4, IRANGEX_SW3, IRANGEX_SW2, IRANGEX_SW1 } = reg_irangex_sw;
 
-  wire [4-1:0] reg_relay;
-  assign { RELAY_SENSE, /*RELAY_OUTCOM, */ RELAY_VRANGE } = reg_relay;
+  // wire [4-1:0] reg_relay;
+  // assign { RELAY_SENSE, /*RELAY_OUTCOM, */ RELAY_VRANGE } = reg_relay;
 
   wire [4-1:0] reg_irange_sense;
   assign { IRANGE_SENSE4, IRANGE_SENSE3, IRANGE_SENSE2, IRANGE_SENSE1 } = reg_irange_sense;
@@ -659,6 +669,9 @@ module top (
   wire [4-1:0] reg_isense_mux;
   assign { ISENSE_MUX3_CTL,  ISENSE_MUX2_CTL , ISENSE_MUX1_CTL } = reg_isense_mux;
 
+
+  wire [4-1:0] reg_relay_out;
+  assign {  RELAY_OUT_SENSE, RELAY_OUT_COM_LC, RELAY_OUT_COM_HC} = reg_relay_out;
 
 
 
@@ -700,7 +713,9 @@ module top (
     . reg_isense_sw(reg_isense_sw),
     . reg_ina_ifb_sw(reg_ina_ifb_sw),
     . reg_ina_vfb_atten_sw(reg_ina_vfb_atten_sw),
-    . reg_isense_mux(reg_isense_mux)
+    . reg_isense_mux(reg_isense_mux),
+
+    . reg_relay_out(reg_relay_out)
 
   );
 
