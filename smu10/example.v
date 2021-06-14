@@ -122,9 +122,8 @@ module my_register_bank   #(parameter MSB=16)   (
   // smu11
    output reg [4-1:0] reg_ina_vfb_atten_sw,
    output reg [4-1:0] reg_isense_mux,
-   output reg [4-1:0] reg_relay_out
-
-
+   output reg [4-1:0] reg_relay_out,
+   output reg [4-1:0] reg_relay_vsense
 
 );
 
@@ -250,6 +249,7 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_ina_vfb_atten_sw = 4'b1111; // active lo. dg444 and 74hc04
               reg_isense_mux     = 4'b1111;
               reg_relay_out       = 0;
+              reg_relay_vsense    = 0;
             end
 
           // dac ref mux
@@ -272,11 +272,14 @@ module my_register_bank   #(parameter MSB=16)   (
           27 : reg_isense_sw    = update(reg_isense_sw, val);
           28 : reg_ina_ifb_sw   = update(reg_ina_ifb_sw, val);
 
+          // need a ref readonly version number/string ... reg.
+
           // smu11
           29 : reg_ina_vfb_atten_sw = update(reg_ina_vfb_atten_sw, val);
-          // need a readonly version... reg. for read only.
           30 : reg_isense_mux  = update(reg_isense_mux, val);
           31 : reg_relay_out    = update(reg_relay_out, val);
+          32 : reg_relay_vsense = update(reg_relay_vsense, val);
+
 
 
         endcase
@@ -510,7 +513,10 @@ module top (
   // reg_relay_out
   output RELAY_OUT_COM_HC,
   output RELAY_OUT_COM_LC,
-  output RELAY_OUT_SENSE
+
+
+  // reg_relay_vsense
+  output RELAY_VSENSE_CTL
 
 
 );
@@ -671,7 +677,11 @@ module top (
 
 
   wire [4-1:0] reg_relay_out;
-  assign {  RELAY_OUT_SENSE, RELAY_OUT_COM_LC, RELAY_OUT_COM_HC} = reg_relay_out;
+  assign {  RELAY_OUT_COM_LC, RELAY_OUT_COM_HC} = reg_relay_out;
+
+
+  wire [4-1:0] reg_relay_vsense;
+  assign {  RELAY_VSENSE_CTL } = reg_relay_vsense;
 
 
 
@@ -715,7 +725,8 @@ module top (
     . reg_ina_vfb_atten_sw(reg_ina_vfb_atten_sw),
     . reg_isense_mux(reg_isense_mux),
 
-    . reg_relay_out(reg_relay_out)
+    . reg_relay_out(reg_relay_out),
+    . reg_relay_vsense(reg_relay_vsense)
 
   );
 

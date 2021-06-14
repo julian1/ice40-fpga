@@ -109,7 +109,6 @@ set_io IRANGEX_SW4 122
 # reg_relay_out
 set_io RELAY_OUT_COM_HC 112
 set_io RELAY_OUT_COM_LC 113
-set_io RELAY_OUT_SENSE  115
 
 
 # irange sense
@@ -172,5 +171,6 @@ set_io ISENSE_MUX1_CTL   78
 set_io ISENSE_MUX2_CTL   79
 set_io ISENSE_MUX3_CTL   80
 
-
+# reg_relay_vsense
+set_io RELAY_VSENSE_CTL  115
 
