@@ -104,7 +104,7 @@ module my_register_bank   #(parameter MSB=16)   (
   output reg [4-1:0] reg_clamp1,
   output reg [4-1:0] reg_clamp2,
   output reg [4-1:0] reg_relay_com,
-  output reg [4-1:0] reg_irangex_sw,
+  output reg [4-1:0] reg_irange_x_sw,
   output reg [4-1:0] reg_relay,
   output reg [4-1:0] reg_irange_sense,
   output reg [4-1:0] reg_ifb_gain,  // 2 bits
@@ -231,7 +231,7 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_clamp1        = 4'b1111;  // active lo. turn off
               reg_clamp2        = 4'b1111;  // active lo. turn off
               reg_relay_com     = 0;
-              reg_irangex_sw    = 0;
+              reg_irange_x_sw    = 0;
               reg_relay         = 0;
               reg_irange_sense  = 4'b1111;
               reg_ifb_gain      = 0;
@@ -258,7 +258,7 @@ module my_register_bank   #(parameter MSB=16)   (
           15 : reg_clamp1       = update(reg_clamp1, val);
           16 : reg_clamp2       = update(reg_clamp2, val);
           17 : reg_relay_com    = update(reg_relay_com, val);
-          18 : reg_irangex_sw   = update(reg_irangex_sw, val);
+          18 : reg_irange_x_sw   = update(reg_irange_x_sw, val);
           19 : reg_relay        = update(reg_relay, val);
           20 : reg_irange_sense = update(reg_irange_sense, val);
           21 : reg_ifb_gain     = update(reg_ifb_gain, val);
@@ -452,10 +452,10 @@ module top (
   output RELAY_COM_Z,
 
   // irangex
-  output IRANGEX_SW1,
-  output IRANGEX_SW2,
-  output IRANGEX_SW3,
-  output IRANGEX_SW4,
+  output IRANGE_X_SW1_CTL,
+  output IRANGE_X_SW2_CTL,
+  output IRANGE_X_SW3_CTL,
+  output IRANGE_X_SW4_CTL,
 
   // relay
   // output RELAY_VRANGE,
@@ -632,8 +632,8 @@ module top (
   wire [4-1:0] reg_relay_com;
   assign { RELAY_COM_Z, RELAY_COM_Y, RELAY_COM_X } = reg_relay_com;
 
-  wire [4-1:0] reg_irangex_sw;
-  assign { IRANGEX_SW4, IRANGEX_SW3, IRANGEX_SW2, IRANGEX_SW1 } = reg_irangex_sw;
+  wire [4-1:0] reg_irange_x_sw;
+  assign { IRANGE_X_SW4_CTL, IRANGE_X_SW3_CTL, IRANGE_X_SW2_CTL, IRANGE_X_SW1_CTL } = reg_irange_x_sw;
 
   // wire [4-1:0] reg_relay;
   // assign { RELAY_SENSE, /*RELAY_OUTCOM, */ RELAY_VRANGE } = reg_relay;
@@ -710,7 +710,7 @@ module top (
     . reg_clamp1(reg_clamp1),
     . reg_clamp2(reg_clamp2),
     . reg_relay_com(reg_relay_com),
-    . reg_irangex_sw(reg_irangex_sw),
+    . reg_irange_x_sw(reg_irange_x_sw),
     . reg_relay(reg_relay),
     . reg_irange_sense(reg_irange_sense),
     . reg_ifb_gain(reg_ifb_gain),

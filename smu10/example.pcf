@@ -93,12 +93,6 @@ set_io RELAY_COM_X  116
 set_io RELAY_COM_Y  117
 set_io RELAY_COM_Z  118
 
-# irangex
-# smu11
-set_io IRANGEX_SW1 119
-set_io IRANGEX_SW2 120
-set_io IRANGEX_SW3 121
-set_io IRANGEX_SW4 122
 
 
 # relay
@@ -173,4 +167,14 @@ set_io ISENSE_MUX3_CTL   80
 
 # reg_relay_vsense
 set_io RELAY_VSENSE_CTL  115
+
+
+
+# irangex
+# smu11
+set_io IRANGE_X_SW1_CTL 119
+set_io IRANGE_X_SW2_CTL 120
+set_io IRANGE_X_SW3_CTL 121
+set_io IRANGE_X_SW4_CTL 122
+
 
