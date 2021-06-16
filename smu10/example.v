@@ -107,9 +107,9 @@ module my_register_bank   #(parameter MSB=16)   (
   output reg [4-1:0] reg_irange_x_sw,
   output reg [4-1:0] reg_relay,
   output reg [4-1:0] reg_irange_sense,
-  output reg [4-1:0] reg_ifb_gain,  // 2 bits
+  // output reg [4-1:0] reg_ifb_gain,  // 2 bits
   // output reg [4-1:0] reg_irangex58_sw,
-  output reg [4-1:0] reg_vfb_gain,   // 2 bits
+  // output reg [4-1:0] reg_vfb_gain,   // 2 bits
 
   ////// smu10
   output reg [4-1:0] reg_rails_oe,
@@ -123,7 +123,8 @@ module my_register_bank   #(parameter MSB=16)   (
    output reg [4-1:0] reg_ina_vfb_atten_sw,
    output reg [4-1:0] reg_isense_mux,
    output reg [4-1:0] reg_relay_out,
-   output reg [4-1:0] reg_relay_vsense
+   output reg [4-1:0] reg_relay_vsense,
+   output reg [4-1:0] reg_irange_yz_sw
 
 );
 
@@ -231,12 +232,12 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_clamp1        = 4'b1111;  // active lo. turn off
               reg_clamp2        = 4'b1111;  // active lo. turn off
               reg_relay_com     = 0;
-              reg_irange_x_sw    = 0;
+              reg_irange_x_sw    = 0;   // adg1334
               reg_relay         = 0;
               reg_irange_sense  = 4'b1111;
-              reg_ifb_gain      = 0;
+              // reg_ifb_gain      = 0;
               // reg_irangex58_sw = 0; // adg1334
-              reg_vfb_gain      = 0;
+              // reg_vfb_gain      = 0;
               ///////////////////
               // smu10
               reg_rails_oe      = 4'b0001;   // active lo. IMPORTANT.  keep hi. until ready to turn on rails.
@@ -250,6 +251,7 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_isense_mux     = 4'b1111;
               reg_relay_out       = 0;
               reg_relay_vsense    = 0;
+              reg_irange_yz_sw    = 0;  // adg1334
             end
 
           // dac ref mux
@@ -261,9 +263,9 @@ module my_register_bank   #(parameter MSB=16)   (
           18 : reg_irange_x_sw   = update(reg_irange_x_sw, val);
           19 : reg_relay        = update(reg_relay, val);
           20 : reg_irange_sense = update(reg_irange_sense, val);
-          21 : reg_ifb_gain     = update(reg_ifb_gain, val);
+          // 21 : reg_ifb_gain     = update(reg_ifb_gain, val);
           // 22 : reg_irangex58_sw = update(reg_irangex58_sw, val);
-          23 : reg_vfb_gain     = update(reg_vfb_gain, val);
+          // 23 : reg_vfb_gain     = update(reg_vfb_gain, val);
 
           // smu10
           24 : reg_rails_oe     = update(reg_rails_oe, val);
@@ -280,7 +282,7 @@ module my_register_bank   #(parameter MSB=16)   (
           31 : reg_relay_out    = update(reg_relay_out, val);
           32 : reg_relay_vsense = update(reg_relay_vsense, val);
 
-
+          33 : reg_irange_yz_sw = update( reg_irange_yz_sw, val);
 
         endcase
       end
@@ -653,16 +655,16 @@ module top (
   wire [4-1:0] reg_irange_sense;
   assign { IRANGE_SENSE4, IRANGE_SENSE3, IRANGE_SENSE2, IRANGE_SENSE1 } = reg_irange_sense;
 
-  wire [4-1:0] reg_ifb_gain;
-  assign { GAIN_IFB_OP2, GAIN_IFB_OP1 } = reg_ifb_gain;
+  // wire [4-1:0] reg_ifb_gain;
+  // assign { GAIN_IFB_OP2, GAIN_IFB_OP1 } = reg_ifb_gain;
 
 
   // wire [4-1:0] reg_irangex58_sw;
   // assign { IRANGEX_SW8, IRANGEX_SW7, IRANGEX_SW6, IRANGEX_SW5 } = reg_irangex58_sw;
 
 
-  wire [4-1:0] reg_vfb_gain;
-  assign { GAIN_VFB_OP2, GAIN_VFB_OP1  } = reg_vfb_gain;
+  // wire [4-1:0] reg_vfb_gain;
+  // assign { GAIN_VFB_OP2, GAIN_VFB_OP1  } = reg_vfb_gain;
 
   //////////////
   // smu10
@@ -696,6 +698,13 @@ module top (
   assign {  RELAY_VSENSE_CTL } = reg_relay_vsense;
 
 
+  wire [4-1:0] reg_relay_vsense;
+  assign {  RELAY_VSENSE_CTL } = reg_relay_vsense;
+
+
+  wire [4-1:0] reg_irange_yz_sw;
+  assign {  IRANGE_YZ_SW4_CTL, IRANGE_YZ_SW3_CTL, IRANGE_YZ_SW2_CTL, IRANGE_YZ_SW1_CTL } = reg_irange_yz_sw;
+
 
 
   /*
@@ -725,9 +734,9 @@ module top (
     . reg_irange_x_sw(reg_irange_x_sw),
     . reg_relay(reg_relay),
     . reg_irange_sense(reg_irange_sense),
-    . reg_ifb_gain(reg_ifb_gain),
+    // . reg_ifb_gain(reg_ifb_gain),
     // . reg_irangex58_sw(reg_irangex58_sw),
-    . reg_vfb_gain(reg_vfb_gain),
+    // . reg_vfb_gain(reg_vfb_gain),
 
     . reg_rails_oe(reg_rails_oe),
     . reg_ina_vfb_sw(reg_ina_vfb_sw),
@@ -736,9 +745,9 @@ module top (
     . reg_ina_ifb_sw(reg_ina_ifb_sw),
     . reg_ina_vfb_atten_sw(reg_ina_vfb_atten_sw),
     . reg_isense_mux(reg_isense_mux),
-
     . reg_relay_out(reg_relay_out),
-    . reg_relay_vsense(reg_relay_vsense)
+    . reg_relay_vsense(reg_relay_vsense),
+    . reg_irange_yz_sw(reg_irange_yz_sw)
 
   );
 
