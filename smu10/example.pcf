@@ -112,8 +112,8 @@ set_io RELAY_OUT_COM_LC 113
 # not monotonoic. order is inx order on dg444. TODO maybe swap on ice40
 
 #define GAIN_IFB_REGISTER    21
-set_io GAIN_IFB_OP1   73
-set_io GAIN_IFB_OP2   74
+#set_io GAIN_IFB_OP1   73
+#set_io GAIN_IFB_OP2   74
 
 
 # IRANGEX_SW58_REGISTER
@@ -122,10 +122,12 @@ set_io GAIN_IFB_OP2   74
 
 
 # #define GAIN_VFB_REGISTER    23
-set_io GAIN_VFB_OP1 75
-set_io GAIN_VFB_OP2 76
+#set_io GAIN_VFB_OP1 75
+#set_io GAIN_VFB_OP2 76
+
 
 #####################################
+# smu11 stuff.
 
 # ina_vfb_sw
 # smu11
@@ -176,5 +178,11 @@ set_io IRANGE_X_SW1_CTL 119
 set_io IRANGE_X_SW2_CTL 120
 set_io IRANGE_X_SW3_CTL 121
 set_io IRANGE_X_SW4_CTL 122
+
+# smu11
+set_io IRANGE_YZ_SW1_CTL 73
+set_io IRANGE_YZ_SW2_CTL 74
+set_io IRANGE_YZ_SW3_CTL 75
+set_io IRANGE_YZ_SW4_CTL 76
 
 

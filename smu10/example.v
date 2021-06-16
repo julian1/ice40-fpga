@@ -451,11 +451,7 @@ module top (
   output RELAY_COM_Y,
   output RELAY_COM_Z,
 
-  // irangex
-  output IRANGE_X_SW1_CTL,
-  output IRANGE_X_SW2_CTL,
-  output IRANGE_X_SW3_CTL,
-  output IRANGE_X_SW4_CTL,
+
 
   // relay
   // output RELAY_VRANGE,
@@ -469,10 +465,10 @@ module top (
   // output IRANGE_SENSE4,
 
   // gain fb
-  output GAIN_VFB_OP1,
-  output GAIN_VFB_OP2,
-  output GAIN_IFB_OP1,
-  output GAIN_IFB_OP2,
+  // output GAIN_VFB_OP1,
+  // output GAIN_VFB_OP2,
+  // output GAIN_IFB_OP1,
+  // output GAIN_IFB_OP2,
 
   // irangex 58
   // deprecate
@@ -516,7 +512,23 @@ module top (
 
 
   // reg_relay_vsense
-  output RELAY_VSENSE_CTL
+  output RELAY_VSENSE_CTL,
+
+
+  // irange_x
+  output IRANGE_X_SW1_CTL,
+  output IRANGE_X_SW2_CTL,
+  output IRANGE_X_SW3_CTL,
+  output IRANGE_X_SW4_CTL,
+
+
+  // irange_yz
+  output IRANGE_YZ_SW1_CTL,
+  output IRANGE_YZ_SW2_CTL,
+  output IRANGE_YZ_SW3_CTL,
+  output IRANGE_YZ_SW4_CTL
+
+
 
 
 );
