@@ -606,8 +606,7 @@ module top (
   // wire = no state preserved between clocks.
 
   wire [4-1:0] reg_led;
-  assign {LED1, LED2} = reg_led;    // schematic has these reversed...
-  // assign {LED2, LED1} = reg_led;
+  assign { LED2, LED1} = reg_led;
 
   wire [4-1:0] reg_dac;
   assign {DAC_RST, DAC_UNI_BIP_B, DAC_UNI_BIP_A, DAC_LDAC } = reg_dac;

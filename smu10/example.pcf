@@ -172,7 +172,7 @@ set_io RELAY_VSENSE_CTL  115
 
 
 
-# irangex
+# irange_x_sw
 # smu11
 set_io IRANGE_X_SW1_CTL 119
 set_io IRANGE_X_SW2_CTL 120
