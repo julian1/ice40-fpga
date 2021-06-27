@@ -65,6 +65,7 @@ set_io ADC02_CLK    8
 set_io LED1 106
 set_io LED2 107
 
+# reg_mux  8
 
 # reg_dac 9
 set_io DAC_LDAC     28
@@ -134,36 +135,36 @@ set_io INA_VFB_SW3_CTL 136
 
 
 
+# reg_ina_ifb_sw 28
+set_io INA_IFB_SW1_CTL  102
+set_io INA_IFB_SW2_CTL  104
+set_io INA_IFB_SW3_CTL  105
+
+
+# reg_ina_vfb_atten  29
+set_io INA_VFB_ATTEN_SW1_CTL 137
+set_io INA_VFB_ATTEN_SW2_CTL 138
+set_io INA_VFB_ATTEN_SW3_CTL 139
+
+
+# reg_isense_mux 30
+set_io ISENSE_MUX1_CTL   78
+set_io ISENSE_MUX2_CTL   79
+set_io ISENSE_MUX3_CTL   80
+
+
 # reg_relay 31
 set_io RELAY_OUT_COM_HC 112
 set_io RELAY_OUT_COM_LC 113
 
 
 
-
-set_io INA_VFB_ATTEN_SW1_CTL 137
-set_io INA_VFB_ATTEN_SW2_CTL 138
-set_io INA_VFB_ATTEN_SW3_CTL 139
-
-
-
-# reg_ina_ifb_sw
-set_io INA_IFB_SW1_CTL  102
-set_io INA_IFB_SW2_CTL  104
-set_io INA_IFB_SW3_CTL  105
-
-
-# reg_isense_mux
-set_io ISENSE_MUX1_CTL   78
-set_io ISENSE_MUX2_CTL   79
-set_io ISENSE_MUX3_CTL   80
-
-# reg_relay_vsense
+# reg_relay_vsense 32
 set_io RELAY_VSENSE_CTL  115
 
 
 
-# smu11
+# reg_irange_yz_sw  33
 set_io IRANGE_YZ_SW1_CTL 73
 set_io IRANGE_YZ_SW2_CTL 74
 set_io IRANGE_YZ_SW3_CTL 75

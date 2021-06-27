@@ -99,13 +99,14 @@ module my_register_bank   #(parameter MSB=16)   (
   output reg [4-1:0] reg_mux,
   output reg [4-1:0] reg_dac,
   output reg [4-1:0] reg_rails,   /* reg_rails_initital */
+  // soft reset
   output reg [4-1:0] reg_dac_ref_mux,
   output reg [4-1:0] reg_adc,
   output reg [4-1:0] reg_clamp1,
   output reg [4-1:0] reg_clamp2,
   output reg [4-1:0] reg_relay_com,
   output reg [4-1:0] reg_irange_x_sw,
-  output reg [4-1:0] reg_relay,
+  // output reg [4-1:0] reg_relay,
   output reg [4-1:0] reg_irange_sense,
   // output reg [4-1:0] reg_ifb_gain,  // 2 bits
   // output reg [4-1:0] reg_irangex58_sw,
@@ -261,7 +262,9 @@ module my_register_bank   #(parameter MSB=16)   (
           16 : reg_clamp2       = update(reg_clamp2, val);
           17 : reg_relay_com    = update(reg_relay_com, val);
           18 : reg_irange_x_sw   = update(reg_irange_x_sw, val);
-          19 : reg_relay        = update(reg_relay, val);
+
+
+          // 19 : reg_relay        = update(reg_relay, val);
           20 : reg_irange_sense = update(reg_irange_sense, val);
           // 21 : reg_ifb_gain     = update(reg_ifb_gain, val);
           // 22 : reg_irangex58_sw = update(reg_irangex58_sw, val);
@@ -731,7 +734,7 @@ module top (
     . reg_clamp2(reg_clamp2),
     . reg_relay_com(reg_relay_com),
     . reg_irange_x_sw(reg_irange_x_sw),
-    . reg_relay(reg_relay),
+    // . reg_relay(reg_relay),
     . reg_irange_sense(reg_irange_sense),
     // . reg_ifb_gain(reg_ifb_gain),
     // . reg_irangex58_sw(reg_irangex58_sw),
