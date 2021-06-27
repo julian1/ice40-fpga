@@ -99,34 +99,20 @@ module my_register_bank   #(parameter MSB=16)   (
   output reg [4-1:0] reg_mux,
   output reg [4-1:0] reg_dac,
   output reg [4-1:0] reg_rails,   /* reg_rails_initital */
-  // soft reset
   output reg [4-1:0] reg_dac_ref_mux,
   output reg [4-1:0] reg_adc,
   output reg [4-1:0] reg_clamp1,
   output reg [4-1:0] reg_clamp2,
   output reg [4-1:0] reg_relay_com,
   output reg [4-1:0] reg_irange_x_sw,
-  // output reg [4-1:0] reg_relay,
-  // output reg [4-1:0] reg_irange_sense,
-  // output reg [4-1:0] reg_ifb_gain,  // 2 bits
-  // output reg [4-1:0] reg_irangex58_sw,
-  // output reg [4-1:0] reg_vfb_gain,   // 2 bits
-
-  ////// smu10
   output reg [4-1:0] reg_rails_oe,
   output reg [4-1:0] reg_ina_vfb_sw,
-  // output reg [4-1:0] reg_ina_diff_sw,
-  // output reg [4-1:0] reg_isense_sw,
   output reg [4-1:0] reg_ina_ifb_sw,
-
-  ///////////////////
-  // smu11
-   output reg [4-1:0] reg_ina_vfb_atten_sw,
-   output reg [4-1:0] reg_isense_mux,
-   output reg [4-1:0] reg_relay_out,
-   output reg [4-1:0] reg_relay_vsense,
-   output reg [4-1:0] reg_irange_yz_sw
-
+  output reg [4-1:0] reg_ina_vfb_atten_sw,
+  output reg [4-1:0] reg_isense_mux,
+  output reg [4-1:0] reg_relay_out,
+  output reg [4-1:0] reg_relay_vsense,
+  output reg [4-1:0] reg_irange_yz_sw
 );
 
 
@@ -198,16 +184,11 @@ module my_register_bank   #(parameter MSB=16)   (
     if(/*cs &&*/ !special && count == 16 )
       begin
         case (addr)
-          // all this repetition seems wrong
           // leds
           7 :
             begin
-              // reg_led = reg_led | (val & 4'b1111) ; // set
-              // reg_led = ~(~reg_led | (val >> 4)); // clear
               reg_led = update(reg_led, val);
             end
-
-          // mux
           8 :  reg_mux =    update(reg_mux, val);
           9 :  reg_dac =    update(reg_dac, val);
           10 : reg_rails =  update(reg_rails, val);
@@ -234,20 +215,9 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_clamp2        = 4'b1111;  // active lo. turn off
               reg_relay_com     = 0;
               reg_irange_x_sw    = 0;   // adg1334
-              // reg_relay         = 0;
-              // reg_irange_sense  = 4'b1111;
-              // reg_ifb_gain      = 0;
-              // reg_irangex58_sw = 0; // adg1334
-              // reg_vfb_gain      = 0;
-              ///////////////////
-              // smu10
-              reg_rails_oe      = 4'b0001;   // active lo. IMPORTANT.  keep hi. until ready to turn on rails.
-                                        // weird. for smu09, on first flash. ice40 pins came up lo.
+              reg_rails_oe      = 4'b0001;   // active lo. IMPORTANT.  keep hi. until ready to turn on rails.  // weird. for smu09, on first flash. ice40 pins came up lo.
               reg_ina_vfb_sw    = 0;
-              // reg_ina_diff_sw   = 0;
-              // reg_isense_sw     = 4'b1111;
               reg_ina_ifb_sw    = 4'b1111;
-
               reg_ina_vfb_atten_sw = 4'b1111; // active lo. dg444 and 74hc04
               reg_isense_mux     = 4'b1111;
               reg_relay_out       = 0;
@@ -262,29 +232,13 @@ module my_register_bank   #(parameter MSB=16)   (
           16 : reg_clamp2       = update(reg_clamp2, val);
           17 : reg_relay_com    = update(reg_relay_com, val);
           18 : reg_irange_x_sw   = update(reg_irange_x_sw, val);
-
-
-          // 19 : reg_relay        = update(reg_relay, val);
-          // 20 : reg_irange_sense = update(reg_irange_sense, val);
-          // 21 : reg_ifb_gain     = update(reg_ifb_gain, val);
-          // 22 : reg_irangex58_sw = update(reg_irangex58_sw, val);
-          // 23 : reg_vfb_gain     = update(reg_vfb_gain, val);
-
-          // smu10
           24 : reg_rails_oe     = update(reg_rails_oe, val);
           25 : reg_ina_vfb_sw   = update(reg_ina_vfb_sw, val);
-          // 26 : reg_ina_diff_sw  = update(reg_ina_diff_sw, val);
-          // 27 : reg_isense_sw    = update(reg_isense_sw, val);
           28 : reg_ina_ifb_sw   = update(reg_ina_ifb_sw, val);
-
-          // need a ref readonly version number/string ... reg.
-
-          // smu11
           29 : reg_ina_vfb_atten_sw = update(reg_ina_vfb_atten_sw, val);
           30 : reg_isense_mux  = update(reg_isense_mux, val);
           31 : reg_relay_out    = update(reg_relay_out, val);
           32 : reg_relay_vsense = update(reg_relay_vsense, val);
-
           33 : reg_irange_yz_sw = update( reg_irange_yz_sw, val);
 
         endcase
@@ -457,42 +411,12 @@ module top (
   output RELAY_COM_Z,
 
 
-
-  // relay
-  // output RELAY_VRANGE,
-  // output RELAY_OUTCOM,
-  // output RELAY_SENSE,
-
-  // irange sense
-  // output IRANGE_SENSE1,
-  // output IRANGE_SENSE2,
-  // output IRANGE_SENSE3,
-  // output IRANGE_SENSE4,
-
-  // gain fb
-  // output GAIN_VFB_OP1,
-  // output GAIN_VFB_OP2,
-  // output GAIN_IFB_OP1,
-  // output GAIN_IFB_OP2,
-
-  // irangex 58
-  // deprecate
-
   //////////////////////////////////////
 
   // reg_ina_vfb_sw
   output INA_VFB_SW3_CTL,
   output INA_VFB_SW2_CTL,
   output INA_VFB_SW1_CTL,
-
-  // reg_ina_diff_sw
-  // output INA_DIFF_SW1_CTL,
-  // output INA_DIFF_SW2_CTL,
-
-  // reg_isense_sw
-  // output ISENSE_SW1_CTL,
-  // output ISENSE_SW2_CTL,
-  // output ISENSE_SW3_CTL,
 
   // reg_ina_ifb
   output INA_IFB_SW1_CTL,
@@ -627,9 +551,6 @@ module top (
 
 
 
-
-
-
   wire [4-1:0] reg_dac_ref_mux;
   assign { DAC_REF_MUX_B, DAC_REF_MUX_A } = reg_dac_ref_mux;
 
@@ -651,38 +572,12 @@ module top (
   wire [4-1:0] reg_irange_x_sw;
   assign { IRANGE_X_SW4_CTL, IRANGE_X_SW3_CTL, IRANGE_X_SW2_CTL, IRANGE_X_SW1_CTL } = reg_irange_x_sw;
 
-  // wire [4-1:0] reg_relay;
-  // assign { RELAY_SENSE, /*RELAY_OUTCOM, */ RELAY_VRANGE } = reg_relay;
-
-//  wire [4-1:0] reg_irange_sense;
-//  assign { IRANGE_SENSE4, IRANGE_SENSE3, IRANGE_SENSE2, IRANGE_SENSE1 } = reg_irange_sense;
-
-  // wire [4-1:0] reg_ifb_gain;
-  // assign { GAIN_IFB_OP2, GAIN_IFB_OP1 } = reg_ifb_gain;
-
-
-  // wire [4-1:0] reg_irangex58_sw;
-  // assign { IRANGEX_SW8, IRANGEX_SW7, IRANGEX_SW6, IRANGEX_SW5 } = reg_irangex58_sw;
-
-
-  // wire [4-1:0] reg_vfb_gain;
-  // assign { GAIN_VFB_OP2, GAIN_VFB_OP1  } = reg_vfb_gain;
-
-  //////////////
-  // smu10
   wire [4-1:0] reg_ina_vfb_sw;
   assign { INA_VFB_SW3_CTL, INA_VFB_SW2_CTL, INA_VFB_SW1_CTL } = reg_ina_vfb_sw;
 
-  // wire [4-1:0] reg_ina_diff_sw;
-  // assign { INA_DIFF_SW2_CTL, INA_DIFF_SW1_CTL } = reg_ina_diff_sw;
-
-  // wire [4-1:0] reg_isense_sw;
-  // assign { ISENSE_SW3_CTL,  ISENSE_SW2_CTL, ISENSE_SW1_CTL } = reg_isense_sw;
 
   wire [4-1:0] reg_ina_ifb_sw;
   assign { INA_IFB_SW3_CTL, INA_IFB_SW2_CTL, INA_IFB_SW1_CTL } = reg_ina_ifb_sw;
-
-
 
   wire [4-1:0] reg_ina_vfb_atten_sw;
   assign { INA_VFB_ATTEN_SW3_CTL, INA_VFB_ATTEN_SW2_CTL, INA_VFB_ATTEN_SW1_CTL } = reg_ina_vfb_atten_sw;
@@ -734,16 +629,8 @@ module top (
     . reg_clamp2(reg_clamp2),
     . reg_relay_com(reg_relay_com),
     . reg_irange_x_sw(reg_irange_x_sw),
-    // . reg_relay(reg_relay),
-    // . reg_irange_sense(reg_irange_sense),
-    // . reg_ifb_gain(reg_ifb_gain),
-    // . reg_irangex58_sw(reg_irangex58_sw),
-    // . reg_vfb_gain(reg_vfb_gain),
-
     . reg_rails_oe(reg_rails_oe),
     . reg_ina_vfb_sw(reg_ina_vfb_sw),
-    // . reg_ina_diff_sw(reg_ina_diff_sw),
-    // . reg_isense_sw(reg_isense_sw),
     . reg_ina_ifb_sw(reg_ina_ifb_sw),
     . reg_ina_vfb_atten_sw(reg_ina_vfb_atten_sw),
     . reg_isense_mux(reg_isense_mux),
@@ -770,4 +657,57 @@ module top (
 
 endmodule
 
+
+  // relay
+  // output RELAY_VRANGE,
+  // output RELAY_OUTCOM,
+  // output RELAY_SENSE,
+
+  // irange sense
+  // output IRANGE_SENSE1,
+  // output IRANGE_SENSE2,
+  // output IRANGE_SENSE3,
+  // output IRANGE_SENSE4,
+
+  // gain fb
+  // output GAIN_VFB_OP1,
+  // output GAIN_VFB_OP2,
+  // output GAIN_IFB_OP1,
+  // output GAIN_IFB_OP2,
+
+  // irangex 58
+  // deprecate
+
+  // reg_ina_diff_sw
+  // output INA_DIFF_SW1_CTL,
+  // output INA_DIFF_SW2_CTL,
+
+  // reg_isense_sw
+  // output ISENSE_SW1_CTL,
+  // output ISENSE_SW2_CTL,
+  // output ISENSE_SW3_CTL,
+
+
+
+  // wire [4-1:0] reg_relay;
+  // assign { RELAY_SENSE, /*RELAY_OUTCOM, */ RELAY_VRANGE } = reg_relay;
+
+//  wire [4-1:0] reg_irange_sense;
+//  assign { IRANGE_SENSE4, IRANGE_SENSE3, IRANGE_SENSE2, IRANGE_SENSE1 } = reg_irange_sense;
+
+  // wire [4-1:0] reg_ifb_gain;
+  // assign { GAIN_IFB_OP2, GAIN_IFB_OP1 } = reg_ifb_gain;
+
+
+  // wire [4-1:0] reg_irangex58_sw;
+  // assign { IRANGEX_SW8, IRANGEX_SW7, IRANGEX_SW6, IRANGEX_SW5 } = reg_irangex58_sw;
+
+
+  // wire [4-1:0] reg_vfb_gain;
+  // assign { GAIN_VFB_OP2, GAIN_VFB_OP1  } = reg_vfb_gain;
+  // wire [4-1:0] reg_ina_diff_sw;
+  // assign { INA_DIFF_SW2_CTL, INA_DIFF_SW1_CTL } = reg_ina_diff_sw;
+
+  // wire [4-1:0] reg_isense_sw;
+  // assign { ISENSE_SW3_CTL,  ISENSE_SW2_CTL, ISENSE_SW1_CTL } = reg_isense_sw;
 
