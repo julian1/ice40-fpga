@@ -107,7 +107,7 @@ module my_register_bank   #(parameter MSB=16)   (
   output reg [4-1:0] reg_relay_com,
   output reg [4-1:0] reg_irange_x_sw,
   // output reg [4-1:0] reg_relay,
-  output reg [4-1:0] reg_irange_sense,
+  // output reg [4-1:0] reg_irange_sense,
   // output reg [4-1:0] reg_ifb_gain,  // 2 bits
   // output reg [4-1:0] reg_irangex58_sw,
   // output reg [4-1:0] reg_vfb_gain,   // 2 bits
@@ -235,7 +235,7 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_relay_com     = 0;
               reg_irange_x_sw    = 0;   // adg1334
               reg_relay         = 0;
-              reg_irange_sense  = 4'b1111;
+              // reg_irange_sense  = 4'b1111;
               // reg_ifb_gain      = 0;
               // reg_irangex58_sw = 0; // adg1334
               // reg_vfb_gain      = 0;
@@ -265,7 +265,7 @@ module my_register_bank   #(parameter MSB=16)   (
 
 
           // 19 : reg_relay        = update(reg_relay, val);
-          20 : reg_irange_sense = update(reg_irange_sense, val);
+          // 20 : reg_irange_sense = update(reg_irange_sense, val);
           // 21 : reg_ifb_gain     = update(reg_ifb_gain, val);
           // 22 : reg_irangex58_sw = update(reg_irangex58_sw, val);
           // 23 : reg_vfb_gain     = update(reg_vfb_gain, val);
@@ -654,8 +654,8 @@ module top (
   // wire [4-1:0] reg_relay;
   // assign { RELAY_SENSE, /*RELAY_OUTCOM, */ RELAY_VRANGE } = reg_relay;
 
-  wire [4-1:0] reg_irange_sense;
-  assign { IRANGE_SENSE4, IRANGE_SENSE3, IRANGE_SENSE2, IRANGE_SENSE1 } = reg_irange_sense;
+//  wire [4-1:0] reg_irange_sense;
+//  assign { IRANGE_SENSE4, IRANGE_SENSE3, IRANGE_SENSE2, IRANGE_SENSE1 } = reg_irange_sense;
 
   // wire [4-1:0] reg_ifb_gain;
   // assign { GAIN_IFB_OP2, GAIN_IFB_OP1 } = reg_ifb_gain;
@@ -735,7 +735,7 @@ module top (
     . reg_relay_com(reg_relay_com),
     . reg_irange_x_sw(reg_irange_x_sw),
     // . reg_relay(reg_relay),
-    . reg_irange_sense(reg_irange_sense),
+    // . reg_irange_sense(reg_irange_sense),
     // . reg_ifb_gain(reg_ifb_gain),
     // . reg_irangex58_sw(reg_irangex58_sw),
     // . reg_vfb_gain(reg_vfb_gain),
