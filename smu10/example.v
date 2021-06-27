@@ -345,6 +345,8 @@ module top (
   output MISO,
   // output b
 
+  output INTERUPT_OUT,
+
 
   // adc 03
   output ADC03_CLK,
@@ -499,6 +501,12 @@ module top (
   assign ADC02_CLK = CLK;
   assign ADC02_MOSI = MOSI;
 
+
+  ////////////////////////////////////////
+  // connect interupt_out to data ready of adc.
+  // to support, multiple interupt source, could use an SR register that is read over spi.
+  // but this is sufficient... atm.
+  assign  INTERUPT_OUT = ADC02_DRDY;
 
 
   // dout for fpga spi.

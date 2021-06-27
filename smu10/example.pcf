@@ -21,6 +21,8 @@ set_io SPECIAL    45
 set_io MISO       47     # output from fpga, input to mcu master.
 
 
+# VOF/VIF
+set_io INTERUPT_OUT   48
 
 
 ########################
