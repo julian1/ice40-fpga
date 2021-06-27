@@ -532,32 +532,25 @@ module top (
 
   // wire = no state preserved between clocks.
 
+
   wire [4-1:0] reg_led;
   assign { LED2, LED1} = reg_led;
+
+  // reg_mux
 
   wire [4-1:0] reg_dac;
   assign {DAC_RST, DAC_UNI_BIP_B, DAC_UNI_BIP_A, DAC_LDAC } = reg_dac;
 
-  // ADC_03... no configuration pins.
-
-
-  // OK...
   wire [4-1:0] reg_rails ;
-  // assign { RAILS_LP60V, RAILS_LP30V, RAILS_LP15V, RAILS_LP5V } = 4'b1111;   // OK. good way to test pins.
   assign { RAILS_LP60V, RAILS_LP30V, RAILS_LP15V, RAILS_LP5V } = reg_rails;
 
-  wire [4-1:0] reg_rails_oe;
-  assign { RAILS_OE  } = reg_rails_oe;
-
-
+  // reg_soft_reset
 
   wire [4-1:0] reg_dac_ref_mux;
   assign { DAC_REF_MUX_B, DAC_REF_MUX_A } = reg_dac_ref_mux;
 
-
-  wire [4-1:0] reg_adc; // reg_adc02? from adc03,
+  wire [4-1:0] reg_adc;
   assign { ADC02_RST, ADC02_M2, ADC02_M1, ADC02_M0 } = reg_adc;
-
 
   wire [4-1:0] reg_clamp1;
   assign { CLAMP1_VSET_INV, CLAMP1_ISET_INV, CLAMP1_ISET, CLAMP1_VSET } = reg_clamp1;
@@ -565,16 +558,17 @@ module top (
   wire [4-1:0] reg_clamp2;
   assign { CLAMP2_MAX, CLAMP2_INJECT_VFB, CLAMP2_INJECT_ERR, CLAMP2_MIN} = reg_clamp2;
 
-  // ranging relays
   wire [4-1:0] reg_relay_com;
   assign { RELAY_COM_Z, RELAY_COM_Y, RELAY_COM_X } = reg_relay_com;
 
   wire [4-1:0] reg_irange_x_sw;
   assign { IRANGE_X_SW4_CTL, IRANGE_X_SW3_CTL, IRANGE_X_SW2_CTL, IRANGE_X_SW1_CTL } = reg_irange_x_sw;
 
+  wire [4-1:0] reg_rails_oe;
+  assign { RAILS_OE  } = reg_rails_oe;
+
   wire [4-1:0] reg_ina_vfb_sw;
   assign { INA_VFB_SW3_CTL, INA_VFB_SW2_CTL, INA_VFB_SW1_CTL } = reg_ina_vfb_sw;
-
 
   wire [4-1:0] reg_ina_ifb_sw;
   assign { INA_IFB_SW3_CTL, INA_IFB_SW2_CTL, INA_IFB_SW1_CTL } = reg_ina_ifb_sw;
@@ -582,25 +576,21 @@ module top (
   wire [4-1:0] reg_ina_vfb_atten_sw;
   assign { INA_VFB_ATTEN_SW3_CTL, INA_VFB_ATTEN_SW2_CTL, INA_VFB_ATTEN_SW1_CTL } = reg_ina_vfb_atten_sw;
 
-
   wire [4-1:0] reg_isense_mux;
   assign { ISENSE_MUX3_CTL,  ISENSE_MUX2_CTL , ISENSE_MUX1_CTL } = reg_isense_mux;
-
 
   wire [4-1:0] reg_relay_out;
   assign {  RELAY_OUT_COM_LC, RELAY_OUT_COM_HC} = reg_relay_out;
 
-
   wire [4-1:0] reg_relay_vsense;
   assign {  RELAY_VSENSE_CTL } = reg_relay_vsense;
 
-
-  wire [4-1:0] reg_relay_vsense;
-  assign {  RELAY_VSENSE_CTL } = reg_relay_vsense;
-
+  // wire [4-1:0] reg_relay_vsense;
+  // assign {  RELAY_VSENSE_CTL } = reg_relay_vsense;
 
   wire [4-1:0] reg_irange_yz_sw;
   assign {  IRANGE_YZ_SW4_CTL, IRANGE_YZ_SW3_CTL, IRANGE_YZ_SW2_CTL, IRANGE_YZ_SW1_CTL } = reg_irange_yz_sw;
+
 
 
 
