@@ -13,14 +13,15 @@ set_io XTALCLK 21
 #    pa6 = miso.  vie=voe  = pin 47
 
 # should prefix these
-set_io CLK   42
+set_io CLK        42
 
-set_io CS     43
-set_io MOSI   44
-set_io SPECIAL 45
-set_io MISO    47     # output from fpga, input to mcu master.
+set_io CS         43
+set_io MOSI       44
+set_io SPECIAL    45
+set_io MISO       47     # output from fpga, input to mcu master.
 
 
+# reg_led
 set_io LED1 106
 set_io LED2 107
 
@@ -39,11 +40,10 @@ set_io DAC_SPI_SDO  26
 set_io DAC_LDAC     28
 set_io DAC_RST      29
 set_io DAC_UNI_BIP_A 31
-set_io DAC_UNI_BIP_B  32
+set_io DAC_UNI_BIP_B 32
 
 # flash
-# smu11.
-# this is really bad. should not be in different io banks.
+# TODO really bad pin assignment. should not be in different gpio banks.
 set_io FLASH_CS     22     # flash_ss
 set_io FLASH_CLK    101     # flash_sck
 set_io FLASH_MOSI   144
@@ -69,6 +69,7 @@ set_io ADC02_DRDY   3
 set_io ADC02_MOSI   4
 set_io ADC02_MISO   7
 set_io ADC02_CLK    8
+
 set_io ADC02_CS     9
 set_io ADC02_M0     10
 set_io ADC02_M1     11
@@ -86,24 +87,67 @@ set_io CLAMP2_INJECT_ERR 58
 set_io CLAMP2_INJECT_VFB 60
 set_io CLAMP2_MAX        56
 
-# ranging relay com.  relay_range_ ...
-# smu11.
+
+
 # reg_relay_com
 set_io RELAY_COM_X  116
 set_io RELAY_COM_Y  117
 set_io RELAY_COM_Z  118
 
 
-
-# relay
-# set_io RELAY_VRANGE  113
-# set_io RELAY_OUTCOM   95    # non contiguous.
-
-# smu11
 # reg_relay_out
 set_io RELAY_OUT_COM_HC 112
 set_io RELAY_OUT_COM_LC 113
 
+
+
+
+# ina_vfb_sw
+set_io INA_VFB_SW1_CTL 134
+set_io INA_VFB_SW2_CTL 135
+set_io INA_VFB_SW3_CTL 136
+
+
+set_io INA_VFB_ATTEN_SW1_CTL 137
+set_io INA_VFB_ATTEN_SW2_CTL 138
+set_io INA_VFB_ATTEN_SW3_CTL 139
+
+
+
+# reg_ina_ifb_sw
+set_io INA_IFB_SW1_CTL  102
+set_io INA_IFB_SW2_CTL  104
+set_io INA_IFB_SW3_CTL  105
+
+
+# reg_isense_mux
+set_io ISENSE_MUX1_CTL   78
+set_io ISENSE_MUX2_CTL   79
+set_io ISENSE_MUX3_CTL   80
+
+# reg_relay_vsense
+set_io RELAY_VSENSE_CTL  115
+
+
+
+# irange_x_sw
+set_io IRANGE_X_SW1_CTL 119
+set_io IRANGE_X_SW2_CTL 120
+set_io IRANGE_X_SW3_CTL 121
+set_io IRANGE_X_SW4_CTL 122
+
+# smu11
+set_io IRANGE_YZ_SW1_CTL 73
+set_io IRANGE_YZ_SW2_CTL 74
+set_io IRANGE_YZ_SW3_CTL 75
+set_io IRANGE_YZ_SW4_CTL 76
+
+
+
+
+
+###########################
+# old
 
 # irange sense
 # deprecated
@@ -126,21 +170,6 @@ set_io RELAY_OUT_COM_LC 113
 #set_io GAIN_VFB_OP2 76
 
 
-#####################################
-# smu11 stuff.
-
-# ina_vfb_sw
-# smu11
-set_io INA_VFB_SW1_CTL 134
-set_io INA_VFB_SW2_CTL 135
-set_io INA_VFB_SW3_CTL 136
-
-# smu11
-set_io INA_VFB_ATTEN_SW1_CTL 137
-set_io INA_VFB_ATTEN_SW2_CTL 138
-set_io INA_VFB_ATTEN_SW3_CTL 139
-
-
 
 
 # ina_diff_sw
@@ -154,35 +183,11 @@ set_io INA_VFB_ATTEN_SW3_CTL 139
 #set_io ISENSE_SW2_CTL   79
 #set_io ISENSE_SW3_CTL   80
 
-# reg_ina_ifb_sw
-# smu11
-set_io INA_IFB_SW1_CTL  102
-set_io INA_IFB_SW2_CTL  104
-set_io INA_IFB_SW3_CTL  105
 
+# relay
+# set_io RELAY_VRANGE  113
+# set_io RELAY_OUTCOM   95    # non contiguous.
 
-# reg_isense_mux
-# smu11
-set_io ISENSE_MUX1_CTL   78
-set_io ISENSE_MUX2_CTL   79
-set_io ISENSE_MUX3_CTL   80
-
-# reg_relay_vsense
-set_io RELAY_VSENSE_CTL  115
-
-
-
-# irange_x_sw
-# smu11
-set_io IRANGE_X_SW1_CTL 119
-set_io IRANGE_X_SW2_CTL 120
-set_io IRANGE_X_SW3_CTL 121
-set_io IRANGE_X_SW4_CTL 122
-
-# smu11
-set_io IRANGE_YZ_SW1_CTL 73
-set_io IRANGE_YZ_SW2_CTL 74
-set_io IRANGE_YZ_SW3_CTL 75
-set_io IRANGE_YZ_SW4_CTL 76
-
+#####################################
+# smu11 stuff.
 
