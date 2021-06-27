@@ -115,7 +115,7 @@ module my_register_bank   #(parameter MSB=16)   (
   output reg [4-1:0] reg_rails_oe,
   output reg [4-1:0] reg_ina_vfb_sw,
   // output reg [4-1:0] reg_ina_diff_sw,
-  output reg [4-1:0] reg_isense_sw,
+  // output reg [4-1:0] reg_isense_sw,
   output reg [4-1:0] reg_ina_ifb_sw,
 
   ///////////////////
@@ -244,7 +244,7 @@ module my_register_bank   #(parameter MSB=16)   (
                                         // weird. for smu09, on first flash. ice40 pins came up lo.
               reg_ina_vfb_sw    = 0;
               // reg_ina_diff_sw   = 0;
-              reg_isense_sw     = 4'b1111;
+              // reg_isense_sw     = 4'b1111;
               reg_ina_ifb_sw    = 4'b1111;
 
               reg_ina_vfb_atten_sw = 4'b1111; // active lo. dg444 and 74hc04
@@ -270,8 +270,8 @@ module my_register_bank   #(parameter MSB=16)   (
           // smu10
           24 : reg_rails_oe     = update(reg_rails_oe, val);
           25 : reg_ina_vfb_sw   = update(reg_ina_vfb_sw, val);
-          26 : reg_ina_diff_sw  = update(reg_ina_diff_sw, val);
-          27 : reg_isense_sw    = update(reg_isense_sw, val);
+          // 26 : reg_ina_diff_sw  = update(reg_ina_diff_sw, val);
+          // 27 : reg_isense_sw    = update(reg_isense_sw, val);
           28 : reg_ina_ifb_sw   = update(reg_ina_ifb_sw, val);
 
           // need a ref readonly version number/string ... reg.
@@ -740,7 +740,7 @@ module top (
     . reg_rails_oe(reg_rails_oe),
     . reg_ina_vfb_sw(reg_ina_vfb_sw),
     // . reg_ina_diff_sw(reg_ina_diff_sw),
-    . reg_isense_sw(reg_isense_sw),
+    // . reg_isense_sw(reg_isense_sw),
     . reg_ina_ifb_sw(reg_ina_ifb_sw),
     . reg_ina_vfb_atten_sw(reg_ina_vfb_atten_sw),
     . reg_isense_mux(reg_isense_mux),

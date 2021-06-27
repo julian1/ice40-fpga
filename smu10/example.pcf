@@ -127,18 +127,18 @@ set_io RAILS_OE         95    # smu10 not contig.
 
 
 
+# reg_ina_vfb_sw  25
+set_io INA_VFB_SW1_CTL 134
+set_io INA_VFB_SW2_CTL 135
+set_io INA_VFB_SW3_CTL 136
+
+
 
 # reg_relay 31
 set_io RELAY_OUT_COM_HC 112
 set_io RELAY_OUT_COM_LC 113
 
 
-
-
-# ina_vfb_sw
-set_io INA_VFB_SW1_CTL 134
-set_io INA_VFB_SW2_CTL 135
-set_io INA_VFB_SW3_CTL 136
 
 
 set_io INA_VFB_ATTEN_SW1_CTL 137
