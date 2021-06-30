@@ -22,6 +22,8 @@ set_io MISO       47     # output from fpga, input to mcu master.
 
 
 # VOF/VIF
+# ads131a04  DYDR Data ready; active low; host interrupt and synchronization for multi-devices
+
 set_io INTERUPT_OUT   48
 
 
@@ -89,7 +91,7 @@ set_io DAC_REF_MUX_A 33
 set_io DAC_REF_MUX_B 34
 
 
-# reg_adc  14  
+# reg_adc  14
 set_io ADC02_CS     9
 set_io ADC02_M0     10
 set_io ADC02_M1     11

@@ -506,6 +506,8 @@ module top (
   // connect interupt_out to data ready of adc.
   // to support, multiple interupt source, could use an SR register that is read over spi.
   // but this is sufficient... atm.
+  //
+  // ads131a04  DYDR Data ready; active low; host interrupt and synchronization for multi-devices
   assign  INTERUPT_OUT = ADC02_DRDY;
 
 
