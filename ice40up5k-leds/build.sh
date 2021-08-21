@@ -23,7 +23,7 @@ icepack ./build/example.asc ./build/example.bin
 echo "finished"
 
 # send to device -
-# iceprog ./build/example.bin
+iceprog ./build/example.bin
 
 
 
