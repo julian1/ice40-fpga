@@ -1,0 +1,9 @@
+
+# example.pcf
+
+set_io clk 21
+
+
+set_io LED1 106
+set_io LED2 107
+
