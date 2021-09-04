@@ -33,7 +33,7 @@ module top (
   reg [31:0] count = 0;
  
 
-  // leds are open drain. 0 is on. 1 is off.
+  // leds are open drain. 1 is on. 1 is off.
   // reg [2:0] leds = 0;// 3'b101;        // middle on.
   // reg [2:0] leds = 3'b001;        // red/ top 
   // reg [2:0] leds = 3'b010;        // g / middle
@@ -74,7 +74,7 @@ module top (
             // initialize count
             count <= 0;
             state <= `STATE_PREF;
-            leds <= ~ 3'b001; // R
+            leds <= 3'b001; // R
           end
 
       
@@ -91,7 +91,7 @@ module top (
               begin
                 // swap to reference input for rundown
                 state <= `STATE_NREF;
-                leds <= ~ 3'b010;
+                leds <= 3'b010; // G
               end
           end
 
