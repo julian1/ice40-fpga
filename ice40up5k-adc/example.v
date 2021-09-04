@@ -37,21 +37,18 @@ module top (
   // reg [2:0] leds = 0;// 3'b101;        // middle on.
   // reg [2:0] leds = 3'b001;        // red/ top 
   // reg [2:0] leds = 3'b010;        // g / middle
-  reg [2:0] leds = 3'b100;        // b / bottom
+  // reg [2:0] leds = 3'b100;        // b / bottom
+  reg [2:0] leds = 3'b000;        // b / bottom
 
 
+  assign { LED_B, LED_G, LED_R } = ~ leds;        // note. INVERTED. 
 
   // assign { LED_B, LED_G, LED_R } = count >> 22 ;      // ok. working. if remove the case block.. 
                                                           // but this does't... 
 
 
-
-  // Think we want to reverse these bits 1
-
-  assign { LED_B, LED_G, LED_R } = ~ leds;        // INVERTED
-/*
   assign { INT_IN_SIG_CTL, INT_IN_N_CTL, INT_IN_P_CTL } = leds;      
-*/
+
 
   `define STATE_INIT    0    // initialsation state
   // `define STATE_WAITING 1
@@ -77,6 +74,7 @@ module top (
             // initialize count
             count <= 0;
             state <= `STATE_PREF;
+            leds <= ~ 3'b001; // R
           end
 
       
@@ -93,7 +91,7 @@ module top (
               begin
                 // swap to reference input for rundown
                 state <= `STATE_NREF;
-                // leds <= ~ 3'b001;
+                leds <= ~ 3'b010;
               end
           end
 
@@ -105,7 +103,6 @@ module top (
               begin
                 // swap to reference input for rundown
                 state <= `STATE_INIT;
-                // leds <= ~ 3'b010;
                 // can avoid state init. by just setting count to 0 again here...
                 // if want.
                 // not. sure we need. integration will toggle 
