@@ -8,7 +8,9 @@ module top (
 
   output INT_IN_P_CTL, 
   output INT_IN_N_CTL,     
-  output INT_IN_SIG_CTL   
+  output INT_IN_SIG_CTL, 
+
+  output CMPR_LATCH_CTL
 
 );
 
@@ -32,7 +34,7 @@ module top (
   // counters and settings  ...
   reg [31:0] count = 0;
  
-
+  // we can probe the leds for signals....
 
 
   // leds are open drain. 1 is on. 1 is off.
@@ -48,11 +50,19 @@ module top (
   // assign { LED_B, LED_G, LED_R } = count >> 22 ;      // ok. working. if remove the case block.. 
                                                           // but this does't... 
 
+  // might be easier to assign things individually.
 
-  assign { /*INT_IN_SIG_CTL,*/ INT_IN_N_CTL, INT_IN_P_CTL } = leds;      
+  assign { INT_IN_SIG_CTL, INT_IN_N_CTL, INT_IN_P_CTL } = leds;      
 
-  assign CMPR_LATCH_CTL = 0;   //  doesn't work?
-  assign INT_IN_SIG_CTL = 0;  // this works to set lo.
+
+ 
+  /* 
+    must be lo to trigger.
+  // on +-4.8V . latch must be off... else it's held low.
+  */
+  assign CMPR_LATCH_CTL = 0;   //  works!
+                               
+
 
 
   `define STATE_INIT    0    // initialsation state
