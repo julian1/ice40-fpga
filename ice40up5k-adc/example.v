@@ -49,6 +49,8 @@ module top (
 
   reg [4:0] state = `STATE_INIT;
 
+  // we don't have to keep the pos,neg count of slow count. because it's implied by oscillation count.
+  // but might be easier.
 
   // ok. so pos count and neg count will be independent. 
 
@@ -71,7 +73,11 @@ module top (
             // should use dedicated pref count... and accumulate.
             // or have a count dedicated....
 
-            if(count == 2000000 )
+            if(count == 20000000 )
+              /*
+                ok. here would would do a small backtrack count. then we test integrator comparator 
+                for next direction.
+              */
               begin
                 // swap to reference input for rundown
                 state <= `STATE_NREF;
@@ -80,14 +86,17 @@ module top (
           end
 
 
-        `STATE_NREF:
+        `STATE_NREF:  // neg backtrack.
           begin
 
-            if(count == 4000000 )
+            if(count == 20000000 + 4000000 )
               begin
                 // swap to reference input for rundown
                 state <= `STATE_INIT;
                 leds <= ~ 3'b010;
+                // can avoid state init. by just setting count to 0 again here...
+                // if want.
+                // not. sure we need. integration will toggle 
               end
           end
 
