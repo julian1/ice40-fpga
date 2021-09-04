@@ -33,6 +33,8 @@ module top (
   reg [31:0] count = 0;
  
 
+
+
   // leds are open drain. 1 is on. 1 is off.
   // reg [2:0] leds = 0;// 3'b101;        // middle on.
   // reg [2:0] leds = 3'b001;        // red/ top 
@@ -47,7 +49,10 @@ module top (
                                                           // but this does't... 
 
 
-  assign { INT_IN_SIG_CTL, INT_IN_N_CTL, INT_IN_P_CTL } = leds;      
+  assign { /*INT_IN_SIG_CTL,*/ INT_IN_N_CTL, INT_IN_P_CTL } = leds;      
+
+  assign CMPR_LATCH_CTL = 0;   //  doesn't work?
+  assign INT_IN_SIG_CTL = 0;  // this works to set lo.
 
 
   `define STATE_INIT    0    // initialsation state
@@ -84,7 +89,7 @@ module top (
             // should use dedicated pref count... and accumulate.
             // or have a count dedicated....
 
-            if(count == 10000 )
+            if(count == 40000 )
               /*
                 ok. here would would do a small backtrack count. then we test integrator comparator 
                 for next direction.
@@ -100,7 +105,7 @@ module top (
         `STATE_NREF:  // neg backtrack.
           begin
 
-            if(count == 10000 + 10000 )
+            if(count == 40000 + 40000 )
               begin
                 // swap to reference input for rundown
                 state <= `STATE_INIT;
