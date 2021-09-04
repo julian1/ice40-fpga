@@ -28,11 +28,7 @@ module top (
   reg [31:0] count = 0;
  
 
- 
-  // 0 is on or off? 
-  // 0 == all bits off, turns leds on.
-  // reg [2:0] leds = 3'b111;    // all off.
-
+  // leds are open drain. 0 is on. 1 is off.
   reg [2:0] leds = 3'b101;        // middle on.
 
 
@@ -53,6 +49,8 @@ module top (
 
   reg [4:0] state = `STATE_INIT;
 
+
+  // ok. so pos count and neg count will be independent. 
 
   always @(posedge clk)
     begin
@@ -77,8 +75,7 @@ module top (
               begin
                 // swap to reference input for rundown
                 state <= `STATE_NREF;
-                leds <= 3'b100;
-
+                leds <= ~ 3'b100;
               end
           end
 
@@ -90,7 +87,7 @@ module top (
               begin
                 // swap to reference input for rundown
                 state <= `STATE_INIT;
-                leds <= 3'b001;
+                leds <= ~ 3'b010;
               end
           end
 
