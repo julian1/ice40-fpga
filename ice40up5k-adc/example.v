@@ -71,9 +71,10 @@ module top (
       case (state)
         `STATE_INIT:
           begin
-            // initialize count
-            count <= 0;
+            /////////// 
+            // transition.
             state <= `STATE_PREF;
+            count <= 0;
             leds <= 3'b001; // R
           end
 
@@ -83,7 +84,7 @@ module top (
             // should use dedicated pref count... and accumulate.
             // or have a count dedicated....
 
-            if(count == 20000000 )
+            if(count == 10000 )
               /*
                 ok. here would would do a small backtrack count. then we test integrator comparator 
                 for next direction.
@@ -99,7 +100,7 @@ module top (
         `STATE_NREF:  // neg backtrack.
           begin
 
-            if(count == 20000000 + 8000000 )
+            if(count == 10000 + 10000 )
               begin
                 // swap to reference input for rundown
                 state <= `STATE_INIT;
