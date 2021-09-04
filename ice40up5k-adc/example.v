@@ -53,8 +53,8 @@ module top (
   `define STATE_INIT    0    // initialsation state
   // `define STATE_WAITING 1
   `define STATE_PREF    2
-  `define STATE_NREF    3
-  `define STATE_RUNDOWN 4
+  `define STATE_NREF    4
+  // `define STATE_RUNDOWN 4
 
   reg [4:0] state = `STATE_INIT;
 
@@ -99,7 +99,7 @@ module top (
         `STATE_NREF:  // neg backtrack.
           begin
 
-            if(count == 20000000 + 4000000 )
+            if(count == 20000000 + 8000000 )
               begin
                 // swap to reference input for rundown
                 state <= `STATE_INIT;
