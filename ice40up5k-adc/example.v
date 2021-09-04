@@ -39,7 +39,7 @@ module top (
 
   // assign { LED_R, LED_G, LED_B } = counter >> 20 ;  // this works???
   // assign { LED_R, LED_G, LED_B } = counter >> 21 ;  // this works???
-  // assign { LED_R, LED_G, LED_B } = count >> 21 ;      // ok. working. if remove the case block.. 
+  // assign { LED_R, LED_G, LED_B } = count >> 22 ;      // ok. working. if remove the case block.. 
 
 
   assign { LED_R, LED_G, LED_B } = leds;      
@@ -77,7 +77,7 @@ module top (
               begin
                 // swap to reference input for rundown
                 state <= `STATE_NREF;
-                // leds <= 3'b100;
+                leds <= 3'b100;
 
               end
           end
@@ -90,7 +90,7 @@ module top (
               begin
                 // swap to reference input for rundown
                 state <= `STATE_INIT;
-                // leds <= 3'b001;
+                leds <= 3'b001;
               end
           end
 
