@@ -46,7 +46,8 @@ module top (
   // we can probe the leds for signals....
 
   // should be differential input
-  assign LED_B = CMPR_OUT_CTL_P;
+  assign LED_B = CMPR_LATCH_CTL;
+  // assign LED_B = CMPR_OUT_CTL_P;
   // assign LED_B = CMPR_OUT_CTL_N;
 
   // rgb. top,middle,bottom.
@@ -72,7 +73,7 @@ module top (
     must be lo to trigger.
     on +-4.8V . latch must be off... else it's held low.
   */
-  assign CMPR_LATCH_CTL = 0;   //  works!
+  // assign CMPR_LATCH_CTL = 0;   //  works!
 
 
 
@@ -94,6 +95,12 @@ module top (
     simplest thing. if above, then drive lo. if below then drive hi.
     ----
     what is the reason for the small backtrack? just to better fit the integration range within the voltage range?
+    ---------------
+
+    EXTREME . 
+      i think the reversinig action - is to avoid two crossing - happing in an instant.
+      eg. where the /\  happens right at the apex. 
+        
   */
 
   // actually counting the number of periods. rather than the clock. might be simpler. 
@@ -112,6 +119,8 @@ module top (
             state <= `STATE_RUNUP;
             count <= 0;
             leds <= 3'b001; // R
+            CMPR_LATCH_CTL <= 1;    // disarm
+            // CMPR_LATCH_CTL <= 0;    // arm
           end
 
         // comparator bouncing means it would be nice to use the latch.  need 5ns? setup.
@@ -123,6 +132,16 @@ module top (
             // should use dedicated pref count... and accumulate.
             // or have a count dedicated....
 
+            // the count is kind of correct. but we are setkkkkk 
+            // not sure we are using correct.... 
+            // it's not an arm/disarm.   instead when we get the cross, we should set latch high ..
+            // but that if two crossings very close together.  which will happen.
+
+            if(count == 9000)
+              begin
+                CMPR_LATCH_CTL <= 0; // arm
+              end
+
             if(count == 10000 )
               begin
               /*
@@ -131,6 +150,7 @@ module top (
               */
 
               count <= 0;   // reset count
+              CMPR_LATCH_CTL <= 1; // disarm
 
               if( CMPR_OUT_CTL_P)
                   begin
