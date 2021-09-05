@@ -28,10 +28,11 @@ module top (
   // counters and settings  ...
   // for an individual phase.
   reg [31:0] count = 0;
-
-
   reg [31:0] count_osc = 0;   // 
   reg [31:0] count_up = 0;   // 
+  reg [31:0] count_rundown = 0;   // 
+
+
 
   // we can probe the leds for signals....
 
@@ -152,9 +153,12 @@ module top (
                 begin
 
                   state <= `STATE_RUNDOWN;
+                  count_rundown <= 0;       // reset...
                 end
 
             end
+
+  
 
         // EXTR. we also have to short the integrator at the start. to begin at a known start position.
 
@@ -165,6 +169,10 @@ module top (
             // probably with want to capture it on a scope. 
             // the direction should be correct here. and we just have to run it down
             // we wnat a different clock so we can read it....
+
+            // EXTR. only incrementing the count, in the contextual state, 
+            // means can avoid copying the variable out, if we do it quickly.
+            count_rundown <= count_rundown + 1;
 
             if(zerocross_down || zerocross_up)
               begin
@@ -180,6 +188,7 @@ module top (
                   mux <= 3'b000; 
                   // state to done
                   state <= `STATE_DONE;
+
               end 
           end
 
@@ -189,6 +198,8 @@ module top (
             // ok. it is hitting exactly the same spot everytime. nice. 
             // when immediately restart. because it's hit a zero cross.  
             // but we probably want to start from a shorted integrator.
+            ///////////////
+            // OK. to get the count value.  we have to be able to read it.
 
             state <= `STATE_INIT;
           end
