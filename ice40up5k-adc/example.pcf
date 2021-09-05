@@ -2,6 +2,12 @@
 # https://github.com/damdoy/ice40_ultraplus_examples/blob/master/common/io.pcf
 # For the iCE40 UltraPlus (iCE40UP5K-QFN) Breakout Board
 
+
+#set_io clk 35
+# JA
+set_io clk 37
+
+
 # JA swapped versus breakout board.
 set_io LED_R 39
 set_io LED_G 40
@@ -17,21 +23,24 @@ set_io INT_IN_UNUSED_CTL 26
 # iot_41a according to kicad.
 set_io CMPR_LATCH_CTL 28
 
+set_io CMPR_OUT_CTL_P   32
+set_io CMPR_OUT_CTL_N   34
+
+
 set_io VOC 10 
 
-set_io SW[2] 34
+
+
+# set_io SW[2] 34
 set_io SW[3] 43
 
 
-#set_io clk 35
-# JA
-set_io clk 37
 
 # bank 0
 # set_io IOT_39A 26
 # set_io IOT_38B 27
 set_io IOT_42B 31
-set_io IOT_43A 32
+# set_io IOT_43A 32
 set_io IOT_45A_G1 37
 set_io IOT_51A 42
 set_io IOT_50B 38

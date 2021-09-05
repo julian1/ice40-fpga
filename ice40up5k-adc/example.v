@@ -6,11 +6,17 @@ module top (
   output LED_G,
   output LED_B,
 
-  output INT_IN_P_CTL, 
-  output INT_IN_N_CTL,     
-  output INT_IN_SIG_CTL, 
+  output INT_IN_P_CTL,
+  output INT_IN_N_CTL,
+  output INT_IN_SIG_CTL,
 
-  output CMPR_LATCH_CTL
+  output CMPR_LATCH_CTL,
+
+  // should configure as differential input.
+  input CMPR_OUT_CTL_P,
+  input CMPR_OUT_CTL_N
+
+
 
 );
 
@@ -33,35 +39,37 @@ module top (
   //////////////////////////////////////////////////////
   // counters and settings  ...
   reg [31:0] count = 0;
- 
+
   // we can probe the leds for signals....
 
 
+  assign LED_B = CMPR_OUT_CTL_P;
+
+  // rgb. top,middle,bottom.
   // leds are open drain. 1 is on. 1 is off.
-  // reg [2:0] leds = 0;// 3'b101;        // middle on.
-  // reg [2:0] leds = 3'b001;        // red/ top 
+  // reg [2:0] leds = 3'b001;        // red/ top
   // reg [2:0] leds = 3'b010;        // g / middle
   // reg [2:0] leds = 3'b100;        // b / bottom
   reg [2:0] leds = 3'b000;        // b / bottom
 
 
-  assign { LED_B, LED_G, LED_R } = ~ leds;        // note. INVERTED. 
+  assign { /*LED_B, */ LED_G, LED_R } = ~ leds;        // note. INVERTED for open-drain..
+  // assign { LED_B, LED_G, LED_R } = count >> 22 ;      // ok. working. if remove the case block..
+                                                          // but this does't...
 
-  // assign { LED_B, LED_G, LED_R } = count >> 22 ;      // ok. working. if remove the case block.. 
-                                                          // but this does't... 
 
   // might be easier to assign things individually.
 
-  assign { INT_IN_SIG_CTL, INT_IN_N_CTL, INT_IN_P_CTL } = leds;      
+  assign { INT_IN_SIG_CTL, INT_IN_N_CTL, INT_IN_P_CTL } = leds;
 
+  // OK. so want to make sure. that the
 
- 
-  /* 
+  /*
     must be lo to trigger.
   // on +-4.8V . latch must be off... else it's held low.
   */
   assign CMPR_LATCH_CTL = 0;   //  works!
-                               
+
 
 
 
@@ -76,7 +84,7 @@ module top (
   // we don't have to keep the pos,neg count of slow count. because it's implied by oscillation count.
   // but might be easier.
 
-  // ok. so pos count and neg count will be independent. 
+  // ok. so pos count and neg count will be independent.
 
   always @(posedge clk)
     begin
@@ -86,14 +94,14 @@ module top (
       case (state)
         `STATE_INIT:
           begin
-            /////////// 
+            ///////////
             // transition.
             state <= `STATE_PREF;
             count <= 0;
             leds <= 3'b001; // R
           end
 
-      
+
         `STATE_PREF:
           begin
             // should use dedicated pref count... and accumulate.
@@ -101,7 +109,7 @@ module top (
 
             if(count == 40000 )
               /*
-                ok. here would would do a small backtrack count. then we test integrator comparator 
+                ok. here would would do a small backtrack count. then we test integrator comparator
                 for next direction.
               */
               begin
@@ -121,7 +129,7 @@ module top (
                 state <= `STATE_INIT;
                 // can avoid state init. by just setting count to 0 again here...
                 // if want.
-                // not. sure we need. integration will toggle 
+                // not. sure we need. integration will toggle
               end
           end
 
