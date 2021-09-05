@@ -35,6 +35,7 @@ module top (
 
   // we can probe the leds for signals....
 
+  // start everything off...
   reg [2:0] mux = 3'b000;        // b / bottom
 
 
@@ -171,6 +172,8 @@ module top (
                   LED_B <= ~ LED_B;     
 
                   // record/copy the count??? or use a different count variable
+                  // OK. we need to have the integrator run from fixed start point.
+                  // what's weird...
 
                   // turn off all inputs
                   // seems to work...
@@ -184,7 +187,11 @@ module top (
 
         `STATE_DONE:
           begin
+            // ok. it is hitting exactly the same spot everytime. nice. 
+            // when immediately restart. because it's hit a zero cross.
 
+
+            state <= `STATE_INIT;
           end
 
 
