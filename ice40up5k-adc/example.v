@@ -137,6 +137,20 @@ module top (
             // it's not an arm/disarm.   instead when we get the cross, we should set latch high ..
             // but that if two crossings very close together.  which will happen.
 
+            if(count == 8000 )
+              begin
+                if(leds == 3'b010 ) 
+                  begin
+                    leds <= 3'b001; // R
+                  end
+ /* 
+                if(leds == 3'b001 ) 
+                  begin
+                  leds <= 3'b010; // G
+                  end
+*/
+              end
+
             if(count == 10000 )
               begin
               /*
