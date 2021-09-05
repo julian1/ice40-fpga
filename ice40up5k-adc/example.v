@@ -75,6 +75,7 @@ module top (
   assign CMPR_LATCH_CTL = 0;   //  works!
 
 
+/*
   // i don't think we need this
   // trigger zerocross
   reg [2:0] zerocrossr;
@@ -83,7 +84,7 @@ module top (
   wire zerocross_up     = (zerocrossr[2:1]==2'b10);
   wire zerocross_down   = (zerocrossr[2:1]==2'b01);
   wire zerocross_any    = zerocross_up || zerocross_down ;
-
+*/
 
 
 
@@ -103,6 +104,8 @@ module top (
   /*
     Actually not sure we do have to get it into the clock domain.
     simplest thing. if above, then drive lo. if below then drive hi.
+    ----
+    what is the reason for the small backtrack? just to better fit the integration range within the voltage range?
   */
 
   always @(posedge clk)
@@ -126,7 +129,7 @@ module top (
             // should use dedicated pref count... and accumulate.
             // or have a count dedicated....
 
-            if(count == 40000 )
+            if(count == 10000 )
               begin
               /*
                 ok. here would would do a small backtrack count. then we test integrator comparator
@@ -147,7 +150,7 @@ module top (
                 end
             end
 
-
+/*
         `STATE_NREF:  // neg backtrack.
           begin
 
@@ -160,7 +163,7 @@ module top (
                 // not. sure we need. integration will toggle
               end
           end
-
+*/
       endcase
     end
 
