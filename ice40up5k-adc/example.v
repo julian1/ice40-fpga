@@ -133,12 +133,21 @@ module top (
                     // n_count <= n_count + 1;
                 end
 
-              if(count_osc == 100) 
+              if(count_osc == 2000 * 5 )     // 2000osc = 1sec.   
                 begin
 
+                  state <= `STATE_DONE;
                 end
 
             end
+
+
+
+        `STATE_DONE:
+          begin
+
+
+          end
 
 
       endcase
