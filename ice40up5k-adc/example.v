@@ -27,8 +27,8 @@ module top (
   //////////////////////////////////////////////////////
   // counters and settings  ...
   // for an individual phase.
-  reg [31:0] count = 0;         // change name phase_count... or something...
-  reg [31:0] count_osc = 0;     //
+  reg [31:0] count = 0;         // count_clk.   change name phase_count... or something...
+  reg [31:0] count_phase = 0;     // phase not oscillation, because may have 2 in the same direction.
   reg [31:0] count_up = 0;      //
   reg [31:0] count_down = 0;    //
   reg [31:0] count_rundown = 0; //
@@ -93,7 +93,7 @@ module top (
             // reset vars, and transition to runup state
             state <= `STATE_RUNUP;
             count <= 0;
-            count_osc <= 0;
+            count_phase <= 0;
             count_up <= 0;
             count_down <= 0;
             mux <= 3'b001; // initial direction
@@ -138,7 +138,7 @@ module top (
                 // reset count
                 count <= 0;
                 // inc oscillations
-                count_osc <= count_osc + 1;
+                count_phase <= count_phase + 1;
 
                 // sample the comparator, to determine next direction
                 if( CMPR_OUT_CTL_P)
@@ -154,7 +154,7 @@ module top (
                 end
   
                 // count_up == count 
-                if(count_osc == 2000 * 5 )     // 2000osc = 1sec.
+                if(count_phase == 2000 * 5 )     // 2000osc = 1sec.
                   begin
 
                     state <= `STATE_RUNDOWN;
