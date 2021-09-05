@@ -35,17 +35,17 @@ module top (
 
   // we can probe the leds for signals....
 
-  reg [2:0] leds = 3'b000;        // b / bottom
+  reg [2:0] mux = 3'b000;        // b / bottom
 
 
-  assign { /*LED_B, */ LED_G, LED_R } = ~ leds;        // note. INVERTED for open-drain..
+  assign { /*LED_B, */ LED_G, LED_R } = ~ mux;        // note. INVERTED for open-drain..
   // assign { LED_B, LED_G, LED_R } = count >> 22 ;      // ok. working. if remove the case block..
                                                           // but this does't...
 
 
   // might be easier to assign things individually.
 
-  assign { INT_IN_SIG_CTL, INT_IN_N_CTL, INT_IN_P_CTL } = leds;
+  assign { INT_IN_SIG_CTL, INT_IN_N_CTL, INT_IN_P_CTL } = mux;
 
   // OK. so want to make sure. that the
 
@@ -77,7 +77,7 @@ module top (
             state <= `STATE_RUNUP;
             count <= 0;
             count_osc <= 0;
-            leds <= 3'b001; // R
+            mux <= 3'b001; // R
             // CMPR_LATCH_CTL <= 1;
             // low to trigger.
             CMPR_LATCH_CTL <= 0;
@@ -95,18 +95,18 @@ module top (
 
             if(count == 8000 )
               begin
-                if(leds == 3'b010 )
+                if(mux == 3'b010 )
                   begin
-                    leds <= 3'b001; // R
+                    mux <= 3'b001; // R
                   end
- /*
+                 /*
                 // these blocks cancel i think...
                 // need a case? perhaps
-                if(leds == 3'b001 )
+                if(mux == 3'b001 )
                   begin
-                  leds <= 3'b010; // G
+                  mux <= 3'b010; // G
                   end
-*/
+                */
               end
 
             if(count == 10000 )
@@ -116,20 +116,22 @@ module top (
                 for next direction.
               */
 
-              count <= 0;   // reset count
+              // reset count
+              count <= 0;   
+              // inc oscillations
               count_osc <= count_osc + 1;
 
-              LED_B <= ~ LED_B;     // eg. comparator test.
+              LED_B <= ~ LED_B;     // trigger for scope
 
               if( CMPR_OUT_CTL_P)
                   begin
                         // swap to reference input for rundown
                         // state <= `STATE_DONE;
-                      leds <= 3'b010; // G
+                      mux <= 3'b010; // G
                       // p_count <= p_count + 1;
                   end
                 else
-                    leds <= 3'b001; // R
+                    mux <= 3'b001; // R
                     // n_count <= n_count + 1;
                 end
 
@@ -145,6 +147,10 @@ module top (
 
         `STATE_DONE:
           begin
+            // need to do the rundown count...
+            // so we have to determine the clock cross... 
+            // probably with want to capture it on a scope. 
+            // the direction should be correct here. and we just have to run it down
 
 
           end
