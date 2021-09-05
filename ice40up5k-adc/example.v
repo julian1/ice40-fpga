@@ -10,8 +10,8 @@ module top (
   output INT_IN_N_CTL,
   output INT_IN_SIG_CTL,
 
-  // it should be possible to immediately set high, on the latch transition, to avoid  
-  // and then reset on some fixed count 
+  // it should be possible to immediately set high, on the latch transition, to avoid
+  // and then reset on some fixed count
   output CMPR_LATCH_CTL,
 
   /* should configure as differential input.
@@ -27,10 +27,11 @@ module top (
   //////////////////////////////////////////////////////
   // counters and settings  ...
   // for an individual phase.
-  reg [31:0] count = 0;
-  reg [31:0] count_osc = 0;   // 
-  reg [31:0] count_up = 0;   // 
-  reg [31:0] count_rundown = 0;   // 
+  reg [31:0] count = 0;         // change name phase_count... or something...
+  reg [31:0] count_osc = 0;     //
+  reg [31:0] count_up = 0;      //
+  reg [31:0] count_down = 0;    //
+  reg [31:0] count_rundown = 0; //
 
 
 
@@ -56,8 +57,8 @@ module top (
   /////////////////////////
   // this should be pushed into a separate module...
   // should be possible to set latch hi immediately on any event here...
-  reg [2:0] zerocrossr;  
-  always @(posedge clk) 
+  reg [2:0] zerocrossr;
+  always @(posedge clk)
     zerocrossr <= {zerocrossr[1:0], CMPR_OUT_CTL_P};
   wire zerocross_up     = (zerocrossr[2:1]==2'b10);  // message starts at falling edge
   wire zerocross_down   = (zerocrossr[2:1]==2'b01);  // message stops at rising edge
@@ -74,10 +75,10 @@ module top (
 
   reg [4:0] state = `STATE_INIT;
 
- 
+
   /*
     - need to keep up/down transitions equal.  - to balance charge injection.
-    - if end up on wrong side. just abandon, and run again? starting in opposite direction. 
+    - if end up on wrong side. just abandon, and run again? starting in opposite direction.
   */
   always @(posedge clk)
     begin
@@ -88,20 +89,22 @@ module top (
         `STATE_INIT:
           begin
             ///////////
-            // transition.
+            // reset vars, and transition to runup state
             state <= `STATE_RUNUP;
             count <= 0;
             count_osc <= 0;
-            mux <= 3'b001; // R
+            count_up <= 0;
+            count_down <= 0;
+            mux <= 3'b001; // initial direction
             LED_B <= 0;
             // enable comparator
             CMPR_LATCH_CTL <= 0;
           end
 
 
-        // So switching to rundown is just when the count hits a certain amount... 
+        // So switching to rundown is just when the count hits a certain amount...
         // having separate clocks means can vary things more easily.
-        // OR. just count the periods.  yes.  
+        // OR. just count the periods.  yes.
 
         `STATE_RUNUP:
           begin
@@ -126,58 +129,58 @@ module top (
 
             if(count == 10000 )
               begin
-              /*
-                ok. here would would do a small backtrack count. then we test integrator comparator
-                for next direction.
-              */
+                /*
+                  ok. here would would do a small backtrack count. then we test integrator comparator
+                  for next direction.
+                */
 
-              // reset count
-              count <= 0;   
-              // inc oscillations
-              count_osc <= count_osc + 1;
+                // reset count
+                count <= 0;
+                // inc oscillations
+                count_osc <= count_osc + 1;
 
-
-              if( CMPR_OUT_CTL_P)
+                // sample the comparator, to determine next direction
+                if( CMPR_OUT_CTL_P)
                   begin
-                        // swap to reference input for rundown
-                        // state <= `STATE_DONE;
-                      mux <= 3'b010; // G
-                      // p_count <= p_count + 1;
+                    mux <= 3'b010;
+                    count_up <= count_up + 1;
                   end
                 else
+                  begin
                     mux <= 3'b001; // R
-                    // n_count <= n_count + 1;
+                    count_down <= count_down + 1;
+                  end
                 end
-
-              if(count_osc == 2000 * 5 )     // 2000osc = 1sec.   
-                begin
-
-                  state <= `STATE_RUNDOWN;
-                  count_rundown <= 0;       // reset...
-                end
-
-            end
-
   
+                // count_up == count 
+                if(count_osc == 2000 * 5 )     // 2000osc = 1sec.
+                  begin
+
+                    state <= `STATE_RUNDOWN;
+                    count_rundown <= 0;       // reset...
+                  end
+
+              end
+
 
         // EXTR. we also have to short the integrator at the start. to begin at a known start position.
 
         `STATE_RUNDOWN:
           begin
             // need to do the rundown count...
-            // so we have to determine the clock cross... 
-            // probably with want to capture it on a scope. 
+            // so we have to determine the clock cross...
+            // probably with want to capture it on a scope.
             // the direction should be correct here. and we just have to run it down
             // we wnat a different clock so we can read it....
 
-            // EXTR. only incrementing the count, in the contextual state, 
+            // EXTR. only incrementing the count, in the contextual state,
             // means can avoid copying the variable out, if we do it quickly.
             count_rundown <= count_rundown + 1;
 
             if(zerocross_down || zerocross_up)
               begin
                   // trigger for scope
-                  LED_B <= ~ LED_B;     
+                  LED_B <= ~ LED_B;
 
                   // record/copy the count??? or use a different count variable
                   // OK. we need to have the integrator run from fixed start point.
@@ -185,18 +188,18 @@ module top (
 
                   // turn off all inputs
                   // seems to work...
-                  mux <= 3'b000; 
+                  mux <= 3'b000;
                   // state to done
                   state <= `STATE_DONE;
 
-              end 
+              end
           end
 
 
         `STATE_DONE:
           begin
-            // ok. it is hitting exactly the same spot everytime. nice. 
-            // when immediately restart. because it's hit a zero cross.  
+            // ok. it is hitting exactly the same spot everytime. nice.
+            // when immediately restart. because it's hit a zero cross.
             // but we probably want to start from a shorted integrator.
             ///////////////
             // OK. to get the count value.  we have to be able to read it.
@@ -239,7 +242,7 @@ endmodule
 
   // actually counting the number of periods. rather than the clock. might be simpler.
   // because the high slope and lo slope are not equal.
- 
+
 
 
   // the count is kind of correct. but we are setkkkkk
