@@ -1,5 +1,11 @@
 
 
+/*
+  - should update. to separate out the mask and val. 
+  so can use different sizes.
+*/
+
+
 function [8-1:0] update (input [8-1:0] x, input [8-1:0]  val);
   begin
     if( (val & 4'b1111) & (val >> 4) /*!= 0*/  ) // if both set and clear bits, then its a toggle
@@ -9,8 +15,12 @@ function [8-1:0] update (input [8-1:0] x, input [8-1:0]  val);
   end
 endfunction
 
+/*
+  - having the write mask is an effective way to do a read.
 
-
+  - being able to use different sized spi actions would be very nice.... 
+  - having some automated stm32 driver tests would also be nice.
+*/
 
 module my_register_bank   #(parameter MSB=16)   (
   input  clk,
