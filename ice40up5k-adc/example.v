@@ -10,6 +10,8 @@ module top (
   output INT_IN_N_CTL,
   output INT_IN_SIG_CTL,
 
+  // it should be possible to immediately set high, on the latch transition, to avoid  
+  // and then reset on some fixed count 
   output CMPR_LATCH_CTL,
 
   /* should configure as differential input.
@@ -19,42 +21,20 @@ module top (
   input CMPR_OUT_CTL_P,
   input CMPR_OUT_CTL_N
 
-
-
 );
-
-  localparam BITS = 5;
-  localparam LOG2DELAY = 21;
-
-  reg [BITS+LOG2DELAY-1:0] counter = 0;
-  reg [BITS-1:0] outcnt;
-
-
-  always@(posedge clk) begin
-    counter <= counter + 1;
-    outcnt <= counter >> LOG2DELAY;
-  end
-
-  // assign { LED_R, LED_G, LED_B } = outcnt ^ (outcnt >> 1);
-
 
 
   //////////////////////////////////////////////////////
   // counters and settings  ...
+  // for an individual phase.
   reg [31:0] count = 0;
+
+
+  reg [31:0] count_osc = 0;   // 
+  reg [31:0] count_up = 0;   // 
 
   // we can probe the leds for signals....
 
-  // should be differential input
-  // assign LED_B = CMPR_LATCH_CTL;
-  // assign LED_B = CMPR_OUT_CTL_P;
-  // assign LED_B = CMPR_OUT_CTL_N;
-
-  // rgb. top,middle,bottom.
-  // leds are open drain. 1 is on. 1 is off.
-  // reg [2:0] leds = 3'b001;        // red/ top
-  // reg [2:0] leds = 3'b010;        // g / middle
-  // reg [2:0] leds = 3'b100;        // b / bottom
   reg [2:0] leds = 3'b000;        // b / bottom
 
 
@@ -69,37 +49,17 @@ module top (
 
   // OK. so want to make sure. that the
 
-  /*
-    must be lo to trigger.
-    on +-4.8V . latch must be off... else it's held low.
-  */
-  // assign CMPR_LATCH_CTL = 0;   //  works!
-
 
 
   `define STATE_INIT    0    // initialsation state
   // `define STATE_WAITING 1
   `define STATE_RUNUP    2
-  `define STATE_NREF    3
+  `define STATE_DONE    3
   // `define STATE_RUNDOWN 4
 
   reg [4:0] state = `STATE_INIT;
 
-  // we don't have to keep the pos,neg count of slow count. because it's implied by oscillation count.
-  // but might be easier.
-
-  // ok. so pos count and neg count will be independent.
-
-  /*
-    EXTREME .
-      i think the small backtracek reversinig action - avoids two crossing - happing in an instant.
-      eg. where the /\  happens right at the apex.
-
-  */
-
-  // actually counting the number of periods. rather than the clock. might be simpler.
-  // because the high slope and lo slope are not equal.
-  
+ 
   /*
     - need to keep up/down transitions equal.  - to balance charge injection.
     - if end up on wrong side. just abandon, and run again? starting in opposite direction. 
@@ -116,8 +76,10 @@ module top (
             // transition.
             state <= `STATE_RUNUP;
             count <= 0;
+            count_osc <= 0;
             leds <= 3'b001; // R
             // CMPR_LATCH_CTL <= 1;
+            // low to trigger.
             CMPR_LATCH_CTL <= 0;
           end
 
@@ -155,19 +117,27 @@ module top (
               */
 
               count <= 0;   // reset count
+              count_osc <= count_osc + 1;
+
               LED_B <= ~ LED_B;     // eg. comparator test.
 
               if( CMPR_OUT_CTL_P)
                   begin
-                      // swap to reference input for rundown
-                      // state <= `STATE_NREF;
-                    leds <= 3'b010; // G
-                    // p_count <= p_count + 1;
+                        // swap to reference input for rundown
+                        // state <= `STATE_DONE;
+                      leds <= 3'b010; // G
+                      // p_count <= p_count + 1;
                   end
                 else
                     leds <= 3'b001; // R
                     // n_count <= n_count + 1;
                 end
+
+              if(count_osc == 100) 
+                begin
+
+                end
+
             end
 
 
@@ -183,8 +153,60 @@ endmodule
 
 
 
+  /*
+    must be lo to trigger.
+    on +-4.8V . latch must be off... else it's held low.
+  */
+  // assign CMPR_LATCH_CTL = 0;   //  works!
+
+
+
+  // we don't have to keep the pos,neg count of slow count. because it's implied by oscillation count.
+  // but might be easier.
+
+  // ok. so pos count and neg count will be independent.
+
+  /*
+    EXTREME .
+      i think the small backtracek reversinig action - avoids two crossing - happing in an instant.
+      eg. where the /\  happens right at the apex.
+
+  */
+
+  // actually counting the number of periods. rather than the clock. might be simpler.
+  // because the high slope and lo slope are not equal.
+ 
+
+
   // the count is kind of correct. but we are setkkkkk
   // not sure we are using correct....
   // it's not an arm/disarm.   instead when we get the cross, we should set latch high ..
   // but that if two crossings very close together.  which will happen.
 
+  // should be differential input
+  // assign LED_B = CMPR_LATCH_CTL;
+  // assign LED_B = CMPR_OUT_CTL_P;
+  // assign LED_B = CMPR_OUT_CTL_N;
+
+  // rgb. top,middle,bottom.
+  // leds are open drain. 1 is on. 1 is off.
+  // reg [2:0] leds = 3'b001;        // red/ top
+  // reg [2:0] leds = 3'b010;        // g / middle
+  // reg [2:0] leds = 3'b100;        // b / bottom
+
+/*
+  localparam BITS = 5;
+  localparam LOG2DELAY = 21;
+
+  reg [BITS+LOG2DELAY-1:0] counter = 0;
+  reg [BITS-1:0] outcnt;
+
+
+  always@(posedge clk) begin
+    counter <= counter + 1;
+    outcnt <= counter >> LOG2DELAY;
+  end
+
+  // assign { LED_R, LED_G, LED_B } = outcnt ^ (outcnt >> 1);
+
+*/
