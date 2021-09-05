@@ -180,7 +180,6 @@ module top (
                   mux <= 3'b000; 
                   // state to done
                   state <= `STATE_DONE;
-
               end 
           end
 
@@ -188,8 +187,8 @@ module top (
         `STATE_DONE:
           begin
             // ok. it is hitting exactly the same spot everytime. nice. 
-            // when immediately restart. because it's hit a zero cross.
-
+            // when immediately restart. because it's hit a zero cross.  
+            // but we probably want to start from a shorted integrator.
 
             state <= `STATE_INIT;
           end
