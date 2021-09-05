@@ -46,7 +46,7 @@ module top (
   // we can probe the leds for signals....
 
   // should be differential input
-  assign LED_B = CMPR_LATCH_CTL;
+  // assign LED_B = CMPR_LATCH_CTL;
   // assign LED_B = CMPR_OUT_CTL_P;
   // assign LED_B = CMPR_OUT_CTL_N;
 
@@ -159,6 +159,7 @@ module top (
               */
 
               count <= 0;   // reset count
+              LED_B <= ~ LED_B;     // eg. comparator test.
 
               if( CMPR_OUT_CTL_P)
                   begin
