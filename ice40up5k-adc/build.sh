@@ -22,10 +22,17 @@ icepack ./build/example.asc ./build/example.bin
 
 echo "finished"
 
+
 if [ "$1" = "-flash" ]; then
   # send to device -
   iceprog ./build/example.bin
 fi
+
+# if [ "$1" = "-touch" ]; then
+#  # read flash id
+#  iceprog -t
+# fi
+
 
 
 

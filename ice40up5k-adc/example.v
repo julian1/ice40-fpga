@@ -99,7 +99,11 @@ module top (
 
   // actually counting the number of periods. rather than the clock. might be simpler.
   // because the high slope and lo slope are not equal.
-
+  
+  /*
+    - need to keep up/down transitions equal.  - to balance charge injection.
+    - if end up on wrong side. just abandon, and run again? starting in opposite direction. 
+  */
   always @(posedge clk)
     begin
       // we use the same count - always increment clock
@@ -120,6 +124,7 @@ module top (
 
         // So switching to rundown is just when the count hits a certain amount... 
         // having separate clocks means can vary things more easily.
+        // OR. just count the periods.  yes.  
 
         `STATE_RUNUP:
           begin
