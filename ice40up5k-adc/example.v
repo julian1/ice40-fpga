@@ -12,7 +12,10 @@ module top (
 
   output CMPR_LATCH_CTL,
 
-  // should configure as differential input.
+  /* should configure as differential input.
+    https://stackoverflow.com/questions/40096272/how-do-i-use-set-lvds-mode-on-lattice-ice40-pins-using-icestorm-tools
+    https://github.com/YosysHQ/icestorm/issues/36
+  */
   input CMPR_OUT_CTL_P,
   input CMPR_OUT_CTL_N
 
@@ -42,8 +45,9 @@ module top (
 
   // we can probe the leds for signals....
 
-
+  // should be differential input
   assign LED_B = CMPR_OUT_CTL_P;
+  // assign LED_B = CMPR_OUT_CTL_N;
 
   // rgb. top,middle,bottom.
   // leds are open drain. 1 is on. 1 is off.
@@ -66,9 +70,19 @@ module top (
 
   /*
     must be lo to trigger.
-  // on +-4.8V . latch must be off... else it's held low.
+    on +-4.8V . latch must be off... else it's held low.
   */
   assign CMPR_LATCH_CTL = 0;   //  works!
+
+
+  // i don't think we need this
+  // trigger zerocross
+  reg [2:0] zerocrossr;
+  always @(posedge clk) 
+    zerocrossr <= {zerocrossr[1:0], CMPR_LATCH_CTL};
+  wire zerocross_up     = (zerocrossr[2:1]==2'b10);
+  wire zerocross_down   = (zerocrossr[2:1]==2'b01);
+  wire zerocross_any    = zerocross_up || zerocross_down ;
 
 
 
@@ -76,7 +90,7 @@ module top (
   `define STATE_INIT    0    // initialsation state
   // `define STATE_WAITING 1
   `define STATE_PREF    2
-  `define STATE_NREF    4
+  `define STATE_NREF    3
   // `define STATE_RUNDOWN 4
 
   reg [4:0] state = `STATE_INIT;
@@ -85,6 +99,11 @@ module top (
   // but might be easier.
 
   // ok. so pos count and neg count will be independent.
+
+  /*
+    Actually not sure we do have to get it into the clock domain.
+    simplest thing. if above, then drive lo. if below then drive hi.
+  */
 
   always @(posedge clk)
     begin
@@ -108,16 +127,25 @@ module top (
             // or have a count dedicated....
 
             if(count == 40000 )
+              begin
               /*
                 ok. here would would do a small backtrack count. then we test integrator comparator
                 for next direction.
               */
-              begin
-                // swap to reference input for rundown
-                state <= `STATE_NREF;
-                leds <= 3'b010; // G
-              end
-          end
+
+              count <= 0;   // reset count
+
+              if( CMPR_OUT_CTL_P)
+                  begin
+                      // swap to reference input for rundown
+                      // state <= `STATE_NREF;
+                    leds <= 3'b010; // G
+                  end
+                else
+
+                    leds <= 3'b001; // R
+                end
+            end
 
 
         `STATE_NREF:  // neg backtrack.
