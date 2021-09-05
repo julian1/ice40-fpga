@@ -152,8 +152,8 @@ module top (
                     count_down <= count_down + 1;
                   end
                 end
-  
-                // count_up == count 
+
+                // count_up == count
                 if(count_phase == 2000 * 5 )     // 2000osc = 1sec.
                   begin
 
@@ -183,6 +183,8 @@ module top (
                   // trigger for scope
                   LED_B <= ~ LED_B;
 
+                  // EXTR. raise interupt that value is ready.
+
                   // record/copy the count??? or use a different count variable
                   // OK. we need to have the integrator run from fixed start point.
                   // what's weird...
@@ -190,7 +192,7 @@ module top (
                   // turn off all inputs
                   // seems to work...
                   mux <= 3'b000;
-                  // state to done
+                  // transition to state to done
                   state <= `STATE_DONE;
 
               end
@@ -199,6 +201,9 @@ module top (
 
         `STATE_DONE:
           begin
+            // EXTR.   we might  want to hold the interrupt for a bit, to get it to propagate.
+            // eg. just use the count.
+
             // ok. it is hitting exactly the same spot everytime. nice.
             // when immediately restart. because it's hit a zero cross.
             // but we probably want to start from a shorted integrator.
