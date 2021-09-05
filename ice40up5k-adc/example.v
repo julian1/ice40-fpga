@@ -1,5 +1,135 @@
 
 
+function [8-1:0] update (input [8-1:0] x, input [8-1:0]  val);
+  begin
+    if( (val & 4'b1111) & (val >> 4) /*!= 0*/  ) // if both set and clear bits, then its a toggle
+      update =  ((val & 4'b1111) & (val >> 4))  ^ x ; // xor. to toggle.
+    else
+      update = ~(~  (x | (val & 4'b1111)) | (val >> 4));
+  end
+endfunction
+
+
+
+
+module my_register_bank   #(parameter MSB=16)   (
+  input  clk,
+  input  cs,
+  input  special,   // TODO swap order specia/din
+  input  din,       // sdi
+  output dout,       // sdo
+
+  // latched val, rename
+  output reg [4-1:0] reg_led     // need to be very careful. only 4 bits. or else screws set/reset calculation ...
+);
+
+  reg [MSB-1:0] tmp;      // register used to read val
+  reg [MSB-1:0] ret  ;    // padding bit
+  reg [8-1:0]   count;
+
+
+  // clock value into tmp var
+  always @ (negedge clk or posedge cs)
+  begin
+    if(cs)          // cs not asserted
+      begin
+        count = 0;
+
+        // dropping of the highest bit maybe cannot avoid...
+        // because it is the first bit.
+
+        // no. 255 is wrong. it overclocks it
+
+        // ret = 16'b1111110111011010 ;
+        // ret = 255 ;
+        ret = 255 << 8;
+        //ret = 0;
+        //ret = 0;
+
+        // highest bit looks problematic...
+        // ret = 65535 ;
+      end
+    else
+    if ( !special)  // cs asserted, and cspecial asserted.
+      begin
+
+        // d into lsb, shift left toward msb
+        tmp = {tmp[MSB-2:0], din};
+
+        /*
+        // appears to work. actually we could return the address...
+        if(count == 0)
+          ret = 255 << 7;
+        // have the address, so can start sending current value back...
+        if(count == 7)
+          ret = 255 << 7;
+        */
+        // return value
+
+        // TODO generates a warning....
+        dout = ret[MSB-2];    // OK. doing this gets our high bit. but loses the last bit... because its delayed??
+        ret = ret << 1; // this *is* zero fill operator.
+
+        count = count + 1;
+
+      end
+  end
+
+
+  // does this work? wire is effectively an alias in combinatorial code
+  wire [8-1:0] addr  = tmp[ MSB-1:8 ]; // high byte for reg/address, lo byte for val.
+  wire [8-1:0] val   = tmp;
+
+
+  always @ (posedge cs)   // cs done.
+  begin
+    // we can assert a done flag here... and factor this code...
+    // special asserted, and 16 received bits
+    if(/*cs &&*/ !special && count == 16 )
+      begin
+        case (addr)
+          // leds
+          7 :
+            begin
+              reg_led = update(reg_led, val);
+            end
+
+          // soft reset
+          11 :
+            /*
+              No. just pass the reset value as a vec, just like pass the reg.
+              eg.  output reg_rails,  input reg_rails_init.
+              but. note that everything comes up hi anyway before flash load
+              OR. just those that are *not* to be set to zer.
+            */
+            begin
+              // none of this is any good... we need mux ctl pulled high etc.
+              // does verilog expand 0 constant to fill all bits?
+              reg_led           = 0;
+            end
+
+        endcase
+      end
+  end
+endmodule
+
+
+
+
+
+
+
+
+////////////////////////////
+
+
+
+
+
+
+
+
+
 module top (
   input  clk,
   output LED_R,
