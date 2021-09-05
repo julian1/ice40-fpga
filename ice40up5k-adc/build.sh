@@ -18,6 +18,7 @@ arachne-pnr -d 5k -P sg48 -p example.pcf  ./build/example.blif -o ./build/exampl
 # icepack $(filename).asc $(filename).bin
 icepack ./build/example.asc ./build/example.bin
 
+# TODO check
 #icetime ./build/example.asc -d hx4k
 
 echo "finished"

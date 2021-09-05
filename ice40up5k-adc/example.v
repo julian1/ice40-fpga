@@ -53,8 +53,10 @@ module top (
 
   /////////////////////////
   // this should be pushed into a separate module...
+  // should be possible to set latch hi immediately on any event here...
   reg [2:0] zerocrossr;  
-  always @(posedge clk) zerocrossr <= {zerocrossr[1:0], CMPR_OUT_CTL_P};
+  always @(posedge clk) 
+    zerocrossr <= {zerocrossr[1:0], CMPR_OUT_CTL_P};
   wire zerocross_up     = (zerocrossr[2:1]==2'b10);  // message starts at falling edge
   wire zerocross_down   = (zerocrossr[2:1]==2'b01);  // message stops at rising edge
   wire zerocross_any    = zerocross_up || zerocross_down ;
@@ -62,13 +64,11 @@ module top (
 
 
 
-
-
   `define STATE_INIT    0    // initialsation state
   // `define STATE_WAITING 1
   `define STATE_RUNUP    2
-  `define STATE_DONE    3
-  // `define STATE_RUNDOWN 4
+  `define STATE_RUNDOWN  3
+  `define STATE_DONE     4
 
   reg [4:0] state = `STATE_INIT;
 
@@ -91,8 +91,8 @@ module top (
             count <= 0;
             count_osc <= 0;
             mux <= 3'b001; // R
-            // CMPR_LATCH_CTL <= 1;
-            // low to trigger.
+            LED_B <= 0;
+            // enable comparator
             CMPR_LATCH_CTL <= 0;
           end
 
@@ -134,7 +134,6 @@ module top (
               // inc oscillations
               count_osc <= count_osc + 1;
 
-              LED_B <= ~ LED_B;     // trigger for scope
 
               if( CMPR_OUT_CTL_P)
                   begin
@@ -151,21 +150,40 @@ module top (
               if(count_osc == 2000 * 5 )     // 2000osc = 1sec.   
                 begin
 
-                  state <= `STATE_DONE;
+                  state <= `STATE_RUNDOWN;
                 end
 
             end
 
         // EXTR. we also have to short the integrator at the start. to begin at a known start position.
 
-        `STATE_DONE:
+        `STATE_RUNDOWN:
           begin
             // need to do the rundown count...
             // so we have to determine the clock cross... 
             // probably with want to capture it on a scope. 
             // the direction should be correct here. and we just have to run it down
+            // we wnat a different clock so we can read it....
+
+            if(zerocross_down || zerocross_up)
+              begin
+                  // trigger for scope
+                  LED_B <= ~ LED_B;     
+
+                  // record/copy the count??? or use a different count variable
+
+                  // turn off all inputs
+                  // seems to work...
+                  mux <= 3'b000; 
+                  // state to done
+                  state <= `STATE_DONE;
+
+              end 
+          end
 
 
+        `STATE_DONE:
+          begin
 
           end
 
