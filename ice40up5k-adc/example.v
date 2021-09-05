@@ -91,14 +91,8 @@ module top (
   // ok. so pos count and neg count will be independent.
 
   /*
-    Actually not sure we do have to get it into the clock domain.
-    simplest thing. if above, then drive lo. if below then drive hi.
-    ----
-    what is the reason for the small backtrack? just to better fit the integration range within the voltage range?
-    ---------------
-
     EXTREME .
-      i think the reversinig action - is to avoid two crossing - happing in an instant.
+      i think the small backtracek reversinig action - avoids two crossing - happing in an instant.
       eg. where the /\  happens right at the apex.
 
   */
@@ -119,32 +113,29 @@ module top (
             state <= `STATE_RUNUP;
             count <= 0;
             leds <= 3'b001; // R
-            // CMPR_LATCH_CTL <= 1;    // disarm
-            CMPR_LATCH_CTL <= 0;    // arm
+            // CMPR_LATCH_CTL <= 1;
+            CMPR_LATCH_CTL <= 0;
           end
 
-        // comparator bouncing means it would be nice to use the latch.  need 5ns? setup.
-        // can do it on a clock count.
-        // with fixed period driving. arming the latch is very relaxed.
+
+        // So switching to rundown is just when the count hits a certain amount... 
+        // having separate clocks means can vary things more easily.
 
         `STATE_RUNUP:
           begin
             // should use dedicated pref count... and accumulate.
             // or have a count dedicated....
 
-            // the count is kind of correct. but we are setkkkkk
-            // not sure we are using correct....
-            // it's not an arm/disarm.   instead when we get the cross, we should set latch high ..
-            // but that if two crossings very close together.  which will happen.
-
             if(count == 8000 )
               begin
-                if(leds == 3'b010 ) 
+                if(leds == 3'b010 )
                   begin
                     leds <= 3'b001; // R
                   end
- /* 
-                if(leds == 3'b001 ) 
+ /*
+                // these blocks cancel i think...
+                // need a case? perhaps
+                if(leds == 3'b001 )
                   begin
                   leds <= 3'b010; // G
                   end
@@ -181,4 +172,14 @@ module top (
 
 endmodule
 
+
+
+
+
+
+
+  // the count is kind of correct. but we are setkkkkk
+  // not sure we are using correct....
+  // it's not an arm/disarm.   instead when we get the cross, we should set latch high ..
+  // but that if two crossings very close together.  which will happen.
 
