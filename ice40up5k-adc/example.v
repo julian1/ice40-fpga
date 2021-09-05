@@ -51,6 +51,19 @@ module top (
 
 
 
+  /////////////////////////
+  // this should be pushed into a separate module...
+  reg [2:0] zerocrossr;  
+  always @(posedge clk) zerocrossr <= {zerocrossr[1:0], CMPR_OUT_CTL_P};
+  wire zerocross_up     = (zerocrossr[2:1]==2'b10);  // message starts at falling edge
+  wire zerocross_down   = (zerocrossr[2:1]==2'b01);  // message stops at rising edge
+  wire zerocross_any    = zerocross_up || zerocross_down ;
+
+
+
+
+
+
   `define STATE_INIT    0    // initialsation state
   // `define STATE_WAITING 1
   `define STATE_RUNUP    2
@@ -143,7 +156,7 @@ module top (
 
             end
 
-
+        // EXTR. we also have to short the integrator at the start. to begin at a known start position.
 
         `STATE_DONE:
           begin
@@ -151,6 +164,7 @@ module top (
             // so we have to determine the clock cross... 
             // probably with want to capture it on a scope. 
             // the direction should be correct here. and we just have to run it down
+
 
 
           end
