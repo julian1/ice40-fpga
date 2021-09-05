@@ -57,12 +57,13 @@ module top (
   /////////////////////////
   // this should be pushed into a separate module...
   // should be possible to set latch hi immediately on any event here...
-  reg [2:0] zerocrossr;
+  // change name  zero_cross.. or just cross_
+  reg [2:0] crossr;
   always @(posedge clk)
-    zerocrossr <= {zerocrossr[1:0], CMPR_OUT_CTL_P};
-  wire zerocross_up     = (zerocrossr[2:1]==2'b10);  // message starts at falling edge
-  wire zerocross_down   = (zerocrossr[2:1]==2'b01);  // message stops at rising edge
-  wire zerocross_any    = zerocross_up || zerocross_down ;
+    crossr <= {crossr[1:0], CMPR_OUT_CTL_P};
+  wire cross_up     = (crossr[2:1]==2'b10);  // message starts at falling edge
+  wire cross_down   = (crossr[2:1]==2'b01);  // message stops at rising edge
+  wire cross_any    = cross_up || cross_down ;
 
 
 
@@ -177,7 +178,7 @@ module top (
             // means can avoid copying the variable out, if we do it quickly.
             count_rundown <= count_rundown + 1;
 
-            if(zerocross_down || zerocross_up)
+            if(cross_down || cross_up)
               begin
                   // trigger for scope
                   LED_B <= ~ LED_B;
