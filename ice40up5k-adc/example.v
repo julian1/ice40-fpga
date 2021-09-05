@@ -75,22 +75,10 @@ module top (
   assign CMPR_LATCH_CTL = 0;   //  works!
 
 
-/*
-  // i don't think we need this
-  // trigger zerocross
-  reg [2:0] zerocrossr;
-  always @(posedge clk) 
-    zerocrossr <= {zerocrossr[1:0], CMPR_LATCH_CTL};
-  wire zerocross_up     = (zerocrossr[2:1]==2'b10);
-  wire zerocross_down   = (zerocrossr[2:1]==2'b01);
-  wire zerocross_any    = zerocross_up || zerocross_down ;
-*/
-
-
 
   `define STATE_INIT    0    // initialsation state
   // `define STATE_WAITING 1
-  `define STATE_PREF    2
+  `define STATE_RUNUP    2
   `define STATE_NREF    3
   // `define STATE_RUNDOWN 4
 
@@ -108,6 +96,9 @@ module top (
     what is the reason for the small backtrack? just to better fit the integration range within the voltage range?
   */
 
+  // actually counting the number of periods. rather than the clock. might be simpler. 
+  // because the high slope and lo slope are not equal.
+
   always @(posedge clk)
     begin
       // we use the same count - always increment clock
@@ -118,13 +109,16 @@ module top (
           begin
             ///////////
             // transition.
-            state <= `STATE_PREF;
+            state <= `STATE_RUNUP;
             count <= 0;
             leds <= 3'b001; // R
           end
 
+        // comparator bouncing means it would be nice to use the latch.  need 5ns? setup.
+        // can do it on a clock count.
+        // with fixed period driving. arming the latch is very relaxed.
 
-        `STATE_PREF:
+        `STATE_RUNUP:
           begin
             // should use dedicated pref count... and accumulate.
             // or have a count dedicated....
@@ -143,27 +137,15 @@ module top (
                       // swap to reference input for rundown
                       // state <= `STATE_NREF;
                     leds <= 3'b010; // G
+                    // p_count <= p_count + 1;
                   end
                 else
-
                     leds <= 3'b001; // R
+                    // n_count <= n_count + 1;
                 end
             end
 
-/*
-        `STATE_NREF:  // neg backtrack.
-          begin
 
-            if(count == 40000 + 40000 )
-              begin
-                // swap to reference input for rundown
-                state <= `STATE_INIT;
-                // can avoid state init. by just setting count to 0 again here...
-                // if want.
-                // not. sure we need. integration will toggle
-              end
-          end
-*/
       endcase
     end
 
