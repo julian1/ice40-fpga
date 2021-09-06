@@ -30,7 +30,7 @@ endfunction
 module my_register_bank   #(parameter MSB=16)   (
   input  clk,
   input  cs,
-  input  special,   // TODO swap order specia/din
+  // input  special,   // TODO swap order specia/din
   input  din,       // sdi
   output dout,       // sdo
 
@@ -214,7 +214,7 @@ module top (
     (
     . clk(COM_CLK),
     . cs(COM_CS),
-    . special(COM_SPECIAL),
+    // . special(COM_SPECIAL),
     . din(COM_MOSI),
     // . dout(dout),
     . dout(COM_MISO),
