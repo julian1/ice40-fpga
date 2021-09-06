@@ -65,6 +65,11 @@ module my_register_bank   #(parameter MSB=16)   (
   wire [8-1:0] addr  = tmp[ MSB-1:8 ]; // high byte for reg/address, lo byte for val.
   wire [8-1:0] val   = tmp;
 
+        // TODO generates a warning....
+  wire dout = ret[MSB- 1];    // OK. doing this gets our high bit. but loses the last bit... because its delayed??
+                              
+                              // this should be able to be done with a wire...
+
 
 
   // clock value into tmp var
@@ -73,20 +78,7 @@ module my_register_bank   #(parameter MSB=16)   (
     if(cs)          // cs not asserted, so reset.
       begin
         count = 0;
-
-        // dropping of the highest bit maybe cannot avoid...
-        // because it is the first bit.
-
-        // no. 255 is wrong. it overclocks it
-
-        // ret = 16'b1111110111011010 ;
-        // ret = 255 ;
-        // ret = 255 << 8;
-        //ret = 0;
         ret = 0;
-
-        // highest bit looks problematic...
-        // ret = 65535 ;
       end
     else
       // cs asserted
@@ -97,16 +89,13 @@ module my_register_bank   #(parameter MSB=16)   (
 
         if(count == 7)
           begin
+            // we should have the address....
 
-            ret = reg_led << 8;
-            // ret = 0 ;
+            ret = reg_led << 7;
           end
         
 
-        // return value
 
-        // TODO generates a warning....
-        dout = ret[MSB-1];    // OK. doing this gets our high bit. but loses the last bit... because its delayed??
         ret = ret << 1; // this *is* zero fill operator.
 
         count = count + 1;
