@@ -5,15 +5,31 @@
   so can use different sizes.
 */
 
+// x is not a mask. it is hi bits and lo bits
 
 function [8-1:0] update (input [8-1:0] x, input [8-1:0]  val);
+
+  reg [4-1:0] v_setb ; 
   begin
+    v_setb   = val & 4'b1111 ;
+    clearb = val >> 4;
+
     if( (val & 4'b1111) & (val >> 4) /*!= 0*/  ) // if both set and clear bits, then its a toggle
       update =  ((val & 4'b1111) & (val >> 4))  ^ x ; // xor. to toggle.
     else
-      update = ~(~  (x | (val & 4'b1111)) | (val >> 4));
+      //             x     (and lo bits)        (or hi bits)
+      update = ~(~  (x | ( v_setb)) | (val >> 4));
   end
 endfunction
+
+
+
+// it is set bits. and clear bits 
+// yes it is a mask.
+/// setb   clearb
+// setb = val & 4'b1111 
+// clearb = val >> 4
+
 
 /*
   - having the write mask is an effective way to do a read.
@@ -25,6 +41,9 @@ endfunction
   EXTR.
     change all this to avoid overloading the special.
     instead make special an extra CS.
+    ------------
+
+  after we have read 8 bits. then we have the address...
 */
 
 module my_register_bank   #(parameter MSB=16)   (
@@ -41,6 +60,12 @@ module my_register_bank   #(parameter MSB=16)   (
   reg [MSB-1:0] tmp;      // register used to read val
   reg [MSB-1:0] ret  ;    // padding bit
   reg [8-1:0]   count;
+
+  // these are going to be different depending... 
+  // does this work? wire is effectively an alias in combinatorial code
+  wire [8-1:0] addr  = tmp[ MSB-1:8 ]; // high byte for reg/address, lo byte for val.
+  wire [8-1:0] val   = tmp;
+
 
 
   // clock value into tmp var
@@ -91,16 +116,14 @@ module my_register_bank   #(parameter MSB=16)   (
   end
 
 
-  // does this work? wire is effectively an alias in combinatorial code
-  wire [8-1:0] addr  = tmp[ MSB-1:8 ]; // high byte for reg/address, lo byte for val.
-  wire [8-1:0] val   = tmp;
-
-
   always @ (posedge cs)   // cs done.
   begin
     // we can assert a done flag here... and factor this code...
     // special asserted, and 16 received bits
-    if(/*cs &&*/ count == 16 )
+
+    // Ok. this can handle different sizes... nice.
+
+    if(count == 16 )
       begin
         case (addr)
           // leds
