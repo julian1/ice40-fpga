@@ -65,7 +65,7 @@ module my_register_bank   #(parameter MSB=16)   (
         // ret = 65535 ;
       end
     else
-    // if ( !special)  // cs asserted, and cspecial asserted.
+      // cs asserted
       begin
 
         // d into lsb, shift left toward msb

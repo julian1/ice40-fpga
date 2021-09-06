@@ -21,6 +21,9 @@ icepack ./build/example.asc ./build/example.bin
 # TODO check
 #icetime ./build/example.asc -d hx4k
 
+icetime ./build/example.asc -d up5k
+
+
 echo "finished"
 
 
