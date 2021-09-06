@@ -79,14 +79,14 @@ module my_register_bank   #(parameter MSB=32)   (
                   out = reg_led << 8;
                 end
 
-              8: out = count_rundown << 8; 
+              8: out = count_rundown << 8;
             endcase
           end
 
       end
   end
 
-  // so either read needs the hi bit. or write gets the hi bit. 
+  // so either read needs the hi bit. or write gets the hi bit.
   // check how the dac8734. does it.
 
   wire [8-1:0] addr  = in[ MSB-1: MSB-8 ];  // single byte for reg/address,
@@ -99,7 +99,7 @@ module my_register_bank   #(parameter MSB=32)   (
       begin
 
         case (addr)
-          // OK. if high bit is set then it avoids writing these...
+          // use high bit - to do a xfer (read+writ) while avoiding actually writing a register
           // leds
           7 :
             begin
@@ -118,7 +118,7 @@ module my_register_bank   #(parameter MSB=32)   (
             begin
               // none of this is any good... we need mux ctl pulled high etc.
               // does verilog expand 0 constant to fill all bits?
-              reg_led           = 3'b101;
+              reg_led = 3'b101;
             end
 
         endcase
@@ -228,13 +228,9 @@ module top (
 
 
 
+  assign { LED_B,  LED_G, LED_R } = ~ 0;        // turn off
 
-  assign { /*LED_B, */ LED_G, LED_R } = ~ mux;        // note. INVERTED for open-drain..
-  // assign { LED_B, LED_G, LED_R } = count >> 22 ;      // ok. working. if remove the case block..
-                                                          // but this does't...
-
-
-  // might be easier to assign things individually.
+  // assign { /*LED_B, */ LED_G, LED_R } = ~ mux;        // note. INVERTED for open-drain..
 
   assign { INT_IN_SIG_CTL, INT_IN_N_CTL, INT_IN_P_CTL } = mux;
 
@@ -292,6 +288,7 @@ module top (
             CMPR_LATCH_CTL <= 0;
           end
 
+        // we may 
 
         // So switching to rundown is just when the count hits a certain amount...
         // having separate clocks means can vary things more easily.
@@ -333,6 +330,8 @@ module top (
                 // sample the comparator, to determine next direction
                 if( CMPR_OUT_CTL_P)
                   begin
+                    // EXTR this may be a continuation of direction.
+                    // EXTR. we may want to count changes of direction as well (and to equalize - charge injection ).
                     mux <= 3'b010;
                     count_up <= count_up + 1;
                   end
@@ -372,7 +371,7 @@ module top (
               begin
                   // trigger for scope
 //                  LED_B <= ~ LED_B;
-                  
+
                   // trigger interupt
                   COM_INTERUPT = 0;
 
