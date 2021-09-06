@@ -1,47 +1,5 @@
 
 
-/*
-  - should update. to separate out the mask and val.
-  so can use different sizes.
-*/
-
-// x is not a mask. it is hi bits and lo bits
-
-
-/*
-function [4-1:0] update (input [4-1:0] x, input [8-1:0]  val);
-
-  reg [4-1:0] lob ;  // 1 and a set b no i think these are the clear bits...
-  reg [4-1:0] hib ;
-  begin
-    lob = val & 4'b1111 ;    // and with lo bits
-    hib = val >> 4;          // or with hi bits
-
-    if( lob & hib   )       // if any bit is both set and clear, then toggle according to when have both set and clear
-      update =  (lob & hib);
-    else
-      update = ~(  ~(x | lob) | hib );
-  end
-endfunction
-*/
-
-
-/*
-  OK. the issue. without having a mask...
-  is that we need a way to signal whether to write the value... or not... 
-  could be put in the high bit?
-*/
-
-function [24-1:0] update (input [24-1:0] x, input [24-1:0]  val);
-  begin
-      update =  val ;
-  end
-endfunction
-
-
-
-
-
 
 
 // for 24bit values we don't really want these bitmask values.
@@ -49,11 +7,6 @@ endfunction
 
 
 /*
-  - having the write mask is an effective way to do a read.
-
-  - being able to use different sized spi actions would be very nice....
-  - having some automated stm32 driver tests would also be nice.
-
   - want to change assignement '=' to '<='
   EXTR.
     change all this to avoid overloading the special.
@@ -63,17 +16,17 @@ endfunction
   after we have read 8 bits. then we have the address...
   ----------------------
 
-  lets do the simplest thing...
 */
 /*
-  - assign is an alias.
+  EXTR.
+    - could almost have exactly the same bank block for 24bit and 4bit regs.
+    - only issue is dout. being driven twice.
 
-  --------------------
-  - OK. hang on.   for out application.... we will avoid written registers.
-
+  we should make this two parameters eg. 8 bit for registers. and 24 bits for val.
+  but this is ok.
 */
 
-module my_register_bank   #(parameter MSB=16)   (
+module my_register_bank   #(parameter MSB=32)   (
   input  clk,
   input  cs,
   // input  special,   // TODO swap order specia/din
@@ -81,22 +34,17 @@ module my_register_bank   #(parameter MSB=16)   (
   output dout,       // sdo
 
   // latched val, rename
-  output reg [4-1:0] reg_led     // need to be very careful. only 4 bits. or else screws set/reset calculation ...
+  output reg [24-1:0] reg_led     // need to be very careful. only 4 bits. or else screws set/reset calculation ...
 );
 
   // TODO rename these...
   // MSB is not correct here...
-  reg [MSB-1:0] in;      // register used to read val
+  reg [MSB-1:0] in;      // could be MSB-8-1 i think.
   reg [MSB-1:0] out  ;    // register for output.  should be size of MSB due to high bits
   reg [8-1:0]   count;
 
-  // these are going to be different depending...
-  // does this work? wire is effectively an alias in combinatorial code
-  // these are only correct when count == 16...
 
   wire dout = out[MSB- 1];
-
-
 
   // clock value into in var
   always @ (negedge clk or posedge cs)
@@ -120,12 +68,10 @@ module my_register_bank   #(parameter MSB=16)   (
 
         count = count + 1;
 
-
-        // in holds the address
-        // EXTR> we should ignore the high bit here.  in order to return a register's value, but without writing it.
         if(count == 8)
           begin
-            case (in )
+            // ignore hi bit. allows us to read a register, without writing, by setting hi bit
+            case (in[8 - 1 - 1: 0 ] )
               7 :
                 begin
                   out = reg_led << 8;
@@ -136,20 +82,15 @@ module my_register_bank   #(parameter MSB=16)   (
       end
   end
 
+  // so either read needs the hi bit. or write gets the hi bit. 
+  // check how the dac8734. does it.
 
-  // only valid when count == 16... MSB
-  // think we should remove
-  wire [8-1:0] addr  = in[ MSB-1:8 ]; // high byte for reg/address, lo byte for val.
-  wire [8-1:0] val   = in;    // lo byte
+  wire [8-1:0] addr  = in[ MSB-1: MSB-8 ];  // single byte for reg/address,
+  wire [MSB-8-1:0] val   = in;              // lo bytes
 
 
   always @ (posedge cs)   // cs done.
   begin
-    // we can assert a done flag here... and factor this code...
-    // special asserted, and 16 received bits
-
-    // Ok. this can handle different sizes... nice.
-
     if(count == MSB ) // MSB
       begin
 
@@ -158,7 +99,8 @@ module my_register_bank   #(parameter MSB=16)   (
           // leds
           7 :
             begin
-              reg_led = update(reg_led, val);
+              // reg_led = update(reg_led, val);
+              reg_led = val;
             end
 
           // soft reset
@@ -225,7 +167,7 @@ module top (
   input COM_MOSI,
   input COM_SPECIAL,
   output COM_MISO,
-  output COM_INTERUPT
+  output COM_INTERUPT   // active lo
 
 
 );
@@ -248,8 +190,8 @@ module top (
   */
 
 
-  wire [4-1:0] reg_led ;
-  assign { LED_B, LED_G, LED_R } =   reg_led ;   // not inverted for easier scope probing.inverted for common drain.
+  wire [24-1:0] reg_led ;
+  // assign { LED_B, LED_G, LED_R } =   reg_led ;   // not inverted for easier scope probing.inverted for common drain.
   // assign { LED_B, LED_G, LED_R } = 3'b010 ;       // works...
                                                     // Ok. it really looks correct on the leds...
 
@@ -257,7 +199,7 @@ module top (
 
 
 
-  my_register_bank #( 16 )   // register bank
+  my_register_bank #( 32 )   // register bank
   my_register_bank
     (
     . clk(COM_CLK),
@@ -281,7 +223,7 @@ module top (
 
 
 
-  // assign { /*LED_B, */ LED_G, LED_R } = ~ mux;        // note. INVERTED for open-drain..
+  assign { /*LED_B, */ LED_G, LED_R } = ~ mux;        // note. INVERTED for open-drain..
   // assign { LED_B, LED_G, LED_R } = count >> 22 ;      // ok. working. if remove the case block..
                                                           // but this does't...
 
@@ -337,6 +279,8 @@ module top (
             count_up <= 0;
             count_down <= 0;
             mux <= 3'b001; // initial direction
+
+            COM_INTERUPT = 1;
 //            LED_B <= 0;
             // enable comparator
             CMPR_LATCH_CTL <= 0;
@@ -422,6 +366,9 @@ module top (
               begin
                   // trigger for scope
 //                  LED_B <= ~ LED_B;
+                  
+                  // trigger interupt
+                  COM_INTERUPT = 0;
 
                   // EXTR. raise interupt that value is ready.
 
