@@ -475,3 +475,22 @@ endmodule
   // assign { LED_R, LED_G, LED_B } = outcnt ^ (outcnt >> 1);
 
 */
+
+
+/*
+function [4-1:0] update (input [4-1:0] x, input [8-1:0]  val);
+  reg [4-1:0] lob ;  // 1 and a set b no i think these are the clear bits...
+  reg [4-1:0] hib ;
+  begin
+    lob = val & 4'b1111 ;    // and with lo bits
+    hib = val >> 4;          // or with hi bits
+    if( lob & hib   )       // if any bit is both set and clear, then toggle according to when have both set and clear
+      update =  (lob & hib);
+    else
+      update = ~(  ~(x | lob) | hib );
+  end
+endfunction
+*/
+
+
+
