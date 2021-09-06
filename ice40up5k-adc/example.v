@@ -1,7 +1,7 @@
 
 
 /*
-  - should update. to separate out the mask and val. 
+  - should update. to separate out the mask and val.
   so can use different sizes.
 */
 
@@ -18,8 +18,13 @@ endfunction
 /*
   - having the write mask is an effective way to do a read.
 
-  - being able to use different sized spi actions would be very nice.... 
+  - being able to use different sized spi actions would be very nice....
   - having some automated stm32 driver tests would also be nice.
+
+  - want to change assignement '=' to '<='
+  EXTR.
+    change all this to avoid overloading the special.
+    instead make special an extra CS.
 */
 
 module my_register_bank   #(parameter MSB=16)   (
@@ -41,7 +46,7 @@ module my_register_bank   #(parameter MSB=16)   (
   // clock value into tmp var
   always @ (negedge clk or posedge cs)
   begin
-    if(cs)          // cs not asserted
+    if(cs)          // cs not asserted, so reset.
       begin
         count = 0;
 
@@ -60,7 +65,7 @@ module my_register_bank   #(parameter MSB=16)   (
         // ret = 65535 ;
       end
     else
-    if ( !special)  // cs asserted, and cspecial asserted.
+    // if ( !special)  // cs asserted, and cspecial asserted.
       begin
 
         // d into lsb, shift left toward msb
@@ -95,13 +100,17 @@ module my_register_bank   #(parameter MSB=16)   (
   begin
     // we can assert a done flag here... and factor this code...
     // special asserted, and 16 received bits
-    if(/*cs &&*/ !special && count == 16 )
+    if(/*cs &&*/ /*!special &&*/ count == 16 )
       begin
         case (addr)
           // leds
           7 :
             begin
               reg_led = update(reg_led, val);
+              // reg_led = 3'b101;   /// oohhhh this worked.
+              // reg_led = 3'b010;   /// oohhhh this worked.
+              // reg_led = val ; //  okk. this works!!!.
+                              // OK. the mask is zero, but should be 1 i think. issue is perhaps on the stm32 side....
             end
 
           // soft reset
@@ -115,7 +124,7 @@ module my_register_bank   #(parameter MSB=16)   (
             begin
               // none of this is any good... we need mux ctl pulled high etc.
               // does verilog expand 0 constant to fill all bits?
-              reg_led           = 0;
+              reg_led           = 3'b101;
             end
 
         endcase
@@ -159,7 +168,17 @@ module top (
     https://github.com/YosysHQ/icestorm/issues/36
   */
   input CMPR_OUT_CTL_P,
-  input CMPR_OUT_CTL_N
+  input CMPR_OUT_CTL_N,
+
+
+  /////////
+  input COM_CLK,
+  input COM_CS,
+  input COM_MOSI,
+  input COM_SPECIAL,
+  output COM_MISO,
+  output COM_INTERUPT
+
 
 );
 
@@ -175,13 +194,48 @@ module top (
 
 
 
+  /*
+    OK. hang on. do we have an issue. with the same registers being sampled in different clk domains?
+
+  */
+
+
+  wire [4-1:0] reg_led ;
+  assign { LED_B, LED_G, LED_R } =   reg_led ;   // not inverted for easier scope probing.inverted for common drain.
+  // assign { LED_B, LED_G, LED_R } = 3'b010 ;       // works...
+                                                    // Ok. it really looks correct on the leds...
+
+  // assign { COM_MOSI , COM_CLK, COM_CS} =  reg_led ;
+
+
+
+  my_register_bank #( 16 )   // register bank
+  my_register_bank
+    (
+    . clk(COM_CLK),
+    . cs(COM_CS),
+    . special(COM_SPECIAL),
+    . din(COM_MOSI),
+    // . dout(dout),
+    . dout(COM_MISO),
+
+    . reg_led(reg_led)
+  );
+
+
+
+
   // we can probe the leds for signals....
 
   // start everything off...
   reg [2:0] mux = 3'b000;        // b / bottom
 
 
-  assign { /*LED_B, */ LED_G, LED_R } = ~ mux;        // note. INVERTED for open-drain..
+
+
+
+
+  // assign { /*LED_B, */ LED_G, LED_R } = ~ mux;        // note. INVERTED for open-drain..
   // assign { LED_B, LED_G, LED_R } = count >> 22 ;      // ok. working. if remove the case block..
                                                           // but this does't...
 
@@ -237,7 +291,7 @@ module top (
             count_up <= 0;
             count_down <= 0;
             mux <= 3'b001; // initial direction
-            LED_B <= 0;
+//            LED_B <= 0;
             // enable comparator
             CMPR_LATCH_CTL <= 0;
           end
@@ -321,7 +375,7 @@ module top (
             if(cross_down || cross_up)
               begin
                   // trigger for scope
-                  LED_B <= ~ LED_B;
+//                  LED_B <= ~ LED_B;
 
                   // EXTR. raise interupt that value is ready.
 

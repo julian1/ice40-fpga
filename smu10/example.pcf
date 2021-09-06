@@ -13,6 +13,7 @@ set_io XTALCLK 21
 #    pa6 = miso.  vie=voe  = pin 47
 
 # should prefix these
+# use COMM_
 set_io CLK        42
 
 set_io CS         43

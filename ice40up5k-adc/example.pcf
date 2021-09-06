@@ -27,8 +27,6 @@ set_io CMPR_OUT_CTL_P   32
 set_io CMPR_OUT_CTL_N   34
 
 
-set_io VOC 10 
-
 
 
 # set_io SW[2] 34
@@ -45,7 +43,20 @@ set_io IOT_45A_G1 37
 set_io IOT_51A 42
 set_io IOT_50B 38
 
-#spi
+
+####
+# prefix COMM_CS   or MCU_CS  or EXT external. or PORT? 
+set_io COM_CLK  6       # VOA
+set_io COM_CS   9       # VOB
+set_io COM_MOSI 10      # VOC
+set_io COM_SPECIAL 11   # VOD
+set_io COM_MISO 12      # VIE
+set_io COM_INTERUPT 21  # VIF
+
+
+##################
+# ice/flash spi
+# not tested.
 set_io SPI_SS 16
 set_io SPI_SCK 15
 # JA - we have these reversed. for master configure??? or mistake
