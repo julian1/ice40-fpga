@@ -7,6 +7,8 @@
 
 // x is not a mask. it is hi bits and lo bits
 
+
+/*
 function [4-1:0] update (input [4-1:0] x, input [8-1:0]  val);
 
   reg [4-1:0] lob ;  // 1 and a set b no i think these are the clear bits...
@@ -15,12 +17,31 @@ function [4-1:0] update (input [4-1:0] x, input [8-1:0]  val);
     lob = val & 4'b1111 ;    // and with lo bits
     hib = val >> 4;          // or with hi bits
 
-    if( lob & hib /*!= 0*/  ) // if any bit is both set and clear, then toggle when both set
+    if( lob & hib   )       // if any bit is both set and clear, then toggle according to when have both set and clear
       update =  (lob & hib);
     else
       update = ~(  ~(x | lob) | hib );
   end
 endfunction
+*/
+
+
+/*
+  OK. the issue. without having a mask...
+  is that we need a way to signal whether to write the value... or not... 
+  could be put in the high bit?
+*/
+
+function [24-1:0] update (input [24-1:0] x, input [24-1:0]  val);
+  begin
+      update =  val ;
+  end
+endfunction
+
+
+
+
+
 
 
 // for 24bit values we don't really want these bitmask values.
@@ -45,7 +66,10 @@ endfunction
   lets do the simplest thing...
 */
 /*
-  assign is an alias.
+  - assign is an alias.
+
+  --------------------
+  - OK. hang on.   for out application.... we will avoid written registers.
 
 */
 
@@ -98,6 +122,7 @@ module my_register_bank   #(parameter MSB=16)   (
 
 
         // in holds the address
+        // EXTR> we should ignore the high bit here.  in order to return a register's value, but without writing it.
         if(count == 8)
           begin
             case (in )
@@ -125,10 +150,11 @@ module my_register_bank   #(parameter MSB=16)   (
 
     // Ok. this can handle different sizes... nice.
 
-    if(count == 16 ) // MSB
+    if(count == MSB ) // MSB
       begin
 
         case (addr)
+          // OK. if high bit is set then it avoids writing these...
           // leds
           7 :
             begin
