@@ -57,15 +57,16 @@ module my_register_bank   #(parameter MSB=16)   (
 );
 
   // TODO rename these...
+  // MSB is not correct here...
   reg [MSB-1:0] in;      // register used to read val
-  reg [MSB-1:0] ret  ;    // padding bit
+  reg [MSB-1:0] out  ;    // register for output.  should be size of MSB due to high bits 
   reg [8-1:0]   count;
 
   // these are going to be different depending...
   // does this work? wire is effectively an alias in combinatorial code
   // these are only correct when count == 16...
   
-  wire dout = ret[MSB- 1];    
+  wire dout = out[MSB- 1];    
                               
                               
 
@@ -76,47 +77,39 @@ module my_register_bank   #(parameter MSB=16)   (
       begin
         count = 0;
         in = 0;
-        ret = 0;
+        out = 0;
       end
     else
       // cs asserted
       begin
 
-        // d into lsb, shift left toward msb
+        // shift din into in register
         in = {in[MSB-2:0], din};
 
-        if(count == 7)
+        count = count + 1;
+
+        // shift data from out register
+        out = out << 1; // this *is* zero fill operator.
+
+
+        // in holds the address
+        if(count == 8)
           begin
-            // reg addr in;
             case (in )
-              // leds
               7 :
                 begin
-                  ret = reg_led << 7;
+                  out = reg_led << 8;
                 end
             endcase  
           end
-
-/*
-          begin
-            // put the value in the return register 
-
-            ret = reg_led << 7;
-          end
- */       
-
-        // shift the output
-        ret = ret << 1; // this *is* zero fill operator.
-
-        count = count + 1;
 
       end
   end
 
 
-  // these are only correct when count == 16...
+  // these are only correct when count == 16... MSB
   wire [8-1:0] addr  = in[ MSB-1:8 ]; // high byte for reg/address, lo byte for val.
-  wire [8-1:0] val   = in;
+  wire [8-1:0] val   = in;    // lo byte
 
 
   always @ (posedge cs)   // cs done.
@@ -133,10 +126,6 @@ module my_register_bank   #(parameter MSB=16)   (
           7 :
             begin
               reg_led = update(reg_led, val);
-              // reg_led = 3'b101;   /// oohhhh this worked.
-              // reg_led = 3'b010;   /// oohhhh this worked.
-              // reg_led = val ; //  okk. this works!!!.
-                              // OK. the mask is zero, but should be 1 i think. issue is perhaps on the stm32 side....
             end
 
           // soft reset
