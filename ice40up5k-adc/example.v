@@ -7,18 +7,19 @@
 
 // x is not a mask. it is hi bits and lo bits
 
-function [8-1:0] update (input [8-1:0] x, input [8-1:0]  val);
+function [4-1:0] update (input [4-1:0] x, input [8-1:0]  val);
 
-  reg [4-1:0] v_setb ; 
+  reg [4-1:0] lob ;  // 1 and a set b no i think these are the clear bits... 
+  reg [4-1:0] hib ; 
   begin
-    v_setb   = val & 4'b1111 ;
-    clearb = val >> 4;
+    lob   = val & 4'b1111 ;    // and with lo bits
+    hib = val >> 4;          // or with hi bits
 
-    if( (val & 4'b1111) & (val >> 4) /*!= 0*/  ) // if both set and clear bits, then its a toggle
-      update =  ((val & 4'b1111) & (val >> 4))  ^ x ; // xor. to toggle.
+    if( lob & hib /*!= 0*/  ) // if any bit is both set and clear bits, then its a toggle
+      update =  (lob  & hib)  ^ x ; // xor. to toggle.
     else
-      //             x     (and lo bits)        (or hi bits)
-      update = ~(~  (x | ( v_setb)) | (val >> 4));
+      //             (and lo bits)     (or hi bits)
+      update = ~(  ~(x | lob) | hib );
   end
 endfunction
 
