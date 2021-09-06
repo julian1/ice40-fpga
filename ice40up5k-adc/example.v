@@ -44,6 +44,10 @@ endfunction
 
   lets do the simplest thing...
 */
+/*
+  assign is an alias.
+
+*/
 
 module my_register_bank   #(parameter MSB=16)   (
   input  clk,
@@ -108,7 +112,8 @@ module my_register_bank   #(parameter MSB=16)   (
   end
 
 
-  // these are only correct when count == 16... MSB
+  // only valid when count == 16... MSB
+  // think we should remove
   wire [8-1:0] addr  = in[ MSB-1:8 ]; // high byte for reg/address, lo byte for val.
   wire [8-1:0] val   = in;    // lo byte
 
@@ -120,8 +125,9 @@ module my_register_bank   #(parameter MSB=16)   (
 
     // Ok. this can handle different sizes... nice.
 
-    if(count == 16 )
+    if(count == 16 ) // MSB
       begin
+
         case (addr)
           // leds
           7 :
