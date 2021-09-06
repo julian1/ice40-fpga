@@ -59,37 +59,38 @@ module my_register_bank   #(parameter MSB=16)   (
   // TODO rename these...
   // MSB is not correct here...
   reg [MSB-1:0] in;      // register used to read val
-  reg [MSB-1:0] out  ;    // register for output.  should be size of MSB due to high bits 
+  reg [MSB-1:0] out  ;    // register for output.  should be size of MSB due to high bits
   reg [8-1:0]   count;
 
   // these are going to be different depending...
   // does this work? wire is effectively an alias in combinatorial code
   // these are only correct when count == 16...
-  
-  wire dout = out[MSB- 1];    
-                              
-                              
+
+  wire dout = out[MSB- 1];
+
+
 
   // clock value into in var
   always @ (negedge clk or posedge cs)
   begin
-    if(cs)          // cs not asserted, so reset.
+    if(cs)
+      // cs not asserted, so reset regs
       begin
         count = 0;
         in = 0;
         out = 0;
       end
     else
-      // cs asserted
+      // cs asserted, clock data in and out
       begin
 
         // shift din into in register
         in = {in[MSB-2:0], din};
 
-        count = count + 1;
-
         // shift data from out register
         out = out << 1; // this *is* zero fill operator.
+
+        count = count + 1;
 
 
         // in holds the address
@@ -100,7 +101,7 @@ module my_register_bank   #(parameter MSB=16)   (
                 begin
                   out = reg_led << 8;
                 end
-            endcase  
+            endcase
           end
 
       end
