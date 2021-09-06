@@ -34,7 +34,9 @@ module my_register_bank   #(parameter MSB=32)   (
   output dout,       // sdo
 
   // latched val, rename
-  output reg [24-1:0] reg_led     // need to be very careful. only 4 bits. or else screws set/reset calculation ...
+  output reg [24-1:0] reg_led ,    // need to be very careful. only 4 bits. or else screws set/reset calculation ...
+
+  input wire [24-1:0] count_rundown
 );
 
   // TODO rename these...
@@ -76,6 +78,8 @@ module my_register_bank   #(parameter MSB=32)   (
                 begin
                   out = reg_led << 8;
                 end
+
+              8: out = count_rundown << 8; 
             endcase
           end
 
@@ -180,7 +184,7 @@ module top (
   reg [31:0] count_phase = 0;     // phase not oscillation, because may have 2 in the same direction.
   reg [31:0] count_up = 0;      //
   reg [31:0] count_down = 0;    //
-  reg [31:0] count_rundown = 0; //
+  reg [24-1:0] count_rundown = 0; //
 
 
 
@@ -207,7 +211,9 @@ module top (
     . din(COM_MOSI),
     . dout(COM_MISO),
 
-    . reg_led(reg_led)
+    . reg_led(reg_led),
+    // . reg8( count_rundown)  could make anon...
+    . count_rundown( count_rundown )
   );
 
 
