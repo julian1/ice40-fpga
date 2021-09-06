@@ -56,28 +56,26 @@ module my_register_bank   #(parameter MSB=16)   (
   output reg [4-1:0] reg_led     // need to be very careful. only 4 bits. or else screws set/reset calculation ...
 );
 
-  reg [MSB-1:0] tmp;      // register used to read val
+  // TODO rename these...
+  reg [MSB-1:0] in;      // register used to read val
   reg [MSB-1:0] ret  ;    // padding bit
   reg [8-1:0]   count;
 
   // these are going to be different depending...
   // does this work? wire is effectively an alias in combinatorial code
-  wire [8-1:0] addr  = tmp[ MSB-1:8 ]; // high byte for reg/address, lo byte for val.
-  wire [8-1:0] val   = tmp;
-
-        // TODO generates a warning....
-  wire dout = ret[MSB- 1];    // OK. doing this gets our high bit. but loses the last bit... because its delayed??
+  // these are only correct when count == 16...
+  
+  wire dout = ret[MSB- 1];    
                               
-                              // this should be able to be done with a wire...
+                              
 
-
-
-  // clock value into tmp var
+  // clock value into in var
   always @ (negedge clk or posedge cs)
   begin
     if(cs)          // cs not asserted, so reset.
       begin
         count = 0;
+        in = 0;
         ret = 0;
       end
     else
@@ -85,23 +83,40 @@ module my_register_bank   #(parameter MSB=16)   (
       begin
 
         // d into lsb, shift left toward msb
-        tmp = {tmp[MSB-2:0], din};
+        in = {in[MSB-2:0], din};
 
         if(count == 7)
           begin
-            // we should have the address....
+            // reg addr in;
+            case (in )
+              // leds
+              7 :
+                begin
+                  ret = reg_led << 7;
+                end
+            endcase  
+          end
+
+/*
+          begin
+            // put the value in the return register 
 
             ret = reg_led << 7;
           end
-        
+ */       
 
-
+        // shift the output
         ret = ret << 1; // this *is* zero fill operator.
 
         count = count + 1;
 
       end
   end
+
+
+  // these are only correct when count == 16...
+  wire [8-1:0] addr  = in[ MSB-1:8 ]; // high byte for reg/address, lo byte for val.
+  wire [8-1:0] val   = in;
 
 
   always @ (posedge cs)   // cs done.
