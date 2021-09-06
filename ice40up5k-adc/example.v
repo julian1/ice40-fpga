@@ -9,27 +9,22 @@
 
 function [4-1:0] update (input [4-1:0] x, input [8-1:0]  val);
 
-  reg [4-1:0] lob ;  // 1 and a set b no i think these are the clear bits... 
-  reg [4-1:0] hib ; 
+  reg [4-1:0] lob ;  // 1 and a set b no i think these are the clear bits...
+  reg [4-1:0] hib ;
   begin
-    lob   = val & 4'b1111 ;    // and with lo bits
+    lob = val & 4'b1111 ;    // and with lo bits
     hib = val >> 4;          // or with hi bits
 
-    if( lob & hib /*!= 0*/  ) // if any bit is both set and clear bits, then its a toggle
-      update =  (lob  & hib)  ^ x ; // xor. to toggle.
+    if( lob & hib /*!= 0*/  ) // if any bit is both set and clear, then toggle when both set
+      update =  (lob & hib);
     else
-      //             (and lo bits)     (or hi bits)
       update = ~(  ~(x | lob) | hib );
   end
 endfunction
 
 
-
-// it is set bits. and clear bits 
-// yes it is a mask.
-/// setb   clearb
-// setb = val & 4'b1111 
-// clearb = val >> 4
+// for 24bit values we don't really want these bitmask values.
+// we just want to write and read registers.
 
 
 /*
@@ -45,6 +40,9 @@ endfunction
     ------------
 
   after we have read 8 bits. then we have the address...
+  ----------------------
+
+  lets do the simplest thing...
 */
 
 module my_register_bank   #(parameter MSB=16)   (
@@ -62,7 +60,7 @@ module my_register_bank   #(parameter MSB=16)   (
   reg [MSB-1:0] ret  ;    // padding bit
   reg [8-1:0]   count;
 
-  // these are going to be different depending... 
+  // these are going to be different depending...
   // does this work? wire is effectively an alias in combinatorial code
   wire [8-1:0] addr  = tmp[ MSB-1:8 ]; // high byte for reg/address, lo byte for val.
   wire [8-1:0] val   = tmp;
@@ -105,6 +103,18 @@ module my_register_bank   #(parameter MSB=16)   (
         if(count == 7)
           ret = 255 << 7;
         */
+        // we need to print the returned value...
+
+        if(count == 7)
+          begin
+            // we need to set the address...
+            // should be a state machine???
+
+            ret = reg_led << 7;
+            // ret = 0 ;
+          end
+        
+
         // return value
 
         // TODO generates a warning....
