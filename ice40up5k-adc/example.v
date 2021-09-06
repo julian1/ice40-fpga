@@ -100,7 +100,7 @@ module my_register_bank   #(parameter MSB=16)   (
   begin
     // we can assert a done flag here... and factor this code...
     // special asserted, and 16 received bits
-    if(/*cs &&*/ /*!special &&*/ count == 16 )
+    if(/*cs &&*/ count == 16 )
       begin
         case (addr)
           // leds
@@ -214,9 +214,7 @@ module top (
     (
     . clk(COM_CLK),
     . cs(COM_CS),
-    // . special(COM_SPECIAL),
     . din(COM_MOSI),
-    // . dout(dout),
     . dout(COM_MISO),
 
     . reg_led(reg_led)
