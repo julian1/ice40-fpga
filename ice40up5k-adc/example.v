@@ -289,18 +289,23 @@ module top (
         `STATE_INIT:
           begin
             ///////////
-            // reset vars, and transition to runup state
-            state <= `STATE_RUNUP;
-            count <= 0;
-            count_phase <= 0;
-            count_up <= 0;
-            count_down <= 0;
-            mux <= 3'b001; // initial direction
 
-            COM_INTERUPT = 1;
-            // LED_B = 0;
-            // enable comparator
-            CMPR_LATCH_CTL <= 0;
+            // settle time...
+            if(count == 10000)
+              begin
+                // reset vars, and transition to runup state
+                state <= `STATE_RUNUP;
+                count <= 0;
+                count_phase <= 0;
+                count_up <= 0;
+                count_down <= 0;
+                mux <= 3'b001; // initial direction
+
+                COM_INTERUPT = 1; // active lo?
+                // LED_B = 0;
+                // enable comparator
+                CMPR_LATCH_CTL <= 0;
+              end
           end
 
         // we may 
@@ -386,27 +391,17 @@ module top (
             if(cross_down || cross_up)
               begin
                   // trigger for scope
-                  // LED_B = ~ LED_B;
 
-                  // trigger interupt
-
-                  // EXTR. raise interupt that value is ready.
-
-                  // record/copy the count??? or use a different count variable
-                  // OK. we need to have the integrator run from fixed start point.
-                  // what's weird...
-
-                  // turn off all inputs
-                  // seems to work...
-                  // transition to state to done
+                  // transition
                   state = `STATE_DONE;
-
                   mux = 3'b000;
-                  COM_INTERUPT = 0;
+                  COM_INTERUPT = 0;   // turn on, interupt. active lo?
                   count_last_up = count_up;
                   count_last_down = count_down;
                   count_last_rundown = count_rundown;
 
+                  // count = 0;    // kills things ? why
+                  count <= 0;    // ok. 
 
               end
           end
@@ -423,7 +418,11 @@ module top (
             ///////////////
             // OK. to get the count value.  we have to be able to read it.
 
+            COM_INTERUPT = 1;   // reset interupt 
+
+            // if(count == 'hffffff )
             state <= `STATE_INIT;
+
           end
 
 
