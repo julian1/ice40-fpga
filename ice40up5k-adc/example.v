@@ -239,7 +239,7 @@ module top (
 
 
 
-  assign { LED_B,  LED_G, LED_R } = ~ 0;        // turn off
+  // assign { LED_B,  LED_G, LED_R } = ~ 0;        // turn off
 
   // assign { /*LED_B, */ LED_G, LED_R } = ~ mux;        // note. INVERTED for open-drain..
 
@@ -272,6 +272,10 @@ module top (
   reg [4:0] state = `STATE_INIT;
 
 
+
+  // works. to trigger scope. must use 'single'
+  wire LED_B = ~ COM_INTERUPT;
+
   /*
     - need to keep up/down transitions equal.  - to balance charge injection.
     - if end up on wrong side. just abandon, and run again? starting in opposite direction.
@@ -294,7 +298,7 @@ module top (
             mux <= 3'b001; // initial direction
 
             COM_INTERUPT = 1;
-//            LED_B <= 0;
+            // LED_B = 0;
             // enable comparator
             CMPR_LATCH_CTL <= 0;
           end
@@ -309,13 +313,14 @@ module top (
           begin
             // should use dedicated pref count... and accumulate.
             // or have a count dedicated....
-
-            if(count == 8000 )
+            if(count == 9000 )
               begin
+/*
                 if(mux == 3'b010 )
                   begin
                     mux <= 3'b001; // R
                   end
+*/
                  /*
                 // these blocks cancel i think...
                 // need a case? perhaps
@@ -381,7 +386,7 @@ module top (
             if(cross_down || cross_up)
               begin
                   // trigger for scope
-//                  LED_B <= ~ LED_B;
+                  // LED_B = ~ LED_B;
 
                   // trigger interupt
                   COM_INTERUPT = 0;
@@ -394,12 +399,12 @@ module top (
 
                   // turn off all inputs
                   // seems to work...
-                  mux <= 3'b000;
+                  mux = 3'b000;
                   // transition to state to done
-                  state <= `STATE_DONE;
-                  count_last_up <= count_up;
-                  count_last_down <= count_down;
-                  count_last_rundown <= count_rundown;
+                  state = `STATE_DONE;
+                  count_last_up = count_up;
+                  count_last_down = count_down;
+                  count_last_rundown = count_rundown;
 
 
               end
