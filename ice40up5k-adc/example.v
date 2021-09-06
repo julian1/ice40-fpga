@@ -81,9 +81,9 @@ module my_register_bank   #(parameter MSB=16)   (
 
         // ret = 16'b1111110111011010 ;
         // ret = 255 ;
-        ret = 255 << 8;
+        // ret = 255 << 8;
         //ret = 0;
-        //ret = 0;
+        ret = 0;
 
         // highest bit looks problematic...
         // ret = 65535 ;
@@ -95,22 +95,10 @@ module my_register_bank   #(parameter MSB=16)   (
         // d into lsb, shift left toward msb
         tmp = {tmp[MSB-2:0], din};
 
-        /*
-        // appears to work. actually we could return the address...
-        if(count == 0)
-          ret = 255 << 7;
-        // have the address, so can start sending current value back...
-        if(count == 7)
-          ret = 255 << 7;
-        */
-        // we need to print the returned value...
-
         if(count == 7)
           begin
-            // we need to set the address...
-            // should be a state machine???
 
-            ret = reg_led << 7;
+            ret = reg_led << 8;
             // ret = 0 ;
           end
         
@@ -118,7 +106,7 @@ module my_register_bank   #(parameter MSB=16)   (
         // return value
 
         // TODO generates a warning....
-        dout = ret[MSB-2];    // OK. doing this gets our high bit. but loses the last bit... because its delayed??
+        dout = ret[MSB-1];    // OK. doing this gets our high bit. but loses the last bit... because its delayed??
         ret = ret << 1; // this *is* zero fill operator.
 
         count = count + 1;
