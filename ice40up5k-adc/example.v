@@ -389,7 +389,6 @@ module top (
                   // LED_B = ~ LED_B;
 
                   // trigger interupt
-                  COM_INTERUPT = 0;
 
                   // EXTR. raise interupt that value is ready.
 
@@ -399,9 +398,11 @@ module top (
 
                   // turn off all inputs
                   // seems to work...
-                  mux = 3'b000;
                   // transition to state to done
                   state = `STATE_DONE;
+
+                  mux = 3'b000;
+                  COM_INTERUPT = 0;
                   count_last_up = count_up;
                   count_last_down = count_down;
                   count_last_rundown = count_rundown;
