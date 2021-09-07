@@ -290,7 +290,7 @@ module top (
           begin
             ///////////
 
-            // settle time...
+            // no without input reset - this isn't a settle time.
             if(count == 10000)
               begin
                 // reset vars, and transition to runup state
@@ -341,8 +341,12 @@ module top (
                 /*
                   ok. here would would do a small backtrack count. then we test integrator comparator
                   for next direction.
-                */
 
+                  EXTR. OK. the difference in counts - one goes up/ the other goes down.
+                  is when the period is right near the zero-cross - and it can go one way or the other
+                  the sum of the up/down should however always be equal.
+                  this is why the final rundown count is the same.
+                */
                 // reset count
                 count <= 0;
                 // inc oscillations
@@ -388,6 +392,7 @@ module top (
             // means can avoid copying the variable out, if we do it quickly.
             count_rundown <= count_rundown + 1;
 
+            // zero-cross to finish.
             if(cross_down || cross_up)
               begin
                   // trigger for scope
