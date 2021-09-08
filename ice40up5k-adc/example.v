@@ -34,7 +34,9 @@ module my_register_bank   #(parameter MSB=32)   (
   output dout,       // sdo
 
   // latched val, rename
-  output reg [24-1:0] reg_led ,    // need to be very careful. only 4 bits. or else screws set/reset calculation ...
+  // this is both input and output????
+  // output wire [24-1:0] reg_led ,    // need to be very careful. only 4 bits. or else screws set/reset calculation ...
+  inout wire [24-1:0] reg_led ,    // need to be very careful. only 4 bits. or else screws set/reset calculation ...
 
   input wire [24-1:0] count_up,
   input wire [24-1:0] count_down,
@@ -57,13 +59,15 @@ module my_register_bank   #(parameter MSB=32)   (
     if(cs)
       // cs not asserted, so reset regs
       begin
-        count = 0;
-        in = 0;
-        out = 0;
+        count <= 0;
+        in <= 0;
+        out <= 0;
       end
     else
       // cs asserted, clock data in and out
       begin
+
+        // All of these three assignments need to be sequential to work...
 
         // shift din into in register
         in = {in[MSB-2:0], din};
@@ -71,11 +75,12 @@ module my_register_bank   #(parameter MSB=32)   (
         // shift data from out register
         out = out << 1; // this *is* zero fill operator.
 
+        // this must be sequential, for equality test...
         count = count + 1;
 
         if(count == 8)
           begin
-            // ignore hi bit. 
+            // ignore hi bit.
             // allows us to read a register, without writing, by setting hi bit of addr
             case (in[8 - 1 - 1: 0 ] )
 
@@ -107,7 +112,7 @@ module my_register_bank   #(parameter MSB=32)   (
           7 :
             begin
               // reg_led = update(reg_led, val);
-              reg_led = val;
+              reg_led <= val;
             end
 
           // soft reset
@@ -121,7 +126,7 @@ module my_register_bank   #(parameter MSB=32)   (
             begin
               // none of this is any good... we need mux ctl pulled high etc.
               // does verilog expand 0 constant to fill all bits?
-              reg_led = 3'b101;
+              reg_led <= 3'b101;
             end
 
         endcase
@@ -140,7 +145,254 @@ endmodule
 
 
 
+// module my_register_bank   #(parameter MSB=32)   (
+module my_modulation (
+  input  clk,
 
+  output [2:0] mux ,
+
+  output [24-1:0] count_last_up,
+  output [24-1:0] count_last_down,
+  output [24-1:0] count_last_rundown,
+
+  input CMPR_OUT_CTL_P,
+
+  output COM_INTERUPT,
+  output CMPR_LATCH_CTL
+);
+
+  // advantage of macros is that they generate errors if not defined.
+
+  `define STATE_INIT    0    // initialsation state
+  // `define STATE_WAITING 1
+  `define STATE_RUNUP    2
+  `define STATE_RUNDOWN  3
+  `define STATE_DONE     4
+
+  `define STATE_FIX_POS 5
+
+  `define STATE_FIX_POS_START 6
+  `define STATE_FIX_POS       7
+  `define STATE_VAR_START     8
+  `define STATE_VAR           9
+  `define STATE_FIX_NEG_START 10 
+  `define STATE_FIX_NEG       11
+  `define STATE_VAR2_START    12
+  `define STATE_VAR2          14
+
+  `define STATE_RUNDOWN_START 15
+
+
+  // is it the same as assign. when performed outside an always block? timing seems different
+  // reg [4:0] state = `STATE_INIT;
+
+  // 2^4 = 16
+  reg [4:0] state;
+
+  // INITIAL BEGIN DOES SEEM TO BE supported.
+  initial begin
+    state = `STATE_INIT;
+  end
+
+
+
+
+  //////////////////////////////////////////////////////
+  // counters and settings  ...
+  // for an individual phase.
+  reg [31:0] count ;         // count_clk.   change name phase_count... or something...
+  reg [31:0] count_tot ;     // = count_up + count_down. avoid calc. should phase not oscillation, because may have 2 in the same direction.
+
+  // ok. think we have to make copies of these... so they're not overwritten at time of read..
+  reg [24-1:0] count_up;
+  reg [24-1:0] count_down;
+  reg [24-1:0] count_rundown;
+
+
+  /////////////////////////
+  // this should be pushed into a separate module...
+  // should be possible to set latch hi immediately on any event here...
+  // change name  zero_cross.. or just cross_
+  reg [2:0] crossr;
+  always @(posedge clk)
+    crossr <= {crossr[1:0], CMPR_OUT_CTL_P};
+
+  wire cross_up     = (crossr[2:1]==2'b10);  // message starts at falling edge
+  wire cross_down   = (crossr[2:1]==2'b01);  // message stops at rising edge
+  wire cross_any    = cross_up || cross_down ;
+
+
+
+  always @(posedge clk)
+    begin
+      // we use the same count - always increment clock
+
+      // this is nested sequntial block. so should be available. in the case statementj.
+      // making this non-blocking makes it much faster 26MHz to 39MHz.
+      count <= count + 1;
+
+      case (state)
+        `STATE_INIT:
+          begin
+            ///////////
+            // no without input reset - this isn't a settle time.
+            if(count == 10000)
+              begin
+                // reset vars, and transition to runup state
+                state <= `STATE_FIX_POS_START;
+                count <= 0;
+                count_tot <= 0;
+                count_up <= 0;
+                count_down <= 0;
+
+                COM_INTERUPT <= 1; // active lo
+                // enable comparator
+                CMPR_LATCH_CTL <= 0;
+              end
+          end
+
+        // OK. may it is easier to put the initialization ... in one bit. rather and then
+
+        // ok. have up with down chink. nice.
+        // and down with an up chink. nice.
+
+
+        `STATE_FIX_POS_START:
+          begin
+            state <= `STATE_FIX_POS;
+            count <= 0;
+            mux <= 3'b001; // initial direction
+          end
+
+        `STATE_FIX_POS:
+          if(count == 2000)
+            state <= `STATE_VAR_START;
+
+        `STATE_VAR_START:
+          begin
+            state <= `STATE_VAR;
+            count <= 0;
+            count_tot <= count_tot + 1;
+            if( CMPR_OUT_CTL_P)
+              begin
+                mux <= 3'b010;
+                count_up <= count_up + 1;
+              end
+            else
+              begin
+                mux <= 3'b001;
+                count_down <= count_down + 1;
+              end
+          end
+
+        `STATE_VAR:
+          if(count == 10000)
+            state <= `STATE_FIX_NEG_START;
+
+        `STATE_FIX_NEG_START:
+          begin
+            state <= `STATE_FIX_NEG;
+            count <= 0;
+            mux <= 3'b010;
+          end
+
+        `STATE_FIX_NEG:
+          if(count == 2000)
+            state <= `STATE_VAR2_START;
+
+        `STATE_VAR2_START:
+          begin
+            state <= `STATE_VAR2;
+            count <= 0;
+            count_tot <= count_tot + 1;
+            if( CMPR_OUT_CTL_P)
+              begin
+                mux <= 3'b010;
+                count_up <= count_up + 1;
+              end
+            else
+              begin
+                mux <= 3'b001;
+                count_down <= count_down + 1;
+              end
+          end
+
+        `STATE_VAR2:
+          if(count == 12000)
+            begin
+              if(count_tot == 5000 * 2) // > 5000... is this guaranteed to trigger?
+                state <= `STATE_RUNDOWN_START;
+              else
+                state <= `STATE_FIX_POS_START;
+
+            end
+
+
+
+        `STATE_RUNDOWN_START:
+          begin
+            state <= `STATE_RUNDOWN;
+            count <= 0;
+            count_rundown <= 0; 
+            // we have to set the direction.
+
+            if( CMPR_OUT_CTL_P)
+              begin
+                mux <= 3'b010;
+                count_up <= count_up + 1;
+              end
+            else
+              begin
+                mux <= 3'b001;
+                count_down <= count_down + 1;
+              end
+
+            // get rid of count_rundown. use count instead. should be everything we need.
+          end
+
+        // EXTR. we also have to short the integrator at the start. to begin at a known start position.
+
+        `STATE_RUNDOWN:
+          begin
+           // EXTR. only incrementing the count, in the contextual state,
+            // means can avoid copying the variable out, if we do it quickly.
+            count_rundown <= count_rundown + 1;
+
+            // zero-cross to finish.
+            if(cross_any )
+              begin
+                  // trigger for scope
+
+                  // transition
+                  state <= `STATE_DONE;
+                  mux <= 3'b000;
+                  COM_INTERUPT <= 0;   // turn on, interupt. active lo?
+                  count_last_up <= count_up;
+                  count_last_down <= count_down;
+                  count_last_rundown <= count_rundown;
+
+                  // count = 0;    // kills things ? why
+                  count <= 0;    // ok.
+
+              end
+          end
+
+
+        `STATE_DONE:
+          begin
+            COM_INTERUPT <= 1;   // reset interupt
+
+            // if(count == 'hffffff )
+            state <= `STATE_INIT;
+
+          end
+
+
+      endcase
+    end
+
+
+endmodule
 
 
 
@@ -180,21 +432,8 @@ module top (
 );
 
 
-  //////////////////////////////////////////////////////
-  // counters and settings  ...
-  // for an individual phase.
-  reg [31:0] count = 0;         // count_clk.   change name phase_count... or something...
-  reg [31:0] count_phase = 0;     // = count_up + count_down. avoid calc. should phase not oscillation, because may have 2 in the same direction.
-
-  // ok. think we have to make copies of these... so they're not overwritten at time of read..
-  reg [24-1:0] count_up = 0;      //
-  reg [24-1:0] count_down = 0;    //
-  reg [24-1:0] count_rundown = 0; //
-
-  reg [24-1:0] count_last_up = 0;      //
-  reg [24-1:0] count_last_down = 0;    //
-  reg [24-1:0] count_last_rundown = 0; //
-
+  //           count_transition_up
+  //           count_last_transition_up
 
 
   /*
@@ -210,6 +449,9 @@ module top (
 
   // assign { COM_MOSI , COM_CLK, COM_CS} =  reg_led ;
 
+  reg [24-1:0] count_last_up;
+  reg [24-1:0] count_last_down;
+  reg [24-1:0] count_last_rundown;
 
 
   my_register_bank #( 32 )   // register bank
@@ -229,210 +471,59 @@ module top (
 
 
 
-
   // we can probe the leds for signals....
 
   // start everything off...
-  reg [2:0] mux = 3'b000;        // b / bottom
-
-
-
-
-
+  reg [2:0] mux ; // = 3'b000;        // b / bottom
   // assign { LED_B,  LED_G, LED_R } = ~ 0;        // turn off
-
   // assign { /*LED_B, */ LED_G, LED_R } = ~ mux;        // note. INVERTED for open-drain..
+  // define POSREF and NEGREF 3'b10
 
   assign { INT_IN_SIG_CTL, INT_IN_N_CTL, INT_IN_P_CTL } = mux;
 
   // OK. so want to make sure. that the
 
-
-
-  /////////////////////////
-  // this should be pushed into a separate module...
-  // should be possible to set latch hi immediately on any event here...
-  // change name  zero_cross.. or just cross_
-  reg [2:0] crossr;
-  always @(posedge clk)
-    crossr <= {crossr[1:0], CMPR_OUT_CTL_P};
-  wire cross_up     = (crossr[2:1]==2'b10);  // message starts at falling edge
-  wire cross_down   = (crossr[2:1]==2'b01);  // message stops at rising edge
-  wire cross_any    = cross_up || cross_down ;
-
-
-
-
-  `define STATE_INIT    0    // initialsation state
-  // `define STATE_WAITING 1
-  `define STATE_RUNUP    2
-  `define STATE_RUNDOWN  3
-  `define STATE_DONE     4
-
-  reg [4:0] state = `STATE_INIT;
-
-
-
-  // works. to trigger scope. must use 'single'
+   // works. to trigger scope. must use 'single'
   wire LED_B = ~ COM_INTERUPT;
 
+
+
+  my_modulation  m1 (
+
+    . clk(clk),
+    . mux(mux),
+
+    . count_last_up(count_last_up),
+    . count_last_down(count_last_down),
+    . count_last_rundown(count_last_rundown),
+
+    . CMPR_OUT_CTL_P(CMPR_OUT_CTL_P),
+    . COM_INTERUPT(COM_INTERUPT),
+    . CMPR_LATCH_CTL(CMPR_LATCH_CTL)
+  );
+
+
+
+
+  /*
+    inputs and outptus. both probably want to be wires.
+      https://github.com/icebreaker-fpga/icebreaker-verilog-examples/blob/main/icebreaker/dvi-12bit/vga_core.v
+  */
+
+  /*
+    we need to count the transitions also.  albeit may not need in final.
+  //           count_transition_up
+    eg. only count if comparator direction is a change.
+  */
   /*
     - need to keep up/down transitions equal.  - to balance charge injection.
     - if end up on wrong side. just abandon, and run again? starting in opposite direction.
   */
-  always @(posedge clk)
-    begin
-      // we use the same count - always increment clock
-      count <= count + 1;
-
-      case (state)
-        `STATE_INIT:
-          begin
-            ///////////
-
-            // no without input reset - this isn't a settle time.
-            if(count == 10000)
-              begin
-                // reset vars, and transition to runup state
-                state <= `STATE_RUNUP;
-                count <= 0;
-                count_phase <= 0;
-                count_up <= 0;
-                count_down <= 0;
-                mux <= 3'b001; // initial direction
-
-                COM_INTERUPT = 1; // active lo?
-                // LED_B = 0;
-                // enable comparator
-                CMPR_LATCH_CTL <= 0;
-              end
-          end
-
-        // we may 
-
-        // So switching to rundown is just when the count hits a certain amount...
-        // having separate clocks means can vary things more easily.
-        // OR. just count the periods.  yes.
-
-        `STATE_RUNUP:
-          begin
-            // should use dedicated pref count... and accumulate.
-            // or have a count dedicated....
-            if(count == 9000 )
-              begin
-/*
-                if(mux == 3'b010 )
-                  begin
-                    mux <= 3'b001; // R
-                  end
-*/
-                 /*
-                // these blocks cancel i think...
-                // need a case? perhaps
-                if(mux == 3'b001 )
-                  begin
-                  mux <= 3'b010; // G
-                  end
-                */
-              end
-
-            if(count == 10000 )
-              begin
-                /*
-                  ok. here would would do a small backtrack count. then we test integrator comparator
-                  for next direction.
-
-                  EXTR. OK. the difference in counts - one goes up/ the other goes down.
-                  is when the period is right near the zero-cross - and it can go one way or the other
-                  the sum of the up/down should however always be equal.
-                  this is why the final rundown count is the same.
-                */
-                // reset count
-                count <= 0;
-                // inc oscillations
-                count_phase <= count_phase + 1;
-
-                // sample the comparator, to determine next direction
-                if( CMPR_OUT_CTL_P)
-                  begin
-                    // EXTR this may be a continuation of direction.
-                    // EXTR. we may want to count changes of direction as well (and to equalize - charge injection ).
-                    mux <= 3'b010;
-                    count_up <= count_up + 1;
-                  end
-                else
-                  begin
-                    mux <= 3'b001; // R
-                    count_down <= count_down + 1;
-                  end
-                end
-
-                // count_up == count
-                if(count_phase == 2000 * 5 )     // 2000osc = 1sec.
-                  begin
-
-                    state <= `STATE_RUNDOWN;
-                    count_rundown <= 0;       // reset...
-                  end
-
-              end
 
 
-        // EXTR. we also have to short the integrator at the start. to begin at a known start position.
-
-        `STATE_RUNDOWN:
-          begin
-            // need to do the rundown count...
-            // so we have to determine the clock cross...
-            // probably with want to capture it on a scope.
-            // the direction should be correct here. and we just have to run it down
-            // we wnat a different clock so we can read it....
-
-            // EXTR. only incrementing the count, in the contextual state,
-            // means can avoid copying the variable out, if we do it quickly.
-            count_rundown <= count_rundown + 1;
-
-            // zero-cross to finish.
-            if(cross_down || cross_up)
-              begin
-                  // trigger for scope
-
-                  // transition
-                  state = `STATE_DONE;
-                  mux = 3'b000;
-                  COM_INTERUPT = 0;   // turn on, interupt. active lo?
-                  count_last_up = count_up;
-                  count_last_down = count_down;
-                  count_last_rundown = count_rundown;
-
-                  // count = 0;    // kills things ? why
-                  count <= 0;    // ok. 
-
-              end
-          end
 
 
-        `STATE_DONE:
-          begin
-            // EXTR.   we might  want to hold the interrupt for a bit, to get it to propagate.
-            // eg. just use the count.
 
-            // ok. it is hitting exactly the same spot everytime. nice.
-            // when immediately restart. because it's hit a zero cross.
-            // but we probably want to start from a shorted integrator.
-            ///////////////
-            // OK. to get the count value.  we have to be able to read it.
-
-            COM_INTERUPT = 1;   // reset interupt 
-
-            // if(count == 'hffffff )
-            state <= `STATE_INIT;
-
-          end
-
-
-      endcase
-    end
 
 
 endmodule
