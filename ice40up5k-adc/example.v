@@ -33,6 +33,10 @@ module my_register_bank   #(parameter MSB=32)   (
   input  din,       // sdi
   output dout,       // sdo
 
+  /*
+    TODO. FIXME. should be output wire.
+    state for reg_led should be in top module. 
+  */
   // latched val, rename
   output reg [24-1:0] reg_led ,    // need to be very careful. only 4 bits. or else screws set/reset calculation ...
 
