@@ -245,6 +245,8 @@ module top (
 
   // assign { /*LED_B, */ LED_G, LED_R } = ~ mux;        // note. INVERTED for open-drain..
 
+  // define POSREF and NEGREF 3'b10 
+
   assign { INT_IN_SIG_CTL, INT_IN_N_CTL, INT_IN_P_CTL } = mux;
 
   // OK. so want to make sure. that the
