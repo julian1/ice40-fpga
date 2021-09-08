@@ -191,10 +191,12 @@ module top (
   reg [24-1:0] count_down = 0;    //
   reg [24-1:0] count_rundown = 0; //
 
+  //           count_transition_up
+  //           count_last_transition_up
+
   reg [24-1:0] count_last_up = 0;      //
   reg [24-1:0] count_last_down = 0;    //
   reg [24-1:0] count_last_rundown = 0; //
-
 
 
   /*
@@ -269,10 +271,28 @@ module top (
   `define STATE_RUNDOWN  3
   `define STATE_DONE     4
 
-  reg [4:0] state = `STATE_INIT;
 
+  // is it the same as assign. when performed outside an always block? timing seems different
+  // reg [4:0] state = `STATE_INIT;
 
+  reg [4:0] state; 
 
+  // INITIAL BEGIN DOES SEEM TO BE supported.
+  initial begin
+    state = `STATE_INIT;
+    count = 0;
+  end
+
+  /*
+    inputs and outptus. both probably want to be wires.
+      https://github.com/icebreaker-fpga/icebreaker-verilog-examples/blob/main/icebreaker/dvi-12bit/vga_core.v
+  */
+
+  /*
+    we need to count the transitions also.  albeit may not need in final.
+  //           count_transition_up
+    eg. only count if comparator direction is a change.
+  */
   // works. to trigger scope. must use 'single'
   wire LED_B = ~ COM_INTERUPT;
 
