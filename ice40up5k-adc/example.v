@@ -310,7 +310,9 @@ module top (
   always @(posedge clk)
     begin
       // we use the same count - always increment clock
-      count <= count + 1;
+
+      // think should be sequential ... so available in the state
+      count = count + 1;
 
       case (state)
         `STATE_INIT:
@@ -450,7 +452,7 @@ module top (
             ///////////////
             // OK. to get the count value.  we have to be able to read it.
 
-            COM_INTERUPT = 1;   // reset interupt 
+            COM_INTERUPT <= 1;   // reset interupt 
 
             // if(count == 'hffffff )
             state <= `STATE_INIT;
