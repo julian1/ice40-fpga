@@ -145,130 +145,21 @@ endmodule
 
 
 
-
-
-
-
-
-
-module top (
+// module my_register_bank   #(parameter MSB=32)   (
+module my_modulation (
   input  clk,
-  output LED_R,
-  output LED_G,
-  output LED_B,
 
-  output INT_IN_P_CTL,
-  output INT_IN_N_CTL,
-  output INT_IN_SIG_CTL,
+  input [2:0] mux ,
 
-  // it should be possible to immediately set high, on the latch transition, to avoid
-  // and then reset on some fixed count
-  output CMPR_LATCH_CTL,
+  output [24-1:0] count_last_up,
+  output [24-1:0] count_last_down,
+  output [24-1:0] count_last_rundown,
 
-  /* should configure as differential input.
-    https://stackoverflow.com/questions/40096272/how-do-i-use-set-lvds-mode-on-lattice-ice40-pins-using-icestorm-tools
-    https://github.com/YosysHQ/icestorm/issues/36
-  */
   input CMPR_OUT_CTL_P,
-  input CMPR_OUT_CTL_N,
 
-
-  /////////
-  input COM_CLK,
-  input COM_CS,
-  input COM_MOSI,
-  input COM_SPECIAL,
-  output COM_MISO,
-  output COM_INTERUPT   // active lo
-
-
+  output COM_INTERUPT,
+  output CMPR_LATCH_CTL
 );
-
-
-  //////////////////////////////////////////////////////
-  // counters and settings  ...
-  // for an individual phase.
-  reg [31:0] count = 0;         // count_clk.   change name phase_count... or something...
-  reg [31:0] count_phase = 0;     // = count_up + count_down. avoid calc. should phase not oscillation, because may have 2 in the same direction.
-
-  // ok. think we have to make copies of these... so they're not overwritten at time of read..
-  reg [24-1:0] count_up = 0;      //
-  reg [24-1:0] count_down = 0;    //
-  reg [24-1:0] count_rundown = 0; //
-
-  //           count_transition_up
-  //           count_last_transition_up
-
-  reg [24-1:0] count_last_up = 0;      //
-  reg [24-1:0] count_last_down = 0;    //
-  reg [24-1:0] count_last_rundown = 0; //
-
-
-  /*
-    OK. hang on. do we have an issue. with the same registers being sampled in different clk domains?
-
-  */
-
-
-  wire [24-1:0] reg_led ;
-  // assign { LED_B, LED_G, LED_R } =   reg_led ;   // not inverted for easier scope probing.inverted for common drain.
-  // assign { LED_B, LED_G, LED_R } = 3'b010 ;       // works...
-                                                    // Ok. it really looks correct on the leds...
-
-  // assign { COM_MOSI , COM_CLK, COM_CS} =  reg_led ;
-
-
-
-  my_register_bank #( 32 )   // register bank
-  my_register_bank
-    (
-    . clk(COM_CLK),
-    . cs(COM_CS),
-    . din(COM_MOSI),
-    . dout(COM_MISO),
-
-    . reg_led(reg_led),
-
-    . count_up(count_last_up),
-    . count_down(count_last_down),
-    . count_rundown( count_last_rundown)
-  );
-
-
-
-
-  // we can probe the leds for signals....
-
-  // start everything off...
-  reg [2:0] mux = 3'b000;        // b / bottom
-
-
-
-
-
-  // assign { LED_B,  LED_G, LED_R } = ~ 0;        // turn off
-
-  // assign { /*LED_B, */ LED_G, LED_R } = ~ mux;        // note. INVERTED for open-drain..
-
-  // define POSREF and NEGREF 3'b10
-
-  assign { INT_IN_SIG_CTL, INT_IN_N_CTL, INT_IN_P_CTL } = mux;
-
-  // OK. so want to make sure. that the
-
-
-
-  /////////////////////////
-  // this should be pushed into a separate module...
-  // should be possible to set latch hi immediately on any event here...
-  // change name  zero_cross.. or just cross_
-  reg [2:0] crossr;
-  always @(posedge clk)
-    crossr <= {crossr[1:0], CMPR_OUT_CTL_P};
-  wire cross_up     = (crossr[2:1]==2'b10);  // message starts at falling edge
-  wire cross_down   = (crossr[2:1]==2'b01);  // message stops at rising edge
-  wire cross_any    = cross_up || cross_down ;
-
 
 
 
@@ -290,23 +181,35 @@ module top (
     count = 0;
   end
 
-  /*
-    inputs and outptus. both probably want to be wires.
-      https://github.com/icebreaker-fpga/icebreaker-verilog-examples/blob/main/icebreaker/dvi-12bit/vga_core.v
-  */
 
-  /*
-    we need to count the transitions also.  albeit may not need in final.
-  //           count_transition_up
-    eg. only count if comparator direction is a change.
-  */
-  // works. to trigger scope. must use 'single'
-  wire LED_B = ~ COM_INTERUPT;
 
-  /*
-    - need to keep up/down transitions equal.  - to balance charge injection.
-    - if end up on wrong side. just abandon, and run again? starting in opposite direction.
-  */
+
+  //////////////////////////////////////////////////////
+  // counters and settings  ...
+  // for an individual phase.
+  reg [31:0] count = 0;         // count_clk.   change name phase_count... or something...
+  reg [31:0] count_phase = 0;     // = count_up + count_down. avoid calc. should phase not oscillation, because may have 2 in the same direction.
+
+  // ok. think we have to make copies of these... so they're not overwritten at time of read..
+  reg [24-1:0] count_up = 0;      //
+  reg [24-1:0] count_down = 0;    //
+  reg [24-1:0] count_rundown = 0; //
+
+
+  /////////////////////////
+  // this should be pushed into a separate module...
+  // should be possible to set latch hi immediately on any event here...
+  // change name  zero_cross.. or just cross_
+  reg [2:0] crossr;
+  always @(posedge clk)
+    crossr <= {crossr[1:0], CMPR_OUT_CTL_P};
+
+  wire cross_up     = (crossr[2:1]==2'b10);  // message starts at falling edge
+  wire cross_down   = (crossr[2:1]==2'b01);  // message stops at rising edge
+  wire cross_any    = cross_up || cross_down ;
+
+
+
   always @(posedge clk)
     begin
       // we use the same count - always increment clock
@@ -463,6 +366,144 @@ module top (
 
       endcase
     end
+
+
+endmodule
+
+
+
+
+
+module top (
+  input  clk,
+  output LED_R,
+  output LED_G,
+  output LED_B,
+
+  output INT_IN_P_CTL,
+  output INT_IN_N_CTL,
+  output INT_IN_SIG_CTL,
+
+  // it should be possible to immediately set high, on the latch transition, to avoid
+  // and then reset on some fixed count
+  output CMPR_LATCH_CTL,
+
+  /* should configure as differential input.
+    https://stackoverflow.com/questions/40096272/how-do-i-use-set-lvds-mode-on-lattice-ice40-pins-using-icestorm-tools
+    https://github.com/YosysHQ/icestorm/issues/36
+  */
+  input CMPR_OUT_CTL_P,
+  input CMPR_OUT_CTL_N,
+
+
+  /////////
+  input COM_CLK,
+  input COM_CS,
+  input COM_MOSI,
+  input COM_SPECIAL,
+  output COM_MISO,
+  output COM_INTERUPT   // active lo
+
+
+);
+
+
+  //           count_transition_up
+  //           count_last_transition_up
+
+
+  /*
+    OK. hang on. do we have an issue. with the same registers being sampled in different clk domains?
+
+  */
+
+
+  wire [24-1:0] reg_led ;
+  // assign { LED_B, LED_G, LED_R } =   reg_led ;   // not inverted for easier scope probing.inverted for common drain.
+  // assign { LED_B, LED_G, LED_R } = 3'b010 ;       // works...
+                                                    // Ok. it really looks correct on the leds...
+
+  // assign { COM_MOSI , COM_CLK, COM_CS} =  reg_led ;
+
+  reg [24-1:0] count_last_up;
+  reg [24-1:0] count_last_down;
+  reg [24-1:0] count_last_rundown;
+
+
+  my_register_bank #( 32 )   // register bank
+  my_register_bank
+    (
+    . clk(COM_CLK),
+    . cs(COM_CS),
+    . din(COM_MOSI),
+    . dout(COM_MISO),
+
+    . reg_led(reg_led),
+
+    . count_up(count_last_up),
+    . count_down(count_last_down),
+    . count_rundown( count_last_rundown)
+  );
+
+
+
+  // we can probe the leds for signals....
+
+  // start everything off...
+  reg [2:0] mux = 3'b000;        // b / bottom
+  // assign { LED_B,  LED_G, LED_R } = ~ 0;        // turn off
+  // assign { /*LED_B, */ LED_G, LED_R } = ~ mux;        // note. INVERTED for open-drain..
+  // define POSREF and NEGREF 3'b10
+
+  assign { INT_IN_SIG_CTL, INT_IN_N_CTL, INT_IN_P_CTL } = mux;
+
+  // OK. so want to make sure. that the
+
+   // works. to trigger scope. must use 'single'
+  wire LED_B = ~ COM_INTERUPT;
+
+
+
+  my_modulation  xx (
+
+    . clk(clk),
+
+    . mux(mux),
+
+    . count_last_up(count_last_up),
+    . count_last_down(count_last_down),
+    . count_last_rundown(count_last_rundown),
+
+    . CMPR_OUT_CTL_P(CMPR_OUT_CTL_P),
+
+    . COM_INTERUPT(COM_INTERUPT),
+    . CMPR_LATCH_CTL(CMPR_LATCH_CTL)
+
+
+  );
+
+
+
+
+  /*
+    inputs and outptus. both probably want to be wires.
+      https://github.com/icebreaker-fpga/icebreaker-verilog-examples/blob/main/icebreaker/dvi-12bit/vga_core.v
+  */
+
+  /*
+    we need to count the transitions also.  albeit may not need in final.
+  //           count_transition_up
+    eg. only count if comparator direction is a change.
+  */
+  /*
+    - need to keep up/down transitions equal.  - to balance charge injection.
+    - if end up on wrong side. just abandon, and run again? starting in opposite direction.
+  */
+
+
+
+
+
 
 
 endmodule
