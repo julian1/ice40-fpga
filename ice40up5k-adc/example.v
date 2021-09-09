@@ -80,7 +80,7 @@ module my_register_bank   #(parameter MSB=32)   (
 
         if(count == 8)
           begin
-            // ignore hi bit. 
+            // ignore hi bit.
             // allows us to read a register, without writing, by setting hi bit of addr
             case (in[8 - 1 - 1: 0 ] )
 
@@ -250,7 +250,7 @@ module top (
 
   // assign { /*LED_B, */ LED_G, LED_R } = ~ mux;        // note. INVERTED for open-drain..
 
-  // define POSREF and NEGREF 3'b10 
+  // define POSREF and NEGREF 3'b10
 
   assign { INT_IN_SIG_CTL, INT_IN_N_CTL, INT_IN_P_CTL } = mux;
 
@@ -282,7 +282,7 @@ module top (
   // is it the same as assign. when performed outside an always block? timing seems different
   // reg [4:0] state = `STATE_INIT;
 
-  reg [4:0] state; 
+  reg [4:0] state;
 
   // INITIAL BEGIN DOES SEEM TO BE supported.
   initial begin
@@ -311,8 +311,9 @@ module top (
     begin
       // we use the same count - always increment clock
 
-      // think should be sequential ... so available in the state
-      count = count + 1;
+      // this is nested sequntial block. so should be available. in the case statement.
+      // making this non-blocking makes it much faster 26MHz to 39MHz.
+      count <= count + 1;
 
       case (state)
         `STATE_INIT:
@@ -337,7 +338,7 @@ module top (
               end
           end
 
-        // we may 
+        // we may
 
         // So switching to rundown is just when the count hits a certain amount...
         // having separate clocks means can vary things more easily.
@@ -435,7 +436,7 @@ module top (
                   count_last_rundown <= count_rundown;
 
                   // count = 0;    // kills things ? why
-                  count <= 0;    // ok. 
+                  count <= 0;    // ok.
 
               end
           end
@@ -452,7 +453,7 @@ module top (
             ///////////////
             // OK. to get the count value.  we have to be able to read it.
 
-            COM_INTERUPT <= 1;   // reset interupt 
+            COM_INTERUPT <= 1;   // reset interupt
 
             // if(count == 'hffffff )
             state <= `STATE_INIT;
