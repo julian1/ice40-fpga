@@ -38,7 +38,7 @@ module my_register_bank   #(parameter MSB=32)   (
     state for reg_led should be in top module. 
   */
   // latched val, rename
-  output reg [24-1:0] reg_led ,    // need to be very careful. only 4 bits. or else screws set/reset calculation ...
+  output wire [24-1:0] reg_led ,    // need to be very careful. only 4 bits. or else screws set/reset calculation ...
 
   input wire [24-1:0] count_up,
   input wire [24-1:0] count_down,
