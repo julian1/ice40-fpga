@@ -59,13 +59,15 @@ module my_register_bank   #(parameter MSB=32)   (
     if(cs)
       // cs not asserted, so reset regs
       begin
-        count = 0;
-        in = 0;
-        out = 0;
+        count <= 0;
+        in <= 0;
+        out <= 0;
       end
     else
       // cs asserted, clock data in and out
       begin
+
+        // All of these three assignments need to be sequential to work...
 
         // shift din into in register
         in = {in[MSB-2:0], din};
@@ -73,6 +75,7 @@ module my_register_bank   #(parameter MSB=32)   (
         // shift data from out register
         out = out << 1; // this *is* zero fill operator.
 
+        // this must be sequential, for equality test...
         count = count + 1;
 
         if(count == 8)
@@ -109,7 +112,7 @@ module my_register_bank   #(parameter MSB=32)   (
           7 :
             begin
               // reg_led = update(reg_led, val);
-              reg_led = val;
+              reg_led <= val;
             end
 
           // soft reset
@@ -123,7 +126,7 @@ module my_register_bank   #(parameter MSB=32)   (
             begin
               // none of this is any good... we need mux ctl pulled high etc.
               // does verilog expand 0 constant to fill all bits?
-              reg_led = 3'b101;
+              reg_led <= 3'b101;
             end
 
         endcase
