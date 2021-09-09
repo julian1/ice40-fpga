@@ -425,12 +425,12 @@ module top (
                   // trigger for scope
 
                   // transition
-                  state = `STATE_DONE;
-                  mux = 3'b000;
-                  COM_INTERUPT = 0;   // turn on, interupt. active lo?
-                  count_last_up = count_up;
-                  count_last_down = count_down;
-                  count_last_rundown = count_rundown;
+                  state <= `STATE_DONE;
+                  mux <= 3'b000;
+                  COM_INTERUPT <= 0;   // turn on, interupt. active lo?
+                  count_last_up <= count_up;
+                  count_last_down <= count_down;
+                  count_last_rundown <= count_rundown;
 
                   // count = 0;    // kills things ? why
                   count <= 0;    // ok. 
