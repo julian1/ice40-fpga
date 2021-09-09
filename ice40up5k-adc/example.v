@@ -161,7 +161,6 @@ module my_modulation (
   output CMPR_LATCH_CTL
 );
 
-
   // advantage of macros is that they generate errors if not defined.
 
   `define STATE_INIT    0    // initialsation state
@@ -182,11 +181,10 @@ module my_modulation (
   `define STATE_VAR2          14
 
 
-
-
   // is it the same as assign. when performed outside an always block? timing seems different
   // reg [4:0] state = `STATE_INIT;
 
+  // 2^4 = 16
   reg [4:0] state;
 
   // INITIAL BEGIN DOES SEEM TO BE supported.
@@ -261,18 +259,15 @@ module my_modulation (
             mux <= 3'b001; // initial direction
           end
 
-
         `STATE_FIX_POS:
           if(count == 2000)
             state <= `STATE_VAR_START;
-
 
         `STATE_VAR_START:
           begin
             state <= `STATE_VAR;
             count <= 0;
             count_tot <= count_tot + 1;
-
             if( CMPR_OUT_CTL_P)
               begin
                 mux <= 3'b010;
@@ -285,11 +280,9 @@ module my_modulation (
               end
           end
 
-
         `STATE_VAR:
           if(count == 10000)
             state <= `STATE_FIX_NEG_START;
-
 
         `STATE_FIX_NEG_START:
           begin
@@ -302,13 +295,11 @@ module my_modulation (
           if(count == 2000)
             state <= `STATE_VAR2_START;
 
-
         `STATE_VAR2_START:
           begin
             state <= `STATE_VAR2;
             count <= 0;
             count_tot <= count_tot + 1;
-
             if( CMPR_OUT_CTL_P)
               begin
                 mux <= 3'b010;
@@ -321,14 +312,9 @@ module my_modulation (
               end
           end
 
-
         `STATE_VAR2:
           if(count == 10000)
             state <= `STATE_FIX_POS_START;
-
-
-
-
 
 
 
