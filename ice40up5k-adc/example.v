@@ -180,6 +180,8 @@ module my_modulation (
   `define STATE_VAR2_START    12
   `define STATE_VAR2          14
 
+  `define STATE_RUNDOWN_START 15
+
 
   // is it the same as assign. when performed outside an always block? timing seems different
   // reg [4:0] state = `STATE_INIT;
@@ -251,6 +253,9 @@ module my_modulation (
 
         // OK. may it is easier to put the initialization ... in one bit. rather and then
 
+        // ok. have up with down chink. nice.
+        // and down with an up chink. nice.
+
 
         `STATE_FIX_POS_START:
           begin
@@ -313,11 +318,37 @@ module my_modulation (
           end
 
         `STATE_VAR2:
-          if(count == 10000)
-            state <= `STATE_FIX_POS_START;
+          if(count == 12000)
+            begin
+              if(count_tot == 5000 * 2) // > 5000... is this guaranteed to trigger?
+                state <= `STATE_RUNDOWN_START;
+              else
+                state <= `STATE_FIX_POS_START;
+
+            end
 
 
 
+        `STATE_RUNDOWN_START:
+          begin
+            state <= `STATE_RUNDOWN;
+            count <= 0;
+            count_rundown <= 0; 
+            // we have to set the direction.
+
+            if( CMPR_OUT_CTL_P)
+              begin
+                mux <= 3'b010;
+                count_up <= count_up + 1;
+              end
+            else
+              begin
+                mux <= 3'b001;
+                count_down <= count_down + 1;
+              end
+
+            // get rid of count_rundown. use count instead. should be everything we need.
+          end
 
         // EXTR. we also have to short the integrator at the start. to begin at a known start position.
 
