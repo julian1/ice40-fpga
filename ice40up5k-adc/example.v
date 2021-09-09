@@ -26,6 +26,9 @@
   but this is ok.
 */
 
+
+// ‘default_nettype none  // turn off implicit data types
+
 module my_register_bank   #(parameter MSB=32)   (
   input  clk,
   input  cs,
@@ -69,6 +72,10 @@ module my_register_bank   #(parameter MSB=32)   (
 
         // All of these three assignments need to be sequential to work...
 
+        /*
+          TODO. change the values...
+  
+        */
         // shift din into in register
         in = {in[MSB-2:0], din};
 
@@ -134,6 +141,26 @@ module my_register_bank   #(parameter MSB=32)   (
   end
 endmodule
 
+// ‘default_nettype wire
+
+/*
+  -noautowire
+  95 make the default of ‘default_nettype be "none" instead of "wire".
+
+  we can use. reset. to control the running of a specific modulation. 
+  --------
+
+  for the simplest application.
+  - should be able to just take positive count, and subtract the negative. then multiply by coefficient.
+  - the slow slope is more complicated - to handle two coefficients.
+  ----
+
+  we could probably do the comparator test and direction update() . 
+    in a module - with an extra signal.
+    or a function.
+
+    probably function is better.
+*/
 
 
 
