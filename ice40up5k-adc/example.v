@@ -311,7 +311,7 @@ module top (
     begin
       // we use the same count - always increment clock
 
-      // this is nested sequntial block. so should be available. in the case statement.
+      // this is nested sequntial block. so should be available. in the case statementj.
       // making this non-blocking makes it much faster 26MHz to 39MHz.
       count <= count + 1;
 
@@ -423,7 +423,7 @@ module top (
             count_rundown <= count_rundown + 1;
 
             // zero-cross to finish.
-            if(cross_down || cross_up)
+            if(cross_any )
               begin
                   // trigger for scope
 
