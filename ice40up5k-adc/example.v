@@ -149,7 +149,7 @@ endmodule
 module my_modulation (
   input  clk,
 
-  input [2:0] mux ,
+  output [2:0] mux ,
 
   output [24-1:0] count_last_up,
   output [24-1:0] count_last_down,
@@ -178,7 +178,6 @@ module my_modulation (
   // INITIAL BEGIN DOES SEEM TO BE supported.
   initial begin
     state = `STATE_INIT;
-    count = 0;
   end
 
 
@@ -187,13 +186,13 @@ module my_modulation (
   //////////////////////////////////////////////////////
   // counters and settings  ...
   // for an individual phase.
-  reg [31:0] count = 0;         // count_clk.   change name phase_count... or something...
-  reg [31:0] count_phase = 0;     // = count_up + count_down. avoid calc. should phase not oscillation, because may have 2 in the same direction.
+  reg [31:0] count ;         // count_clk.   change name phase_count... or something...
+  reg [31:0] count_phase ;     // = count_up + count_down. avoid calc. should phase not oscillation, because may have 2 in the same direction.
 
   // ok. think we have to make copies of these... so they're not overwritten at time of read..
-  reg [24-1:0] count_up = 0;      //
-  reg [24-1:0] count_down = 0;    //
-  reg [24-1:0] count_rundown = 0; //
+  reg [24-1:0] count_up;
+  reg [24-1:0] count_down;
+  reg [24-1:0] count_rundown;
 
 
   /////////////////////////
@@ -450,7 +449,7 @@ module top (
   // we can probe the leds for signals....
 
   // start everything off...
-  reg [2:0] mux = 3'b000;        // b / bottom
+  reg [2:0] mux ; // = 3'b000;        // b / bottom
   // assign { LED_B,  LED_G, LED_R } = ~ 0;        // turn off
   // assign { /*LED_B, */ LED_G, LED_R } = ~ mux;        // note. INVERTED for open-drain..
   // define POSREF and NEGREF 3'b10
@@ -464,10 +463,9 @@ module top (
 
 
 
-  my_modulation  xx (
+  my_modulation  m1 (
 
     . clk(clk),
-
     . mux(mux),
 
     . count_last_up(count_last_up),
@@ -475,11 +473,8 @@ module top (
     . count_last_rundown(count_last_rundown),
 
     . CMPR_OUT_CTL_P(CMPR_OUT_CTL_P),
-
     . COM_INTERUPT(COM_INTERUPT),
     . CMPR_LATCH_CTL(CMPR_LATCH_CTL)
-
-
   );
 
 
