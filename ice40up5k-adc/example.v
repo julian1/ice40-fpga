@@ -160,6 +160,17 @@ endmodule
     or a function.
 
     probably function is better.
+  -----
+
+  no. just needs a function. at every setting of direction.
+
+    update( mux, mux_new, count_tran_up, count_tran_down); 
+  
+  - The input adc switch .    should be passed as separate wire. 
+  to make assignment with the two bit easy.
+
+
+
 */
 
 
