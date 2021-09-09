@@ -187,7 +187,7 @@ module my_modulation (
   // counters and settings  ...
   // for an individual phase.
   reg [31:0] count ;         // count_clk.   change name phase_count... or something...
-  reg [31:0] count_phase ;     // = count_up + count_down. avoid calc. should phase not oscillation, because may have 2 in the same direction.
+  reg [31:0] count_tot ;     // = count_up + count_down. avoid calc. should phase not oscillation, because may have 2 in the same direction.
 
   // ok. think we have to make copies of these... so they're not overwritten at time of read..
   reg [24-1:0] count_up;
@@ -228,7 +228,7 @@ module my_modulation (
                 // reset vars, and transition to runup state
                 state <= `STATE_RUNUP;
                 count <= 0;
-                count_phase <= 0;
+                count_tot <= 0;
                 count_up <= 0;
                 count_down <= 0;
                 mux <= 3'b001; // initial direction
@@ -240,49 +240,14 @@ module my_modulation (
               end
           end
 
-        // we may
-
-        // So switching to rundown is just when the count hits a certain amount...
-        // having separate clocks means can vary things more easily.
-        // OR. just count the periods.  yes.
-
         `STATE_RUNUP:
           begin
-            // should use dedicated pref count... and accumulate.
-            // or have a count dedicated....
-            if(count == 9000 )
-              begin
-/*
-                if(mux == 3'b010 )
-                  begin
-                    mux <= 3'b001; // R
-                  end
-*/
-                 /*
-                // these blocks cancel i think...
-                // need a case? perhaps
-                if(mux == 3'b001 )
-                  begin
-                  mux <= 3'b010; // G
-                  end
-                */
-              end
-
             if(count == 10000 )
               begin
-                /*
-                  ok. here would would do a small backtrack count. then we test integrator comparator
-                  for next direction.
-
-                  EXTR. OK. the difference in counts - one goes up/ the other goes down.
-                  is when the period is right near the zero-cross - and it can go one way or the other
-                  the sum of the up/down should however always be equal.
-                  this is why the final rundown count is the same.
-                */
                 // reset count
                 count <= 0;
                 // inc oscillations
-                count_phase <= count_phase + 1;
+                count_tot <= count_tot + 1;
 
                 // sample the comparator, to determine next direction
                 if( CMPR_OUT_CTL_P)
@@ -300,7 +265,7 @@ module my_modulation (
                 end
 
                 // count_up == count
-                if(count_phase == 2000 * 5 )     // 2000osc = 1sec.
+                if(count_tot == 2000 * 5 )     // 2000osc = 1sec.
                   begin
 
                     state <= `STATE_RUNDOWN;
@@ -314,13 +279,7 @@ module my_modulation (
 
         `STATE_RUNDOWN:
           begin
-            // need to do the rundown count...
-            // so we have to determine the clock cross...
-            // probably with want to capture it on a scope.
-            // the direction should be correct here. and we just have to run it down
-            // we wnat a different clock so we can read it....
-
-            // EXTR. only incrementing the count, in the contextual state,
+           // EXTR. only incrementing the count, in the contextual state,
             // means can avoid copying the variable out, if we do it quickly.
             count_rundown <= count_rundown + 1;
 
@@ -346,15 +305,6 @@ module my_modulation (
 
         `STATE_DONE:
           begin
-            // EXTR.   we might  want to hold the interrupt for a bit, to get it to propagate.
-            // eg. just use the count.
-
-            // ok. it is hitting exactly the same spot everytime. nice.
-            // when immediately restart. because it's hit a zero cross.
-            // but we probably want to start from a shorted integrator.
-            ///////////////
-            // OK. to get the count value.  we have to be able to read it.
-
             COM_INTERUPT <= 1;   // reset interupt
 
             // if(count == 'hffffff )
