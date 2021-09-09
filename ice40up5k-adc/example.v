@@ -162,12 +162,26 @@ module my_modulation (
 );
 
 
+  // advantage of macros is that they generate errors if not defined.
 
   `define STATE_INIT    0    // initialsation state
   // `define STATE_WAITING 1
   `define STATE_RUNUP    2
   `define STATE_RUNDOWN  3
   `define STATE_DONE     4
+
+  `define STATE_FIX_POS 5
+
+  `define STATE_FIX_POS_START 6
+  `define STATE_FIX_POS       7
+  `define STATE_VAR_START     8
+  `define STATE_VAR           9
+  `define STATE_FIX_NEG_START 10 
+  `define STATE_FIX_NEG       11
+  `define STATE_VAR2_START    12
+  `define STATE_VAR2          14
+
+
 
 
   // is it the same as assign. when performed outside an always block? timing seems different
@@ -221,58 +235,102 @@ module my_modulation (
         `STATE_INIT:
           begin
             ///////////
-
             // no without input reset - this isn't a settle time.
             if(count == 10000)
               begin
                 // reset vars, and transition to runup state
-                state <= `STATE_RUNUP;
+                state <= `STATE_FIX_POS_START;
                 count <= 0;
                 count_tot <= 0;
                 count_up <= 0;
                 count_down <= 0;
-                mux <= 3'b001; // initial direction
 
-                COM_INTERUPT <= 1; // active lo?
-                // LED_B = 0;
+                COM_INTERUPT <= 1; // active lo
                 // enable comparator
                 CMPR_LATCH_CTL <= 0;
               end
           end
 
-        `STATE_RUNUP:
+        // OK. may it is easier to put the initialization ... in one bit. rather and then
+
+
+        `STATE_FIX_POS_START:
           begin
-            if(count == 10000 )
+            state <= `STATE_FIX_POS;
+            count <= 0;
+            mux <= 3'b001; // initial direction
+          end
+
+
+        `STATE_FIX_POS:
+          if(count == 2000)
+            state <= `STATE_VAR_START;
+
+
+        `STATE_VAR_START:
+          begin
+            state <= `STATE_VAR;
+            count <= 0;
+            count_tot <= count_tot + 1;
+
+            if( CMPR_OUT_CTL_P)
               begin
-                // reset count
-                count <= 0;
-                // inc oscillations
-                count_tot <= count_tot + 1;
-
-                // sample the comparator, to determine next direction
-                if( CMPR_OUT_CTL_P)
-                  begin
-                    // EXTR this may be a continuation of direction.
-                    // EXTR. we may want to count changes of direction as well (and to equalize - charge injection ).
-                    mux <= 3'b010;
-                    count_up <= count_up + 1;
-                  end
-                else
-                  begin
-                    mux <= 3'b001; // R
-                    count_down <= count_down + 1;
-                  end
-                end
-
-                // count_up == count
-                if(count_tot == 2000 * 5 )     // 2000osc = 1sec.
-                  begin
-
-                    state <= `STATE_RUNDOWN;
-                    count_rundown <= 0;       // reset...
-                  end
-
+                mux <= 3'b010;
+                count_up <= count_up + 1;
               end
+            else
+              begin
+                mux <= 3'b001;
+                count_down <= count_down + 1;
+              end
+          end
+
+
+        `STATE_VAR:
+          if(count == 10000)
+            state <= `STATE_FIX_NEG_START;
+
+
+        `STATE_FIX_NEG_START:
+          begin
+            state <= `STATE_FIX_NEG;
+            count <= 0;
+            mux <= 3'b010;
+          end
+
+        `STATE_FIX_NEG:
+          if(count == 2000)
+            state <= `STATE_VAR2_START;
+
+
+        `STATE_VAR2_START:
+          begin
+            state <= `STATE_VAR2;
+            count <= 0;
+            count_tot <= count_tot + 1;
+
+            if( CMPR_OUT_CTL_P)
+              begin
+                mux <= 3'b010;
+                count_up <= count_up + 1;
+              end
+            else
+              begin
+                mux <= 3'b001;
+                count_down <= count_down + 1;
+              end
+          end
+
+
+        `STATE_VAR2:
+          if(count == 10000)
+            state <= `STATE_FIX_POS_START;
+
+
+
+
+
+
 
 
         // EXTR. we also have to short the integrator at the start. to begin at a known start position.
