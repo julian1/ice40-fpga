@@ -328,7 +328,7 @@ module top (
                 count_down <= 0;
                 mux <= 3'b001; // initial direction
 
-                COM_INTERUPT = 1; // active lo?
+                COM_INTERUPT <= 1; // active lo?
                 // LED_B = 0;
                 // enable comparator
                 CMPR_LATCH_CTL <= 0;
