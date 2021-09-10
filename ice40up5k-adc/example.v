@@ -43,7 +43,10 @@ module my_register_bank   #(parameter MSB=32)   (
 
   input wire [24-1:0] count_up,
   input wire [24-1:0] count_down,
-  input wire [24-1:0] count_rundown
+  input wire [24-1:0] count_rundown,
+
+  input wire [24-1:0] count_last_trans_up,
+  input wire [24-1:0] count_last_trans_down
 
 );
 
@@ -74,7 +77,7 @@ module my_register_bank   #(parameter MSB=32)   (
 
         /*
           TODO. change the values...
-  
+
         */
         // shift din into in register
         in = {in[MSB-2:0], din};
@@ -91,10 +94,14 @@ module my_register_bank   #(parameter MSB=32)   (
             // allows us to read a register, without writing, by setting hi bit of addr
             case (in[8 - 1 - 1: 0 ] )
 
-              7 : out = reg_led << 8;
+              7:  out = reg_led << 8;
               9:  out = count_up << 8;
               10: out = count_down << 8;
-              11:  out = count_rundown << 8;
+              11: out = count_rundown << 8;
+
+              12: out = count_last_trans_up << 8;
+              14: out = count_last_trans_down << 8;
+
             endcase
           end
 
@@ -147,7 +154,7 @@ endmodule
   -noautowire
   95 make the default of ‘default_nettype be "none" instead of "wire".
 
-  we can use. reset. to control the running of a specific modulation. 
+  we can use. reset. to control the running of a specific modulation.
   --------
 
   for the simplest application.
@@ -155,7 +162,7 @@ endmodule
   - the slow slope is more complicated - to handle two coefficients.
   ----
 
-  we could probably do the comparator test and direction update() . 
+  we could probably do the comparator test and direction update() .
     in a module - with an extra signal.
     or a function.
 
@@ -164,16 +171,14 @@ endmodule
 
   no. just needs a function. at every setting of direction.
 
-    update( mux, mux_new, count_tran_up, count_tran_down); 
-  
-  - The input adc switch .    should be passed as separate wire. 
+    update( mux, mux_new, count_tran_up, count_tran_down);
+
+  - The input adc switch .    should be passed as separate wire.
   to make assignment with the two bit easy.
 
 
 
 */
-
-
 
 
 
@@ -189,9 +194,14 @@ module my_modulation (
 
   output [2:0] mux ,
 
+  // prefix with n_ instead of count_ ?
   output [24-1:0] count_last_up,
   output [24-1:0] count_last_down,
   output [24-1:0] count_last_rundown,
+
+  output [24-1:0] count_last_trans_up,
+  output [24-1:0] count_last_trans_down,
+
 
   input CMPR_OUT_CTL_P,
 
@@ -213,7 +223,7 @@ module my_modulation (
   `define STATE_FIX_POS       7
   `define STATE_VAR_START     8
   `define STATE_VAR           9
-  `define STATE_FIX_NEG_START 10 
+  `define STATE_FIX_NEG_START 10
   `define STATE_FIX_NEG       11
   `define STATE_VAR2_START    12
   `define STATE_VAR2          14
@@ -244,8 +254,10 @@ module my_modulation (
   // ok. think we have to make copies of these... so they're not overwritten at time of read..
   reg [24-1:0] count_up;
   reg [24-1:0] count_down;
-  reg [24-1:0] count_rundown;
+//   reg [24-1:0] count_rundown;
 
+  reg [24-1:0] count_trans_up;
+  reg [24-1:0] count_trans_down;
 
   /////////////////////////
   // this should be pushed into a separate module...
@@ -282,10 +294,11 @@ module my_modulation (
                 count_tot <= 0;
                 count_up <= 0;
                 count_down <= 0;
+                count_trans_up <= 0;
+                count_trans_down <= 0;
 
                 COM_INTERUPT <= 1; // active lo
-                // enable comparator
-                CMPR_LATCH_CTL <= 0;
+                CMPR_LATCH_CTL <= 0; // enable comparator
               end
           end
 
@@ -300,10 +313,11 @@ module my_modulation (
             state <= `STATE_FIX_POS;
             count <= 0;
             mux <= 3'b001; // initial direction
+            if(mux != 3'b001) count_trans_down <= count_trans_down + 1 ;
           end
 
         `STATE_FIX_POS:
-          if(count == 2000)
+          if(count == 2500)
             state <= `STATE_VAR_START;
 
         `STATE_VAR_START:
@@ -315,11 +329,13 @@ module my_modulation (
               begin
                 mux <= 3'b010;
                 count_up <= count_up + 1;
+                if(mux != 3'b010) count_trans_up <= count_trans_up + 1 ;
               end
             else
               begin
                 mux <= 3'b001;
                 count_down <= count_down + 1;
+                if(mux != 3'b001) count_trans_down <= count_trans_down + 1 ;
               end
           end
 
@@ -332,6 +348,7 @@ module my_modulation (
             state <= `STATE_FIX_NEG;
             count <= 0;
             mux <= 3'b010;
+            if(mux != 3'b010) count_trans_up <= count_trans_up + 1 ;
           end
 
         `STATE_FIX_NEG:
@@ -347,42 +364,54 @@ module my_modulation (
               begin
                 mux <= 3'b010;
                 count_up <= count_up + 1;
+                if(mux != 3'b010) count_trans_up <= count_trans_up + 1 ;
               end
             else
               begin
                 mux <= 3'b001;
                 count_down <= count_down + 1;
+                if(mux != 3'b001) count_trans_down <= count_trans_down + 1 ;
               end
           end
 
+/*
+        count_up 5125,   count_down 4876  rundown 3183     trans_up 5001    trans_down 5001
+        count_up 5126,   count_down 4876  rundown 3183     trans_up 5002    trans_down 5001
+
+        i think this is not quite right?  count_up + count_down ought to always be equal?
+          eg. we stop when count_tot is 10000 ...
+          and then add a single extra rundown.
+*/
+
         `STATE_VAR2:
-          if(count == 12000)
+          if(count == 10000)
             begin
               if(count_tot == 5000 * 2) // > 5000... is this guaranteed to trigger?
                 state <= `STATE_RUNDOWN_START;
               else
                 state <= `STATE_FIX_POS_START;
-
             end
-
 
 
         `STATE_RUNDOWN_START:
           begin
             state <= `STATE_RUNDOWN;
             count <= 0;
-            count_rundown <= 0; 
+            // count_rundown <= 0;
             // we have to set the direction.
 
             if( CMPR_OUT_CTL_P)
               begin
                 mux <= 3'b010;
                 count_up <= count_up + 1;
+                // should final transition be included? yes.
+                if(mux != 3'b010) count_trans_up <= count_trans_up + 1 ;
               end
             else
               begin
                 mux <= 3'b001;
                 count_down <= count_down + 1;
+                if(mux != 3'b001) count_trans_down <= count_trans_down + 1 ;
               end
 
             // get rid of count_rundown. use count instead. should be everything we need.
@@ -394,7 +423,7 @@ module my_modulation (
           begin
            // EXTR. only incrementing the count, in the contextual state,
             // means can avoid copying the variable out, if we do it quickly.
-            count_rundown <= count_rundown + 1;
+            // count_rundown <= count_rundown + 1;
 
             // zero-cross to finish.
             if(cross_any )
@@ -403,15 +432,16 @@ module my_modulation (
 
                   // transition
                   state <= `STATE_DONE;
+                  count <= 0;    // ok.
+
                   mux <= 3'b000;
                   COM_INTERUPT <= 0;   // turn on, interupt. active lo?
                   count_last_up <= count_up;
                   count_last_down <= count_down;
-                  count_last_rundown <= count_rundown;
+                  count_last_rundown <= count;//count_rundown;
 
-                  // count = 0;    // kills things ? why
-                  count <= 0;    // ok.
-
+                  count_last_trans_up <= count_trans_up;
+                  count_last_trans_down <= count_trans_down;
               end
           end
 
@@ -491,9 +521,12 @@ module top (
   reg [24-1:0] count_last_down;
   reg [24-1:0] count_last_rundown;
 
+  reg [24-1:0] count_last_trans_up ;
+  reg [24-1:0] count_last_trans_down;
+
 
   my_register_bank #( 32 )   // register bank
-  my_register_bank
+  bank
     (
     . clk(COM_CLK),
     . cs(COM_CS),
@@ -504,7 +537,11 @@ module top (
 
     . count_up(count_last_up),
     . count_down(count_last_down),
-    . count_rundown( count_last_rundown)
+    . count_rundown( count_last_rundown),
+
+    . count_last_trans_up(count_last_trans_up),
+    . count_last_trans_down(count_last_trans_down)
+
   );
 
 
@@ -534,6 +571,9 @@ module top (
     . count_last_up(count_last_up),
     . count_last_down(count_last_down),
     . count_last_rundown(count_last_rundown),
+
+    . count_last_trans_up(count_last_trans_up),
+    . count_last_trans_down(count_last_trans_down),
 
     . CMPR_OUT_CTL_P(CMPR_OUT_CTL_P),
     . COM_INTERUPT(COM_INTERUPT),
@@ -568,6 +608,103 @@ endmodule
 
 
 
+
+
+/*
+
+
+
+
+
+
+// so we would instantiate this in multiple places...
+// and pass the state as the argument...
+
+// hmmmmmmm.....
+// so it would be instantiated in each place that it's required.
+
+module my_whoot (
+  input  clk,
+  input CMPR_OUT_CTL_P,
+  inout [2:0] mux,        // in out
+
+  inout [24-1:0] count_up,
+  inout [24-1:0] count_down,
+
+  inout update           // in out
+
+);
+  always @(posedge clk)
+    if(update)
+      begin
+
+        update <= 0;
+        // count_tot <= count_tot + 1;
+
+        if( CMPR_OUT_CTL_P)
+          begin
+            mux <= 3'b010;
+            count_up <= count_up + 1;
+          end
+        else
+          begin
+            mux <= 3'b001;
+            count_down <= count_down + 1;
+         end
+
+      end
+
+
+endmodule
+
+
+
+
+
+
+
+  So. we can have the function like this.
+  but cannot update the counts
+
+  mux <= update( new_mux )
+
+
+
+// typedef struct { int c, d, n; } ST;
+
+function [4-1:0] update_func ( input [4-1:0] newmux  );
+  begin
+    update_func = newmux;
+
+  end
+endfunction
+
+
+
+
+
+
+
+
+
+  input  clk,
+  input CMPR_OUT_CTL_P,
+  inout [2:0] mux,        // in out
+
+  inout [24-1:0] count_up,
+  inout [24-1:0] count_down,
+
+  inout update           // in out
+
+
+
+);
+*/
+
+  // reg update1 ;
+  // my_whoot w ( clk, CMPR_OUT_CTL_P,  mux,  count_up, count_down,  update1 ) ;
+
+  // initial begin update1 = 1; end
 
 
 
@@ -629,6 +766,8 @@ endmodule
   // assign { LED_R, LED_G, LED_B } = outcnt ^ (outcnt >> 1);
 
 */
+
+
 
 
 /*
