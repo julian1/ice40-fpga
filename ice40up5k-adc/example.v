@@ -74,8 +74,8 @@ module my_register_bank   #(parameter MSB=32)   (
       // cs asserted, clock data in and out
       begin
         /*
-          TODO. would be better as non-blocking. 
-          but we end up with a losing a bit on addr or value. 
+          TODO. would be better as non-blocking.
+          but we end up with a losing a bit on addr or value.
         */
         // shift din into in register
         in = {in[MSB-2:0], din};
@@ -99,9 +99,9 @@ module my_register_bank   #(parameter MSB=32)   (
 
               12: out = count_last_trans_up << 8;
               14: out = count_last_trans_down << 8;
-              
-              // fixed value, test value 
-              15: out = 24'hffffff << 8; 
+
+              // fixed value, test value
+              15: out = 24'hffffff << 8;
 
             endcase
           end
@@ -217,7 +217,7 @@ module my_modulation (
 
   `define STATE_INIT    0    // initialsation state
   // `define STATE_WAITING 1
-  `define STATE_RUNUP    2
+  // `define STATE_RUNUP    2
   `define STATE_RUNDOWN  3
   `define STATE_DONE     4
 
@@ -252,14 +252,10 @@ module my_modulation (
   //////////////////////////////////////////////////////
   // counters and settings  ...
   // for an individual phase.
-  reg [31:0] count ;         // count_clk.   change name phase_count... or something...
-  reg [31:0] count_tot ;     // = count_up + count_down. avoid calc. should phase not oscillation, because may have 2 in the same direction.
-
-  // ok. think we have to make copies of these... so they're not overwritten at time of read..
+  reg [31:0]  count ;         // count_clk.   change name phase_count... or something...
+  reg [31:0]  count_tot ;     // = count_up + count_down. avoid calc. should phase not oscillation, because may have 2 in the same direction.
   reg [24-1:0] count_up;
   reg [24-1:0] count_down;
-//   reg [24-1:0] count_rundown;
-
   reg [24-1:0] count_trans_up;
   reg [24-1:0] count_trans_down;
 
