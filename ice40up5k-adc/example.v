@@ -206,6 +206,8 @@ module my_modulation (
   output [24-1:0] count_last_trans_up,
   output [24-1:0] count_last_trans_down,
 
+  // could also record the initial dir.
+  output last_rundown_dir,
 
   input CMPR_OUT_CTL_P,
 
@@ -442,6 +444,12 @@ module my_modulation (
 
                   count_last_trans_up <= count_trans_up;
                   count_last_trans_down <= count_trans_down;
+
+                  case(mux) 
+                    3'b010: last_rundown_dir = 1;
+                    3'b001: last_rundown_dir = 0;
+                  endcase 
+
               end
           end
 
