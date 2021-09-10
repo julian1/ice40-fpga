@@ -101,6 +101,9 @@ module my_register_bank   #(parameter MSB=32)   (
 
               12: out = count_last_trans_up << 8;
               14: out = count_last_trans_down << 8;
+              
+              // test value 
+              15: out = 24'hffffff << 8; 
 
             endcase
           end
