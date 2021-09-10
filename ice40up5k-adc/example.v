@@ -374,6 +374,15 @@ module my_modulation (
               end
           end
 
+/*
+        count_up 5125,   count_down 4876  rundown 3183     trans_up 5001    trans_down 5001
+        count_up 5126,   count_down 4876  rundown 3183     trans_up 5002    trans_down 5001
+
+        i think this is not quite right?  count_up + count_down ought to always be equal?
+          eg. we stop when count_tot is 10000 ...
+          and then add a single extra rundown.
+*/
+
         `STATE_VAR2:
           if(count == 10000)
             begin
@@ -381,9 +390,7 @@ module my_modulation (
                 state <= `STATE_RUNDOWN_START;
               else
                 state <= `STATE_FIX_POS_START;
-
             end
-
 
 
         `STATE_RUNDOWN_START:
@@ -515,8 +522,8 @@ module top (
   reg [24-1:0] count_last_rundown;
 
   reg [24-1:0] count_last_trans_up ;
-  reg [24-1:0] count_last_trans_down; 
- 
+  reg [24-1:0] count_last_trans_down;
+
 
   my_register_bank #( 32 )   // register bank
   bank
