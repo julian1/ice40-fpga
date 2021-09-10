@@ -317,7 +317,7 @@ module my_modulation (
           end
 
         `STATE_FIX_POS:
-          if(count == 2000)
+          if(count == 3000)
             state <= `STATE_VAR_START;
 
         `STATE_VAR_START:
@@ -375,7 +375,7 @@ module my_modulation (
           end
 
         `STATE_VAR2:
-          if(count == 12000)
+          if(count == 10000)
             begin
               if(count_tot == 5000 * 2) // > 5000... is this guaranteed to trigger?
                 state <= `STATE_RUNDOWN_START;
