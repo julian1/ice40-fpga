@@ -220,10 +220,8 @@ module my_modulation (
   `define STATE_INIT    0    // initialsation state
   // `define STATE_WAITING 1
   // `define STATE_RUNUP    2
-  `define STATE_RUNDOWN  3
   `define STATE_DONE     4
-
-  `define STATE_FIX_POS 5
+  // `define STATE_FIX_POS 5
 
   `define STATE_FIX_POS_START 6
   `define STATE_FIX_POS       7
@@ -235,6 +233,7 @@ module my_modulation (
   `define STATE_VAR2          14
 
   `define STATE_RUNDOWN_START 15
+  `define STATE_RUNDOWN       3
 
 
   // is it the same as assign. when performed outside an always block? timing seems different
