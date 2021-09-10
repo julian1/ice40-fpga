@@ -43,7 +43,10 @@ module my_register_bank   #(parameter MSB=32)   (
 
   input wire [24-1:0] count_up,
   input wire [24-1:0] count_down,
-  input wire [24-1:0] count_rundown
+  input wire [24-1:0] count_rundown,
+
+  input wire [24-1:0] count_last_trans_up,
+  input wire [24-1:0] count_last_trans_down
 
 );
 
@@ -506,9 +509,12 @@ module top (
   reg [24-1:0] count_last_down;
   reg [24-1:0] count_last_rundown;
 
+  reg [24-1:0] count_last_trans_up ;
+  reg [24-1:0] count_last_trans_down; 
+ 
 
   my_register_bank #( 32 )   // register bank
-  my_register_bank
+  bank
     (
     . clk(COM_CLK),
     . cs(COM_CS),
@@ -519,7 +525,11 @@ module top (
 
     . count_up(count_last_up),
     . count_down(count_last_down),
-    . count_rundown( count_last_rundown)
+    . count_rundown( count_last_rundown),
+
+    . count_last_trans_up(count_last_trans_up),
+    . count_last_trans_down(count_last_trans_down)
+
   );
 
 
@@ -549,6 +559,9 @@ module top (
     . count_last_up(count_last_up),
     . count_last_down(count_last_down),
     . count_last_rundown(count_last_rundown),
+
+    . count_last_trans_up(count_last_trans_up),
+    . count_last_trans_down(count_last_trans_down),
 
     . CMPR_OUT_CTL_P(CMPR_OUT_CTL_P),
     . COM_INTERUPT(COM_INTERUPT),
