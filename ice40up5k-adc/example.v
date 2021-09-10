@@ -187,9 +187,14 @@ module my_modulation (
 
   output [2:0] mux ,
 
+  // prefix with n_ instead of count_ ?
   output [24-1:0] count_last_up,
   output [24-1:0] count_last_down,
   output [24-1:0] count_last_rundown,
+
+  output [24-1:0] count_last_trans_up,
+  output [24-1:0] count_last_trans_down,
+
 
   input CMPR_OUT_CTL_P,
 
@@ -412,15 +417,16 @@ module my_modulation (
 
                   // transition
                   state <= `STATE_DONE;
+                  count <= 0;    // ok.
+
                   mux <= 3'b000;
                   COM_INTERUPT <= 0;   // turn on, interupt. active lo?
                   count_last_up <= count_up;
                   count_last_down <= count_down;
                   count_last_rundown <= count;//count_rundown;
 
-                  // count = 0;    // kills things ? why
-                  count <= 0;    // ok.
-
+                  count_last_trans_up <= count_trans_up;
+                  count_last_trans_down <= count_trans_down;
               end
           end
 
