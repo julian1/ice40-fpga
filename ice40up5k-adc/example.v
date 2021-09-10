@@ -185,6 +185,11 @@ endmodule
 
 ////////////////////////////
 
+/*
+  see,
+    https://www.eevblog.com/forum/projects/multislope-design/75/
+    https://patentimages.storage.googleapis.com/e2/ba/5a/ff3abe723b7230/US5200752.pdf
+*/
 
 
 // module my_register_bank   #(parameter MSB=32)   (
