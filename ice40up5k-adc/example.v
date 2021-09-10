@@ -242,7 +242,7 @@ module my_modulation (
   // ok. think we have to make copies of these... so they're not overwritten at time of read..
   reg [24-1:0] count_up;
   reg [24-1:0] count_down;
-  reg [24-1:0] count_rundown;
+//   reg [24-1:0] count_rundown;
 
   reg [24-1:0] count_trans_up;
   reg [24-1:0] count_trans_down;
@@ -378,7 +378,7 @@ module my_modulation (
           begin
             state <= `STATE_RUNDOWN;
             count <= 0;
-            count_rundown <= 0;
+            // count_rundown <= 0;
             // we have to set the direction.
 
             if( CMPR_OUT_CTL_P)
@@ -403,7 +403,7 @@ module my_modulation (
           begin
            // EXTR. only incrementing the count, in the contextual state,
             // means can avoid copying the variable out, if we do it quickly.
-            count_rundown <= count_rundown + 1;
+            // count_rundown <= count_rundown + 1;
 
             // zero-cross to finish.
             if(cross_any )
@@ -416,7 +416,7 @@ module my_modulation (
                   COM_INTERUPT <= 0;   // turn on, interupt. active lo?
                   count_last_up <= count_up;
                   count_last_down <= count_down;
-                  count_last_rundown <= count_rundown;
+                  count_last_rundown <= count;//count_rundown;
 
                   // count = 0;    // kills things ? why
                   count <= 0;    // ok.
