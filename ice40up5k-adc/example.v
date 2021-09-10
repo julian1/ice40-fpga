@@ -317,7 +317,7 @@ module my_modulation (
           end
 
         `STATE_FIX_POS:
-          if(count == 3000)
+          if(count == 2500)
             state <= `STATE_VAR_START;
 
         `STATE_VAR_START:
@@ -397,6 +397,7 @@ module my_modulation (
               begin
                 mux <= 3'b010;
                 count_up <= count_up + 1;
+                // should final transition be included? yes.
                 if(mux != 3'b010) count_trans_up <= count_trans_up + 1 ;
               end
             else
