@@ -44,6 +44,7 @@ module my_register_bank   #(parameter MSB=32)   (
   input wire [24-1:0] count_up,
   input wire [24-1:0] count_down,
   input wire [24-1:0] count_rundown,
+  // input wire [24-1:0] rundown_dir,
 
   input wire [24-1:0] count_last_trans_up,
   input wire [24-1:0] count_last_trans_down
@@ -73,8 +74,8 @@ module my_register_bank   #(parameter MSB=32)   (
       // cs asserted, clock data in and out
       begin
         /*
-          TODO. would be better as non-blocking. but end up with issues in losing bits. 
-
+          TODO. would be better as non-blocking. 
+          but we end up with a losing a bit on addr or value. 
         */
         // shift din into in register
         in = {in[MSB-2:0], din};
