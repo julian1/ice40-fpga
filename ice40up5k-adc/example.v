@@ -94,10 +94,14 @@ module my_register_bank   #(parameter MSB=32)   (
             // allows us to read a register, without writing, by setting hi bit of addr
             case (in[8 - 1 - 1: 0 ] )
 
-              7 : out = reg_led << 8;
+              7:  out = reg_led << 8;
               9:  out = count_up << 8;
               10: out = count_down << 8;
-              11:  out = count_rundown << 8;
+              11: out = count_rundown << 8;
+
+              12: out = count_last_trans_up << 8;
+              14: out = count_last_trans_down << 8;
+
             endcase
           end
 
