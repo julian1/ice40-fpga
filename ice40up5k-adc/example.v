@@ -74,7 +74,7 @@ module my_register_bank   #(parameter MSB=32)   (
 
         /*
           TODO. change the values...
-  
+
         */
         // shift din into in register
         in = {in[MSB-2:0], din};
@@ -147,7 +147,7 @@ endmodule
   -noautowire
   95 make the default of ‘default_nettype be "none" instead of "wire".
 
-  we can use. reset. to control the running of a specific modulation. 
+  we can use. reset. to control the running of a specific modulation.
   --------
 
   for the simplest application.
@@ -155,7 +155,7 @@ endmodule
   - the slow slope is more complicated - to handle two coefficients.
   ----
 
-  we could probably do the comparator test and direction update() . 
+  we could probably do the comparator test and direction update() .
     in a module - with an extra signal.
     or a function.
 
@@ -164,16 +164,14 @@ endmodule
 
   no. just needs a function. at every setting of direction.
 
-    update( mux, mux_new, count_tran_up, count_tran_down); 
-  
-  - The input adc switch .    should be passed as separate wire. 
+    update( mux, mux_new, count_tran_up, count_tran_down);
+
+  - The input adc switch .    should be passed as separate wire.
   to make assignment with the two bit easy.
 
 
 
 */
-
-
 
 
 
@@ -213,7 +211,7 @@ module my_modulation (
   `define STATE_FIX_POS       7
   `define STATE_VAR_START     8
   `define STATE_VAR           9
-  `define STATE_FIX_NEG_START 10 
+  `define STATE_FIX_NEG_START 10
   `define STATE_FIX_NEG       11
   `define STATE_VAR2_START    12
   `define STATE_VAR2          14
@@ -246,6 +244,8 @@ module my_modulation (
   reg [24-1:0] count_down;
   reg [24-1:0] count_rundown;
 
+  reg [24-1:0] count_trans_up;
+  reg [24-1:0] count_trans_down;
 
   /////////////////////////
   // this should be pushed into a separate module...
@@ -282,10 +282,11 @@ module my_modulation (
                 count_tot <= 0;
                 count_up <= 0;
                 count_down <= 0;
+                count_trans_up <= 0;
+                count_trans_down <= 0;
 
                 COM_INTERUPT <= 1; // active lo
-                // enable comparator
-                CMPR_LATCH_CTL <= 0;
+                CMPR_LATCH_CTL <= 0; // enable comparator
               end
           end
 
@@ -300,6 +301,7 @@ module my_modulation (
             state <= `STATE_FIX_POS;
             count <= 0;
             mux <= 3'b001; // initial direction
+            if(mux != 3'b001) count_trans_down <= count_trans_down + 1 ;
           end
 
         `STATE_FIX_POS:
@@ -315,11 +317,13 @@ module my_modulation (
               begin
                 mux <= 3'b010;
                 count_up <= count_up + 1;
+                if(mux != 3'b010) count_trans_up <= count_trans_up + 1 ;
               end
             else
               begin
                 mux <= 3'b001;
                 count_down <= count_down + 1;
+                if(mux != 3'b001) count_trans_down <= count_trans_down + 1 ;
               end
           end
 
@@ -332,6 +336,7 @@ module my_modulation (
             state <= `STATE_FIX_NEG;
             count <= 0;
             mux <= 3'b010;
+            if(mux != 3'b010) count_trans_up <= count_trans_up + 1 ;
           end
 
         `STATE_FIX_NEG:
@@ -347,11 +352,13 @@ module my_modulation (
               begin
                 mux <= 3'b010;
                 count_up <= count_up + 1;
+                if(mux != 3'b010) count_trans_up <= count_trans_up + 1 ;
               end
             else
               begin
                 mux <= 3'b001;
                 count_down <= count_down + 1;
+                if(mux != 3'b001) count_trans_down <= count_trans_down + 1 ;
               end
           end
 
@@ -371,18 +378,20 @@ module my_modulation (
           begin
             state <= `STATE_RUNDOWN;
             count <= 0;
-            count_rundown <= 0; 
+            count_rundown <= 0;
             // we have to set the direction.
 
             if( CMPR_OUT_CTL_P)
               begin
                 mux <= 3'b010;
                 count_up <= count_up + 1;
+                if(mux != 3'b010) count_trans_up <= count_trans_up + 1 ;
               end
             else
               begin
                 mux <= 3'b001;
                 count_down <= count_down + 1;
+                if(mux != 3'b001) count_trans_down <= count_trans_down + 1 ;
               end
 
             // get rid of count_rundown. use count instead. should be everything we need.
@@ -570,6 +579,103 @@ endmodule
 
 
 
+/*
+
+
+
+
+
+
+// so we would instantiate this in multiple places...
+// and pass the state as the argument...
+
+// hmmmmmmm.....
+// so it would be instantiated in each place that it's required.
+
+module my_whoot (
+  input  clk,
+  input CMPR_OUT_CTL_P,
+  inout [2:0] mux,        // in out
+
+  inout [24-1:0] count_up,
+  inout [24-1:0] count_down,
+
+  inout update           // in out
+
+);
+  always @(posedge clk)
+    if(update)
+      begin
+
+        update <= 0;
+        // count_tot <= count_tot + 1;
+
+        if( CMPR_OUT_CTL_P)
+          begin
+            mux <= 3'b010;
+            count_up <= count_up + 1;
+          end
+        else
+          begin
+            mux <= 3'b001;
+            count_down <= count_down + 1;
+         end
+
+      end
+
+
+endmodule
+
+
+
+
+
+
+
+  So. we can have the function like this.
+  but cannot update the counts
+
+  mux <= update( new_mux )
+
+
+
+// typedef struct { int c, d, n; } ST;
+
+function [4-1:0] update_func ( input [4-1:0] newmux  );
+  begin
+    update_func = newmux;
+
+  end
+endfunction
+
+
+
+
+
+
+
+
+
+  input  clk,
+  input CMPR_OUT_CTL_P,
+  inout [2:0] mux,        // in out
+
+  inout [24-1:0] count_up,
+  inout [24-1:0] count_down,
+
+  inout update           // in out
+
+
+
+);
+*/
+
+  // reg update1 ;
+  // my_whoot w ( clk, CMPR_OUT_CTL_P,  mux,  count_up, count_down,  update1 ) ;
+
+  // initial begin update1 = 1; end
+
+
 
 
   /*
@@ -629,6 +735,8 @@ endmodule
   // assign { LED_R, LED_G, LED_B } = outcnt ^ (outcnt >> 1);
 
 */
+
+
 
 
 /*
