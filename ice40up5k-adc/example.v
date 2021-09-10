@@ -72,11 +72,8 @@ module my_register_bank   #(parameter MSB=32)   (
     else
       // cs asserted, clock data in and out
       begin
-
-        // All of these three assignments need to be sequential to work...
-
         /*
-          TODO. change the values...
+          TODO. would be better as non-blocking. but end up with issues in losing bits. 
 
         */
         // shift din into in register
@@ -102,7 +99,7 @@ module my_register_bank   #(parameter MSB=32)   (
               12: out = count_last_trans_up << 8;
               14: out = count_last_trans_down << 8;
               
-              // test value 
+              // fixed value, test value 
               15: out = 24'hffffff << 8; 
 
             endcase
@@ -111,8 +108,6 @@ module my_register_bank   #(parameter MSB=32)   (
       end
   end
 
-  // so either read needs the hi bit. or write gets the hi bit.
-  // check how the dac8734. does it.
 
   wire [8-1:0] addr  = in[ MSB-1: MSB-8 ];  // single byte for reg/address,
   wire [MSB-8-1:0] val   = in;              // lo bytes
