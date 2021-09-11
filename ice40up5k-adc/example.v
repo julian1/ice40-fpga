@@ -47,8 +47,9 @@ module my_register_bank   #(parameter MSB=32)   (
   // input wire [24-1:0] rundown_dir,
 
   input wire [24-1:0] count_last_trans_up,
-  input wire [24-1:0] count_last_trans_down
+  input wire [24-1:0] count_last_trans_down,
 
+  input wire          rundown_dir
 );
 
   // TODO rename these...
@@ -56,7 +57,6 @@ module my_register_bank   #(parameter MSB=32)   (
   reg [MSB-1:0] in;      // could be MSB-8-1 i think.
   reg [MSB-1:0] out  ;    // register for output.  should be size of MSB due to high bits
   reg [8-1:0]   count;
-
 
   wire dout = out[MSB- 1];
 
@@ -102,6 +102,8 @@ module my_register_bank   #(parameter MSB=32)   (
 
               // fixed value, test value
               15: out = 24'hffffff << 8;
+
+              16: out = rundown_dir << 8;   // correct for single bit?
 
             endcase
           end
@@ -531,6 +533,7 @@ module top (
   reg [24-1:0] count_last_trans_up ;
   reg [24-1:0] count_last_trans_down;
 
+  reg          last_rundown_dir;
 
   my_register_bank #( 32 )   // register bank
   bank
@@ -547,7 +550,9 @@ module top (
     . count_rundown( count_last_rundown),
 
     . count_last_trans_up(count_last_trans_up),
-    . count_last_trans_down(count_last_trans_down)
+    . count_last_trans_down(count_last_trans_down),
+
+    . rundown_dir(last_rundown_dir)
 
   );
 
@@ -581,6 +586,8 @@ module top (
 
     . count_last_trans_up(count_last_trans_up),
     . count_last_trans_down(count_last_trans_down),
+
+    .  last_rundown_dir(last_rundown_dir),
 
     . CMPR_OUT_CTL_P(CMPR_OUT_CTL_P),
     . COM_INTERUPT(COM_INTERUPT),
