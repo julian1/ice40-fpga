@@ -320,7 +320,7 @@ module my_modulation (
           end
 
         `STATE_FIX_POS:
-          if(count == 2500)
+          if(count == 2550)
             state <= `STATE_VAR_START;
 
         `STATE_VAR_START:
@@ -376,6 +376,11 @@ module my_modulation (
                 if(mux != 3'b001) count_trans_down <= count_trans_down + 1 ;
               end
           end
+/*
+    if we're on the wrong side, at end, for upwards slope. 
+    it is easy - to add an additional phase or two with fixed count to get to the other side for final rundown.
+
+*/
 
 /*
         count_up 5125,   count_down 4876  rundown 3183     trans_up 5001    trans_down 5001
