@@ -321,11 +321,11 @@ module my_modulation (
 
         `STATE_FIX_POS:
 
-          // if(count == 2549)    
+          // if(count == 2549)
           // if(count == 2550)    // walk down. rundown_dir = 0
-          // if(count == 2000)       // walk up.  dir = 1
+          if(count == 2000)       // walk up.  dir = 1
           // if(count == 3000)       // walk up.  dir = 1
-          if(count == 3001)       // walk up.  dir = 1
+          // if(count == 3001)       // walk up.  dir = 1
             state <= `STATE_VAR_START;
 
         // variable direction
@@ -383,31 +383,18 @@ module my_modulation (
               end
           end
 /*
-    if we're on the wrong side, at end, for upwards slope. 
+    if we're on the wrong side, at end, for upwards slope.
     it is easy - to add an additional phase or two with fixed count to get to the other side for final rundown.
-
-*/
-
-/*
-        count_up 5125,   count_down 4876  rundown 3183     trans_up 5001    trans_down 5001
-        count_up 5126,   count_down 4876  rundown 3183     trans_up 5002    trans_down 5001
-
-        i think this is not quite right?  count_up + count_down ought to always be equal?
-          eg. we stop when count_tot is 10000 ...
-          and then add a single extra rundown.
-        ---------------------  
-
-        ok.  we might be end up on the wrong side. 
-
-      if we are at the end.. in terms of count...
-      then we are finished or need to do another cycle.
-      change the side 
-    -------------
-
-    question is - to flip us to the correct side - do we need to include the fixed bit. and which direction?
-      i think no. because we already had equal fixed pos and neg.
+    and we can equalize time with reset period.
 
     // Timing estimate: 27.54 ns (36.31 MHz)
+
+     run an extra cycle. and count them.
+  ----------
+    - i think its ok as it is. if add extra fixpos, then should also add fixneg. which is the same as not adding.
+    - if add new cycle ( fixpos,fixneg and two var). then we likely end up on the same side we started.
+    - as it is - we equalize transitions. and time above cross and time below.
+
 
 */
 
@@ -415,7 +402,7 @@ module my_modulation (
           if(count == 10000)
             begin
               if(count_tot > 5000 * 2) // > 5000... is this guaranteed to trigger?
-            
+
 
                 if( CMPR_OUT_CTL_P)
                   begin
@@ -428,7 +415,7 @@ module my_modulation (
                     state <= `STATE_VAR2_START;
                   end
 
-            
+
               else
                 // do another cycle
                 state <= `STATE_FIX_POS_START;
@@ -489,10 +476,10 @@ module my_modulation (
                   count_last_trans_up <= count_trans_up;
                   count_last_trans_down <= count_trans_down;
 
-                  case(mux) 
+                  case(mux)
                     3'b010: last_rundown_dir = 1;
                     3'b001: last_rundown_dir = 0;
-                  endcase 
+                  endcase
 
               end
           end
