@@ -416,28 +416,17 @@ module my_modulation (
             begin
               if(count_tot > 5000 * 2) // > 5000... is this guaranteed to trigger?
             
-                // state <= `STATE_RUNDOWN_START;
 
                 if( CMPR_OUT_CTL_P)
                   begin
-
+                    // go straight to the final rundown.
                     state <= `STATE_RUNDOWN_START;
-                    /*mux <= 3'b010;
-                    count_up <= count_up + 1;
-                    if(mux != 3'b010) count_trans_up <= count_trans_up + 1 ;
-                    */
                   end
                 else
                   begin
-                    
+                    // do another variable, which should push us to the correct side.
                     state <= `STATE_VAR2_START;
-              /*
-                    mux <= 3'b001;
-                    count_down <= count_down + 1;
-                    if(mux != 3'b001) count_trans_down <= count_trans_down + 1 ;
-*/
                   end
-
 
             
               else
