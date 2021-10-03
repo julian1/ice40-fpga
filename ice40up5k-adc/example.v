@@ -320,9 +320,15 @@ module my_modulation (
           end
 
         `STATE_FIX_POS:
-          if(count == 2550)
+
+          // if(count == 2549)    
+          // if(count == 2550)    // walk down. rundown_dir = 0
+          // if(count == 2000)       // walk up.  dir = 1
+          // if(count == 3000)       // walk up.  dir = 1
+          if(count == 3001)       // walk up.  dir = 1
             state <= `STATE_VAR_START;
 
+        // variable direction
         `STATE_VAR_START:
           begin
             state <= `STATE_VAR;
@@ -389,17 +395,60 @@ module my_modulation (
         i think this is not quite right?  count_up + count_down ought to always be equal?
           eg. we stop when count_tot is 10000 ...
           and then add a single extra rundown.
+        ---------------------  
+
+        ok.  we might be end up on the wrong side. 
+
+      if we are at the end.. in terms of count...
+      then we are finished or need to do another cycle.
+      change the side 
+    -------------
+
+    question is - to flip us to the correct side - do we need to include the fixed bit. and which direction?
+      i think no. because we already had equal fixed pos and neg.
+
+    // Timing estimate: 27.54 ns (36.31 MHz)
+
 */
 
         `STATE_VAR2:
           if(count == 10000)
             begin
-              if(count_tot == 5000 * 2) // > 5000... is this guaranteed to trigger?
-                state <= `STATE_RUNDOWN_START;
+              if(count_tot > 5000 * 2) // > 5000... is this guaranteed to trigger?
+            
+                // state <= `STATE_RUNDOWN_START;
+
+                if( CMPR_OUT_CTL_P)
+                  begin
+
+                    state <= `STATE_RUNDOWN_START;
+                    /*mux <= 3'b010;
+                    count_up <= count_up + 1;
+                    if(mux != 3'b010) count_trans_up <= count_trans_up + 1 ;
+                    */
+                  end
+                else
+                  begin
+                    
+                    state <= `STATE_VAR2_START;
+              /*
+                    mux <= 3'b001;
+                    count_down <= count_down + 1;
+                    if(mux != 3'b001) count_trans_down <= count_trans_down + 1 ;
+*/
+                  end
+
+
+            
               else
+                // do another cycle
                 state <= `STATE_FIX_POS_START;
             end
 
+/*
+  Actually this rundown start can do a fixed bit to push us over.
+
+*/
 
         `STATE_RUNDOWN_START:
           begin
