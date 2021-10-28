@@ -493,18 +493,11 @@ module top (
 
   wire [8-1:0] reg_mux ;// = 8'b00000001; // test
 
-
   wire [8-1:0] cs_vec ;
-  // assign { ADC02_CS, FLASH_CS,  DAC_SPI_CS, ADC03_CS } = cs_vec;
-  // assign { ADC02_CS, ICE_SS,  DAC_SPI_CS, ADC03_CS } = cs_vec;
   assign { ADC02_CS, ICE_FLASH_SS,  DAC_SPI_CS, ADC03_CS } = cs_vec;
 
-
-
   wire [8-1:0] miso_vec ;
-  // assign { ADC02_MISO, FLASH_MISO,  DAC_SPI_SDO,  ADC03_MISO } = miso_vec;
   assign { ADC02_MISO, ICE_MISO,  DAC_SPI_SDO,  ADC03_MISO } = miso_vec;
-
 
   // make sure ice40 programming flash is pulled hi. so that its not asserted.
   assign ICE_SS = 1;
@@ -512,31 +505,11 @@ module top (
    ////////////////////////////////////////
   // spi pass through
 
-  // assign { ADC02_CLK, DAC_SPI_CLK, ADC03_CLK, ICE_SCK  } = { CLK, CLK, CLK, CLK } ;
+  // could mux these also, if we want
   // syntax. {a,b,c,d,e} = {5{value}};
   assign { ADC02_CLK, DAC_SPI_CLK, ADC03_CLK, ICE_SCK  } = { 5{CLK }} ;
 
   assign { ADC02_MOSI, DAC_SPI_SDI, ADC03_MOSI, ICE_MOSI } = { 5{MOSI}} ;
-
-  // could mux these also, if we want
-  // pass-through adc03.
-//  assign ADC03_CLK = CLK;
-  // assign ADC03_MOSI = MOSI;
-
-  // pass-through flash
-  // assign FLASH_CLK = CLK;
-  // assign FLASH_MOSI = MOSI;
-//  assign ICE_SCK = CLK;         // this isn't right...right
-  // assign ICE_MOSI = MOSI;
-
-
-  // pass through dac.
-//  assign DAC_SPI_CLK = CLK;
-  // assign DAC_SPI_SDI = MOSI;
-
-  // pass through adc
-//  assign ADC02_CLK = CLK;
-//   assign ADC02_MOSI = MOSI;
 
 
   ////////////////////////////////////////
