@@ -243,7 +243,6 @@ endmodule
 
 module my_cs_mux    (
   input wire [8-1:0] reg_mux,
-  input  cs,
   input cs2,
   output [8-1:0] cs_vec
 );
@@ -494,7 +493,6 @@ module top (
   my_cs_mux
   (
     . reg_mux(reg_mux),
-    . cs(CS),
     . cs2(CS2),
     . cs_vec(cs_vec)
   );
