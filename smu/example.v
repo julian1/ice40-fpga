@@ -485,7 +485,9 @@ module top (
 
   wire [8-1:0] cs_vec ;
   // assign { ADC02_CS, FLASH_CS,  DAC_SPI_CS, ADC03_CS } = cs_vec;
-  assign { ADC02_CS, ICE_SS,  DAC_SPI_CS, ADC03_CS } = cs_vec;
+  // assign { ADC02_CS, ICE_SS,  DAC_SPI_CS, ADC03_CS } = cs_vec;
+  assign { ADC02_CS, ICE_FLASH_SS,  DAC_SPI_CS, ADC03_CS } = cs_vec;
+
 
 
   wire [8-1:0] miso_vec ;
@@ -493,7 +495,8 @@ module top (
   assign { ADC02_MISO, ICE_MISO,  DAC_SPI_SDO,  ADC03_MISO } = miso_vec;
 
 
-
+  // make sure ice40 programming flash is pulled hi. so that its not asserted.
+  assign ICE_SS = 1;
 
    ////////////////////////////////////////
   // spi pass through
