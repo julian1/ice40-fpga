@@ -452,6 +452,7 @@ module top (
   assign { ADC02_MISO, ICE_MISO,  DAC_SPI_SDO,  ADC03_MISO } = miso_vec;
 
   // make sure ice40 programming flash is pulled hi. so that its not asserted.
+  // no don't thiink this is issue.
   assign ICE_SS = 1;
 
    ////////////////////////////////////////
