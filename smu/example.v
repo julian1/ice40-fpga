@@ -514,27 +514,29 @@ module top (
 
   // assign { ADC02_CLK, DAC_SPI_CLK, ADC03_CLK, ICE_SCK  } = { CLK, CLK, CLK, CLK } ;
   // syntax. {a,b,c,d,e} = {5{value}};
-  // assign { ADC02_CLK, DAC_SPI_CLK, ADC03_CLK, ICE_SCK  } = { 5{CLK }} ;
+  assign { ADC02_CLK, DAC_SPI_CLK, ADC03_CLK, ICE_SCK  } = { 5{CLK }} ;
+
+  assign { ADC02_MOSI, DAC_SPI_SDI, ADC03_MOSI, ICE_MOSI } = { 5{MOSI}} ;
 
   // could mux these also, if we want
   // pass-through adc03.
-  assign ADC03_CLK = CLK;
-  assign ADC03_MOSI = MOSI;
+//  assign ADC03_CLK = CLK;
+  // assign ADC03_MOSI = MOSI;
 
   // pass-through flash
   // assign FLASH_CLK = CLK;
   // assign FLASH_MOSI = MOSI;
-  assign ICE_SCK = CLK;         // this isn't right...right
-  assign ICE_MOSI = MOSI;
+//  assign ICE_SCK = CLK;         // this isn't right...right
+  // assign ICE_MOSI = MOSI;
 
 
   // pass through dac.
-  assign DAC_SPI_CLK = CLK;
-  assign DAC_SPI_SDI = MOSI;
+//  assign DAC_SPI_CLK = CLK;
+  // assign DAC_SPI_SDI = MOSI;
 
   // pass through adc
-  assign ADC02_CLK = CLK;
-  assign ADC02_MOSI = MOSI;
+//  assign ADC02_CLK = CLK;
+//   assign ADC02_MOSI = MOSI;
 
 
   ////////////////////////////////////////
