@@ -2,7 +2,7 @@
 // - can have heartbeat timer. over spi.
 // - if have more than one dac. then just create another register. very clean.
 // - we can actually handle a toggle. if both set and clear bit are hi then toggle
-// - instead of !cs or !special.  would be good if can write asserted(cs)  asserted(special)
+// - instead of !cs or !cs2.  would be good if can write asserted(cs)  asserted(cs2)
 
 module blinker    (
   input clk,
@@ -76,11 +76,11 @@ endfunction
 
 /*
   rather than having register bank.
-  have one 'special' mux register.
+  have one 'cs2' mux register.
 
   and then have the register bank be it's own spi peripheral.
   that should make reading simpler.
-  eg. the special only controls mux.
+  eg. the cs2 only controls mux.
 */
 
 /*
@@ -90,7 +90,6 @@ endfunction
 module my_register_bank   #(parameter MSB=16)   (
   input  clk,
   input  cs,
-  // input  special,     // TODO swap order specia/din
   input  din,       // sdi
   output dout,   // sdo
 
@@ -176,9 +175,7 @@ module my_register_bank   #(parameter MSB=16)   (
   always @ (posedge cs)   // cs done.
   begin
     // we can assert a done flag here... and factor this code...
-    // special asserted, and 16 received bits
-    // if(/*cs &&*/ !special && count == 16 )
-    if(/*cs && !special &&*/ count == 16 )
+    if(/*cs && !cs2 &&*/ count == 16 )
       begin
         case (addr)
           // leds
@@ -247,13 +244,13 @@ endmodule
 module my_cs_mux    (
   input wire [8-1:0] reg_mux,
   input  cs,
-  input special,
+  input cs2,
   output [8-1:0] cs_vec
 );
 
-  always @ (special) // both edges...
+  always @ (cs2) // both edges...
 
-    if(special)   // special = high = not asserted
+    if(cs2)   // cs2 = high = not asserted
         cs_vec = ~( reg_mux & 8'b00000000 );  // turn off cs for all.
       else
         cs_vec = ~( reg_mux & 8'b11111111 );  // turn on
@@ -264,15 +261,15 @@ endmodule
 
 module my_miso_mux    (
   input wire [8-1:0] reg_mux,
-  input special,
+  input cs2,
   input dout,
   input wire [8-1:0] miso_vec,
   output miso
 );
 
- always @ (special)
+ always @ (cs2)
 
-    if(special)     // special = high = not asserted
+    if(cs2)     // cs2 = high = not asserted
       miso = dout;
     else
       miso = (reg_mux & miso_vec) != 0 ;   // hmmm seems ok.
@@ -309,7 +306,7 @@ module top (
   input  CLK,
   input  CS,
   input  MOSI,
-  input  SPECIAL,
+  input  CS2,
   output MISO,
   // output b
 
@@ -486,7 +483,7 @@ module top (
   my_miso_mux
   (
     . reg_mux(reg_mux),
-    . special(SPECIAL),
+    . cs2(CS2),
     . dout(dout),
     . miso_vec(miso_vec),
     . miso(MISO)
@@ -498,7 +495,7 @@ module top (
   (
     . reg_mux(reg_mux),
     . cs(CS),
-    . special(SPECIAL),
+    . cs2(CS2),
     . cs_vec(cs_vec)
   );
 
@@ -581,7 +578,6 @@ module top (
     (
     . clk(CLK),
     . cs(CS),
-    // . special(SPECIAL),
     . din(MOSI),
     . dout(dout),
 
