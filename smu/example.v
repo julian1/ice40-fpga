@@ -512,6 +512,10 @@ module top (
    ////////////////////////////////////////
   // spi pass through
 
+  // assign { ADC02_CLK, DAC_SPI_CLK, ADC03_CLK, ICE_SCK  } = { CLK, CLK, CLK, CLK } ;
+  // syntax. {a,b,c,d,e} = {5{value}};
+  // assign { ADC02_CLK, DAC_SPI_CLK, ADC03_CLK, ICE_SCK  } = { 5{CLK }} ;
+
   // could mux these also, if we want
   // pass-through adc03.
   assign ADC03_CLK = CLK;

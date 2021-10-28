@@ -39,10 +39,10 @@ set_io ADC03_CS     91
 
 
 # dac
-set_io DAC_SPI_CS   23
-set_io DAC_SPI_CLK  24
-set_io DAC_SPI_SDI  25
-set_io DAC_SPI_SDO  26
+set_io DAC_SPI_CS   29
+set_io DAC_SPI_CLK  28
+set_io DAC_SPI_SDI  26
+set_io DAC_SPI_SDO  25
 
 
 # flash
@@ -84,8 +84,8 @@ set_io LED2 107
 # reg_mux  8
 
 # reg_dac 9
-set_io DAC_LDAC     28
-set_io DAC_RST      29
+set_io DAC_LDAC     24
+set_io DAC_RST      23
 set_io DAC_UNI_BIP_A 31
 set_io DAC_UNI_BIP_B 32
 
