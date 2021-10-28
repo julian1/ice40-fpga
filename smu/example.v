@@ -295,16 +295,12 @@ module my_cs_mux    (
   output [8-1:0] cs_vec
 );
 
-
   always @ (special) // both edges...
 
     if(special)   // special = high = not asserted
-      // if(cs)
-        cs_vec = ~( reg_mux & 8'b00000000 );
+        cs_vec = ~( reg_mux & 8'b00000000 );  // turn off cs for all.
       else
-        cs_vec = ~( reg_mux & 8'b11111111 );
-//     else
-  //       cs_vec = 8'b11111111;
+        cs_vec = ~( reg_mux & 8'b11111111 );  // turn on
 endmodule
 
 
@@ -318,21 +314,15 @@ module my_miso_mux    (
   output miso
 );
 
- // always @ (miso_vec)
  always @ (special)
 
-// #FIXME change to blocking.
-    // if special is asserted just mux dout.
-    // if(!special)
-    if(special)
+    if(special)     // special = high = not asserted
       miso = dout;
-    // else use the vector
     else
       miso = (reg_mux & miso_vec) != 0 ;   // hmmm seems ok.
                                           // TODO should just be able to express without !=
                                           // eg. (reg_mux & miso_vec)
                                             // NOPE.
-
 endmodule
 
 
