@@ -90,7 +90,7 @@ endfunction
 module my_register_bank   #(parameter MSB=16)   (
   input  clk,
   input  cs,
-  input  special,     // TODO swap order specia/din
+  // input  special,     // TODO swap order specia/din
   input  din,       // sdi
   output dout,   // sdo
 
@@ -120,19 +120,15 @@ module my_register_bank   #(parameter MSB=16)   (
   reg [MSB-1:0] ret  ;    // padding bit
   reg [8-1:0]   count;
 
-
-  //
-
   // clock value into tmp var
   always @ (negedge clk or posedge cs)
   begin
-    if(cs)          // cs not asserted
+    if(cs)  // cs not asserted
       begin
         count = 0;
 
         // dropping of the highest bit maybe cannot avoid...
         // because it is the first bit.
-
         // no. 255 is wrong. it overclocks it
 
         // ret = 16'b1111110111011010 ;
@@ -145,7 +141,7 @@ module my_register_bank   #(parameter MSB=16)   (
         // ret = 65535 ;
       end
     else
-//    if ( !special)  // cs asserted, and cspecial asserted.
+       // cs asserted 
       begin
 
         // d into lsb, shift left toward msb
@@ -585,7 +581,7 @@ module top (
     (
     . clk(CLK),
     . cs(CS),
-    . special(SPECIAL),
+    // . special(SPECIAL),
     . din(MOSI),
     . dout(dout),
 
