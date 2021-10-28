@@ -367,17 +367,28 @@ module top (
   output DAC_UNI_BIP_A,
   output DAC_UNI_BIP_B,
 
+
   // flash
-  output FLASH_CS,
-  output FLASH_CLK,
-  output FLASH_MOSI ,
-  input  FLASH_MISO,   // input
+  // output FLASH_CS,
+  // output FLASH_CLK,
+  // output FLASH_MOSI ,
+  // input  FLASH_MISO,   // input
+
+  output ICE_SS,
+  output ICE_FLASH_SS,
+
+  output ICE_SCK,
+  output ICE_MOSI,
+  input ICE_MISO,
+
+
+
 
   // rails
   output RAILS_LP5V,
   output RAILS_LP15V,
   output RAILS_LP30V,
-  output RAILS_LP60V,
+  // output RAILS_LP60V,
 
   output RAILS_OE,
 
@@ -473,11 +484,13 @@ module top (
 
 
   wire [8-1:0] cs_vec ;
-  assign { ADC02_CS, FLASH_CS,  DAC_SPI_CS, ADC03_CS } = cs_vec;
+  // assign { ADC02_CS, FLASH_CS,  DAC_SPI_CS, ADC03_CS } = cs_vec;
+  assign { ADC02_CS, ICE_SS,  DAC_SPI_CS, ADC03_CS } = cs_vec;
 
 
   wire [8-1:0] miso_vec ;
-  assign { ADC02_MISO, FLASH_MISO,  DAC_SPI_SDO,  ADC03_MISO } = miso_vec;
+  // assign { ADC02_MISO, FLASH_MISO,  DAC_SPI_SDO,  ADC03_MISO } = miso_vec;
+  assign { ADC02_MISO, ICE_MISO,  DAC_SPI_SDO,  ADC03_MISO } = miso_vec;
 
 
 
@@ -491,8 +504,11 @@ module top (
   assign ADC03_MOSI = MOSI;
 
   // pass-through flash
-  assign FLASH_CLK = CLK;
-  assign FLASH_MOSI = MOSI;
+  // assign FLASH_CLK = CLK;
+  // assign FLASH_MOSI = MOSI;
+  assign ICE_SCK = CLK;         // this isn't right...right
+  assign ICE_MOSI = MOSI;
+
 
   // pass through dac.
   assign DAC_SPI_CLK = CLK;
@@ -553,7 +569,7 @@ module top (
   assign {DAC_RST, DAC_UNI_BIP_B, DAC_UNI_BIP_A, DAC_LDAC } = reg_dac;
 
   wire [4-1:0] reg_rails ;
-  assign { RAILS_LP60V, RAILS_LP30V, RAILS_LP15V, RAILS_LP5V } = reg_rails;
+  assign { /*RAILS_LP60V,*/ RAILS_LP30V, RAILS_LP15V, RAILS_LP5V } = reg_rails;
 
   // reg_soft_reset
 
