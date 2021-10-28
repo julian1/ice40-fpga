@@ -248,46 +248,6 @@ module my_register_bank   #(parameter MSB=16)   (
 endmodule
 
 
-// EXTRME
-// put adc/dac creset - in its own register. then we can assert/toggle it, without having to do bitshifting  - on mcu.
-// eg. t
-// actually if we can read a register, then we can do a toggle fairly simply... toggle over spi.
-
-/*
-    miso must be high-Z. if a peripheral does not have CS asserted.
-    otherwise there will be contention if several peripherals try to manipulate.
-    in which case we will need a mux vector.
-    -------------
-
-    we are going to have to do it anyway....  because its not a wire...
-
-    hang on. are we getting the clk propagating? kind of need to test.
-*/
-
-
-/*
-module my_cs_mux    (
-  input wire [8-1:0] reg_mux,
-  input  cs,
-  input special,
-  output [8-1:0] cs_vec
-);
-
-  // GAHHH. NO. if special is asserted. then we don't want cs being muxed to a peripheral...
-  // and that peripheral picking up spurious writes
-
-  always @ (cs) // both edges...
-
-    if(special)   // special = high = not asserted
-      if(cs)
-        cs_vec = ~( reg_mux & 8'b00000000 );
-      else
-        cs_vec = ~( reg_mux & 8'b11111111 );
-    else
-        cs_vec = 8'b11111111;
-endmodule
-*/
-
 module my_cs_mux    (
   input wire [8-1:0] reg_mux,
   input  cs,
