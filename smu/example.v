@@ -145,7 +145,7 @@ module my_register_bank   #(parameter MSB=16)   (
         // ret = 65535 ;
       end
     else
-    if ( !special)  // cs asserted, and cspecial asserted.
+//    if ( !special)  // cs asserted, and cspecial asserted.
       begin
 
         // d into lsb, shift left toward msb
@@ -181,7 +181,8 @@ module my_register_bank   #(parameter MSB=16)   (
   begin
     // we can assert a done flag here... and factor this code...
     // special asserted, and 16 received bits
-    if(/*cs &&*/ !special && count == 16 )
+    // if(/*cs &&*/ !special && count == 16 )
+    if(/*cs && !special &&*/ count == 16 )
       begin
         case (addr)
           // leds
