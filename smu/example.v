@@ -265,7 +265,7 @@ endmodule
 */
 
 
-
+/*
 module my_cs_mux    (
   input wire [8-1:0] reg_mux,
   input  cs,
@@ -285,7 +285,26 @@ module my_cs_mux    (
         cs_vec = ~( reg_mux & 8'b11111111 );
     else
         cs_vec = 8'b11111111;
+endmodule
+*/
 
+module my_cs_mux    (
+  input wire [8-1:0] reg_mux,
+  input  cs,
+  input special,
+  output [8-1:0] cs_vec
+);
+
+
+  always @ (special) // both edges...
+
+    if(special)   // special = high = not asserted
+      // if(cs)
+        cs_vec = ~( reg_mux & 8'b00000000 );
+      else
+        cs_vec = ~( reg_mux & 8'b11111111 );
+//     else
+  //       cs_vec = 8'b11111111;
 endmodule
 
 
@@ -299,11 +318,13 @@ module my_miso_mux    (
   output miso
 );
 
- always @ (miso_vec)
+ // always @ (miso_vec)
+ always @ (special)
 
 // #FIXME change to blocking.
     // if special is asserted just mux dout.
-    if(!special)
+    // if(!special)
+    if(special)
       miso = dout;
     // else use the vector
     else
