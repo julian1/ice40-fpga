@@ -601,9 +601,10 @@ module top (
   // OK. so want to make sure. that the
 
    // works. to trigger scope. must use 'single'
-  wire LED_B = ~ COM_INTERUPT;
+  // wire LED_B = ~ COM_INTERUPT;
 
-  assign {  LED_G, LED_R } = 3'b111 ;   // off
+  assign {  LED_B, LED_G, LED_R } = 3'b111 ;   // off
+  // assign {  LED_B, LED_G, LED_R } = 3'b000 ;   // on
 
 
 
