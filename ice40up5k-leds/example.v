@@ -5,6 +5,15 @@ module top (
   output LED_R,
   output LED_G,
   output LED_B,
+
+  output INT_IN_SIG_CTL,
+  output INT_IN_P_CTL,
+  output INT_IN_N_CTL,
+
+  output COM_MISO,
+  output COM_INTERUPT
+
+
 );
 
   localparam BITS = 5;
@@ -19,6 +28,12 @@ module top (
   end
 
   assign { LED_R, LED_G, LED_B } = outcnt ^ (outcnt >> 1);
+
+  assign { INT_IN_SIG_CTL,  INT_IN_P_CTL , INT_IN_N_CTL }  = outcnt ^ (outcnt >> 1);
+
+  assign { COM_MISO,  COM_INTERUPT }  = outcnt ^ (outcnt >> 1);
+
+
 
 endmodule
 

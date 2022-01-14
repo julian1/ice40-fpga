@@ -31,3 +31,12 @@ set_io SPI_SCK 15
 set_io SPI_MOSI 17
 set_io SPI_MISO 14
 
+
+
+set_io COM_MISO 12      # VIE
+set_io COM_INTERUPT 21  # VIF
+
+set_io INT_IN_SIG_CTL   27
+set_io INT_IN_P_CTL     25
+set_io INT_IN_N_CTL     23
+
