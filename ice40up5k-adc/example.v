@@ -276,6 +276,8 @@ module my_modulation (
 
 
 
+  `define VAR_COUNT 8000
+
   always @(posedge clk)
     begin
       // we use the same count - always increment clock
@@ -349,7 +351,7 @@ module my_modulation (
           end
 
         `STATE_VAR:
-          if(count == 10000)
+          if(count == `VAR_COUNT)
             state <= `STATE_FIX_NEG_START;
 
         `STATE_FIX_NEG_START:
@@ -399,8 +401,9 @@ module my_modulation (
 */
 
         `STATE_VAR2:
-          if(count == 10000)
+          if(count == `VAR_COUNT)
             begin
+              // end of integration condition.
               if(count_tot > 5000 * 2) // > 5000... is this guaranteed to trigger?
 
 
