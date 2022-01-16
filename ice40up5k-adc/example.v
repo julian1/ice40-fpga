@@ -265,7 +265,7 @@ module my_modulation (
     get rid of count_tot.
 
   */
-  reg [31:0]  count ;         // count_clk.  clk_count. clk_count_phase.  change name ccount clk_count phase_count... or something...
+  reg [31:0]  clk_count ;         // count_clk.  clk_count. clk_count_phase.  change name ccount clk_count phase_count... or something...
   reg [31:0]  count_tot ;     // = count_up + count_down. avoid calc. should phase not oscillation, because may have 2 in the same direction.
   reg [24-1:0] count_up;
   reg [24-1:0] count_down;
@@ -297,18 +297,18 @@ module my_modulation (
 
       // this is nested sequntial block. so should be available. in the case statementj.
       // making this non-blocking makes it much faster 26MHz to 39MHz.
-      count <= count + 1;
+      clk_count <= clk_count + 1;
 
       case (state)
         `STATE_INIT:
           begin
             ///////////
             // no without input reset - this isn't a settle time.
-            if(count == 10000)
+            if(clk_count == 10000)
               begin
                 // reset vars, and transition to runup state
                 state <= `STATE_FIX_POS_START;
-                count <= 0;
+                clk_count <= 0;
                 count_tot <= 0;
                 count_up <= 0;
                 count_down <= 0;
@@ -329,20 +329,20 @@ module my_modulation (
         `STATE_FIX_POS_START:
           begin
             state <= `STATE_FIX_POS;
-            count <= 0;
+            clk_count <= 0;
             mux <= 3'b001; // initial direction
             if(mux != 3'b001) count_trans_down <= count_trans_down + 1 ;
           end
 
         `STATE_FIX_POS:
-          if(count == `FIX_COUNT)       // walk up.  dir = 1
+          if(clk_count == `FIX_COUNT)       // walk up.  dir = 1
             state <= `STATE_VAR_START;
 
         // variable direction
         `STATE_VAR_START:
           begin
             state <= `STATE_VAR;
-            count <= 0;
+            clk_count <= 0;
             count_tot <= count_tot + 1;
             if( CMPR_OUT_CTL_P)   // test below the zero-cross
               begin
@@ -359,25 +359,25 @@ module my_modulation (
           end
 
         `STATE_VAR:
-          if(count == `VAR_COUNT)
+          if(clk_count == `VAR_COUNT)
             state <= `STATE_FIX_NEG_START;
 
         `STATE_FIX_NEG_START:
           begin
             state <= `STATE_FIX_NEG;
-            count <= 0;
+            clk_count <= 0;
             mux <= 3'b010;
             if(mux != 3'b010) count_trans_up <= count_trans_up + 1 ;
           end
 
         `STATE_FIX_NEG:
-          if(count == `FIX_COUNT)
+          if(clk_count == `FIX_COUNT)
             state <= `STATE_VAR2_START;
 
         `STATE_VAR2_START:
           begin
             state <= `STATE_VAR2;
-            count <= 0;
+            clk_count <= 0;
             count_tot <= count_tot + 1;
             if( CMPR_OUT_CTL_P)
               begin
@@ -413,7 +413,7 @@ module my_modulation (
 */
 
         `STATE_VAR2:
-          if(count == `VAR_COUNT)
+          if(clk_count == `VAR_COUNT)
             begin
               /*
                   this point should end-up on a PLC multiple eg. 50/60Hz.
@@ -453,7 +453,7 @@ module my_modulation (
         `STATE_RUNDOWN_START:
           begin
             state <= `STATE_RUNDOWN;
-            count <= 0;
+            clk_count <= 0;
 
             // turn on both references - to create +ve bias, to drive integrator down.
             // mux <= 3'b011;
@@ -478,6 +478,13 @@ module my_modulation (
 
         // EXTR. we also have to short the integrator at the start. to begin at a known start position.
 
+        /*
+            EXTR. 
+              the other way to end the integration. - is just to keep running 4 wave sequences.
+              until we are above. but that could be a long time.
+            
+        */
+
         `STATE_RUNDOWN:
           begin
            // EXTR. only incrementing the count, in the contextual state,
@@ -491,13 +498,13 @@ module my_modulation (
 
                   // transition
                   state <= `STATE_DONE;
-                  count <= 0;    // ok.
+                  clk_count <= 0;    // ok.
 
                   mux <= 3'b000;
                   COM_INTERUPT <= 0;   // turn on, interupt. active lo?
                   count_last_up <= count_up;
                   count_last_down <= count_down;
-                  count_last_rundown <= count;//count_rundown;
+                  count_last_rundown <= clk_count;//count_rundown;
 
                   count_last_trans_up <= count_trans_up;
                   count_last_trans_down <= count_trans_down;
