@@ -432,7 +432,8 @@ module my_modulation (
               // end of integration condition.
               // if(count_tot > 5000 * 2) // > 5000... is this guaranteed to trigger?
 
-              if(clk_count_tot > 100 * 1000000)   // 5 sec integration.
+              // if(clk_count_tot > 100 * 1000000)   // 5 sec integration.
+              if(clk_count_tot > 10 * 1000000)   // 500ms integration.
 
                 if( ~ CMPR_OUT_CTL_P)   // test above zero cross
                   begin
