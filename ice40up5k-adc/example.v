@@ -286,8 +286,8 @@ module my_modulation (
 
 
 
-  `define VAR_COUNT 7000
-  `define FIX_COUNT 1000
+  `define VAR_CLK_COUNT 7000
+  `define FIX_CLK_COUNT 1000
 
   `define SLOW 0    // change name SLOW_RUNDOWN. put in register.
 
@@ -335,7 +335,7 @@ module my_modulation (
           end
 
         `STATE_FIX_POS:
-          if(clk_count == `FIX_COUNT)       // walk up.  dir = 1
+          if(clk_count == `FIX_CLK_COUNT)       // walk up.  dir = 1
             state <= `STATE_VAR_START;
 
         // variable direction
@@ -359,7 +359,7 @@ module my_modulation (
           end
 
         `STATE_VAR:
-          if(clk_count == `VAR_COUNT)
+          if(clk_count == `VAR_CLK_COUNT)
             state <= `STATE_FIX_NEG_START;
 
         `STATE_FIX_NEG_START:
@@ -371,7 +371,7 @@ module my_modulation (
           end
 
         `STATE_FIX_NEG:
-          if(clk_count == `FIX_COUNT)
+          if(clk_count == `FIX_CLK_COUNT)
             state <= `STATE_VAR2_START;
 
         `STATE_VAR2_START:
@@ -413,7 +413,7 @@ module my_modulation (
 */
 
         `STATE_VAR2:
-          if(clk_count == `VAR_COUNT)
+          if(clk_count == `VAR_CLK_COUNT)
             begin
               /*
                   this point should end-up on a PLC multiple eg. 50/60Hz.
