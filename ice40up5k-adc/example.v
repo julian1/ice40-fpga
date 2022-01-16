@@ -278,8 +278,8 @@ module my_modulation (
 
   `define VAR_COUNT 7000
   `define FIX_COUNT 1000
-    
-  `define SLOW 1 
+
+  `define SLOW 1
 
   always @(posedge clk)
     begin
@@ -398,6 +398,8 @@ module my_modulation (
 
   TODO. we must count fixed and var count separately.
         because of the final potential double fixed positive . to get to the correct size for rundown.
+
+  TODO.
 */
 
         `STATE_VAR2:
@@ -408,7 +410,6 @@ module my_modulation (
               */
               // end of integration condition.
               if(count_tot > 5000 * 2) // > 5000... is this guaranteed to trigger?
-
 
                 if( ~ CMPR_OUT_CTL_P)   // test above zero cross
                   begin
@@ -422,6 +423,13 @@ module my_modulation (
                     // do another variable, which should push us to the correct side.
                     // but should we do fixed - first? no because fixed are equalized at this point.
                     // i think we could
+                    /*
+                      - doing an extra pos + neg is the same as doing neither. actually not quite because it breaks it up.
+                      TODO.
+                      - just taking on another section. means that we have to keep track of all 4 inputs. fixed and var. because
+                      - but if added a fixed pos, and var pos - then the pos count would be equalized.
+
+                    */
                     state <= `STATE_VAR2_START;
                   end
 
@@ -481,7 +489,7 @@ module my_modulation (
 
                   count_last_trans_up <= count_trans_up;
                   count_last_trans_down <= count_trans_down;
-              
+
                   /*
                     can get rid of this. if always drive in the same direction.
 
