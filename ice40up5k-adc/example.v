@@ -392,27 +392,34 @@ module my_modulation (
     - i think its ok as it is. if add extra fixpos, then should also add fixneg. which is the same as not adding.
     - if add new cycle ( fixpos,fixneg and two var). then we likely end up on the same side we started.
     - as it is - we equalize transitions. and time above cross and time below.
+  -----------
 
-
+  TODO. we must count fixed and var count separately.
+        because of the final potential double fixed positive . to get to the correct size for rundown.
 */
 
         `STATE_VAR2:
           if(count == `VAR_COUNT)
             begin
+              /*
+                  this point should end-up on a PLC multiple eg. 50/60Hz.
+              */
               // end of integration condition.
               if(count_tot > 5000 * 2) // > 5000... is this guaranteed to trigger?
 
 
                 if( ~ CMPR_OUT_CTL_P)
                   begin
+                    // above zero cross
                     // go straight to the final rundown.
                     state <= `STATE_RUNDOWN_START;
                   end
                 else
                   begin
+                    // below zero cross
                     // do another variable, which should push us to the correct side.
                     // but should we do fixed - first? no because fixed are equalized at this point.
-                    // i think we could 
+                    // i think we could
                     state <= `STATE_VAR2_START;
                   end
 
@@ -422,45 +429,17 @@ module my_modulation (
                 state <= `STATE_FIX_POS_START;
             end
 
-/*
-  Actually this rundown start can do a fixed bit to push us over.
-
-*/
 
         `STATE_RUNDOWN_START:
           begin
             state <= `STATE_RUNDOWN;
             count <= 0;
 
-             // turn on both references - to create +ve bias, to drive integrator down.
-              // mux <= 3'b011;
+              // turn on both references - to create +ve bias, to drive integrator down.
+              mux <= 3'b011;
 
-              // no slow slope. - just +ve bias 
-              mux <= 3'b001;
-
-            // count_rundown <= 0;
-            // we have to set the direction.
-/*
-            if( ~ CMPR_OUT_CTL_P)
-              begin
-                // turn on just positive.
-                // mux <= 3'b010;
-                // turn on both references - to create bias.
-                mux <= 3'b011;
-
-
-                count_up <= count_up + 1;
-                // should final transition be included? yes.
-                if(mux != 3'b010) count_trans_up <= count_trans_up + 1 ;
-              end
-            else
-              begin
-                mux <= 3'b001;
-                count_down <= count_down + 1;
-                if(mux != 3'b001) count_trans_down <= count_trans_down + 1 ;
-              end
-*/
-            // get rid of count_rundown. use count instead. should be everything we need.
+              // no slow slope. - just +ve bias
+              // mux <= 3'b001;
           end
 
         // EXTR. we also have to short the integrator at the start. to begin at a known start position.
