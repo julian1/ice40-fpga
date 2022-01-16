@@ -201,7 +201,7 @@ module my_modulation (
 
   output [2:0] mux ,
 
-  // prefix with n_ instead of count_ ?
+  // perhaps use tmp instead of last.
   output [24-1:0] count_last_up,
   output [24-1:0] count_last_down,
   output [24-1:0] count_last_rundown,
