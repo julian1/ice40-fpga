@@ -332,9 +332,9 @@ module my_modulation (
             state <= `STATE_VAR;
             count <= 0;
             count_tot <= count_tot + 1;
-            if( CMPR_OUT_CTL_P)
+            if( CMPR_OUT_CTL_P)   // test below the zero-cross
               begin
-                mux <= 3'b010;
+                mux <= 3'b010;  // add negative ref. to drive up.
                 count_up <= count_up + 1;
                 if(mux != 3'b010) count_trans_up <= count_trans_up + 1 ;
               end
@@ -408,7 +408,7 @@ module my_modulation (
               if(count_tot > 5000 * 2) // > 5000... is this guaranteed to trigger?
 
 
-                if( ~ CMPR_OUT_CTL_P)
+                if( ~ CMPR_OUT_CTL_P)   // test above zero cross
                   begin
                     // above zero cross
                     // go straight to the final rundown.
