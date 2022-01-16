@@ -276,7 +276,8 @@ module my_modulation (
 
 
 
-  `define VAR_COUNT 8000
+  `define VAR_COUNT 7000
+  `define FIX_COUNT 1000
 
   always @(posedge clk)
     begin
@@ -322,12 +323,7 @@ module my_modulation (
           end
 
         `STATE_FIX_POS:
-
-          // if(count == 2549)
-          // if(count == 2550)    // walk down. rundown_dir = 0
-          if(count == 2000)       // walk up.  dir = 1
-          // if(count == 3000)       // walk up.  dir = 1
-          // if(count == 3001)       // walk up.  dir = 1
+          if(count == FIX_COUNT)       // walk up.  dir = 1
             state <= `STATE_VAR_START;
 
         // variable direction
@@ -363,7 +359,7 @@ module my_modulation (
           end
 
         `STATE_FIX_NEG:
-          if(count == 2000)
+          if(count == FIX_COUNT)
             state <= `STATE_VAR2_START;
 
         `STATE_VAR2_START:
@@ -407,7 +403,7 @@ module my_modulation (
               if(count_tot > 5000 * 2) // > 5000... is this guaranteed to trigger?
 
 
-                if( CMPR_OUT_CTL_P)
+                if( ~ CMPR_OUT_CTL_P)
                   begin
                     // go straight to the final rundown.
                     state <= `STATE_RUNDOWN_START;
@@ -415,6 +411,8 @@ module my_modulation (
                 else
                   begin
                     // do another variable, which should push us to the correct side.
+                    // but should we do fixed - first? no because fixed are equalized at this point.
+                    // i think we could 
                     state <= `STATE_VAR2_START;
                   end
 
@@ -433,12 +431,24 @@ module my_modulation (
           begin
             state <= `STATE_RUNDOWN;
             count <= 0;
+
+             // turn on both references - to create +ve bias, to drive integrator down.
+              // mux <= 3'b011;
+
+              // no slow slope. - just +ve bias 
+              mux <= 3'b001;
+
             // count_rundown <= 0;
             // we have to set the direction.
-
-            if( CMPR_OUT_CTL_P)
+/*
+            if( ~ CMPR_OUT_CTL_P)
               begin
-                mux <= 3'b010;
+                // turn on just positive.
+                // mux <= 3'b010;
+                // turn on both references - to create bias.
+                mux <= 3'b011;
+
+
                 count_up <= count_up + 1;
                 // should final transition be included? yes.
                 if(mux != 3'b010) count_trans_up <= count_trans_up + 1 ;
@@ -449,7 +459,7 @@ module my_modulation (
                 count_down <= count_down + 1;
                 if(mux != 3'b001) count_trans_down <= count_trans_down + 1 ;
               end
-
+*/
             // get rid of count_rundown. use count instead. should be everything we need.
           end
 
