@@ -207,6 +207,7 @@ module my_modulation (
 
   output [24-1:0] count_last_trans_up,
   output [24-1:0] count_last_trans_down,
+  // output [24-1:0] clk_count_tot,     // could be useful
 
   // could also record the initial dir.
   // these (the outputs) could be combined into single bitfield.
@@ -282,10 +283,11 @@ module my_modulation (
 
 
 
-  `define VAR_CLK_COUNT 7000
+  `define VAR_CLK_COUNT 7100
   `define FIX_CLK_COUNT 1000
 
-  `define INT_CLK_COUNT (10 * 1000000)
+  `define INT_CLK_COUNT (5 * 2000000) // 500ms
+  // `define INT_CLK_COUNT (50 * 2000000) // 5s
 
   `define SLOW_RUNDOWN 1
 
