@@ -278,6 +278,8 @@ module my_modulation (
 
   `define VAR_COUNT 7000
   `define FIX_COUNT 1000
+    
+  `define SLOW 1 
 
   always @(posedge clk)
     begin
@@ -435,11 +437,17 @@ module my_modulation (
             state <= `STATE_RUNDOWN;
             count <= 0;
 
-              // turn on both references - to create +ve bias, to drive integrator down.
-              mux <= 3'b011;
+            // turn on both references - to create +ve bias, to drive integrator down.
+            // mux <= 3'b011;
 
-              // no slow slope. - just +ve bias
-              // mux <= 3'b001;
+            if(`SLOW)
+              mux <= 3'b011;
+            else
+              mux <= 3'b001;
+
+            // no slow slope. - just +ve bias
+            // this fails to route?
+            // mux <= 3'b001;
           end
 
         // EXTR. we also have to short the integrator at the start. to begin at a known start position.
@@ -469,8 +477,9 @@ module my_modulation (
                   count_last_trans_down <= count_trans_down;
 
                   case(mux)
-                    3'b010: last_rundown_dir = 1;
+                    3'b010: last_rundown_dir = 1; // up
                     3'b001: last_rundown_dir = 0;
+                    3'b011: last_rundown_dir = 0;
                   endcase
 
               end
