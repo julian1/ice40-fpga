@@ -323,7 +323,7 @@ module my_modulation (
           end
 
         `STATE_FIX_POS:
-          if(count == FIX_COUNT)       // walk up.  dir = 1
+          if(count == `FIX_COUNT)       // walk up.  dir = 1
             state <= `STATE_VAR_START;
 
         // variable direction
@@ -359,7 +359,7 @@ module my_modulation (
           end
 
         `STATE_FIX_NEG:
-          if(count == FIX_COUNT)
+          if(count == `FIX_COUNT)
             state <= `STATE_VAR2_START;
 
         `STATE_VAR2_START:
