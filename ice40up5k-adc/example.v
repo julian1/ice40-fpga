@@ -45,8 +45,8 @@ module my_register_bank   #(parameter MSB=32)   (
   input wire [24-1:0] count_down,
   input wire [24-1:0] count_rundown,
 
-  input wire [24-1:0] count_last_trans_up,
-  input wire [24-1:0] count_last_trans_down,
+  input wire [24-1:0] count_trans_up,
+  input wire [24-1:0] count_trans_down,
 
   input wire          rundown_dir,
   input wire          flip
@@ -97,8 +97,8 @@ module my_register_bank   #(parameter MSB=32)   (
               10: out = count_down << 8;
               11: out = count_rundown << 8;
 
-              12: out = count_last_trans_up << 8;
-              14: out = count_last_trans_down << 8;
+              12: out = count_trans_up << 8;
+              14: out = count_trans_down << 8;
 
               // fixed value, test value
               15: out = 24'hffffff << 8;
@@ -599,35 +599,22 @@ module top (
 
 );
 
-
-  //           count_transition_up
-  //           count_last_transition_up
-
-
-  /*
-    OK. hang on. do we have an issue. with the same registers being sampled in different clk domains?
-
-  */
-
-
   wire [24-1:0] reg_led ;
   // assign { LED_B, LED_G, LED_R } =   reg_led ;   // not inverted for easier scope probing.inverted for common drain.
   // assign { LED_B, LED_G, LED_R } = 3'b010 ;       // works...
                                                     // Ok. it really looks correct on the leds...
-
   // assign { COM_MOSI , COM_CLK, COM_CS} =  reg_led ;
 
-  // TODO. these don't have to have the last prefix in them...
 
-  reg [24-1:0] count_last_up;
-  reg [24-1:0] count_last_down;
-  reg [24-1:0] count_last_rundown;
+  reg [24-1:0] count_up;
+  reg [24-1:0] count_down;
+  reg [24-1:0] count_rundown;
 
-  reg [24-1:0] count_last_trans_up ;
-  reg [24-1:0] count_last_trans_down;
+  reg [24-1:0] count_trans_up ;
+  reg [24-1:0] count_trans_down;
 
-  reg          last_rundown_dir;
-  reg          last_flip;
+  reg          rundown_dir;
+  reg          flip;
 
   my_register_bank #( 32 )   // register bank
   bank
@@ -640,15 +627,15 @@ module top (
     // rename this as a test register. for 24 bit read/write.
     . reg_led(reg_led),
 
-    . count_up(count_last_up),
-    . count_down(count_last_down),
-    . count_rundown( count_last_rundown),
+    . count_up(count_up),
+    . count_down(count_down),
+    . count_rundown(count_rundown),
 
-    . count_last_trans_up(count_last_trans_up),
-    . count_last_trans_down(count_last_trans_down),
+    . count_trans_up(count_trans_up),
+    . count_trans_down(count_trans_down),
 
-    . rundown_dir(last_rundown_dir),
-    . flip(last_flip)
+    . rundown_dir(rundown_dir),
+    . flip(flip)
 
   );
 
@@ -679,21 +666,27 @@ module top (
     . clk(clk),
     . mux(mux),
 
-    . count_last_up(count_last_up),
-    . count_last_down(count_last_down),
-    . count_last_rundown(count_last_rundown),
+    . count_last_up(count_up),
+    . count_last_down(count_down),
+    . count_last_rundown(count_rundown),
 
-    . count_last_trans_up(count_last_trans_up),
-    . count_last_trans_down(count_last_trans_down),
+    . count_last_trans_up(count_trans_up),
+    . count_last_trans_down(count_trans_down),
 
-    .  last_rundown_dir(last_rundown_dir),
-    .  last_flip(last_flip),
+    .  last_rundown_dir(rundown_dir),
+    .  last_flip(flip),
 
     . CMPR_OUT_CTL_P(CMPR_OUT_CTL_P),
     . COM_INTERUPT(COM_INTERUPT),
     . CMPR_LATCH_CTL(CMPR_LATCH_CTL)
   );
 
+
+
+
+
+
+endmodule
 
 
 
@@ -713,12 +706,6 @@ module top (
   */
 
 
-
-
-
-
-
-endmodule
 
 
 
