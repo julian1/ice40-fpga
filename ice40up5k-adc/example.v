@@ -195,7 +195,6 @@ endmodule
 */
 
 
-// module my_register_bank   #(parameter MSB=32)   (
 module my_modulation (
   input  clk,
 
@@ -244,8 +243,6 @@ module my_modulation (
   end
 
 
-
-
   //////////////////////////////////////////////////////
   // counters and settings  ...
   // for an individual phase.
@@ -260,6 +257,7 @@ module my_modulation (
   */
   reg [31:0]  clk_count ;         // clk_count for the current phase.
   reg [31:0]  clk_count_tot ;     // from the start of the signal integration. eg. 5sec*20MHz=100m count. won't fit in 24 bit value. would need to split between read registers.
+                                  // could also record clk_count_actual.
 
   // modulation counts
   reg [31:0]  count_tot ;     // = count_up + count_down. avoid calc. should phase not oscillation, because may have 2 in the same direction.
@@ -287,7 +285,9 @@ module my_modulation (
   `define VAR_CLK_COUNT 7000
   `define FIX_CLK_COUNT 1000
 
-  `define SLOW_RUNDOWN 1    // change name SLOW_RUNDOWN_RUNDOWN. put in register.
+  `define INT_CLK_COUNT (10 * 1000000)
+
+  `define SLOW_RUNDOWN 1
 
   always @(posedge clk)
     begin
@@ -430,7 +430,7 @@ module my_modulation (
               // if(count_tot > 5000 * 2) // > 5000... is this guaranteed to trigger?
 
               // if(clk_count_tot > 100 * 1000000)   // 5 sec integration.
-              if(clk_count_tot > 10 * 1000000)   // 500ms integration.
+              if(clk_count_tot >= `INT_CLK_COUNT)   // 500ms integration.
 
                 if( ~ CMPR_OUT_CTL_P)   // test above zero cross
                   begin
