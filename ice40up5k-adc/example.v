@@ -374,6 +374,7 @@ module my_modulation (
           if(clk_count == `CLK_COUNT_FIX)
             state <= `STATE_VAR2_START;
 
+        // variable direction
         `STATE_VAR2_START:
           begin
             state <= `STATE_VAR2;
