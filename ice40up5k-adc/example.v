@@ -263,9 +263,11 @@ module my_modulation (
     then stop.
 
     get rid of count_tot.
-
   */
-  reg [31:0]  clk_count ;         // count_clk.  clk_count. clk_count_phase.  change name ccount clk_count phase_count... or something...
+  reg [31:0]  clk_count ;         // clk_count for the current phase.
+  reg [31:0]  clk_count_tot ;     // from the start of the signal integration. eg. 5sec*20MHz=100m count. won't fit in 24 bit value. would need to split between read registers.
+
+  // modulation counts
   reg [31:0]  count_tot ;     // = count_up + count_down. avoid calc. should phase not oscillation, because may have 2 in the same direction.
   reg [24-1:0] count_up;
   reg [24-1:0] count_down;
@@ -297,7 +299,10 @@ module my_modulation (
 
       // this is nested sequntial block. so should be available. in the case statementj.
       // making this non-blocking makes it much faster 26MHz to 39MHz.
+
+      // default behavior at top of verilog block.
       clk_count <= clk_count + 1;
+      clk_count_tot <= clk_count_tot + 1;
 
       case (state)
         `STATE_INIT:
@@ -309,6 +314,7 @@ module my_modulation (
                 // reset vars, and transition to runup state
                 state <= `STATE_FIX_POS_START;
                 clk_count <= 0;
+                clk_count_tot <= 0;   // start of signal integration time.
                 count_tot <= 0;
                 count_up <= 0;
                 count_down <= 0;
@@ -416,10 +422,17 @@ module my_modulation (
           if(clk_count == `VAR_CLK_COUNT)
             begin
               /*
+                  End. of integration condition. can be defined.
+                    - in terms of global clk count.
+                    - or sum of count_up count_down etc.
+        
                   this point should end-up on a PLC multiple eg. 50/60Hz.
+                  EXTR. could be be nice to record value at the end. 
               */
               // end of integration condition.
-              if(count_tot > 5000 * 2) // > 5000... is this guaranteed to trigger?
+              // if(count_tot > 5000 * 2) // > 5000... is this guaranteed to trigger?
+
+              if(clk_count_tot > 100 * 1000000)   // 5 sec integration.
 
                 if( ~ CMPR_OUT_CTL_P)   // test above zero cross
                   begin
