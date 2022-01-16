@@ -445,6 +445,12 @@ module my_modulation (
             else
               mux <= 3'b001;
 
+            // TODO - the better way to do transitions is with a function. so can test existing state. up/down. then record.
+
+            // count_down <= count_down + 1; don't count
+            // TODO - this is not correct. it's possible we did not transition here. eg. we may already be going down.
+            // count_trans_down <= count_trans_down + 1 ;
+
             // no slow slope. - just +ve bias
             // this fails to route?
             // mux <= 3'b001;
@@ -475,7 +481,11 @@ module my_modulation (
 
                   count_last_trans_up <= count_trans_up;
                   count_last_trans_down <= count_trans_down;
+              
+                  /*
+                    can get rid of this. if always drive in the same direction.
 
+                  */
                   case(mux)
                     3'b010: last_rundown_dir = 1; // up
                     3'b001: last_rundown_dir = 0;
