@@ -459,6 +459,8 @@ module my_modulation (
             // TODO - this is not correct. it's possible we did not transition here. eg. we may already be going down.
             // count_trans_down <= count_trans_down + 1 ;
 
+            // NO. - fixed pos and fixed neg - do not cancel. because they are non-ideal. but if they are equal - then a count of the number of cycles could capture the current.
+
             // no slow slope. - just +ve bias
             // this fails to route?
             // mux <= 3'b001;
