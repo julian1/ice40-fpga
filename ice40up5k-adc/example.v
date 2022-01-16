@@ -44,12 +44,12 @@ module my_register_bank   #(parameter MSB=32)   (
   input wire [24-1:0] count_up,
   input wire [24-1:0] count_down,
   input wire [24-1:0] count_rundown,
-  // input wire [24-1:0] rundown_dir,
 
   input wire [24-1:0] count_last_trans_up,
   input wire [24-1:0] count_last_trans_down,
 
-  input wire          rundown_dir
+  input wire          rundown_dir,
+  input wire          flip
 );
 
   // TODO rename these...
@@ -104,6 +104,7 @@ module my_register_bank   #(parameter MSB=32)   (
               15: out = 24'hffffff << 8;
 
               16: out = rundown_dir << 8;   // correct for single bit?
+              17: out = flip << 8;
 
             endcase
           end
@@ -209,7 +210,9 @@ module my_modulation (
   output [24-1:0] count_last_trans_down,
 
   // could also record the initial dir.
+  // these (the outputs) could be combined into single bitfield.
   output last_rundown_dir,
+  output last_flip,
 
   input CMPR_OUT_CTL_P,
 
@@ -257,9 +260,9 @@ module my_modulation (
   // for an individual phase.
 
   /*
-    TODO. 
+    TODO.
     for termination condition. just use the main clk.
-    eg. so if the end of the 4 wave period is past the total integration clk count.   
+    eg. so if the end of the 4 wave period is past the total integration clk count.
     then stop.
 
     get rid of count_tot.
@@ -273,6 +276,8 @@ module my_modulation (
   reg [24-1:0] count_down;
   reg [24-1:0] count_trans_up;
   reg [24-1:0] count_trans_down;
+
+  reg flip;
 
   /////////////////////////
   // this should be pushed into a separate module...
@@ -291,7 +296,7 @@ module my_modulation (
   `define VAR_CLK_COUNT 7000
   `define FIX_CLK_COUNT 1000
 
-  `define SLOW 0    // change name SLOW_RUNDOWN. put in register.
+  `define SLOW_RUNDOWN 1    // change name SLOW_RUNDOWN_RUNDOWN. put in register.
 
   always @(posedge clk)
     begin
@@ -320,6 +325,7 @@ module my_modulation (
                 count_down <= 0;
                 count_trans_up <= 0;
                 count_trans_down <= 0;
+                flip <= 0;
 
                 COM_INTERUPT <= 1; // active lo
                 CMPR_LATCH_CTL <= 0; // enable comparator
@@ -425,9 +431,9 @@ module my_modulation (
                   End. of integration condition. can be defined.
                     - in terms of global clk count.
                     - or sum of count_up count_down etc.
-        
+
                   this point should end-up on a PLC multiple eg. 50/60Hz.
-                  EXTR. could be be nice to record value at the end. 
+                  EXTR. could be be nice to record value at the end.
               */
               // end of integration condition.
               // if(count_tot > 5000 * 2) // > 5000... is this guaranteed to trigger?
@@ -455,6 +461,7 @@ module my_modulation (
 
                     */
                     state <= `STATE_VAR2_START;
+                    flip <= 1;
                   end
 
 
@@ -472,7 +479,7 @@ module my_modulation (
             // turn on both references - to create +ve bias, to drive integrator down.
             // mux <= 3'b011;
 
-            if(`SLOW)
+            if(`SLOW_RUNDOWN)
               mux <= 3'b011;
             else
               mux <= 3'b001;
@@ -493,10 +500,10 @@ module my_modulation (
         // EXTR. we also have to short the integrator at the start. to begin at a known start position.
 
         /*
-            EXTR. 
+            EXTR.
               the other way to end the integration. - is just to keep running 4 wave sequences.
               until we are above. but that could be a long time.
-            
+
         */
 
         `STATE_RUNDOWN:
@@ -522,6 +529,8 @@ module my_modulation (
 
                   count_last_trans_up <= count_trans_up;
                   count_last_trans_down <= count_trans_down;
+
+                  last_flip <= flip;
 
                   /*
                     can get rid of this. if always drive in the same direction.
@@ -608,6 +617,8 @@ module top (
 
   // assign { COM_MOSI , COM_CLK, COM_CS} =  reg_led ;
 
+  // TODO. these don't have to have the last prefix in them...
+
   reg [24-1:0] count_last_up;
   reg [24-1:0] count_last_down;
   reg [24-1:0] count_last_rundown;
@@ -616,6 +627,7 @@ module top (
   reg [24-1:0] count_last_trans_down;
 
   reg          last_rundown_dir;
+  reg          last_flip;
 
   my_register_bank #( 32 )   // register bank
   bank
@@ -635,7 +647,8 @@ module top (
     . count_last_trans_up(count_last_trans_up),
     . count_last_trans_down(count_last_trans_down),
 
-    . rundown_dir(last_rundown_dir)
+    . rundown_dir(last_rundown_dir),
+    . flip(last_flip)
 
   );
 
@@ -674,6 +687,7 @@ module top (
     . count_last_trans_down(count_last_trans_down),
 
     .  last_rundown_dir(last_rundown_dir),
+    .  last_flip(last_flip),
 
     . CMPR_OUT_CTL_P(CMPR_OUT_CTL_P),
     . COM_INTERUPT(COM_INTERUPT),
