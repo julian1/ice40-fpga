@@ -281,14 +281,14 @@ module my_modulation (
   */
 
 
-  `define INIT_CLK_COUNT 10000  // pause time, to do spi read, and settle.
+  `define CLK_COUNT_INIT 10000  // pause time, to do spi read, and settle.
 
-  // `define VAR_CLK_COUNT 7100
-  `define VAR_CLK_COUNT 7000
-  `define FIX_CLK_COUNT 1000
+  // `define CLK_COUNT_VAR 7100
+  `define CLK_COUNT_VAR 7000
+  `define CLK_COUNT_FIX 1000
 
-  `define INT_CLK_COUNT (5 * 2000000) // 500ms
-  // `define INT_CLK_COUNT (50 * 2000000) // 5s
+  `define CLK_COUNT_INT (5 * 2000000) // 500ms
+  // `define CLK_COUNT_INT (50 * 2000000) // 5s
 
   `define SLOW_RUNDOWN 1
 
@@ -308,7 +308,7 @@ module my_modulation (
           begin
             ///////////
             // no without input reset - this isn't a settle time.
-            if(clk_count == `INIT_CLK_COUNT)
+            if(clk_count == `CLK_COUNT_INIT)
               begin
                 // reset vars, and transition to runup state
                 state <= `STATE_FIX_POS_START;
@@ -335,7 +335,7 @@ module my_modulation (
           end
 
         `STATE_FIX_POS:
-          if(clk_count == `FIX_CLK_COUNT)       // walk up.  dir = 1
+          if(clk_count == `CLK_COUNT_FIX)       // walk up.  dir = 1
             state <= `STATE_VAR_START;
 
         // variable direction
@@ -359,7 +359,7 @@ module my_modulation (
           end
 
         `STATE_VAR:
-          if(clk_count == `VAR_CLK_COUNT)
+          if(clk_count == `CLK_COUNT_VAR)
             state <= `STATE_FIX_NEG_START;
 
         `STATE_FIX_NEG_START:
@@ -371,7 +371,7 @@ module my_modulation (
           end
 
         `STATE_FIX_NEG:
-          if(clk_count == `FIX_CLK_COUNT)
+          if(clk_count == `CLK_COUNT_FIX)
             state <= `STATE_VAR2_START;
 
         `STATE_VAR2_START:
@@ -413,7 +413,7 @@ module my_modulation (
 */
 
         `STATE_VAR2:
-          if(clk_count == `VAR_CLK_COUNT)
+          if(clk_count == `CLK_COUNT_VAR)
             begin
               /*
                   End. of integration condition. can be defined.
@@ -424,7 +424,7 @@ module my_modulation (
                   EXTR. could be be nice to record value at the end.
               */
               // end of integration condition.
-              if(clk_count_tot >= `INT_CLK_COUNT)
+              if(clk_count_tot >= `CLK_COUNT_INT)
 
                 if( ~ CMPR_OUT_CTL_P)   // test above zero cross
                   begin
