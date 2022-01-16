@@ -248,14 +248,6 @@ module my_modulation (
   // counters and settings  ...
   // for an individual phase.
 
-  /*
-    TODO.
-    for termination condition. just use the main clk.
-    eg. so if the end of the 4 wave period is past the total integration clk count.
-    then stop.
-
-    get rid of count_tot.
-  */
   reg [31:0]  clk_count ;         // clk_count for the current phase.
   reg [31:0]  clk_count_tot ;     // from the start of the signal integration. eg. 5sec*20MHz=100m count. won't fit in 24 bit value. would need to split between read registers.
                                   // could also record clk_count_actual.
@@ -282,8 +274,14 @@ module my_modulation (
   wire cross_any    = cross_up || cross_down ;
 
 
+  /*
+      - start integration in reverse direction. - eg. it would pautse
+      - perturb length.
+      - add another count period. But think it should be time of fix+var. so that it can be counted normally.
+  */
 
-  `define VAR_CLK_COUNT 7100
+  // `define VAR_CLK_COUNT 7100
+  `define VAR_CLK_COUNT 7000
   `define FIX_CLK_COUNT 1000
 
   `define INT_CLK_COUNT (5 * 2000000) // 500ms
