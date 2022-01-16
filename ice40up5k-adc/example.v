@@ -221,13 +221,8 @@ module my_modulation (
 );
 
   // advantage of macros is that they generate errors if not defined.
-
-  `define STATE_INIT    0    // initialsation state
-  // `define STATE_WAITING 1
-  // `define STATE_RUNUP    2
-  `define STATE_DONE     4
-  // `define STATE_FIX_POS 5
-
+  `define STATE_INIT          0    // initialsation state
+  `define STATE_DONE          4
   `define STATE_FIX_POS_START 6
   `define STATE_FIX_POS       7
   `define STATE_VAR_START     8
@@ -236,15 +231,11 @@ module my_modulation (
   `define STATE_FIX_NEG       11
   `define STATE_VAR2_START    12
   `define STATE_VAR2          14
-
   `define STATE_RUNDOWN_START 15
   `define STATE_RUNDOWN       3
 
 
-  // is it the same as assign. when performed outside an always block? timing seems different
-  // reg [4:0] state = `STATE_INIT;
-
-  // 2^4 = 16
+    // 2^4 = 16
   reg [4:0] state;
 
   // INITIAL BEGIN DOES SEEM TO BE supported.
