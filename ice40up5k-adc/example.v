@@ -255,7 +255,17 @@ module my_modulation (
   //////////////////////////////////////////////////////
   // counters and settings  ...
   // for an individual phase.
-  reg [31:0]  count ;         // count_clk.   change name phase_count... or something...
+
+  /*
+    TODO. 
+    for termination condition. just use the main clk.
+    eg. so if the end of the 4 wave period is past the total integration clk count.   
+    then stop.
+
+    get rid of count_tot.
+
+  */
+  reg [31:0]  count ;         // count_clk.  clk_count. clk_count_phase.  change name ccount clk_count phase_count... or something...
   reg [31:0]  count_tot ;     // = count_up + count_down. avoid calc. should phase not oscillation, because may have 2 in the same direction.
   reg [24-1:0] count_up;
   reg [24-1:0] count_down;
@@ -279,7 +289,7 @@ module my_modulation (
   `define VAR_COUNT 7000
   `define FIX_COUNT 1000
 
-  `define SLOW 1
+  `define SLOW 0    // change name SLOW_RUNDOWN. put in register.
 
   always @(posedge clk)
     begin
