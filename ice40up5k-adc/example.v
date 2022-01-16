@@ -592,6 +592,7 @@ module top (
     . din(COM_MOSI),
     . dout(COM_MISO),
 
+    // rename this as a test register. for 24 bit read/write.
     . reg_led(reg_led),
 
     . count_up(count_last_up),
