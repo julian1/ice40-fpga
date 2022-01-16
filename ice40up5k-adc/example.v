@@ -280,6 +280,9 @@ module my_modulation (
       - add another count period. But think it should be time of fix+var. so that it can be counted normally.
   */
 
+
+  `define INIT_CLK_COUNT 10000  // pause time, to do spi read, and settle.
+
   // `define VAR_CLK_COUNT 7100
   `define VAR_CLK_COUNT 7000
   `define FIX_CLK_COUNT 1000
@@ -305,7 +308,7 @@ module my_modulation (
           begin
             ///////////
             // no without input reset - this isn't a settle time.
-            if(clk_count == 10000)
+            if(clk_count == `INIT_CLK_COUNT)
               begin
                 // reset vars, and transition to runup state
                 state <= `STATE_FIX_POS_START;
@@ -322,12 +325,6 @@ module my_modulation (
                 CMPR_LATCH_CTL <= 0; // enable comparator
               end
           end
-
-        // OK. may it is easier to put the initialization ... in one bit. rather and then
-
-        // ok. have up with down chink. nice.
-        // and down with an up chink. nice.
-
 
         `STATE_FIX_POS_START:
           begin
@@ -427,10 +424,7 @@ module my_modulation (
                   EXTR. could be be nice to record value at the end.
               */
               // end of integration condition.
-              // if(count_tot > 5000 * 2) // > 5000... is this guaranteed to trigger?
-
-              // if(clk_count_tot > 100 * 1000000)   // 5 sec integration.
-              if(clk_count_tot >= `INT_CLK_COUNT)   // 500ms integration.
+              if(clk_count_tot >= `INT_CLK_COUNT)
 
                 if( ~ CMPR_OUT_CTL_P)   // test above zero cross
                   begin
@@ -448,8 +442,7 @@ module my_modulation (
                       - doing an extra pos + neg is the same as doing neither. actually not quite because it breaks it up.
                       TODO.
                       - just taking on another section. means that we have to keep track of all 4 inputs. fixed and var. because
-                      - but if added a fixed pos, and var pos - then the pos count would be equalized.
-
+                      - but if added a fixed pos, and var pos - then we could just add to the positive  count
                     */
                     state <= `STATE_VAR2_START;
                     flip <= 1;
