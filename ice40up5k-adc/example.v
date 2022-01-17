@@ -253,7 +253,7 @@ module my_modulation (
                                   // could also record clk_count_actual.
 
   // modulation counts
-  reg [31:0]  count_tot ;     // = count_up + count_down. avoid calc. should phase not oscillation, because may have 2 in the same direction.
+  reg [31:0]  count_tot ;     // TODO. remove. unless use as terminate condition.
   reg [24-1:0] count_up;
   reg [24-1:0] count_down;
   reg [24-1:0] count_trans_up;
