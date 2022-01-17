@@ -283,6 +283,7 @@ module my_modulation (
 
   `define CLK_COUNT_INIT 10000  // pause time, to do spi read, and settle.
 
+  // modulation freq = 20,000000 / 2 * (7000 + 1000) = 1250Hz. = 1.25kHz. with 10nF.
   // `define CLK_COUNT_VAR 7100
   `define CLK_COUNT_VAR 7000
   `define CLK_COUNT_FIX 1000
