@@ -275,8 +275,8 @@ module my_modulation (
 
 
   /*
-      - start integration in reverse direction. - eg. it would pautse
-      - perturb length.
+      - start integration in reverse direction. - eg. it would pautse. won't work. references are not perfectly symmetrical around cross voltage.
+      - perturb length. eg. 50,100,200ms.
       - add another count period. But think it should be time of fix+var. so that it can be counted normally.
   */
 
