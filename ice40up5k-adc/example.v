@@ -43,7 +43,7 @@ module my_register_bank   #(parameter MSB=32)   (
 
   input wire [24-1:0] count_up,
   input wire [24-1:0] count_down,
-  input wire [24-1:0] count_rundown,
+  input wire [24-1:0] clk_count_rundown,
 
   input wire [24-1:0] count_trans_up,
   input wire [24-1:0] count_trans_down,
@@ -95,7 +95,7 @@ module my_register_bank   #(parameter MSB=32)   (
               7:  out = reg_led << 8;
               9:  out = count_up << 8;
               10: out = count_down << 8;
-              11: out = count_rundown << 8;
+              11: out = clk_count_rundown << 8;
 
               12: out = count_trans_up << 8;
               14: out = count_trans_down << 8;
@@ -203,7 +203,7 @@ module my_modulation (
   // perhaps use tmp instead of last.
   output [24-1:0] count_last_up,
   output [24-1:0] count_last_down,
-  output [24-1:0] count_last_rundown,
+  output [24-1:0] clk_count_rundown_last,
 
   output [24-1:0] count_last_trans_up,
   output [24-1:0] count_last_trans_down,
@@ -496,7 +496,7 @@ module my_modulation (
           begin
            // EXTR. only incrementing the count, in the contextual state,
             // means can avoid copying the variable out, if we do it quickly.
-            // count_rundown <= count_rundown + 1;
+            // clk_count_rundown <= clk_count_rundown + 1;
 
             // zero-cross to finish.
             if(cross_any )
@@ -511,7 +511,7 @@ module my_modulation (
                   COM_INTERUPT <= 0;   // turn on, interupt. active lo?
                   count_last_up <= count_up;
                   count_last_down <= count_down;
-                  count_last_rundown <= clk_count;//count_rundown;
+                  clk_count_rundown_last <= clk_count;// TODO change nmae  clk_clk_count_rundown 
 
                   count_last_trans_up <= count_trans_up;
                   count_last_trans_down <= count_trans_down;
@@ -594,7 +594,7 @@ module top (
 
   reg [24-1:0] count_up;
   reg [24-1:0] count_down;
-  reg [24-1:0] count_rundown;
+  reg [24-1:0] clk_count_rundown;
 
   reg [24-1:0] count_trans_up ;
   reg [24-1:0] count_trans_down;
@@ -615,7 +615,7 @@ module top (
 
     . count_up(count_up),
     . count_down(count_down),
-    . count_rundown(count_rundown),
+    . clk_count_rundown(clk_count_rundown),
 
     . count_trans_up(count_trans_up),
     . count_trans_down(count_trans_down),
@@ -654,7 +654,7 @@ module top (
 
     . count_last_up(count_up),
     . count_last_down(count_down),
-    . count_last_rundown(count_rundown),
+    . clk_count_rundown_last(clk_count_rundown),
 
     . count_last_trans_up(count_trans_up),
     . count_last_trans_down(count_trans_down),
