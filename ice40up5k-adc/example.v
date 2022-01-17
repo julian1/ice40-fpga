@@ -201,18 +201,18 @@ module my_modulation (
   output [2:0] mux ,
 
   // perhaps use tmp instead of last.
-  output [24-1:0] count_last_up,
-  output [24-1:0] count_last_down,
+  output [24-1:0] count_up_last,
+  output [24-1:0] count_down_last,
   output [24-1:0] clk_count_rundown_last,
 
-  output [24-1:0] count_last_trans_up,
-  output [24-1:0] count_last_trans_down,
+  output [24-1:0] count_trans_up_last,
+  output [24-1:0] count_trans_down_last,
   // output [24-1:0] clk_count_tot,     // could be useful
 
   // could also record the initial dir.
   // these (the outputs) could be combined into single bitfield.
-  output last_rundown_dir,
-  output last_flip,
+  output rundown_dir_last,
+  output flip_last,
 
   input CMPR_OUT_CTL_P,
 
@@ -509,23 +509,23 @@ module my_modulation (
 
                   mux <= 3'b000;
                   COM_INTERUPT <= 0;   // turn on, interupt. active lo?
-                  count_last_up <= count_up;
-                  count_last_down <= count_down;
-                  clk_count_rundown_last <= clk_count;// TODO change nmae  clk_clk_count_rundown 
+                  count_up_last <= count_up;
+                  count_down_last <= count_down;
+                  clk_count_rundown_last <= clk_count;// TODO change nmae  clk_clk_count_rundown
 
-                  count_last_trans_up <= count_trans_up;
-                  count_last_trans_down <= count_trans_down;
+                  count_trans_up_last <= count_trans_up;
+                  count_trans_down_last <= count_trans_down;
 
-                  last_flip <= flip;
+                  flip_last <= flip;
 
                   /*
                     can get rid of this. if always drive in the same direction.
 
                   */
                   case(mux)
-                    3'b010: last_rundown_dir = 1; // up
-                    3'b001: last_rundown_dir = 0;
-                    3'b011: last_rundown_dir = 0;
+                    3'b010: rundown_dir_last = 1; // up
+                    3'b001: rundown_dir_last = 0;
+                    3'b011: rundown_dir_last = 0;
                   endcase
 
               end
@@ -652,15 +652,15 @@ module top (
     . clk(clk),
     . mux(mux),
 
-    . count_last_up(count_up),
-    . count_last_down(count_down),
+    . count_up_last(count_up),
+    . count_down_last(count_down),
     . clk_count_rundown_last(clk_count_rundown),
 
-    . count_last_trans_up(count_trans_up),
-    . count_last_trans_down(count_trans_down),
+    . count_trans_up_last(count_trans_up),
+    . count_trans_down_last(count_trans_down),
 
-    .  last_rundown_dir(rundown_dir),
-    .  last_flip(flip),
+    . rundown_dir_last(rundown_dir),
+    . flip_last(flip),
 
     . CMPR_OUT_CTL_P(CMPR_OUT_CTL_P),
     . COM_INTERUPT(COM_INTERUPT),
