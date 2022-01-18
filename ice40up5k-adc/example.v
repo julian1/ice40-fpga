@@ -280,17 +280,15 @@ module my_modulation (
       - add another count period. But think it should be time of fix+var. so that it can be counted normally.
   */
 
-
-  `define CLK_COUNT_INIT 10000  // pause time, to do spi read, and settle.
-
   // modulation freq = 20,000000 / 2 * (7000 + 1000) = 1250Hz. = 1.25kHz. with 10nF.
   // `define CLK_COUNT_VAR 7100
-  `define CLK_COUNT_VAR 7000
-  `define CLK_COUNT_FIX 1000
-
-  `define CLK_COUNT_INT (5 * 2000000) // 500ms
   // `define CLK_COUNT_INT (50 * 2000000) // 5s
+  // `define CLK_COUNT_INT (5 * 2000000) // 500ms
 
+  `define CLK_COUNT_INIT 10000  // pause time, to do spi read, and settle.
+  `define CLK_COUNT_FIX 1000
+  `define CLK_COUNT_VAR 7000
+  `define CLK_COUNT_INT (2 * 2000000) // 200ms
   `define SLOW_RUNDOWN 1
 
   always @(posedge clk)
