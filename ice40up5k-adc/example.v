@@ -49,7 +49,7 @@ module my_register_bank   #(parameter MSB=32)   (
   input wire [24-1:0] count_trans_down,
 
   input wire          rundown_dir,
-  input wire [3-1:0]  flip    // should be a count. possible could require two up modulations
+  input wire [3-1:0]  count_flip    // should be a count. possible could require two up modulations
 );
 
   // TODO rename these...
@@ -104,7 +104,7 @@ module my_register_bank   #(parameter MSB=32)   (
               15: out = 24'hffffff << 8;
 
               16: out = rundown_dir << 8;   // correct for single bit?
-              17: out = flip << 8;
+              17: out = count_flip << 8;
 
             endcase
           end
@@ -212,7 +212,7 @@ module my_modulation (
   // could also record the initial dir.
   // these (the outputs) could be combined into single bitfield.
   output rundown_dir_last,
-  output [3-1:0] flip_last,
+  output [3-1:0] count_flip_last,
 
   input CMPR_OUT_CTL_P,
 
@@ -259,7 +259,7 @@ module my_modulation (
   reg [24-1:0] count_trans_up;
   reg [24-1:0] count_trans_down;
 
-  reg [3-1:0] flip;
+  reg [3-1:0] count_flip;
 
   /////////////////////////
   // this should be pushed into a separate module...
@@ -318,7 +318,7 @@ module my_modulation (
                 count_down <= 0;
                 count_trans_up <= 0;
                 count_trans_down <= 0;
-                flip <= 0;
+                count_flip <= 0;
 
                 COM_INTERUPT <= 1; // active lo
                 CMPR_LATCH_CTL <= 0; // enable comparator
@@ -445,7 +445,7 @@ module my_modulation (
                       - but if added a fixed pos, and var pos - then we could just add to the positive  count
                     */
                     state <= `STATE_VAR2_START;
-                    flip <= flip + 1;
+                    count_flip <= count_flip + 1;
                   end
 
 
@@ -514,7 +514,7 @@ module my_modulation (
                   count_trans_up_last <= count_trans_up;
                   count_trans_down_last <= count_trans_down;
 
-                  flip_last <= flip;
+                  count_flip_last <= count_flip;
 
                   /*
                     can get rid of this. if always drive in the same direction.
@@ -598,7 +598,7 @@ module top (
   reg [24-1:0] count_trans_down;
 
   reg          rundown_dir;
-  reg [3-1:0]  flip;
+  reg [3-1:0]  count_flip;
 
   my_register_bank #( 32 )   // register bank
   bank
@@ -619,7 +619,7 @@ module top (
     . count_trans_down(count_trans_down),
 
     . rundown_dir(rundown_dir),
-    . flip(flip)
+    . count_flip(count_flip)
 
   );
 
@@ -658,7 +658,7 @@ module top (
     . count_trans_down_last(count_trans_down),
 
     . rundown_dir_last(rundown_dir),
-    . flip_last(flip),
+    . count_flip_last(count_flip),
 
     . CMPR_OUT_CTL_P(CMPR_OUT_CTL_P),
     . COM_INTERUPT(COM_INTERUPT),
