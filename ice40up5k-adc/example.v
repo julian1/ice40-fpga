@@ -288,7 +288,7 @@ module my_modulation (
   `define CLK_COUNT_INIT 10000  // pause time, to do spi read, and settle.
   `define CLK_COUNT_FIX 1000
   `define CLK_COUNT_VAR 7000
-  `define CLK_COUNT_INT (2 * 2000000) // 200ms
+  `define CLK_COUNT_INT (2 * 2000000) // 200ms/4PLC. 20000000 * (200ms/ 1000)
   `define SLOW_RUNDOWN 1
 
   always @(posedge clk)
