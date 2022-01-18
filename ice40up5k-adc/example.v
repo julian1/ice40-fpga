@@ -49,7 +49,7 @@ module my_register_bank   #(parameter MSB=32)   (
   input wire [24-1:0] count_trans_down,
 
   input wire          rundown_dir,
-  input wire          flip
+  input wire [3-1:0]  flip    // should be a count. possible could require two up modulations
 );
 
   // TODO rename these...
@@ -212,7 +212,7 @@ module my_modulation (
   // could also record the initial dir.
   // these (the outputs) could be combined into single bitfield.
   output rundown_dir_last,
-  output flip_last,
+  output [3-1:0] flip_last,
 
   input CMPR_OUT_CTL_P,
 
@@ -259,7 +259,7 @@ module my_modulation (
   reg [24-1:0] count_trans_up;
   reg [24-1:0] count_trans_down;
 
-  reg flip;
+  reg [3-1:0] flip;
 
   /////////////////////////
   // this should be pushed into a separate module...
@@ -445,7 +445,7 @@ module my_modulation (
                       - but if added a fixed pos, and var pos - then we could just add to the positive  count
                     */
                     state <= `STATE_VAR2_START;
-                    flip <= 1;
+                    flip <= flip + 1;
                   end
 
 
@@ -598,7 +598,7 @@ module top (
   reg [24-1:0] count_trans_down;
 
   reg          rundown_dir;
-  reg          flip;
+  reg [3-1:0]  flip;
 
   my_register_bank #( 32 )   // register bank
   bank
