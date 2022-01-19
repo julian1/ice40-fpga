@@ -198,7 +198,7 @@ endmodule
 module my_modulation (
   input  clk,
 
-  output [2:0] mux ,
+  output [2:0] mux,
 
   // perhaps use tmp instead of last.
   output [24-1:0] count_up_last,
@@ -234,6 +234,11 @@ module my_modulation (
   `define STATE_RUNDOWN_START 15
   `define STATE_RUNDOWN       3
 
+/*
+  // TODO change name refmux. no. int_mux.  or mux4053. or muxlow.
+  assign wire [1:0] mux = mux_; 
+  assign wire       signal_mux = mux_[2] ;
+*/
 
     // 2^4 = 16
   reg [4:0] state;

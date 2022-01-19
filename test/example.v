@@ -1,6 +1,8 @@
 
 // this doesn't synthesize because led has multiple drivers. even though in practice the arbitrations prevents this.
 
+// better approach is an arbitration module that would just select the output of the desired fsm. and perhaps hold the unused one in reset.
+
     module my_fsm (
       input  clk,
       input  active ,
