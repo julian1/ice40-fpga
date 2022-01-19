@@ -576,10 +576,10 @@ module top (
   output INT_IN_N_CTL,
   output INT_IN_SIG_CTL,
 
-  output MUX_SIG_HI,
-  output MUX_REF_HI,
-  output MUX_REF_LO,
-  output MUX_SLOPE_ANG,
+  output MUX_SIG_HI_CTL,
+  output MUX_REF_HI_CTL,
+  output MUX_REF_LO_CTL,
+  output MUX_SLOPE_ANG_CTL,
 
   // it should be possible to immediately set high, on the latch transition, to avoid
   // and then reset on some fixed count
@@ -654,7 +654,7 @@ module top (
 
 
   reg [3:0] mux_sel;
-  assign { MUX_SLOPE_ANG, MUX_REF_LO, MUX_REF_HI, MUX_SIG_HI } = sel_mux;
+  assign { MUX_SLOPE_ANG_CTL, MUX_REF_LO_CTL, MUX_REF_HI_CTL, MUX_SIG_HI_CTL } = sel_mux;
 
   // OK. so want to make sure. that the
 

@@ -28,10 +28,10 @@ set_io CMPR_OUT_CTL_N   34
 
 
 # dg444 / max326
-set_io MUX_SIG_HI       36
-set_io MUX_REF_HI       43
-set_io MUX_REF_LO       38
-set_io MUX_SLOPE_ANG    42
+set_io MUX_SIG_HI_CTL   36
+set_io MUX_REF_HI_CTL   43
+set_io MUX_REF_LO_CTL   38
+set_io MUX_SLOPE_ANG_CTL 42
 
 
 # # bank 0
@@ -46,20 +46,20 @@ set_io MUX_SLOPE_ANG    42
 
 ####
 # prefix COM for comms, or MCU_CS or SPI1 ?
-set_io COM_CLK  6       # VOA
-set_io COM_CS   9       # VOB
-set_io COM_MOSI 10      # VOC
-set_io COM_SPECIAL 11   # VOD
-set_io COM_MISO 12      # VIE
-set_io COM_INTERUPT 21  # VIF
+set_io COM_CLK          6       # VOA
+set_io COM_CS           9       # VOB
+set_io COM_MOSI         10      # VOC
+set_io COM_SPECIAL      11   # VOD
+set_io COM_MISO         12      # VIE
+set_io COM_INTERUPT     21  # VIF
 
 
 ##################
 # ice/flash spi
 # not tested as gpio.
-set_io SPI_SS 16
-set_io SPI_SCK 15
+set_io SPI_SS           16
+set_io SPI_SCK          15
 # JA - we have these reversed. for master configure??? or mistake
-set_io SPI_MOSI 17
-set_io SPI_MISO 14
+set_io SPI_MOSI         17
+set_io SPI_MISO         14
 
