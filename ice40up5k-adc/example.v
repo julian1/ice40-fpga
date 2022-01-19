@@ -293,6 +293,11 @@ module my_modulation (
 
   always @(posedge clk)
     begin
+      /*
+        EXTR. we could add/inject a is_active wire test here - to control if the module should run.
+        or else just control reset.
+        except reset - generally should control the outputs.
+      */
       // we use the same count - always increment clock
 
       // this is nested sequntial block. so should be available. in the case statementj.
