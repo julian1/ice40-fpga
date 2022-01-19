@@ -1,4 +1,9 @@
 
+/*
+  Toggle, key gpio.
+
+  Do *NOT* run this when circuit populated, and analog power is applied.
+*/
 
 module top (
   input  clk,

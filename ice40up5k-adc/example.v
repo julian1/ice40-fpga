@@ -235,9 +235,12 @@ module my_modulation (
   `define STATE_RUNDOWN       3
 
 /*
-  // TODO change name refmux. no. int_mux.  or mux4053. or muxlow.
+  // TODO change name refmux. no. int_mux.  or mux4053. or muxlow.  or mux_in. 
   assign wire [1:0] mux = mux_; 
   assign wire       signal_mux = mux_[2] ;
+  mux_select.  for signal etc.
+  ------
+  No. I don't think we need to split. each phase the input is on. *except* for the rundown. 
 */
 
     // 2^4 = 16
