@@ -1,8 +1,11 @@
 
+DO NOT RUN WITH POPULATED BOARD
 /*
   Toggle, key gpio.
 
-  Do *NOT* run this when circuit populated, and analog power is applied.
+  Actually. This won't work without power. which also powers up the analog section.
+
+  So do *not* run with a populated board. 
 */
 
 module top (
