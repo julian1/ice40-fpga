@@ -235,12 +235,15 @@ module my_modulation (
   `define STATE_RUNDOWN       3
 
 /*
-  // TODO change name refmux. no. int_mux.  or mux4053. or muxlow.  or mux_in. 
-  assign wire [1:0] mux = mux_; 
+  // TODO change name refmux. no. int_mux.  or mux4053. or muxlow.  or mux_in.
+
+  int_in_mux.   same as the pcb net names.
+
+  assign wire [1:0] mux = mux_;
   assign wire       signal_mux = mux_[2] ;
   mux_select.  for signal etc.
   ------
-  No. I don't think we need to split. each phase the input is on. *except* for the rundown. 
+  No. I don't think we need to split. each phase the input is on. *except* for the rundown.
 */
 
     // 2^4 = 16
@@ -573,6 +576,11 @@ module top (
   output INT_IN_N_CTL,
   output INT_IN_SIG_CTL,
 
+  output MUX_SIG_HI,
+  output MUX_REF_HI,
+  output MUX_REF_LO,
+  output MUX_SLOPE_ANG,
+
   // it should be possible to immediately set high, on the latch transition, to avoid
   // and then reset on some fixed count
   output CMPR_LATCH_CTL,
@@ -641,12 +649,12 @@ module top (
   // we can probe the leds for signals....
 
   // start everything off...
-  reg [2:0] mux ; // = 3'b000;        // b / bottom
-  // assign { LED_B,  LED_G, LED_R } = ~ 0;        // turn off
-  // assign { /*LED_B, */ LED_G, LED_R } = ~ mux;        // note. INVERTED for open-drain..
-  // define POSREF and NEGREF 3'b10
-
+  reg [2:0] mux ; 
   assign { INT_IN_SIG_CTL, INT_IN_N_CTL, INT_IN_P_CTL } = mux;
+
+
+  reg [3:0] mux_sel;
+  assign { MUX_SLOPE_ANG, MUX_REF_LO, MUX_REF_HI, MUX_SIG_HI } = sel_mux;
 
   // OK. so want to make sure. that the
 
