@@ -224,6 +224,8 @@ module my_modulation (
   // so need
   //   1. state where switch op - to take slope to reset. and the mux takes the input .
   //   2. state to switch op back to the signal. while holding the switch at intmux at gnd.
+  // **** actually at the end of the initegration - we would not turn off teh lowmux. 
+  // instead just switch the highmux to feedback and settle
   // then
     */
 
