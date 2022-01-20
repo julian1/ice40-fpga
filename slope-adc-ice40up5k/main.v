@@ -221,7 +221,8 @@ module my_modulation (
 );
 
   // advantage of macros is that they generate errors if not defined.
-  `define STATE_INIT          0    // initialsation state
+  `define STATE_INIT_START    0
+  `define STATE_INIT          1    // initialsation state
   `define STATE_DONE          4
   `define STATE_FIX_POS_START 6
   `define STATE_FIX_POS       7
@@ -251,7 +252,7 @@ module my_modulation (
 
   // INITIAL BEGIN DOES SEEM TO BE supported.
   initial begin
-    state = `STATE_INIT;
+    state = `STATE_INIT_START;
   end
 
 
@@ -319,33 +320,40 @@ module my_modulation (
       clk_count_tot <= clk_count_tot + 1;
 
       /*
-        think we want a state init. that holds everything in pause.  
+        think we want a state init. that holds everything in pause.
         and then state begin. /
       */
       case (state)
+
+        `STATE_INIT_START:
+          begin
+            // reset vars, and transition to runup state
+            state <= `STATE_INIT;
+
+            clk_count <= 0;
+            clk_count_tot <= 0;   // start of signal integration time.
+            count_tot <= 0;
+            count_up <= 0;
+            count_down <= 0;
+            count_trans_up <= 0;
+            count_trans_down <= 0;
+            count_flip <= 0;
+
+            COM_INTERUPT <= 1; // active lo
+            CMPR_LATCH_CTL <= 0; // enable comparator
+
+
+            // mux <= 3'b000; // turn off all inputs.
+            // mux <= 3'b100; // turn on input signal
+          end
+
+
+
         `STATE_INIT:
           begin
-            ///////////
-            // no without input reset - this isn't a settle time.
             if(clk_count == `CLK_COUNT_INIT)
               begin
-                // reset vars, and transition to runup state
                 state <= `STATE_FIX_POS_START;
-                clk_count <= 0;
-                clk_count_tot <= 0;   // start of signal integration time.
-                count_tot <= 0;
-                count_up <= 0;
-                count_down <= 0;
-                count_trans_up <= 0;
-                count_trans_down <= 0;
-                count_flip <= 0;
-
-                COM_INTERUPT <= 1; // active lo
-                CMPR_LATCH_CTL <= 0; // enable comparator
-
-
-                // mux <= 3'b000; // turn off all inputs.
-                // mux <= 3'b100; // turn on input signal
               end
           end
 
@@ -558,7 +566,8 @@ module my_modulation (
             COM_INTERUPT <= 1;   // reset interupt
 
             // if(count == 'hffffff )
-            state <= `STATE_INIT;
+            // state <= `STATE_INIT;
+            state <= `STATE_INIT_START;
 
           end
 
@@ -696,7 +705,8 @@ module top (
 
   // 3'b010
   // assign mux_sel = 4'b1111;  // active lo. turn all off.
-  // assign mux_sel = 4'b1011;  // ref lo on.
+
+  // assign mux_sel = 4'b1011;  // ref lo in .
   assign mux_sel = 4'b1110;  // sig in .
 
 
