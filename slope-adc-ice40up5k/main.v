@@ -236,7 +236,7 @@ module my_modulation (
   `define STATE_DONE          17
 
 
-    // 2^5 = 32 
+    // 2^5 = 32
   reg [5-1:0] state;
 
   // INITIAL BEGIN DOES SEEM TO BE supported.
@@ -512,9 +512,6 @@ module my_modulation (
 
         `STATE_RUNDOWN:
           begin
-           // EXTR. only incrementing the count, in the contextual state,
-            // means can avoid copying the variable out, if we do it quickly.
-            // clk_count_rundown <= clk_count_rundown + 1;
 
             // zero-cross to finish.
             if(cross_any )
@@ -526,7 +523,7 @@ module my_modulation (
                   clk_count <= 0;    // ok.
 
                   mux <= 3'b000;
-                  COM_INTERUPT <= 0;   // turn on, interupt. active lo?
+                  COM_INTERUPT <= 0;   // active lo, set interupt
                   count_up_last <= count_up;
                   count_down_last <= count_down;
                   clk_count_rundown_last <= clk_count;// TODO change nmae  clk_clk_count_rundown
@@ -537,8 +534,7 @@ module my_modulation (
                   count_flip_last <= count_flip;
 
                   /*
-                    can get rid of this. if always drive in the same direction.
-
+                    TODO can get rid of this. if always drive in the same direction.
                   */
                   case(mux)
                     3'b010: rundown_dir_last = 1; // up
@@ -552,12 +548,8 @@ module my_modulation (
 
         `STATE_DONE:
           begin
-            COM_INTERUPT <= 1;   // reset interupt
-
-            // if(count == 'hffffff )
-            // state <= `STATE_INIT;
+            COM_INTERUPT <= 1;   // active hi. turn off.
             state <= `STATE_INIT_START;
-
           end
 
 
