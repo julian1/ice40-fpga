@@ -223,7 +223,6 @@ module my_modulation (
   // advantage of macros is that they generate errors if not defined.
   `define STATE_INIT_START    0
   `define STATE_INIT          1    // initialsation state
-  `define STATE_DONE          4
   `define STATE_FIX_POS_START 6
   `define STATE_FIX_POS       7
   `define STATE_VAR_START     8
@@ -234,6 +233,7 @@ module my_modulation (
   `define STATE_VAR2          14
   `define STATE_RUNDOWN_START 15
   `define STATE_RUNDOWN       3
+  `define STATE_DONE          4
 
 /*
   // TODO change name refmux. no. int_mux.  or mux4053. or muxlow.  or mux_in.
@@ -706,8 +706,8 @@ module top (
   // 3'b010
   // assign mux_sel = 4'b1111;  // active lo. turn all off.
 
-  // assign mux_sel = 4'b1011;  // ref lo in .
-  assign mux_sel = 4'b1110;  // sig in .
+  assign mux_sel = 4'b1011;  // ref lo in .
+  // assign mux_sel = 4'b1110;  // sig in .
 
 
   // registers mux_sel |= 0x ... turn a bit on.
