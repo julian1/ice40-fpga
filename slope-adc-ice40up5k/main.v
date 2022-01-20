@@ -224,7 +224,7 @@ module my_modulation (
   // so need
   //   1. state where switch op - to take slope to reset. and the mux takes the input .
   //   2. state to switch op back to the signal. while holding the switch at intmux at gnd.
-  // **** actually at the end of the initegration - we would not turn off teh lowmux. 
+  // **** actually at the end of the initegration - we would not turn off teh lowmux.
   // instead just switch the highmux to feedback and settle
   // then
     */
@@ -296,8 +296,8 @@ module my_modulation (
   // `define CLK_COUNT_INT (5 * 2000000) // 500ms
 
   `define CLK_COUNT_INIT 10000  // pause time, to do spi read, and settle.
-  `define CLK_COUNT_FIX 1000
-  `define CLK_COUNT_VAR 7000
+  `define CLK_COUNT_FIX 700
+  `define CLK_COUNT_VAR 5500
   `define CLK_COUNT_INT (2 * 2000000) // ie. 200ms/4PLC. 20000000 * (200ms/ 1000). spi. do hi byte2/lo byte. not multiplcation.
   `define SLOW_RUNDOWN 1
 
@@ -699,6 +699,7 @@ module top (
 
   // assign mux_sel = 4'b1011;  // ref lo in .
   assign mux_sel = 4'b1110;  // sig in .
+  // assign mux_sel = 4'b1101;  // ref in .
 
 
   // registers mux_sel |= 0x ... turn a bit on.
