@@ -7,7 +7,7 @@
 
 
 /*
-  - want to change assignement '=' to '<='
+  - want to change assignement '=' to '<=' in the spi code.
   EXTR.
     change all this to avoid overloading the special.
     instead make special an extra CS.
@@ -566,6 +566,37 @@ endmodule
 
 
 
+
+
+
+module blinky (
+  input  clk,
+  output [4-1:0] out_v
+  // output LED1,
+  // output LED2,
+);
+
+  localparam BITS = 5;
+  localparam LOG2DELAY = 22;
+
+  reg [BITS+LOG2DELAY-1:0] counter = 0;
+  reg [BITS-1:0] outcnt;
+
+  always@(posedge clk) begin
+    counter <= counter + 1;
+    outcnt <= counter >> LOG2DELAY;
+    out_v  <= outcnt ^ (outcnt >> 1);
+  end
+
+  // why doesn't this work?
+  // assign out_v  = outcnt ^ (outcnt >> 1);
+
+endmodule
+
+
+
+
+
 module top (
   input  clk,
   output LED_R,
@@ -621,7 +652,7 @@ module top (
   reg          rundown_dir;
   reg [3-1:0]  count_flip;
 
-  my_register_bank #( 32 )   // register bank
+  my_register_bank #( 32 )   // register bank  . change name 'registers'
   bank
     (
     . clk(COM_CLK),
@@ -649,20 +680,21 @@ module top (
   // we can probe the leds for signals....
 
   // start everything off...
-  reg [2:0] mux ; 
+  reg [2:0] mux ;
   assign { INT_IN_SIG_CTL, INT_IN_N_CTL, INT_IN_P_CTL } = mux;
 
 
   reg [3:0] mux_sel;
-  assign { MUX_SLOPE_ANG_CTL, MUX_REF_LO_CTL, MUX_REF_HI_CTL, MUX_SIG_HI_CTL } = sel_mux;
+  assign { MUX_SLOPE_ANG_CTL, MUX_REF_LO_CTL, MUX_REF_HI_CTL, MUX_SIG_HI_CTL } = mux_sel;
 
-  // OK. so want to make sure. that the
 
-   // works. to trigger scope. must use 'single'
-  // wire LED_B = ~ COM_INTERUPT;
+  blinky blinky_ (
+    . clk(clk),
+    . out_v( mux_sel)
+  );
 
-  assign {  LED_B, LED_G, LED_R } = 3'b111 ;   // off
-  // assign {  LED_B, LED_G, LED_R } = 3'b000 ;   // on
+
+  assign { LED_B, LED_G, LED_R } = 3'b111 ;   // off
 
 
 
