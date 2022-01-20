@@ -689,7 +689,12 @@ module top (
 
   // 3'b010
   // assign mux_sel = 4'b1111;  // active lo. turn all off.
-  assign mux_sel = 4'b1011;  // ref lo on.
+  // assign mux_sel = 4'b1011;  // ref lo on.
+  assign mux_sel = 4'b1110;  // sig in .
+
+
+  // registers mux_sel |= 0x ... turn a bit on.
+  // registers mux_sel &= ~ 0x ... turn a bit on.
 
 /*
   blinky blinky_ (
