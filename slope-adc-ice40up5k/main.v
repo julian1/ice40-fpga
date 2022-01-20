@@ -232,23 +232,12 @@ module my_modulation (
   `define STATE_VAR2_START    12
   `define STATE_VAR2          14
   `define STATE_RUNDOWN_START 15
-  `define STATE_RUNDOWN       3
-  `define STATE_DONE          4
+  `define STATE_RUNDOWN       16
+  `define STATE_DONE          17
 
-/*
-  // TODO change name refmux. no. int_mux.  or mux4053. or muxlow.  or mux_in.
 
-  int_in_mux.   same as the pcb net names.
-
-  assign wire [1:0] mux = mux_;
-  assign wire       signal_mux = mux_[2] ;
-  mux_select.  for signal etc.
-  ------
-  No. I don't think we need to split. each phase the input is on. *except* for the rundown.
-*/
-
-    // 2^4 = 16
-  reg [4:0] state;
+    // 2^5 = 32 
+  reg [5-1:0] state;
 
   // INITIAL BEGIN DOES SEEM TO BE supported.
   initial begin
