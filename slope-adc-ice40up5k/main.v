@@ -687,12 +687,16 @@ module top (
   reg [3:0] mux_sel;
   assign { MUX_SLOPE_ANG_CTL, MUX_REF_LO_CTL, MUX_REF_HI_CTL, MUX_SIG_HI_CTL } = mux_sel;
 
+  // 3'b010
+  // assign mux_sel = 4'b1111;  // active lo. turn all off.
+  assign mux_sel = 4'b1011;  // ref lo on.
 
+/*
   blinky blinky_ (
     . clk(clk),
     . out_v( mux_sel)
   );
-
+*/
 
   assign { LED_B, LED_G, LED_R } = 3'b111 ;   // off
 
