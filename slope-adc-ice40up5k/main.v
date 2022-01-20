@@ -531,6 +531,7 @@ module my_modulation (
                   state <= `STATE_DONE;
                   clk_count <= 0;    // ok.
 
+                  // turn off all inputs. actually should leave. because we will turn on to reset the integrator.
                   mux <= 3'b000;
                   COM_INTERUPT <= 0;   // active lo, set interupt
                   count_up_last <= count_up;
