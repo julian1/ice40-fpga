@@ -220,6 +220,13 @@ module my_modulation (
   output CMPR_LATCH_CTL
 );
 
+  /*
+  // so need
+  //   1. state where switch op - to take slope to reset. and the mux takes the input .
+  //   2. state to switch op back to the signal. while holding the switch at intmux at gnd.
+  // then
+    */
+
   // advantage of macros is that they generate errors if not defined.
   `define STATE_INIT_START    0
   `define STATE_INIT          1    // initialsation state
@@ -687,8 +694,8 @@ module top (
   // 3'b010
   // assign mux_sel = 4'b1111;  // active lo. turn all off.
 
-  assign mux_sel = 4'b1011;  // ref lo in .
-  // assign mux_sel = 4'b1110;  // sig in .
+  // assign mux_sel = 4'b1011;  // ref lo in .
+  assign mux_sel = 4'b1110;  // sig in .
 
 
   // registers mux_sel |= 0x ... turn a bit on.
