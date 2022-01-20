@@ -318,6 +318,10 @@ module my_modulation (
       clk_count <= clk_count + 1;
       clk_count_tot <= clk_count_tot + 1;
 
+      /*
+        think we want a state init. that holds everything in pause.  
+        and then state begin. /
+      */
       case (state)
         `STATE_INIT:
           begin
@@ -338,6 +342,10 @@ module my_modulation (
 
                 COM_INTERUPT <= 1; // active lo
                 CMPR_LATCH_CTL <= 0; // enable comparator
+
+
+                // mux <= 3'b000; // turn off all inputs.
+                // mux <= 3'b100; // turn on input signal
               end
           end
 
@@ -345,8 +353,8 @@ module my_modulation (
           begin
             state <= `STATE_FIX_POS;
             clk_count <= 0;
-            mux <= 3'b001; // initial direction
-            if(mux != 3'b001) count_trans_down <= count_trans_down + 1 ;
+            mux <= 3'b101; // initial direction
+            if(mux != 3'b101) count_trans_down <= count_trans_down + 1 ;
           end
 
         `STATE_FIX_POS:
@@ -361,15 +369,15 @@ module my_modulation (
             count_tot <= count_tot + 1;
             if( CMPR_OUT_CTL_P)   // test below the zero-cross
               begin
-                mux <= 3'b010;  // add negative ref. to drive up.
+                mux <= 3'b110;  // add negative ref. to drive up.
                 count_up <= count_up + 1;
-                if(mux != 3'b010) count_trans_up <= count_trans_up + 1 ;
+                if(mux != 3'b110) count_trans_up <= count_trans_up + 1 ;
               end
             else
               begin
-                mux <= 3'b001;
+                mux <= 3'b101;
                 count_down <= count_down + 1;
-                if(mux != 3'b001) count_trans_down <= count_trans_down + 1 ;
+                if(mux != 3'b101) count_trans_down <= count_trans_down + 1 ;
               end
           end
 
@@ -381,8 +389,8 @@ module my_modulation (
           begin
             state <= `STATE_FIX_NEG;
             clk_count <= 0;
-            mux <= 3'b010;
-            if(mux != 3'b010) count_trans_up <= count_trans_up + 1 ;
+            mux <= 3'b110;
+            if(mux != 3'b110) count_trans_up <= count_trans_up + 1 ;
           end
 
         `STATE_FIX_NEG:
@@ -397,15 +405,15 @@ module my_modulation (
             count_tot <= count_tot + 1;
             if( CMPR_OUT_CTL_P)
               begin
-                mux <= 3'b010;
+                mux <= 3'b110;
                 count_up <= count_up + 1;
-                if(mux != 3'b010) count_trans_up <= count_trans_up + 1 ;
+                if(mux != 3'b110) count_trans_up <= count_trans_up + 1 ;
               end
             else
               begin
-                mux <= 3'b001;
+                mux <= 3'b101;
                 count_down <= count_down + 1;
-                if(mux != 3'b001) count_trans_down <= count_trans_down + 1 ;
+                if(mux != 3'b101) count_trans_down <= count_trans_down + 1 ;
               end
           end
 /*
@@ -477,7 +485,6 @@ module my_modulation (
             clk_count <= 0;
 
             // turn on both references - to create +ve bias, to drive integrator down.
-            // mux <= 3'b011;
 
             if(`SLOW_RUNDOWN)
               mux <= 3'b011;
