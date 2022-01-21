@@ -697,9 +697,9 @@ module top (
   // 3'b010
   // assign mux_sel = 4'b1111;  // active lo. turn all off.
 
-  // assign mux_sel = 4'b1011;  // ref lo in .
-  assign mux_sel = 4'b1110;  // sig in .
-  // assign mux_sel = 4'b1101;  // ref in .
+  // assign mux_sel = 4'b1011;  // ref lo in / ie. dead short.
+  // assign mux_sel = 4'b1110;  // sig in .
+  assign mux_sel = 4'b1101;  // ref in .
 
 
   // registers mux_sel |= 0x ... turn a bit on.
