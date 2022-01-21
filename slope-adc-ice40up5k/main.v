@@ -60,11 +60,12 @@ module my_register_bank   #(parameter MSB=32)   (
 
   wire dout = out[MSB- 1];
 
-  // clock value into in var
+  // read
+  // clock value into into out var
   always @ (negedge clk or posedge cs)
   begin
     if(cs)
-      // cs not asserted, so reset regs
+      // cs not asserted (active lo), so reset regs
       begin
         count <= 0;
         in <= 0;
@@ -117,6 +118,7 @@ module my_register_bank   #(parameter MSB=32)   (
   wire [MSB-8-1:0] val   = in;              // lo bytes
 
 
+  // set/write
   always @ (posedge cs)   // cs done.
   begin
     if(count == MSB ) // MSB
@@ -299,6 +301,7 @@ module my_modulation (
   `define CLK_COUNT_FIX 700
   `define CLK_COUNT_VAR 5500
   `define CLK_COUNT_INT (2 * 2000000) // ie. 200ms/4PLC. 20000000 * (200ms/ 1000). spi. do hi byte2/lo byte. not multiplcation.
+                                      // need a better name for this...
   `define SLOW_RUNDOWN 1
 
   always @(posedge clk)
