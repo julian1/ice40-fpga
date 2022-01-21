@@ -115,7 +115,7 @@ module my_register_bank   #(parameter MSB=32)   (
 
 
   wire [8-1:0] addr  = in[ MSB-1: MSB-8 ];  // single byte for reg/address,
-  wire [MSB-8-1:0] val   = in;              // lo bytes
+  wire [MSB-8-1:0] val   = in;              // lo 24 bits/
 
 
   // set/write
