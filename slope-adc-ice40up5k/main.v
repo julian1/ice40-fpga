@@ -198,24 +198,32 @@ endmodule
 
 
 module my_modulation (
+
   input  clk,
 
+  // input clk counts to use
+  input [24-1:0]  clk_count_init_n,
+  input [24-1:0]  clk_count_fix_n,
+  input [24-1:0]  clk_count_var_n,
+  input [31:0]    clk_count_int_n,
+
+
+  // lowmux
   output [2:0] mux,
 
-  // perhaps use tmp instead of last.
+  // values from last run, available in order to read
   output [24-1:0] count_up_last,
   output [24-1:0] count_down_last,
   output [24-1:0] clk_count_rundown_last,
-
   output [24-1:0] count_trans_up_last,
   output [24-1:0] count_trans_down_last,
-  // output [24-1:0] clk_count_tot,     // could be useful
 
   // could also record the initial dir.
   // these (the outputs) could be combined into single bitfield.
   output rundown_dir_last,
   output [3-1:0] count_flip_last,
 
+  // comparator input
   input CMPR_OUT_CTL_P,
 
   output COM_INTERUPT,
@@ -292,15 +300,7 @@ module my_modulation (
       - add another count period. But think it should be time of fix+var. so that it can be counted normally.
   */
 
-  // modulation freq = 20,000000 / 2 * (7000 + 1000) = 1250Hz. = 1.25kHz. with 10nF.
-  // `define CLK_COUNT_VAR 7100
-  // `define CLK_COUNT_INT (50 * 2000000) // 5s
-  // `define CLK_COUNT_INT (5 * 2000000) // 500ms
 
-  `define CLK_COUNT_INIT 10000  // pause time, to do spi read, and settle.
-  `define CLK_COUNT_FIX 700
-  `define CLK_COUNT_VAR 5500
-  `define CLK_COUNT_INT (2 * 2000000) // ie. 200ms/4PLC. 20000000 * (200ms/ 1000). spi. do hi byte2/lo byte. not multiplcation.
                                       // need a better name for this...
   `define SLOW_RUNDOWN 1
 
@@ -352,7 +352,7 @@ module my_modulation (
 
         `STATE_INIT:
           begin
-            if(clk_count == `CLK_COUNT_INIT)
+            if(clk_count == clk_count_init_n)
               begin
                 state <= `STATE_FIX_POS_START;
               end
@@ -367,7 +367,7 @@ module my_modulation (
           end
 
         `STATE_FIX_POS:
-          if(clk_count == `CLK_COUNT_FIX)       // walk up.  dir = 1
+          if(clk_count == clk_count_fix_n)       // walk up.  dir = 1
             state <= `STATE_VAR_START;
 
         // variable direction
@@ -391,7 +391,7 @@ module my_modulation (
           end
 
         `STATE_VAR:
-          if(clk_count == `CLK_COUNT_VAR)
+          if(clk_count == clk_count_var_n)
             state <= `STATE_FIX_NEG_START;
 
         `STATE_FIX_NEG_START:
@@ -403,7 +403,7 @@ module my_modulation (
           end
 
         `STATE_FIX_NEG:
-          if(clk_count == `CLK_COUNT_FIX)
+          if(clk_count == clk_count_fix_n)
             state <= `STATE_VAR2_START;
 
         // variable direction
@@ -446,7 +446,7 @@ module my_modulation (
 */
 
         `STATE_VAR2:
-          if(clk_count == `CLK_COUNT_VAR)
+          if(clk_count == clk_count_var_n)
             begin
               /*
                   End. of integration condition. can be defined.
@@ -457,7 +457,7 @@ module my_modulation (
                   EXTR. could be be nice to record value at the end.
               */
               // end of integration condition.
-              if(clk_count_tot >= `CLK_COUNT_INT)
+              if(clk_count_tot >= clk_count_int_n)
 
                 if( ~ CMPR_OUT_CTL_P)   // test above zero cross
                   begin
@@ -717,11 +717,22 @@ module top (
 
   assign { LED_B, LED_G, LED_R } = 3'b111 ;   // off
 
-
+/*
+-  `define CLK_COUNT_INIT 10000  // pause time, to do spi read, and settle.
+-  `define CLK_COUNT_FIX 700
+-  `define CLK_COUNT_VAR 5500
+-  `define CLK_COUNT_INT (2 * 2000000) // ie. 200
+*/
 
   my_modulation  m1 (
 
     . clk(clk),
+
+    . clk_count_init_n( 10000  ) ,
+    . clk_count_fix_n( 700 ) ,
+    . clk_count_var_n( 5500 ) ,
+    . clk_count_int_n( (2 * 2000000) ) ,
+
     . mux(mux),
 
     . count_up_last(count_up),
