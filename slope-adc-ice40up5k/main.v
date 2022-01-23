@@ -223,7 +223,7 @@ module my_modulation (
   output rundown_dir_last,
   output [3-1:0] count_flip_last,
 
-  // comparator input
+  // comparator input - TODO. move next to clk. to group by in/out
   input CMPR_OUT_CTL_P,
 
   output COM_INTERUPT,
@@ -652,6 +652,16 @@ module top (
   // assign { COM_MOSI , COM_CLK, COM_CS} =  reg_led ;
 
 
+
+  // input parameters
+  reg [24-1:0]  clk_count_init_n;
+  reg [24-1:0]  clk_count_fix_n;
+  reg [24-1:0]  clk_count_var_n;
+  reg [31:0]    clk_count_int_n;
+
+
+
+  // output counts to read
   reg [24-1:0] count_up;
   reg [24-1:0] count_down;
   reg [24-1:0] clk_count_rundown;
@@ -661,6 +671,18 @@ module top (
 
   reg          rundown_dir;
   reg [3-1:0]  count_flip;
+
+
+
+  //
+  initial begin
+    clk_count_init_n =  10000;
+    clk_count_fix_n = 700;
+    clk_count_var_n = 5500;
+    clk_count_int_n = (2 * 2000000);
+  end
+
+
 
   my_register_bank #( 32 )   // register bank  . change name 'registers'
   bank
@@ -717,21 +739,17 @@ module top (
 
   assign { LED_B, LED_G, LED_R } = 3'b111 ;   // off
 
-/*
--  `define CLK_COUNT_INIT 10000  // pause time, to do spi read, and settle.
--  `define CLK_COUNT_FIX 700
--  `define CLK_COUNT_VAR 5500
--  `define CLK_COUNT_INT (2 * 2000000) // ie. 200
-*/
+
+
 
   my_modulation  m1 (
 
     . clk(clk),
 
-    . clk_count_init_n( 10000  ) ,
-    . clk_count_fix_n( 700 ) ,
-    . clk_count_var_n( 5500 ) ,
-    . clk_count_int_n( (2 * 2000000) ) ,
+    . clk_count_init_n( clk_count_init_n ) ,
+    . clk_count_fix_n( clk_count_fix_n ) ,
+    . clk_count_var_n( clk_count_var_n ) ,
+    . clk_count_int_n( clk_count_int_n ) ,
 
     . mux(mux),
 
