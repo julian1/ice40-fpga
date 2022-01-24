@@ -50,11 +50,10 @@ module my_register_bank   #(parameter MSB=32)   (
   input           use_slow_rundown,
   input [4-1:0]   himux_sel,
 
-
+  // output values
   input wire [24-1:0] count_up,
   input wire [24-1:0] count_down,
   input wire [24-1:0] clk_count_rundown,
-
   input wire [24-1:0] count_trans_up,
   input wire [24-1:0] count_trans_down,
 
@@ -144,16 +143,9 @@ module my_register_bank   #(parameter MSB=32)   (
       begin
 
         case (addr)
-          // use high bit - to do a xfer (read+writ) while avoiding actually writing a register
-          // leds
-          7 :
-            begin
-              // reg_led = update(reg_led, val);
-              reg_led <= val;
-            end
-
           // soft reset
-          11 :
+          // not implemented. - basically would need to pass in integrator state.
+          6 :
             /*
               No. just pass the reset value as a vec, just like pass the reg.
               eg.  output reg_rails,  input reg_rails_init.
@@ -164,6 +156,15 @@ module my_register_bank   #(parameter MSB=32)   (
               // none of this is any good... we need mux ctl pulled high etc.
               // does verilog expand 0 constant to fill all bits?
               reg_led <= 3'b101;
+            end
+
+
+          // use high bit - to do a xfer (read+writ) while avoiding actually writing a register
+          // leds
+          7 :
+            begin
+              // reg_led = update(reg_led, val);
+              reg_led <= val;
             end
 
         endcase
@@ -738,7 +739,8 @@ module top (
     clk_count_int_n = (2 * 2000000);    // 200ms
     // clk_count_int_n = (5 * 20000000);   // 5 sec.
     use_slow_rundown = 1;
-    himux_sel = 4'b1011;
+    // himux_sel = 4'b1011;  ref lo/gnd
+    himux_sel = 4'b1101;    // ref in
   end
 
 
