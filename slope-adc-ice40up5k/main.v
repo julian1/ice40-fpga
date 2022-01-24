@@ -202,9 +202,10 @@ module my_modulation (
   input  clk,
 
   // comparator input
+  // TODO. should be lower case.
   input CMPR_OUT_CTL_P,
 
-  // input clk count limits to use
+  // modulation parameters/count limits to use
   input [24-1:0]  clk_count_init_n,
   input [24-1:0]  clk_count_fix_n,
   input [24-1:0]  clk_count_var_n,
@@ -226,6 +227,7 @@ module my_modulation (
   output rundown_dir_last,
   output [3-1:0] count_flip_last,
 
+  // TODO change lower case
   output COM_INTERUPT,
   output CMPR_LATCH_CTL
 );
@@ -273,7 +275,7 @@ module my_modulation (
                                   // could also record clk_count_actual.
 
   // modulation counts
-  reg [31:0]  count_tot ;     // TODO. remove. unless use as terminate condition.
+  // reg [31:0]  count_tot ;     // TODO. remove. unless use as terminate condition.
   reg [24-1:0] count_up;
   reg [24-1:0] count_down;
   reg [24-1:0] count_trans_up;
@@ -333,7 +335,7 @@ module my_modulation (
 
             clk_count <= 0;
             clk_count_tot <= 0;   // start of signal integration time.
-            count_tot <= 0;
+            // count_tot <= 0;
             count_up <= 0;
             count_down <= 0;
             count_trans_up <= 0;
@@ -375,7 +377,7 @@ module my_modulation (
           begin
             state <= `STATE_VAR;
             clk_count <= 0;
-            count_tot <= count_tot + 1;
+            // count_tot <= count_tot + 1;
             if( CMPR_OUT_CTL_P)   // test below the zero-cross
               begin
                 mux <= 3'b110;  // add negative ref. to drive up.
@@ -411,7 +413,7 @@ module my_modulation (
           begin
             state <= `STATE_VAR2;
             clk_count <= 0;
-            count_tot <= count_tot + 1;
+            // count_tot <= count_tot + 1;
             if( CMPR_OUT_CTL_P)
               begin
                 mux <= 3'b110;
