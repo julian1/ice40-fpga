@@ -30,6 +30,7 @@
 // ‘default_nettype none  // turn off implicit data types
 
 module my_register_bank   #(parameter MSB=32)   (
+
   input  clk,
   input  cs,
   // input  special,   // TODO swap order specia/din
@@ -98,14 +99,14 @@ module my_register_bank   #(parameter MSB=32)   (
         if(count == 8)
           begin
             // ignore hi bit.
-            // allows us to read a register, without writing, by setting hi bit of addr
+            // allows us to read a register, without writing, by setting hi bit of register addr
             case (in[8 - 1 - 1: 0 ] )
 
               7:  out = reg_led << 8;
+
               9:  out = count_up << 8;
               10: out = count_down << 8;
               11: out = clk_count_rundown << 8;
-
               12: out = count_trans_up << 8;
               14: out = count_trans_down << 8;
 
@@ -114,6 +115,17 @@ module my_register_bank   #(parameter MSB=32)   (
 
               16: out = rundown_dir << 8;   // correct for single bit?
               17: out = count_flip << 8;
+
+              // registers
+
+      
+              18: out = clk_count_init_n << 8;  // lo 24 bits
+
+
+              20: out = clk_count_fix_n << 8;
+              21: out = clk_count_var_n << 8;
+              22: out = clk_count_int_n << 8;
+
 
             endcase
           end
