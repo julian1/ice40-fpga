@@ -124,6 +124,7 @@ module my_register_bank   #(parameter MSB=32)   (
               22: out = clk_count_int_n << 8;           // lo 24 bits
               23: out = (clk_count_int_n >> 24) << 8;   // hi 8 bits
               24: out = use_slow_rundown << 8;
+              25: out = himux_sel << 8;
 
             endcase
           end
