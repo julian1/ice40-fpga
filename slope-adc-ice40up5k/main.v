@@ -36,20 +36,18 @@ module my_register_bank   #(parameter MSB=32)   (
   input  din,       // sdi
   output dout,       // sdo
 
-  // latched val, rename
-  // this is both input and output????
-  // output wire [24-1:0] reg_led ,    // need to be very careful. only 4 bits. or else screws set/reset calculation ...
+
+
+  // use ' inout',  must be inout to write
   inout wire [24-1:0] reg_led ,    // need to be very careful. only 4 bits. or else screws set/reset calculation ...
+  inout [24-1:0]  clk_count_init_n,
+  inout [24-1:0]  clk_count_fix_n,
+  inout [24-1:0]  clk_count_var_n,
+  inout [31:0]    clk_count_int_n,
+  inout           use_slow_rundown,
+  inout [4-1:0]   himux_sel,
 
-  // modulation parameters/count limits to use
-  input [24-1:0]  clk_count_init_n,
-  input [24-1:0]  clk_count_fix_n,
-  input [24-1:0]  clk_count_var_n,
-  input [31:0]    clk_count_int_n,
-  input           use_slow_rundown,
-  input [4-1:0]   himux_sel,
-
-  // output values
+  // outputs only
   input wire [24-1:0] count_up,
   input wire [24-1:0] count_down,
   input wire [24-1:0] clk_count_rundown,
@@ -67,6 +65,23 @@ module my_register_bank   #(parameter MSB=32)   (
   reg [8-1:0]   count;
 
   wire dout = out[MSB- 1];
+
+
+  // To use in an inout. the initial block is a driver. so must be placed here.
+  initial begin
+    reg_led           = 3'b101;
+    clk_count_init_n  =  10000;
+    clk_count_fix_n   = 700;
+    clk_count_var_n   = 5500;
+    clk_count_int_n   = (2 * 2000000);    // 200ms
+    // clk_count_int_n = (5 * 20000000);   // 5 sec.
+    use_slow_rundown  = 1;
+    // himux_sel      = 4'b1011;        // ref lo/agnd
+    // himux_sel      = 4'b1101;     // ref in
+    himux_sel         = 4'b1011;        // ref lo/agnd
+  end
+
+
 
   // read
   // clock value into into out var
@@ -100,6 +115,7 @@ module my_register_bank   #(parameter MSB=32)   (
             // ignore hi bit.
             // allows us to read a register, without writing, by setting hi bit of register addr
             case (in[8 - 1 - 1: 0 ] )
+
 
               7:  out = reg_led << 8;
 
@@ -145,47 +161,18 @@ module my_register_bank   #(parameter MSB=32)   (
           // soft reset
           // not implemented. - basically would need to pass in integrator state.
           // *and* to have the op slope feedback working - to reset the integrator change.
-          6 :
-            /*
-              No. just pass the reset value as a vec, just like pass the reg.
-              eg.  output reg_rails,  input reg_rails_init.
-              but. note that everything comes up hi anyway before flash load
-              OR. just those that are *not* to be set to zer.
-            */
-            begin
-              // none of this is any good... we need mux ctl pulled high etc.
-              // does verilog expand 0 constant to fill all bits?
-              reg_led <= 3'b101;
-            end
-
 
           // use high bit - to do a xfer (read+writ) while avoiding actually writing a register
           // leds
+
+
           7 :
             begin
               // reg_led = update(reg_led, val);
               reg_led <= val;
             end
-/*
-              // read/write registers
-              18: out = clk_count_init_n << 8;
-              20: out = clk_count_fix_n << 8;
-              21: out = clk_count_var_n << 8;
-              22: out = clk_count_int_n << 8;           // lo 24 bits
-              23: out = (clk_count_int_n >> 24) << 8;   // hi 8 bits
-              24: out = use_slow_rundown << 8;
-              25: out = himux_sel << 8;
-*/
 
-          18: clk_count_init_n <= val;
-          20: clk_count_fix_n <= val;
-          21: clk_count_var_n <= val;
-          // 22: clk_count_int_n <= clk_count_int_n & 32'hff000000;           // lo 24 bits
-
-          22: clk_count_int_n <= (clk_count_int_n & 32'hff000000) | val;           // lo 24 bits
-          23: clk_count_int_n <= (clk_count_int_n & 32'h00ffffff) | (val << 24);  // hi 8 bits
-          24: use_slow_rundown <= val;
-          25: himux_sel <= val;
+          25 : himux_sel <=  val;
 
 
         endcase
@@ -386,7 +373,7 @@ module my_modulation (
 
             // set the hi mux to desired signal
             // IMPORTANT. buffer op must now be given time to settle to new input.
-            himux <= himux_sel; 
+            himux <= himux_sel;
 
             // lomux <= 3'b000; // turn off all inputs.
             // lomux <= 3'b100; // turn on input signal
@@ -747,18 +734,6 @@ module top (
 
   assign { LED_B, LED_G, LED_R } = 3'b111 ;   // off, active lo.
 
-
-  //
-  initial begin
-    clk_count_init_n =  10000;
-    clk_count_fix_n = 700;
-    clk_count_var_n = 5500;
-    clk_count_int_n = (2 * 2000000);    // 200ms
-    // clk_count_int_n = (5 * 20000000);   // 5 sec.
-    use_slow_rundown = 1;
-    himux_sel = 4'b1011;        // ref lo/agnd
-    // himux_sel = 4'b1101;     // ref in
-  end
 
 
 
