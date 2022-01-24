@@ -185,7 +185,7 @@ module my_register_bank   #(parameter MSB=32)   (
           22: clk_count_int_n <= (clk_count_int_n & 32'hff000000) | val;           // lo 24 bits
           23: clk_count_int_n <= (clk_count_int_n & 32'h00ffffff) | (val << 24);  // hi 8 bits
           24: use_slow_rundown <= val;
-          25: himux_sel <= val8;
+          25: himux_sel <= val;
 
 
         endcase
