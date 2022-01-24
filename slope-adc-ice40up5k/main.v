@@ -48,7 +48,7 @@ module my_register_bank   #(parameter MSB=32)   (
   input [24-1:0]  clk_count_var_n,
   input [31:0]    clk_count_int_n,
   input           use_slow_rundown,
-
+  input [4-1:0]   himux_sel,
 
 
   input wire [24-1:0] count_up,
@@ -228,6 +228,7 @@ module my_modulation (
   input [24-1:0]  clk_count_var_n,
   input [31:0]    clk_count_int_n,
   input           use_slow_rundown,
+  input [4-1:0]   himux_sel,
 
   // lowmux
   output [2:0] mux,
@@ -677,7 +678,6 @@ module top (
   reg [31:0]    clk_count_int_n;
   reg use_slow_rundown;
 
-
   // output counts to read
   reg [24-1:0] count_up;
   reg [24-1:0] count_down;
@@ -690,6 +690,19 @@ module top (
   reg [3-1:0]  count_flip;
 
 
+  reg [4-1:0] himux_sel;    // himux signal selection
+
+
+  reg [4-1:0] himux;
+  assign { MUX_SLOPE_ANG_CTL, MUX_REF_LO_CTL, MUX_REF_HI_CTL, MUX_SIG_HI_CTL } = himux;
+
+  // 3'b010
+  // assign himux = 4'b1111;  // active lo. turn all off.
+  // assign himux = 4'b1011;  // ref lo in / ie. dead short.
+  // assign himux = 4'b1110;  // sig in .
+  // assign himux = 4'b1101;  // ref in .
+
+
 
   //
   initial begin
@@ -699,6 +712,11 @@ module top (
     clk_count_int_n = (2 * 2000000);    // 200ms
     // clk_count_int_n = (5 * 20000000);   // 5 sec.
     use_slow_rundown = 1;
+
+    himux_sel = 4'b1011;
+   
+    himux =  4'b1011;  // ref lo in / ie. dead short.
+
   end
 
 
@@ -719,6 +737,7 @@ module top (
     . clk_count_var_n( clk_count_var_n ) ,
     . clk_count_int_n( clk_count_int_n ) ,
     . use_slow_rundown( use_slow_rundown),
+    . himux_sel( himux_sel ),
 
     // counts
     . count_up(count_up),
@@ -741,16 +760,6 @@ module top (
   reg [2:0] mux ;
   assign { INT_IN_SIG_CTL, INT_IN_N_CTL, INT_IN_P_CTL } = mux;
 
-
-  reg [3:0] mux_sel;
-  assign { MUX_SLOPE_ANG_CTL, MUX_REF_LO_CTL, MUX_REF_HI_CTL, MUX_SIG_HI_CTL } = mux_sel;
-
-  // 3'b010
-  // assign mux_sel = 4'b1111;  // active lo. turn all off.
-
-  // assign mux_sel = 4'b1011;  // ref lo in / ie. dead short.
-  // assign mux_sel = 4'b1110;  // sig in .
-  assign mux_sel = 4'b1101;  // ref in .
 
 
   // registers mux_sel |= 0x ... turn a bit on.
@@ -779,6 +788,7 @@ module top (
     . clk_count_var_n( clk_count_var_n ) ,
     . clk_count_int_n( clk_count_int_n ) ,
     . use_slow_rundown( use_slow_rundown),
+    . himux_sel( himux_sel ),
 
     // lomux
     . mux(mux),
