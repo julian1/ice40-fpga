@@ -144,6 +144,7 @@ module my_register_bank   #(parameter MSB=32)   (
         case (addr)
           // soft reset
           // not implemented. - basically would need to pass in integrator state.
+          // *and* to have the op slope feedback working - to reset the integrator change.
           6 :
             /*
               No. just pass the reset value as a vec, just like pass the reg.
