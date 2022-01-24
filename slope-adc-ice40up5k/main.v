@@ -449,25 +449,25 @@ module my_modulation (
                 if(lomux != 3'b101) count_trans_down <= count_trans_down + 1 ;
               end
           end
-/*
-    if we're on the wrong side, at end, for upwards slope.
-    it is easy - to add an additional phase or two with fixed count to get to the other side for final rundown.
-    and we can equalize time with reset period.
+          /*
+              if we're on the wrong side, at end, for upwards slope.
+              it is easy - to add an additional phase or two with fixed count to get to the other side for final rundown.
+              and we can equalize time with reset period.
 
-    // Timing estimate: 27.54 ns (36.31 MHz)
+              // Timing estimate: 27.54 ns (36.31 MHz)
 
-     run an extra cycle. and count them.
-  ----------
-    - i think its ok as it is. if add extra fixpos, then should also add fixneg. which is the same as not adding.
-    - if add new cycle ( fixpos,fixneg and two var). then we likely end up on the same side we started.
-    - as it is - we equalize transitions. and time above cross and time below.
-  -----------
+               run an extra cycle. and count them.
+            ----------
+              - i think its ok as it is. if add extra fixpos, then should also add fixneg. which is the same as not adding.
+              - if add new cycle ( fixpos,fixneg and two var). then we likely end up on the same side we started.
+              - as it is - we equalize transitions. and time above cross and time below.
+            -----------
 
-  TODO. we must count fixed and var count separately.
-        because of the final potential double fixed positive . to get to the correct size for rundown.
+            TODO. we must count fixed and var count separately.
+                  because of the final potential double fixed positive . to get to the correct size for rundown.
 
-  TODO.
-*/
+            TODO.
+          */
 
         `STATE_VAR2:
           if(clk_count == clk_count_var_n)
@@ -738,9 +738,7 @@ module top (
     clk_count_int_n = (2 * 2000000);    // 200ms
     // clk_count_int_n = (5 * 20000000);   // 5 sec.
     use_slow_rundown = 1;
-
     himux_sel = 4'b1011;
-    // himux     =  4'b1011;  // ref lo in / ie. dead short.
   end
 
 
