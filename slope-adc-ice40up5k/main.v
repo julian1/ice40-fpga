@@ -166,6 +166,27 @@ module my_register_bank   #(parameter MSB=32)   (
               // reg_led = update(reg_led, val);
               reg_led <= val;
             end
+/*
+              // read/write registers
+              18: out = clk_count_init_n << 8;
+              20: out = clk_count_fix_n << 8;
+              21: out = clk_count_var_n << 8;
+              22: out = clk_count_int_n << 8;           // lo 24 bits
+              23: out = (clk_count_int_n >> 24) << 8;   // hi 8 bits
+              24: out = use_slow_rundown << 8;
+              25: out = himux_sel << 8;
+*/
+
+          18: clk_count_init_n <= val;
+          20: clk_count_fix_n <= val;
+          21: clk_count_var_n <= val;
+          // 22: clk_count_int_n <= clk_count_int_n & 32'hff000000;           // lo 24 bits
+
+          22: clk_count_int_n <= (clk_count_int_n & 32'hff000000) | val;           // lo 24 bits
+          23: clk_count_int_n <= (clk_count_int_n & 32'h00ffffff) | (val << 24);  // hi 8 bits
+          24: use_slow_rundown <= val;
+          25: himux_sel <= val8;
+
 
         endcase
       end
