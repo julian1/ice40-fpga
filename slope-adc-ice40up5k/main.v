@@ -201,7 +201,10 @@ module my_modulation (
 
   input  clk,
 
-  // input clk counts to use
+  // comparator input
+  input CMPR_OUT_CTL_P,
+
+  // input clk count limits to use
   input [24-1:0]  clk_count_init_n,
   input [24-1:0]  clk_count_fix_n,
   input [24-1:0]  clk_count_var_n,
@@ -222,9 +225,6 @@ module my_modulation (
   // these (the outputs) could be combined into single bitfield.
   output rundown_dir_last,
   output [3-1:0] count_flip_last,
-
-  // comparator input - TODO. move next to clk. to group by in/out
-  input CMPR_OUT_CTL_P,
 
   output COM_INTERUPT,
   output CMPR_LATCH_CTL
@@ -746,6 +746,8 @@ module top (
 
     . clk(clk),
 
+    . CMPR_OUT_CTL_P(CMPR_OUT_CTL_P),
+
     . clk_count_init_n( clk_count_init_n ) ,
     . clk_count_fix_n( clk_count_fix_n ) ,
     . clk_count_var_n( clk_count_var_n ) ,
@@ -763,7 +765,6 @@ module top (
     . rundown_dir_last(rundown_dir),
     . count_flip_last(count_flip),
 
-    . CMPR_OUT_CTL_P(CMPR_OUT_CTL_P),
     . COM_INTERUPT(COM_INTERUPT),
     . CMPR_LATCH_CTL(CMPR_LATCH_CTL)
   );
