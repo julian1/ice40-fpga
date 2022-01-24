@@ -138,6 +138,10 @@ module my_register_bank   #(parameter MSB=32)   (
               22: out = clk_count_int_n << 8;           // lo 24 bits
               23: out = (clk_count_int_n >> 24) << 8;   // hi 8 bits
               24: out = use_slow_rundown << 8;
+
+              /* could convert numerical argument - to avoid accidently turning on more than one source.
+                no. mux switch has 1.5k impedance. should not break anything
+              */
               25: out = himux_sel << 8;
 
             endcase
@@ -171,10 +175,20 @@ module my_register_bank   #(parameter MSB=32)   (
           20: clk_count_fix_n <= val;
           21: clk_count_var_n <= val;
 
-          // these slow things down from 40MHz to 24MHz. need piplining. 
+          // TODO
+          // these slow things down from 40MHz to 34MHz. need piplining.
+          // PROBLEM - sensitivity list does not include clk.
+          // YES. we have the spi clk. so could pipeline on that.
+
+          // 35MHz. test.
+          // 22: clk_count_int_n <= { clk_count_int_n[32 -1: 24 -1] ,  val } ;           // lo 24 bits
+          // 23: clk_count_int_n <= { val, clk_count_int_n[ 24 -1 : 0 ] };  // hi 8 bits
+
+          // 34MHz.
           22: clk_count_int_n <= (clk_count_int_n & 32'hff000000) | val;           // lo 24 bits
           23: clk_count_int_n <= (clk_count_int_n & 32'h00ffffff) | (val << 24);  // hi 8 bits
           24: use_slow_rundown <= val;
+
           25: himux_sel <= val;
 
         endcase
