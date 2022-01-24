@@ -116,15 +116,12 @@ module my_register_bank   #(parameter MSB=32)   (
               16: out = rundown_dir << 8;   // correct for single bit?
               17: out = count_flip << 8;
 
-              // registers
-
-      
-              18: out = clk_count_init_n << 8;  // lo 24 bits
-
-
+              // read/write registers
+              18: out = clk_count_init_n << 8;
               20: out = clk_count_fix_n << 8;
               21: out = clk_count_var_n << 8;
-              22: out = clk_count_int_n << 8;
+              22: out = clk_count_int_n << 8;           // lo 24 bits
+              23: out = (clk_count_int_n >> 24) << 8;   // hi 8 bits
 
 
             endcase
@@ -700,7 +697,8 @@ module top (
     clk_count_init_n =  10000;
     clk_count_fix_n = 700;
     clk_count_var_n = 5500;
-    clk_count_int_n = (2 * 2000000);
+    clk_count_int_n = (2 * 2000000);    // 200ms
+    // clk_count_int_n = (5 * 20000000);   // 5 sec.
   end
 
 
