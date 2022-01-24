@@ -363,8 +363,8 @@ module my_modulation (
             CMPR_LATCH_CTL <= 0; // enable comparator
 
             // set the hi mux to desired signal
+            // IMPORTANT. buffer op must now be given time to settle to new input.
             himux <= himux_sel; 
-
 
             // lomux <= 3'b000; // turn off all inputs.
             // lomux <= 3'b100; // turn on input signal
