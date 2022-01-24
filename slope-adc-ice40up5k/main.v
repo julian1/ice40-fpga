@@ -756,8 +756,8 @@ module top (
     clk_count_int_n = (2 * 2000000);    // 200ms
     // clk_count_int_n = (5 * 20000000);   // 5 sec.
     use_slow_rundown = 1;
-    // himux_sel = 4'b1011;  ref lo/gnd
-    himux_sel = 4'b1101;    // ref in
+    himux_sel = 4'b1011;        // ref lo/agnd
+    // himux_sel = 4'b1101;     // ref in
   end
 
 
