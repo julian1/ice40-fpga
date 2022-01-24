@@ -271,7 +271,7 @@ module my_modulation (
   // for an individual phase.
 
   reg [31:0]  clk_count ;         // clk_count for the current phase.
-  reg [31:0]  clk_count_tot ;     // from the start of the signal integration. eg. 5sec*20MHz=100m count. won't fit in 24 bit value. would need to split between read registers.
+  reg [31:0]  clk_count_int ;     // from the start of the signal integration. eg. 5sec*20MHz=100m count. won't fit in 24 bit value. would need to split between read registers.
                                   // could also record clk_count_actual.
 
   // modulation counts
@@ -320,7 +320,7 @@ module my_modulation (
 
       // default behavior at top of verilog block.
       clk_count <= clk_count + 1;
-      clk_count_tot <= clk_count_tot + 1;
+      clk_count_int <= clk_count_int + 1;
 
       /*
         think we want a state init. that holds everything in pause.
@@ -334,7 +334,7 @@ module my_modulation (
             state <= `STATE_INIT;
 
             clk_count <= 0;
-            clk_count_tot <= 0;   // start of signal integration time.
+            clk_count_int <= 0;   // start of signal integration time.
             // count_tot <= 0;
             count_up <= 0;
             count_down <= 0;
@@ -459,7 +459,7 @@ module my_modulation (
                   EXTR. could be be nice to record value at the end.
               */
               // end of integration condition.
-              if(clk_count_tot >= clk_count_int_n)
+              if(clk_count_int >= clk_count_int_n)
 
                 if( ~ CMPR_OUT_CTL_P)   // test above zero cross
                   begin
