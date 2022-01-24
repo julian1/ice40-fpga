@@ -41,6 +41,14 @@ module my_register_bank   #(parameter MSB=32)   (
   // output wire [24-1:0] reg_led ,    // need to be very careful. only 4 bits. or else screws set/reset calculation ...
   inout wire [24-1:0] reg_led ,    // need to be very careful. only 4 bits. or else screws set/reset calculation ...
 
+  // modulation parameters/count limits to use
+  input [24-1:0]  clk_count_init_n,
+  input [24-1:0]  clk_count_fix_n,
+  input [24-1:0]  clk_count_var_n,
+  input [31:0]    clk_count_int_n,
+
+
+
   input wire [24-1:0] count_up,
   input wire [24-1:0] count_down,
   input wire [24-1:0] clk_count_rundown,
@@ -688,21 +696,27 @@ module top (
   my_register_bank #( 32 )   // register bank  . change name 'registers'
   bank
     (
+    // spi
     . clk(COM_CLK),
     . cs(COM_CS),
     . din(COM_MOSI),
     . dout(COM_MISO),
 
-    // rename this as a test register. for 24 bit read/write.
+    // parameters
     . reg_led(reg_led),
+    . clk_count_init_n( clk_count_init_n ) ,
+    . clk_count_fix_n( clk_count_fix_n ) ,
+    . clk_count_var_n( clk_count_var_n ) ,
+    . clk_count_int_n( clk_count_int_n ) ,
 
+    // counts
     . count_up(count_up),
     . count_down(count_down),
     . clk_count_rundown(clk_count_rundown),
-
     . count_trans_up(count_trans_up),
     . count_trans_down(count_trans_down),
 
+    // other vars
     . rundown_dir(rundown_dir),
     . count_flip(count_flip)
 
@@ -746,23 +760,25 @@ module top (
   my_modulation  m1 (
 
     . clk(clk),
-
     . comparator_val( CMPR_OUT_CTL_P ),
 
+    // parameters
     . clk_count_init_n( clk_count_init_n ) ,
     . clk_count_fix_n( clk_count_fix_n ) ,
     . clk_count_var_n( clk_count_var_n ) ,
     . clk_count_int_n( clk_count_int_n ) ,
 
+    // lomux
     . mux(mux),
 
+    // counts
     . count_up_last(count_up),
     . count_down_last(count_down),
     . clk_count_rundown_last(clk_count_rundown),
-
     . count_trans_up_last(count_trans_up),
     . count_trans_down_last(count_trans_down),
 
+    // other vars
     . rundown_dir_last(rundown_dir),
     . count_flip_last(count_flip),
 
