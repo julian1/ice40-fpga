@@ -231,8 +231,10 @@ module my_modulation (
   input           use_slow_rundown,
   input [4-1:0]   himux_sel,
 
-  // lowmux
-  output [2:0] mux,
+  // low mux
+  output [3-1:0] lomux,
+  // high mux
+  output [4-1:0] himux,
 
   // values from last run, available in order to read
   output [24-1:0] count_up_last,
@@ -253,10 +255,10 @@ module my_modulation (
 
   /*
   // so need
-  //   1. state where switch op - to take slope to reset. and the mux takes the input .
-  //   2. state to switch op back to the signal. while holding the switch at intmux at gnd.
-  // **** actually at the end of the initegration - we would not turn off teh lowmux.
-  // instead just switch the highmux to feedback and settle
+  //   1. state where switch op - to take slope to reset. and the lomux takes the input .
+  //   2. state to switch op back to the signal. while holding the switch at intlomux at gnd.
+  // **** actually at the end of the initegration - we would not turn off teh lowlomux.
+  // instead just switch the highlomux to feedback and settle
   // then
     */
 
@@ -362,9 +364,12 @@ module my_modulation (
             COM_INTERUPT <= 1; // active lo
             CMPR_LATCH_CTL <= 0; // enable comparator
 
+            // set the hi mux to desired signal
+            himux <= himux_sel; 
 
-            // mux <= 3'b000; // turn off all inputs.
-            // mux <= 3'b100; // turn on input signal
+
+            // lomux <= 3'b000; // turn off all inputs.
+            // lomux <= 3'b100; // turn on input signal
           end
 
 
@@ -381,8 +386,8 @@ module my_modulation (
           begin
             state <= `STATE_FIX_POS;
             clk_count <= 0;
-            mux <= 3'b101; // initial direction
-            if(mux != 3'b101) count_trans_down <= count_trans_down + 1 ;
+            lomux <= 3'b101; // initial direction
+            if(lomux != 3'b101) count_trans_down <= count_trans_down + 1 ;
           end
 
         `STATE_FIX_POS:
@@ -397,15 +402,15 @@ module my_modulation (
             // count_tot <= count_tot + 1;
             if( comparator_val)   // test below the zero-cross
               begin
-                mux <= 3'b110;  // add negative ref. to drive up.
+                lomux <= 3'b110;  // add negative ref. to drive up.
                 count_up <= count_up + 1;
-                if(mux != 3'b110) count_trans_up <= count_trans_up + 1 ;
+                if(lomux != 3'b110) count_trans_up <= count_trans_up + 1 ;
               end
             else
               begin
-                mux <= 3'b101;
+                lomux <= 3'b101;
                 count_down <= count_down + 1;
-                if(mux != 3'b101) count_trans_down <= count_trans_down + 1 ;
+                if(lomux != 3'b101) count_trans_down <= count_trans_down + 1 ;
               end
           end
 
@@ -417,8 +422,8 @@ module my_modulation (
           begin
             state <= `STATE_FIX_NEG;
             clk_count <= 0;
-            mux <= 3'b110;
-            if(mux != 3'b110) count_trans_up <= count_trans_up + 1 ;
+            lomux <= 3'b110;
+            if(lomux != 3'b110) count_trans_up <= count_trans_up + 1 ;
           end
 
         `STATE_FIX_NEG:
@@ -433,15 +438,15 @@ module my_modulation (
             // count_tot <= count_tot + 1;
             if( comparator_val)
               begin
-                mux <= 3'b110;
+                lomux <= 3'b110;
                 count_up <= count_up + 1;
-                if(mux != 3'b110) count_trans_up <= count_trans_up + 1 ;
+                if(lomux != 3'b110) count_trans_up <= count_trans_up + 1 ;
               end
             else
               begin
-                mux <= 3'b101;
+                lomux <= 3'b101;
                 count_down <= count_down + 1;
-                if(mux != 3'b101) count_trans_down <= count_trans_down + 1 ;
+                if(lomux != 3'b101) count_trans_down <= count_trans_down + 1 ;
               end
           end
 /*
@@ -515,9 +520,9 @@ module my_modulation (
             // turn on both references - to create +ve bias, to drive integrator down.
 
             if( use_slow_rundown )
-              mux <= 3'b011;
+              lomux <= 3'b011;
             else
-              mux <= 3'b001;
+              lomux <= 3'b001;
 
             // TODO - the better way to do transitions is with a function. so can test existing state. up/down. then record.
 
@@ -529,7 +534,7 @@ module my_modulation (
 
             // no slow slope. - just +ve bias
             // this fails to route?
-            // mux <= 3'b001;
+            // lomux <= 3'b001;
           end
 
         // EXTR. we also have to short the integrator at the start. to begin at a known start position.
@@ -554,7 +559,7 @@ module my_modulation (
                   clk_count <= 0;    // ok.
 
                   // turn off all inputs. actually should leave. because we will turn on to reset the integrator.
-                  mux <= 3'b000;
+                  lomux <= 3'b000;
                   COM_INTERUPT <= 0;   // active lo, set interupt
                   count_up_last <= count_up;
                   count_down_last <= count_down;
@@ -568,7 +573,7 @@ module my_modulation (
                   /*
                     TODO can get rid of this. if always drive in the same direction.
                   */
-                  case(mux)
+                  case(lomux)
                     3'b010: rundown_dir_last = 1; // up
                     3'b001: rundown_dir_last = 0;
                     3'b011: rundown_dir_last = 0;
@@ -694,6 +699,12 @@ module top (
   reg [4-1:0] himux_sel;    // himux signal selection
 
 
+  /*
+    registers mux_sel |= 0x ... turn a bit on.
+    registers mux_sel &= ~ 0x ... turn a bit on.
+  */
+
+
   reg [4-1:0] himux;
   assign { MUX_SLOPE_ANG_CTL, MUX_REF_LO_CTL, MUX_REF_HI_CTL, MUX_SIG_HI_CTL } = himux;
 
@@ -703,6 +714,20 @@ module top (
   // assign himux = 4'b1110;  // sig in .
   // assign himux = 4'b1101;  // ref in .
 
+  // we can probe the leds for signals....
+
+  // start everything off...
+  reg [3-1:0] lomux ;
+  assign { INT_IN_SIG_CTL, INT_IN_N_CTL, INT_IN_P_CTL } = lomux;
+
+  /*
+    blinky blinky_ (
+      . clk(clk),
+      . out_v( mux_sel)
+    );
+  */
+
+  assign { LED_B, LED_G, LED_R } = 3'b111 ;   // off, active lo.
 
 
   //
@@ -715,9 +740,7 @@ module top (
     use_slow_rundown = 1;
 
     himux_sel = 4'b1011;
-   
-    himux =  4'b1011;  // ref lo in / ie. dead short.
-
+    // himux     =  4'b1011;  // ref lo in / ie. dead short.
   end
 
 
@@ -755,31 +778,10 @@ module top (
 
 
 
-  // we can probe the leds for signals....
-
-  // start everything off...
-  reg [2:0] mux ;
-  assign { INT_IN_SIG_CTL, INT_IN_N_CTL, INT_IN_P_CTL } = mux;
-
-
-
-  // registers mux_sel |= 0x ... turn a bit on.
-  // registers mux_sel &= ~ 0x ... turn a bit on.
-
-/*
-  blinky blinky_ (
-    . clk(clk),
-    . out_v( mux_sel)
-  );
-*/
-
-  assign { LED_B, LED_G, LED_R } = 3'b111 ;   // off
-
-
-
 
   my_modulation  m1 (
 
+    // inputs
     . clk(clk),
     . comparator_val( CMPR_OUT_CTL_P ),
 
@@ -792,7 +794,8 @@ module top (
     . himux_sel( himux_sel ),
 
     // lomux
-    . mux(mux),
+    . lomux(lomux),
+    . himux(himux),
 
     // counts
     . count_up_last(count_up),
