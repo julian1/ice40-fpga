@@ -696,9 +696,9 @@ module top (
     clk_count_init_n =  10000;
     clk_count_fix_n = 700;
     clk_count_var_n = 5500;
-    // clk_count_int_n = (2 * 2000000);    // 200ms
-    clk_count_int_n = (5 * 20000000);   // 5 sec.
-    use_slow_rundown = 0;
+    clk_count_int_n = (2 * 2000000);    // 200ms
+    // clk_count_int_n = (5 * 20000000);   // 5 sec.
+    use_slow_rundown = 1;
   end
 
 
