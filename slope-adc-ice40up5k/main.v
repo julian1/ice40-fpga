@@ -33,7 +33,6 @@ module my_register_bank   #(parameter MSB=32)   (
 
   input  clk,
   input  cs,
-  // input  special,   // TODO swap order specia/din
   input  din,       // sdi
   output dout,       // sdo
 
@@ -297,7 +296,6 @@ module my_modulation (
                                   // could also record clk_count_actual.
 
   // modulation counts
-  // reg [31:0]  count_tot ;     // TODO. remove. unless use as terminate condition.
   reg [24-1:0] count_up;
   reg [24-1:0] count_down;
   reg [24-1:0] count_trans_up;
@@ -355,7 +353,6 @@ module my_modulation (
 
             clk_count <= 0;
             clk_count_int <= 0;   // start of signal integration time.
-            // count_tot <= 0;
             count_up <= 0;
             count_down <= 0;
             count_trans_up <= 0;
@@ -400,7 +397,6 @@ module my_modulation (
           begin
             state <= `STATE_VAR;
             clk_count <= 0;
-            // count_tot <= count_tot + 1;
             if( comparator_val)   // test below the zero-cross
               begin
                 lomux <= 3'b110;  // add negative ref. to drive up.
@@ -436,7 +432,6 @@ module my_modulation (
           begin
             state <= `STATE_VAR2;
             clk_count <= 0;
-            // count_tot <= count_tot + 1;
             if( comparator_val)
               begin
                 lomux <= 3'b110;
