@@ -202,8 +202,7 @@ module my_modulation (
   input  clk,
 
   // comparator input
-  // TODO. should be lower case.
-  input CMPR_OUT_CTL_P,
+  input comparator_val,
 
   // modulation parameters/count limits to use
   input [24-1:0]  clk_count_init_n,
@@ -289,7 +288,7 @@ module my_modulation (
   // change name  zero_cross.. or just cross_
   reg [2:0] crossr;
   always @(posedge clk)
-    crossr <= {crossr[1:0], CMPR_OUT_CTL_P};
+    crossr <= {crossr[1:0], comparator_val};
 
   wire cross_up     = (crossr[2:1]==2'b10);  // message starts at falling edge
   wire cross_down   = (crossr[2:1]==2'b01);  // message stops at rising edge
@@ -378,7 +377,7 @@ module my_modulation (
             state <= `STATE_VAR;
             clk_count <= 0;
             // count_tot <= count_tot + 1;
-            if( CMPR_OUT_CTL_P)   // test below the zero-cross
+            if( comparator_val)   // test below the zero-cross
               begin
                 mux <= 3'b110;  // add negative ref. to drive up.
                 count_up <= count_up + 1;
@@ -414,7 +413,7 @@ module my_modulation (
             state <= `STATE_VAR2;
             clk_count <= 0;
             // count_tot <= count_tot + 1;
-            if( CMPR_OUT_CTL_P)
+            if( comparator_val)
               begin
                 mux <= 3'b110;
                 count_up <= count_up + 1;
@@ -461,7 +460,7 @@ module my_modulation (
               // end of integration condition.
               if(clk_count_int >= clk_count_int_n)
 
-                if( ~ CMPR_OUT_CTL_P)   // test above zero cross
+                if( ~ comparator_val)   // test above zero cross
                   begin
                     // above zero cross
                     // go straight to the final rundown.
@@ -748,7 +747,7 @@ module top (
 
     . clk(clk),
 
-    . CMPR_OUT_CTL_P(CMPR_OUT_CTL_P),
+    . comparator_val( CMPR_OUT_CTL_P ),
 
     . clk_count_init_n( clk_count_init_n ) ,
     . clk_count_fix_n( clk_count_fix_n ) ,
