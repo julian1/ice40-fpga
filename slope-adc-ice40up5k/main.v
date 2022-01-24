@@ -47,6 +47,7 @@ module my_register_bank   #(parameter MSB=32)   (
   input [24-1:0]  clk_count_fix_n,
   input [24-1:0]  clk_count_var_n,
   input [31:0]    clk_count_int_n,
+  input           use_slow_rundown,
 
 
 
@@ -96,7 +97,7 @@ module my_register_bank   #(parameter MSB=32)   (
         // this must be sequential, for equality test...
         count = count + 1;
 
-        if(count == 8)
+        if(count == 8)  // we have read the register to use
           begin
             // ignore hi bit.
             // allows us to read a register, without writing, by setting hi bit of register addr
@@ -122,7 +123,7 @@ module my_register_bank   #(parameter MSB=32)   (
               21: out = clk_count_var_n << 8;
               22: out = clk_count_int_n << 8;           // lo 24 bits
               23: out = (clk_count_int_n >> 24) << 8;   // hi 8 bits
-
+              24: out = use_slow_rundown << 8;
 
             endcase
           end
@@ -226,7 +227,7 @@ module my_modulation (
   input [24-1:0]  clk_count_fix_n,
   input [24-1:0]  clk_count_var_n,
   input [31:0]    clk_count_int_n,
-
+  input           use_slow_rundown,
 
   // lowmux
   output [2:0] mux,
@@ -319,8 +320,6 @@ module my_modulation (
   */
 
 
-                                      // need a better name for this...
-  `define SLOW_RUNDOWN 1
 
   always @(posedge clk)
     begin
@@ -513,7 +512,7 @@ module my_modulation (
 
             // turn on both references - to create +ve bias, to drive integrator down.
 
-            if(`SLOW_RUNDOWN)
+            if( use_slow_rundown )
               mux <= 3'b011;
             else
               mux <= 3'b001;
@@ -676,7 +675,7 @@ module top (
   reg [24-1:0]  clk_count_fix_n;
   reg [24-1:0]  clk_count_var_n;
   reg [31:0]    clk_count_int_n;
-
+  reg use_slow_rundown;
 
 
   // output counts to read
@@ -697,8 +696,9 @@ module top (
     clk_count_init_n =  10000;
     clk_count_fix_n = 700;
     clk_count_var_n = 5500;
-    clk_count_int_n = (2 * 2000000);    // 200ms
-    // clk_count_int_n = (5 * 20000000);   // 5 sec.
+    // clk_count_int_n = (2 * 2000000);    // 200ms
+    clk_count_int_n = (5 * 20000000);   // 5 sec.
+    use_slow_rundown = 0;
   end
 
 
@@ -718,6 +718,7 @@ module top (
     . clk_count_fix_n( clk_count_fix_n ) ,
     . clk_count_var_n( clk_count_var_n ) ,
     . clk_count_int_n( clk_count_int_n ) ,
+    . use_slow_rundown( use_slow_rundown),
 
     // counts
     . count_up(count_up),
@@ -777,6 +778,7 @@ module top (
     . clk_count_fix_n( clk_count_fix_n ) ,
     . clk_count_var_n( clk_count_var_n ) ,
     . clk_count_int_n( clk_count_int_n ) ,
+    . use_slow_rundown( use_slow_rundown),
 
     // lomux
     . mux(mux),
