@@ -31,11 +31,11 @@
 
 module my_register_bank   #(parameter MSB=32)   (
 
+  // spi
   input  clk,
   input  cs,
   input  din,       // sdi
   output dout,       // sdo
-
 
 
   // use ' inout',  must be inout to write
@@ -165,15 +165,17 @@ module my_register_bank   #(parameter MSB=32)   (
           // use high bit - to do a xfer (read+writ) while avoiding actually writing a register
           // leds
 
+          7 : reg_led <= val;
 
-          7 :
-            begin
-              // reg_led = update(reg_led, val);
-              reg_led <= val;
-            end
+          18: clk_count_init_n <= val;
+          20: clk_count_fix_n <= val;
+          21: clk_count_var_n <= val;
 
-          25 : himux_sel <=  val;
-
+          // these slow things down from 40MHz to 24MHz. need piplining. 
+          22: clk_count_int_n <= (clk_count_int_n & 32'hff000000) | val;           // lo 24 bits
+          23: clk_count_int_n <= (clk_count_int_n & 32'h00ffffff) | (val << 24);  // hi 8 bits
+          24: use_slow_rundown <= val;
+          25: himux_sel <= val;
 
         endcase
       end
