@@ -50,9 +50,12 @@ module my_register_bank   #(parameter MSB=32)   (
   // outputs only
   input wire [24-1:0] count_up,
   input wire [24-1:0] count_down,
-  input wire [24-1:0] clk_count_rundown,
   input wire [24-1:0] count_trans_up,
   input wire [24-1:0] count_trans_down,
+  input wire [24-1:0] count_fix_up,
+  input wire [24-1:0] count_fix_down,
+
+  input wire [24-1:0] clk_count_rundown,
 
   input wire          rundown_dir,
   input wire [3-1:0]  count_flip    // should be a count. possible could require two up modulations
@@ -264,9 +267,12 @@ module my_modulation (
   // values from last run, available in order to read
   output [24-1:0] count_up_last,
   output [24-1:0] count_down_last,
-  output [24-1:0] clk_count_rundown_last,
   output [24-1:0] count_trans_up_last,
   output [24-1:0] count_trans_down_last,
+  output [24-1:0] count_fix_up_last,
+  output [24-1:0] count_fix_down_last,
+
+  output [24-1:0] clk_count_rundown_last,
 
   // could also record the initial dir.
   // these (the outputs) could be combined into single bitfield.
@@ -341,6 +347,9 @@ module my_modulation (
   reg [24-1:0] count_down;
   reg [24-1:0] count_trans_up;
   reg [24-1:0] count_trans_down;
+  reg [24-1:0] count_fix_up;
+  reg [24-1:0] count_fix_down;
+
 
   // reg [3-1:0] count_flip;
 
@@ -397,12 +406,14 @@ module my_modulation (
             count_down <= 0;
             count_trans_up <= 0;
             count_trans_down <= 0;
-            // count_flip <= 0;
+            count_fix_up <= 0;
+            count_fix_down <= 0;
 
             COM_INTERUPT <= 1; // active lo
             CMPR_LATCH_CTL <= 0; // enable comparator
 
-            // set the hi mux to desired signal
+            // TODO this is wrong. should be muxing reset signal.
+            // select input signal 
             // IMPORTANT. buffer op must now be given time to settle to new input.
             himux <= himux_sel;
 
@@ -536,12 +547,15 @@ module my_modulation (
                   refmux <= `MUX_NONE;
 
                   COM_INTERUPT <= 0;   // active lo, set interupt
-                  count_up_last <= count_up;
-                  count_down_last <= count_down;
-                  clk_count_rundown_last <= clk_count;// TODO change nmae  clk_clk_count_rundown
 
+                  count_up_last       <= count_up;
+                  count_down_last     <= count_down;
                   count_trans_up_last <= count_trans_up;
                   count_trans_down_last <= count_trans_down;
+                  count_fix_up_last   <= count_fix_up;
+                  count_fix_down_last <= count_fix_down;
+
+                  clk_count_rundown_last <= clk_count;// TODO change nmae  clk_clk_count_rundown
 
                   count_flip_last <= 0; // count_flip;
 
@@ -656,10 +670,12 @@ module top (
   // output counts to read
   reg [24-1:0] count_up;
   reg [24-1:0] count_down;
-  reg [24-1:0] clk_count_rundown;
-
   reg [24-1:0] count_trans_up ;
   reg [24-1:0] count_trans_down;
+  reg [24-1:0] count_fix_up;
+  reg [24-1:0] count_fix_down;
+
+  reg [24-1:0] clk_count_rundown;
 
   reg          rundown_dir;
   reg [3-1:0]  count_flip;
@@ -722,9 +738,13 @@ module top (
     // counts
     . count_up(count_up),
     . count_down(count_down),
-    . clk_count_rundown(clk_count_rundown),
     . count_trans_up(count_trans_up),
     . count_trans_down(count_trans_down),
+    . count_fix_up(count_fix_up),
+    . count_fix_down(count_fix_down),
+
+    // clk counts
+    . clk_count_rundown(clk_count_rundown),
 
     // other vars
     . rundown_dir(rundown_dir),
@@ -756,9 +776,13 @@ module top (
     // counts
     . count_up_last(count_up),
     . count_down_last(count_down),
-    . clk_count_rundown_last(clk_count_rundown),
     . count_trans_up_last(count_trans_up),
     . count_trans_down_last(count_trans_down),
+    . count_fix_up_last(count_fix_up),
+    . count_fix_down_last(count_fix_down),
+  
+    // clk counts
+    . clk_count_rundown_last(clk_count_rundown),
 
     // other vars
     . rundown_dir_last(rundown_dir),
