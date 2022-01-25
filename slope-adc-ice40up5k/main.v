@@ -72,7 +72,7 @@ module my_register_bank   #(parameter MSB=32)   (
 
   // To use in an inout. the initial block is a driver. so must be placed here.
   initial begin
-    reg_led           = 3'b101;
+//    reg_led           = 3'b101;
     clk_count_init_n  =  10000;
     clk_count_fix_n   = 700;
     clk_count_var_n   = 5500;
@@ -277,13 +277,13 @@ module my_modulation (
   output [24-1:0] count_trans_down_last,
   output [24-1:0] count_fix_up_last,
   output [24-1:0] count_fix_down_last,
+  output [24-1:0] count_flip_last,
 
   output [24-1:0] clk_count_rundown_last,
 
   // could also record the initial dir.
   // these (the outputs) could be combined into single bitfield.
   output rundown_dir_last,
-  output [3-1:0] count_flip_last,
 
   // TODO change lower case
   output COM_INTERUPT,
@@ -355,9 +355,7 @@ module my_modulation (
   reg [24-1:0] count_trans_down;
   reg [24-1:0] count_fix_up;
   reg [24-1:0] count_fix_down;
-
-
-  // reg [3-1:0] count_flip;
+  reg [24-1:0] count_flip;
 
   /////////////////////////
   // this should be pushed into a separate module...
@@ -414,6 +412,7 @@ module my_modulation (
             count_trans_down <= 0;
             count_fix_up    <= 0;
             count_fix_down  <= 0;
+            count_flip      <= 0;
 
             COM_INTERUPT    <= 1; // active lo
             CMPR_LATCH_CTL  <= 0; // enable comparator
@@ -522,6 +521,8 @@ module my_modulation (
               else
                 // do another cycle
                 state <= `STATE_FIX_POS_START;
+                // TODO rename extra_cycle
+                count_flip <= count_flip + 1;
             end
 
 
@@ -562,14 +563,26 @@ module my_modulation (
                   count_trans_down_last <= count_trans_down;
                   count_fix_up_last   <= count_fix_up;
                   count_fix_down_last <= count_fix_down;
+                  count_flip_last     <= count_flip;
 
                   clk_count_rundown_last <= clk_count;// TODO change nmae  clk_clk_count_rundown
 
                   count_flip_last <= 0; // count_flip;
 
                   // ADDING these here seemed to be necessary to get the design to place without going into loop.
-                  count_fix_up       <= 0;
-                  count_fix_down     <= 0;
+                  // count_fix_up       <= 0;
+                  // count_fix_down     <= 0;
+                  // count_flip         <= 0;
+
+                  // setting these here. improves speed / stability
+                  // 30MHz to 35MHz.
+                  count_up        <= 0;
+                  count_down      <= 0;
+                  count_trans_up  <= 0;
+                  count_trans_down <= 0;
+                  count_fix_up    <= 0;
+                  count_fix_down  <= 0;
+                  count_flip      <= 0;
 
 
 
@@ -666,7 +679,8 @@ module top (
 
 );
 
-  wire [24-1:0] reg_led ;
+  // wire [24-1:0] reg_led ;
+  reg [24-1:0] reg_led ;
   // assign { LED_B, LED_G, LED_R } =   reg_led ;   // not inverted for easier scope probing.inverted for common drain.
   // assign { LED_B, LED_G, LED_R } = 3'b010 ;       // works...
                                                     // Ok. it really looks correct on the leds...
@@ -688,11 +702,11 @@ module top (
   reg [24-1:0] count_trans_down;
   reg [24-1:0] count_fix_up;
   reg [24-1:0] count_fix_down;
+  reg [24-1:0] count_flip;
 
   reg [24-1:0] clk_count_rundown;
 
   reg          rundown_dir;
-  reg [3-1:0]  count_flip;
 
 
   reg [4-1:0] himux_sel;    // himux signal selection
@@ -756,13 +770,13 @@ module top (
     . count_trans_down(count_trans_down),
     . count_fix_up(count_fix_up),
     . count_fix_down(count_fix_down),
+    . count_flip(count_flip),
 
     // clk counts
     . clk_count_rundown(clk_count_rundown),
 
     // other vars
     . rundown_dir(rundown_dir),
-    . count_flip(count_flip)
 
   );
 
@@ -794,13 +808,13 @@ module top (
     . count_trans_down_last(count_trans_down),
     . count_fix_up_last(count_fix_up),
     . count_fix_down_last(count_fix_down),
+    . count_flip_last(count_flip),
 
     // clk counts
     . clk_count_rundown_last(clk_count_rundown),
 
     // other vars
     . rundown_dir_last(rundown_dir),
-    . count_flip_last(count_flip),
 
     . COM_INTERUPT(COM_INTERUPT),
     . CMPR_LATCH_CTL(CMPR_LATCH_CTL)
