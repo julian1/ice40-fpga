@@ -412,7 +412,7 @@ module my_modulation (
             count_trans_down <= 0;
             count_fix_up    <= 0;
             count_fix_down  <= 0;
-            count_flip      <= 0;
+            // count_flip      <= 0;
 
             COM_INTERUPT    <= 1; // active lo
             CMPR_LATCH_CTL  <= 0; // enable comparator
@@ -514,6 +514,11 @@ module my_modulation (
         `STATE_VAR2:
           if(clk_count == clk_count_var_n)
             begin
+              ///////////////////////////
+              // this code here, with flip_count is very speed sensitive. eg. 39MHz to 32MHz.
+              // integration becomes unstable around 30MHz. waveform starts flipping.
+              // its OK. we can remove the count_flip if we want.
+
               // end of integration condition. and above zero cross
               if(done && ~ comparator_val)
                 // go straight to the final rundown.
@@ -522,9 +527,16 @@ module my_modulation (
                 // do another cycle
                 state <= `STATE_FIX_POS_START;
                 // TODO rename extra_cycle
-
+/*
+               // slow??? 32MHz.
                 if(done)
-                  count_flip <= count_flip + 1;
+                  begin
+                    // simple pipeline won't work. because constrained by the done condition to only propagate once.
+                    count_flip <= count_flip + 1;
+                  end
+*/
+
+
             end
 
 
@@ -565,18 +577,16 @@ module my_modulation (
                   count_trans_down_last <= count_trans_down;
                   count_fix_up_last   <= count_fix_up;
                   count_fix_down_last <= count_fix_down;
-                  count_flip_last     <= count_flip;
+                  // count_flip_last     <= count_flip;
 
                   clk_count_rundown_last <= clk_count;// TODO change nmae  clk_clk_count_rundown
 
 
-                  // ADDING these here seemed to be necessary to get the design to place without going into loop.
-                  // count_fix_up       <= 0;
-                  // count_fix_down     <= 0;
-                  // count_flip         <= 0;
-
+ 
+                  /*
                   // setting these here. improves speed / stability
                   // 30MHz to 35MHz.
+                  // not really
                   count_up        <= 0;
                   count_down      <= 0;
                   count_trans_up  <= 0;
@@ -584,7 +594,7 @@ module my_modulation (
                   count_fix_up    <= 0;
                   count_fix_down  <= 0;
                   count_flip      <= 0;
-
+                    */
 
 
                   // record last // unused. could remove.
