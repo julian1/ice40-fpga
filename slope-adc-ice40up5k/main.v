@@ -507,27 +507,9 @@ module my_modulation (
             else
               refmux <= `MUX_REF_POS;
 
-            // TODO - the better way to do transitions is with a function. so can test existing state. up/down. then record.
-
-            // count_down <= count_down + 1; don't count
-            // TODO - this is not correct. it's possible we did not transition here. eg. we may already be going down.
-            // count_trans_down <= count_trans_down + 1 ;
-
-            // NO. - fixed pos and fixed neg - do not cancel. because they are non-ideal. but if they are equal - then a count of the number of cycles could capture the current.
-
-            // no slow slope. - just +ve bias
-            // this fails to route?
-            // refmux <= 3'b001;
           end
 
-        // EXTR. we also have to short the integrator at the start. to begin at a known start position.
 
-        /*
-            EXTR.
-              the other way to end the integration. - is just to keep running 4 wave sequences.
-              until we are above. but that could be a long time.
-
-        */
 
         `STATE_RUNDOWN:
           begin
