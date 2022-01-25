@@ -377,7 +377,7 @@ module my_modulation (
       if(clk_count_int >= clk_count_int_n)
         begin
           done <= 1; // change name to sigdone.
-          sigmux <= 0; // turn off
+          sigmux <= 0; // turn off signal
         end
 
 
@@ -474,12 +474,12 @@ module my_modulation (
           ///////////
           // EXTR.  actually since we stopped injecting signal - it doesn't matter how many cycles we use to get above zero-cross.
           // and it will happen reasonably quickly. because of the bias.
-          // so perhaps we don't have to withhold a var after we are done.
+          // so just keep running complete 4 phase cycles until we get a cross. rather than force positive vars. 
           //////////
           begin
             state <= `STATE_VAR2;
             clk_count <= 0;
-            if( comparator_val)
+            if( comparator_val) // below zero-cross
               begin
                 refmux <= `MUX_REF_NEG;
                 if(refmux != `MUX_REF_NEG) count_trans_up <= count_trans_up + 1 ;
@@ -498,7 +498,7 @@ module my_modulation (
             begin
               // end of integration condition. and above zero cross
               if(done && ~ comparator_val)
-                  // go straight to the final rundown.
+                // go straight to the final rundown.
                 state <= `STATE_RUNDOWN_START;
               else
                 // do another cycle
@@ -511,15 +511,13 @@ module my_modulation (
             state <= `STATE_RUNDOWN;
             clk_count <= 0;
 
-            // turn on both references - to create +ve bias, to drive integrator down.
-
             if( use_slow_rundown )
+              // turn on both references - to create +ve bias, to drive integrator down.
               refmux <= `MUX_REF_SLOW_POS;
             else
+              // fast rundown
               refmux <= `MUX_REF_POS;
-
           end
-
 
 
         `STATE_RUNDOWN:
