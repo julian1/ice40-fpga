@@ -384,7 +384,7 @@ module my_modulation (
     begin
 
       // default behavior at top of verilog block.
-      clk_count <= clk_count + 1;
+      clk_count     <= clk_count + 1;
       clk_count_int <= clk_count_int + 1;
 
 
@@ -434,7 +434,7 @@ module my_modulation (
             if(clk_count == clk_count_init_n)
               begin
                 state <= `STATE_FIX_POS_START;
-                // turn on signal
+                // turn on signal, begin signal integration
                 sigmux <= 1;
               end
           end
@@ -442,6 +442,7 @@ module my_modulation (
         `STATE_FIX_POS_START:
           begin
             state <= `STATE_FIX_POS;
+            count_fix_down <= count_fix_down + 1;
             clk_count <= 0;
             refmux <= `MUX_REF_POS; // initial direction
             if(refmux != `MUX_REF_POS) count_trans_down <= count_trans_down + 1 ;
@@ -477,6 +478,7 @@ module my_modulation (
         `STATE_FIX_NEG_START:
           begin
             state <= `STATE_FIX_NEG;
+            count_fix_up <= count_fix_up + 1;
             clk_count <= 0;
             refmux <= `MUX_REF_NEG;
             if(refmux != `MUX_REF_NEG) count_trans_up <= count_trans_up + 1 ;
@@ -564,6 +566,12 @@ module my_modulation (
                   clk_count_rundown_last <= clk_count;// TODO change nmae  clk_clk_count_rundown
 
                   count_flip_last <= 0; // count_flip;
+
+                  // ADDING these here seemed to be necessary to get the design to place without going into loop.
+                  count_fix_up       <= 0;
+                  count_fix_down     <= 0;
+
+
 
                   // record last // unused. could remove.
                   rundown_dir_last <= refmux; // up
