@@ -375,7 +375,10 @@ module my_modulation (
 
       // test regardless of state
       if(clk_count_int >= clk_count_int_n)
-        done <= 1;
+        begin
+          done <= 1; // change name to sigdone.
+          sigmux <= 0; // turn off
+        end
 
 
       case (state)
@@ -403,6 +406,7 @@ module my_modulation (
             // IMPORTANT. buffer op must now be given time to settle to new input.
             himux <= himux_sel;
 
+            sigmux <= 0;
             refmux <= `MUX_NONE;
 
           end
@@ -413,6 +417,8 @@ module my_modulation (
             if(clk_count == clk_count_init_n)
               begin
                 state <= `STATE_FIX_POS_START;
+                // turn on signal
+                sigmux <= 1;
               end
           end
 
@@ -536,14 +542,9 @@ module my_modulation (
 
                   count_flip_last <= count_flip;
 
-                  /*
-                    TODO can get rid of this. if always drive in the same direction.
-                  */
-                  case(refmux)
-                    3'b010: rundown_dir_last = 1; // up
-                    3'b001: rundown_dir_last = 0;
-                    3'b011: rundown_dir_last = 0;
-                  endcase
+
+                  // record last // unused. could remove.
+                  rundown_dir_last <= refmux; // up
 
               end
           end
