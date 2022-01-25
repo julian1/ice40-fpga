@@ -1,30 +1,17 @@
-
-
-
-
-// for 24bit values we don't really want these bitmask values.
-// we just want to write and read registers.
-
-
 /*
-  - want to change assignement '=' to '<=' in the spi code.
-  EXTR.
-    change all this to avoid overloading the special.
-    instead make special an extra CS.
-    ------------
+  - under 30MHz. and it seems to be unstable / the integration  starts to have slight timing deviations observable on scope.
+  - need to try nextpnr.  see if it improves.
+  - removing unused counts used for test/debug. appears that may actually improve speed. and reduce power consumption
+  - still need to add the reset phase to integrator
 
-  after we have read 8 bits. then we have the address...
-  ----------------------
+  - the registerbank/spi code. probably should be more synchronous/ pipelined.
 
+  - we could in fact get rid of the counts. and just count the total pos/neg clks. for all phases - fixed/var/rundown.
+      this wold be fast and simple.
+  - one-hot encoding
 */
-/*
-  EXTR.
-    - could almost have exactly the same bank block for 24bit and 4bit regs.
-    - only issue is dout. being driven twice.
 
-  we should make this two parameters eg. 8 bit for registers. and 24 bits for val.
-  but this is ok.
-*/
+
 
 
 // ‘default_nettype none  // turn off implicit data types
@@ -186,12 +173,7 @@ module my_register_bank   #(parameter MSB=32)   (
 
           // TODO
           // these slow things down from 40MHz to 34MHz. need piplining.
-          // PROBLEM - sensitivity list does not include clk.
-          // YES. we have the spi clk. so could pipeline on that.
-
-          // 35MHz. test.
-          // 22: clk_count_int_n <= { clk_count_int_n[32 -1: 24 -1] ,  val } ;           // lo 24 bits
-          // 23: clk_count_int_n <= { val, clk_count_int_n[ 24 -1 : 0 ] };  // hi 8 bits
+          // but the PROBLEM - is the sensitivity list does not include clk.
 
           // 34MHz.
           22: clk_count_int_n <= (clk_count_int_n & 32'hff000000) | val;           // lo 24 bits
@@ -210,28 +192,6 @@ endmodule
 /*
   -noautowire
   95 make the default of ‘default_nettype be "none" instead of "wire".
-
-  we can use. reset. to control the running of a specific modulation.
-  --------
-
-  for the simplest application.
-  - should be able to just take positive count, and subtract the negative. then multiply by coefficient.
-  - the slow slope is more complicated - to handle two coefficients.
-  ----
-
-  we could probably do the comparator test and direction update() .
-    in a module - with an extra signal.
-    or a function.
-
-    probably function is better.
-  -----
-
-  no. just needs a function. at every setting of direction.
-
-    update( mux, mux_new, count_tran_up, count_tran_down);
-
-  - The input adc switch .    should be passed as separate wire.
-  to make assignment with the two bit easy.
 
 
 
@@ -292,7 +252,7 @@ module my_modulation (
 
   /*
   // so need
-  //   1. state where switch op - to take slope to reset. and the lomux takes the input .
+  //   1. state to buffer the reset signal. and the lomux takes the input .
   //   2. state to switch op back to the signal. while holding the switch at intlomux at gnd.
   // **** actually at the end of the initegration - we would not turn off teh lowlomux.
   // instead just switch the highlomux to feedback and settle
@@ -342,7 +302,8 @@ module my_modulation (
   // counters and settings  ...
   // for an individual phase.
 
-  reg [31:0]  clk_count ;         // clk_count for the current phase.
+  // reg [24-1:0]  clk_count ;         // clk_count for the current phase.
+  reg [31:0]  clk_count ;         // 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
   reg [31:0]  clk_count_int ;     // from the start of the signal integration. eg. 5sec*20MHz=100m count. won't fit in 24 bit value. would need to split between read registers.
                                   // could also record clk_count_actual.
 
@@ -381,6 +342,8 @@ module my_modulation (
   always @(posedge clk)
     begin
 
+
+      // could/should specify bitwidth of constants eg. 24'b1. but result is smae.
       // default behavior at top of verilog block.
       clk_count     <= clk_count + 1;
       clk_count_int <= clk_count_int + 1;
@@ -389,8 +352,8 @@ module my_modulation (
       // test regardless of state
       if(clk_count_int >= clk_count_int_n)
         begin
-          done <= 1; // change name to sigdone.
-          sigmux <= 0; // turn off signal
+          done    <= 1; // indicate end of signal input. maybe change name to sigdone.
+          sigmux  <= 0; // turn off signal input
         end
 
 
@@ -422,6 +385,7 @@ module my_modulation (
             // IMPORTANT. buffer op must now be given time to settle to new input.
             himux <= himux_sel;
 
+            // mux ctrl
             sigmux <= 0;
             refmux <= `MUX_NONE;
 
@@ -433,7 +397,7 @@ module my_modulation (
             if(clk_count == clk_count_init_n)
               begin
                 state <= `STATE_FIX_POS_START;
-                // turn on signal, begin signal integration
+                // turn on signal input, to start signal integration
                 sigmux <= 1;
               end
           end
@@ -518,6 +482,7 @@ module my_modulation (
               // this code here, with flip_count is very speed sensitive. eg. 39MHz to 32MHz.
               // integration becomes unstable around 30MHz. waveform starts flipping.
               // its OK. we can remove the count_flip if we want.
+              // perhaps - could reduce the bit length of count_flip and it would propagate faster.
 
               // end of integration condition. and above zero cross
               if(done && ~ comparator_val)
@@ -580,7 +545,7 @@ module my_modulation (
                   // count_flip_last     <= count_flip;
 
                   // weird.// appears to improve speed.
-                  count_flip_last     <= 0; 
+                  count_flip_last     <= 0;
 
                   clk_count_rundown_last <= clk_count;// TODO change nmae  clk_clk_count_rundown
 
@@ -840,4 +805,52 @@ endmodule
   - if end up on wrong side. just abandon, and run again? starting in opposite direction.
 */
 
+// for 24bit values we don't really want these bitmask values.
+// we just want to write and read registers.
 
+
+/*
+  - want to change assignement '=' to '<=' in the spi code.
+  EXTR.
+    change all this to avoid overloading the special.
+    instead make special an extra CS.
+    ------------
+
+  after we have read 8 bits. then we have the address...
+  ----------------------
+
+*/
+/*
+  EXTR.
+    - could almost have exactly the same bank block for 24bit and 4bit regs.
+    - only issue is dout. being driven twice.
+
+  we should make this two parameters eg. 8 bit for registers. and 24 bits for val.
+  but this is ok.
+*/
+
+/*
+
+  we can use. reset. to control the running of a specific modulation.
+  --------
+
+  for the simplest application.
+  - should be able to just take positive count, and subtract the negative. then multiply by coefficient.
+  - the slow slope is more complicated - to handle two coefficients.
+  ----
+
+  we could probably do the comparator test and direction update() .
+    in a module - with an extra signal.
+    or a function.
+
+    probably function is better.
+  -----
+
+  no. just needs a function. at every setting of direction.
+
+    update( mux, mux_new, count_tran_up, count_tran_down);
+
+  - The input adc switch .    should be passed as separate wire.
+  to make assignment with the two bit easy.
+
+*/
