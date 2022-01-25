@@ -54,11 +54,11 @@ module my_register_bank   #(parameter MSB=32)   (
   input wire [24-1:0] count_trans_down,
   input wire [24-1:0] count_fix_up,
   input wire [24-1:0] count_fix_down,
+  input wire [24-1:0] count_flip, // should be a count. possible could require two up modulations
 
   input wire [24-1:0] clk_count_rundown,
 
-  input wire          rundown_dir,
-  input wire [24-1:0]  count_flip    // should be a count. possible could require two up modulations
+  input wire          rundown_dir
 );
 
   // TODO rename these...
