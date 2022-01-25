@@ -403,8 +403,8 @@ module my_modulation (
             // IMPORTANT. buffer op must now be given time to settle to new input.
             himux <= himux_sel;
 
-            // refmux <= 3'b000; // turn off all inputs.
-            // refmux <= 3'b100; // turn on input signal
+            refmux <= `MUX_NONE;
+
           end
 
 
@@ -485,22 +485,10 @@ module my_modulation (
         `STATE_VAR2:
           if(clk_count == clk_count_var_n)
             begin
-              // end of integration condition.
-              if(clk_count_int >= clk_count_int_n)
-
-                if( ~ comparator_val)   // test above zero cross
-                  begin
-                    // above zero cross
-                    // go straight to the final rundown.
-                    state <= `STATE_RUNDOWN_START;
-                  end
-                else
-                  begin
-                    state <= `STATE_VAR2_START;
-                    count_flip <= count_flip + 1;
-                  end
-
-
+              // end of integration condition. and above zero cross
+              if(done && ~ comparator_val)
+                  // go straight to the final rundown.
+                state <= `STATE_RUNDOWN_START;
               else
                 // do another cycle
                 state <= `STATE_FIX_POS_START;
