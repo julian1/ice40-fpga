@@ -307,7 +307,7 @@ module my_modulation (
   `define MUX_REF_POS         2'b01
   `define MUX_REF_NEG         2'b10
   `define MUX_REF_SLOW_POS    2'b11
- 
+
 
   wire [2-1:0] refmux;
   // assign {  INT_IN_N_CTL, INT_IN_P_CTL } = lomux ;
@@ -471,6 +471,11 @@ module my_modulation (
 
         // variable direction
         `STATE_VAR2_START:
+          ///////////
+          // EXTR.  actually since we stopped signin - it doesn't matter how many cycles we use to get above zero-cross.
+          // and it will happen reasonably quickly. because of the bias.
+          // so perhaps we don't have to withhold a var after we are done.
+          //////////
           begin
             state <= `STATE_VAR2;
             clk_count <= 0;
