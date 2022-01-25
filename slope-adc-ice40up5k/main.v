@@ -342,7 +342,7 @@ module my_modulation (
   reg [24-1:0] count_trans_up;
   reg [24-1:0] count_trans_down;
 
-  reg [3-1:0] count_flip;
+  // reg [3-1:0] count_flip;
 
   /////////////////////////
   // this should be pushed into a separate module...
@@ -397,7 +397,7 @@ module my_modulation (
             count_down <= 0;
             count_trans_up <= 0;
             count_trans_down <= 0;
-            count_flip <= 0;
+            // count_flip <= 0;
 
             COM_INTERUPT <= 1; // active lo
             CMPR_LATCH_CTL <= 0; // enable comparator
@@ -462,7 +462,7 @@ module my_modulation (
             state <= `STATE_FIX_NEG;
             clk_count <= 0;
             refmux <= `MUX_REF_NEG;
-            if(refmux != 3'b110) count_trans_up <= count_trans_up + 1 ;
+            if(refmux != `MUX_REF_NEG) count_trans_up <= count_trans_up + 1 ;
           end
 
         `STATE_FIX_NEG:
@@ -540,8 +540,7 @@ module my_modulation (
                   count_trans_up_last <= count_trans_up;
                   count_trans_down_last <= count_trans_down;
 
-                  count_flip_last <= count_flip;
-
+                  count_flip_last <= 0; // count_flip;
 
                   // record last // unused. could remove.
                   rundown_dir_last <= refmux; // up
