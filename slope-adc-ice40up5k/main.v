@@ -122,11 +122,11 @@ module my_register_bank   #(parameter MSB=32)   (
 
               7:  out = reg_led << 8;
 
-              9:  out = count_up << 8;  // TODO fix.
+              9:  out = count_up << 8;
               10: out = count_down << 8;
               12: out = count_trans_up << 8;
               14: out = count_trans_down << 8;
-    
+
               // TODO reorder.
               26: out = count_fix_up << 8;
               27: out = count_fix_down << 8;
@@ -419,7 +419,7 @@ module my_modulation (
             CMPR_LATCH_CTL <= 0; // enable comparator
 
             // TODO this is wrong. should be muxing reset signal.
-            // select input signal 
+            // select input signal
             // IMPORTANT. buffer op must now be given time to settle to new input.
             himux <= himux_sel;
 
@@ -491,7 +491,7 @@ module my_modulation (
           ///////////
           // EXTR.  actually since we stopped injecting signal - it doesn't matter how many cycles we use to get above zero-cross.
           // and it will happen reasonably quickly. because of the bias.
-          // so just keep running complete 4 phase cycles until we get a cross. rather than force positive vars. 
+          // so just keep running complete 4 phase cycles until we get a cross. rather than force positive vars.
           //////////
           begin
             state <= `STATE_VAR2;
@@ -786,7 +786,7 @@ module top (
     . count_trans_down_last(count_trans_down),
     . count_fix_up_last(count_fix_up),
     . count_fix_down_last(count_fix_down),
-  
+
     // clk counts
     . clk_count_rundown_last(clk_count_rundown),
 
