@@ -579,22 +579,11 @@ module my_modulation (
                   count_fix_down_last <= count_fix_down;
                   // count_flip_last     <= count_flip;
 
+                  // weird.// appears to improve speed.
+                  count_flip_last     <= 0; 
+
                   clk_count_rundown_last <= clk_count;// TODO change nmae  clk_clk_count_rundown
 
-
- 
-                  /*
-                  // setting these here. improves speed / stability
-                  // 30MHz to 35MHz.
-                  // not really
-                  count_up        <= 0;
-                  count_down      <= 0;
-                  count_trans_up  <= 0;
-                  count_trans_down <= 0;
-                  count_fix_up    <= 0;
-                  count_fix_down  <= 0;
-                  count_flip      <= 0;
-                    */
 
 
                   // record last // unused. could remove.
