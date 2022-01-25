@@ -408,15 +408,15 @@ module my_modulation (
 
             done <= 0;
 
-            count_up <= 0;
-            count_down <= 0;
-            count_trans_up <= 0;
+            count_up        <= 0;
+            count_down      <= 0;
+            count_trans_up  <= 0;
             count_trans_down <= 0;
-            count_fix_up <= 0;
-            count_fix_down <= 0;
+            count_fix_up    <= 0;
+            count_fix_down  <= 0;
 
-            COM_INTERUPT <= 1; // active lo
-            CMPR_LATCH_CTL <= 0; // enable comparator
+            COM_INTERUPT    <= 1; // active lo
+            CMPR_LATCH_CTL  <= 0; // enable comparator
 
             // TODO this is wrong. should be muxing reset signal.
             // select input signal
