@@ -472,7 +472,7 @@ module my_modulation (
         // variable direction
         `STATE_VAR2_START:
           ///////////
-          // EXTR.  actually since we stopped signin - it doesn't matter how many cycles we use to get above zero-cross.
+          // EXTR.  actually since we stopped injecting signal - it doesn't matter how many cycles we use to get above zero-cross.
           // and it will happen reasonably quickly. because of the bias.
           // so perhaps we don't have to withhold a var after we are done.
           //////////
