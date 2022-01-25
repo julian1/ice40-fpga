@@ -303,6 +303,20 @@ module my_modulation (
   `define STATE_DONE          17
 
 
+  `define MUX_NONE            2'b00
+  `define MUX_REF_POS         2'b01
+  `define MUX_REF_NEG         2'b10
+  `define MUX_REF_SLOW_POS    2'b11
+ 
+
+  wire [2-1:0] refmux;
+  // assign {  INT_IN_N_CTL, INT_IN_P_CTL } = lomux ;
+  assign refmux  = lomux [ 2-1:0] ;
+
+  wire sigmux;
+  assign sigmux = lowmux [ 3-1 ];
+
+
     // 2^5 = 32
   reg [5-1:0] state;
 
@@ -319,6 +333,8 @@ module my_modulation (
   reg [31:0]  clk_count ;         // clk_count for the current phase.
   reg [31:0]  clk_count_int ;     // from the start of the signal integration. eg. 5sec*20MHz=100m count. won't fit in 24 bit value. would need to split between read registers.
                                   // could also record clk_count_actual.
+
+  reg         done;
 
   // modulation counts
   reg [24-1:0] count_up;
@@ -351,24 +367,17 @@ module my_modulation (
 
   always @(posedge clk)
     begin
-      /*
-        EXTR. we could add/inject a is_active wire test here - to control if the module should run.
-        or else just control reset.
-        except reset - generally should control the outputs.
-      */
-      // we use the same count - always increment clock
-
-      // this is nested sequntial block. so should be available. in the case statementj.
-      // making this non-blocking makes it much faster 26MHz to 39MHz.
 
       // default behavior at top of verilog block.
       clk_count <= clk_count + 1;
       clk_count_int <= clk_count_int + 1;
 
-      /*
-        think we want a state init. that holds everything in pause.
-        and then state begin. /
-      */
+
+      // test regardless of state
+      if(clk_count_int >= clk_count_int_n)
+        done <= 1;
+
+
       case (state)
 
         `STATE_INIT_START:
@@ -378,6 +387,9 @@ module my_modulation (
 
             clk_count <= 0;
             clk_count_int <= 0;   // start of signal integration time.
+
+            done <= 0;
+
             count_up <= 0;
             count_down <= 0;
             count_trans_up <= 0;
@@ -391,10 +403,9 @@ module my_modulation (
             // IMPORTANT. buffer op must now be given time to settle to new input.
             himux <= himux_sel;
 
-            // lomux <= 3'b000; // turn off all inputs.
-            // lomux <= 3'b100; // turn on input signal
+            // refmux <= 3'b000; // turn off all inputs.
+            // refmux <= 3'b100; // turn on input signal
           end
-
 
 
         `STATE_INIT:
@@ -409,8 +420,8 @@ module my_modulation (
           begin
             state <= `STATE_FIX_POS;
             clk_count <= 0;
-            lomux <= 3'b101; // initial direction
-            if(lomux != 3'b101) count_trans_down <= count_trans_down + 1 ;
+            refmux <= `MUX_REF_POS; // initial direction
+            if(refmux != `MUX_REF_POS) count_trans_down <= count_trans_down + 1 ;
           end
 
         `STATE_FIX_POS:
@@ -424,15 +435,15 @@ module my_modulation (
             clk_count <= 0;
             if( comparator_val)   // test below the zero-cross
               begin
-                lomux <= 3'b110;  // add negative ref. to drive up.
+                refmux <= `MUX_REF_NEG;  // add negative ref. to drive up.
+                if(refmux != `MUX_REF_NEG) count_trans_up <= count_trans_up + 1 ;
                 count_up <= count_up + 1;
-                if(lomux != 3'b110) count_trans_up <= count_trans_up + 1 ;
               end
             else
               begin
-                lomux <= 3'b101;
+                refmux <= `MUX_REF_POS;
+                if(refmux != `MUX_REF_POS) count_trans_down <= count_trans_down + 1 ;
                 count_down <= count_down + 1;
-                if(lomux != 3'b101) count_trans_down <= count_trans_down + 1 ;
               end
           end
 
@@ -444,8 +455,8 @@ module my_modulation (
           begin
             state <= `STATE_FIX_NEG;
             clk_count <= 0;
-            lomux <= 3'b110;
-            if(lomux != 3'b110) count_trans_up <= count_trans_up + 1 ;
+            refmux <= `MUX_REF_NEG;
+            if(refmux != 3'b110) count_trans_up <= count_trans_up + 1 ;
           end
 
         `STATE_FIX_NEG:
@@ -459,48 +470,21 @@ module my_modulation (
             clk_count <= 0;
             if( comparator_val)
               begin
-                lomux <= 3'b110;
+                refmux <= `MUX_REF_NEG;
+                if(refmux != `MUX_REF_NEG) count_trans_up <= count_trans_up + 1 ;
                 count_up <= count_up + 1;
-                if(lomux != 3'b110) count_trans_up <= count_trans_up + 1 ;
               end
             else
               begin
-                lomux <= 3'b101;
+                refmux <= `MUX_REF_POS;
+                if(refmux != `MUX_REF_POS) count_trans_down <= count_trans_down + 1 ;
                 count_down <= count_down + 1;
-                if(lomux != 3'b101) count_trans_down <= count_trans_down + 1 ;
               end
           end
-          /*
-              if we're on the wrong side, at end, for upwards slope.
-              it is easy - to add an additional phase or two with fixed count to get to the other side for final rundown.
-              and we can equalize time with reset period.
-
-              // Timing estimate: 27.54 ns (36.31 MHz)
-
-               run an extra cycle. and count them.
-            ----------
-              - i think its ok as it is. if add extra fixpos, then should also add fixneg. which is the same as not adding.
-              - if add new cycle ( fixpos,fixneg and two var). then we likely end up on the same side we started.
-              - as it is - we equalize transitions. and time above cross and time below.
-            -----------
-
-            TODO. we must count fixed and var count separately.
-                  because of the final potential double fixed positive . to get to the correct size for rundown.
-
-            TODO.
-          */
 
         `STATE_VAR2:
           if(clk_count == clk_count_var_n)
             begin
-              /*
-                  End. of integration condition. can be defined.
-                    - in terms of global clk count.
-                    - or sum of count_up count_down etc.
-
-                  this point should end-up on a PLC multiple eg. 50/60Hz.
-                  EXTR. could be be nice to record value at the end.
-              */
               // end of integration condition.
               if(clk_count_int >= clk_count_int_n)
 
@@ -512,16 +496,6 @@ module my_modulation (
                   end
                 else
                   begin
-                    // below zero cross
-                    // do another variable, which should push us to the correct side.
-                    // but should we do fixed - first? no because fixed are equalized at this point.
-                    // i think we could
-                    /*
-                      - doing an extra pos + neg is the same as doing neither. actually not quite because it breaks it up.
-                      TODO.
-                      - just taking on another section. means that we have to keep track of all 4 inputs. fixed and var. because
-                      - but if added a fixed pos, and var pos - then we could just add to the positive  count
-                    */
                     state <= `STATE_VAR2_START;
                     count_flip <= count_flip + 1;
                   end
@@ -541,9 +515,9 @@ module my_modulation (
             // turn on both references - to create +ve bias, to drive integrator down.
 
             if( use_slow_rundown )
-              lomux <= 3'b011;
+              refmux <= `MUX_REF_SLOW_POS;
             else
-              lomux <= 3'b001;
+              refmux <= `MUX_REF_POS;
 
             // TODO - the better way to do transitions is with a function. so can test existing state. up/down. then record.
 
@@ -555,7 +529,7 @@ module my_modulation (
 
             // no slow slope. - just +ve bias
             // this fails to route?
-            // lomux <= 3'b001;
+            // refmux <= 3'b001;
           end
 
         // EXTR. we also have to short the integrator at the start. to begin at a known start position.
@@ -580,7 +554,8 @@ module my_modulation (
                   clk_count <= 0;    // ok.
 
                   // turn off all inputs. actually should leave. because we will turn on to reset the integrator.
-                  lomux <= 3'b000;
+                  refmux <= `MUX_NONE;
+
                   COM_INTERUPT <= 0;   // active lo, set interupt
                   count_up_last <= count_up;
                   count_down_last <= count_down;
@@ -594,7 +569,7 @@ module my_modulation (
                   /*
                     TODO can get rid of this. if always drive in the same direction.
                   */
-                  case(lomux)
+                  case(refmux)
                     3'b010: rundown_dir_last = 1; // up
                     3'b001: rundown_dir_last = 0;
                     3'b011: rundown_dir_last = 0;
