@@ -314,7 +314,7 @@ module my_modulation (
   assign refmux  = lomux [ 2-1:0] ;
 
   wire sigmux;
-  assign sigmux = lowmux [ 3-1 ];
+  assign sigmux = lomux [ 3-1 ];
 
 
     // 2^5 = 32
