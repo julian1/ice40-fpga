@@ -48,7 +48,7 @@ module my_register_bank   #(parameter MSB=32)   (
   inout [4-1:0]   himux_sel,
 
   // outputs only
-  input wire [24-1:0] count_up,
+  input wire [24-1:0] count_var_neg,
   input wire [24-1:0] count_down,
   input wire [24-1:0] clk_count_rundown,
   input wire [24-1:0] count_trans_up,
@@ -119,7 +119,7 @@ module my_register_bank   #(parameter MSB=32)   (
 
               7:  out = reg_led << 8;
 
-              9:  out = count_up << 8;
+              9:  out = count_var_neg << 8;
               10: out = count_down << 8;
               11: out = clk_count_rundown << 8;
               12: out = count_trans_up << 8;
@@ -262,7 +262,7 @@ module my_modulation (
   output [4-1:0] himux,
 
   // values from last run, available in order to read
-  output [24-1:0] count_up_last,
+  output [24-1:0] count_var_neg_last,
   output [24-1:0] count_down_last,
   output [24-1:0] clk_count_rundown_last,
   output [24-1:0] count_trans_up_last,
@@ -337,7 +337,7 @@ module my_modulation (
   reg         done;
 
   // modulation counts
-  reg [24-1:0] count_up;
+  reg [24-1:0] count_var_neg;
   reg [24-1:0] count_down;
   reg [24-1:0] count_trans_up;
   reg [24-1:0] count_trans_down;
@@ -393,7 +393,7 @@ module my_modulation (
 
             done <= 0;
 
-            count_up <= 0;
+            count_var_neg <= 0;
             count_down <= 0;
             count_trans_up <= 0;
             count_trans_down <= 0;
@@ -443,7 +443,7 @@ module my_modulation (
               begin
                 refmux <= `MUX_REF_NEG;  // add negative ref. to drive up.
                 if(refmux != `MUX_REF_NEG) count_trans_up <= count_trans_up + 1 ;
-                count_up <= count_up + 1;
+                count_var_neg <= count_var_neg + 1;
               end
             else
               begin
@@ -483,7 +483,7 @@ module my_modulation (
               begin
                 refmux <= `MUX_REF_NEG;
                 if(refmux != `MUX_REF_NEG) count_trans_up <= count_trans_up + 1 ;
-                count_up <= count_up + 1;
+                count_var_neg <= count_var_neg + 1;
               end
             else
               begin
@@ -536,7 +536,7 @@ module my_modulation (
                   refmux <= `MUX_NONE;
 
                   COM_INTERUPT <= 0;   // active lo, set interupt
-                  count_up_last <= count_up;
+                  count_var_neg_last <= count_var_neg;
                   count_down_last <= count_down;
                   clk_count_rundown_last <= clk_count;// TODO change nmae  clk_clk_count_rundown
 
@@ -654,7 +654,7 @@ module top (
   reg use_slow_rundown;
 
   // output counts to read
-  reg [24-1:0] count_up;
+  reg [24-1:0] count_var_neg;
   reg [24-1:0] count_down;
   reg [24-1:0] clk_count_rundown;
 
@@ -720,7 +720,7 @@ module top (
     . himux_sel( himux_sel ),
 
     // counts
-    . count_up(count_up),
+    . count_var_neg(count_var_neg),
     . count_down(count_down),
     . clk_count_rundown(clk_count_rundown),
     . count_trans_up(count_trans_up),
@@ -754,7 +754,7 @@ module top (
     . himux(himux),
 
     // counts
-    . count_up_last(count_up),
+    . count_var_neg_last(count_var_neg),
     . count_down_last(count_down),
     . clk_count_rundown_last(clk_count_rundown),
     . count_trans_up_last(count_trans_up),
