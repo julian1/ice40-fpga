@@ -522,7 +522,9 @@ module my_modulation (
                 // do another cycle
                 state <= `STATE_FIX_POS_START;
                 // TODO rename extra_cycle
-                count_flip <= count_flip + 1;
+
+                if(done)
+                  count_flip <= count_flip + 1;
             end
 
 
@@ -567,7 +569,6 @@ module my_modulation (
 
                   clk_count_rundown_last <= clk_count;// TODO change nmae  clk_clk_count_rundown
 
-                  count_flip_last <= 0; // count_flip;
 
                   // ADDING these here seemed to be necessary to get the design to place without going into loop.
                   // count_fix_up       <= 0;
