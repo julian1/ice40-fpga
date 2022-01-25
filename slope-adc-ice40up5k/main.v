@@ -122,11 +122,17 @@ module my_register_bank   #(parameter MSB=32)   (
 
               7:  out = reg_led << 8;
 
-              9:  out = count_up << 8;
+              9:  out = count_up << 8;  // TODO fix.
               10: out = count_down << 8;
-              11: out = clk_count_rundown << 8;
               12: out = count_trans_up << 8;
               14: out = count_trans_down << 8;
+    
+              // TODO reorder.
+              26: out = count_fix_up << 8;
+              27: out = count_fix_down << 8;
+
+
+              11: out = clk_count_rundown << 8;
 
               // fixed value, test value
               15: out = 24'hffffff << 8;
