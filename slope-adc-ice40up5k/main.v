@@ -9,6 +9,7 @@
   - we could in fact get rid of the counts. and just count the total pos/neg clks. for all phases - fixed/var/rundown.
       this wold be fast and simple.
   - one-hot encoding
+      http://asics.chuckbenz.com/OneHotCodingBestPractices.htm
 */
 
 
