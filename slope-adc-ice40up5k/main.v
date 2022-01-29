@@ -1,4 +1,13 @@
 /*
+  switching of the high-side mux is a little tricky.
+    eg. do we switch the feedback signal to reset integrator - at the start of rundown or the finish of rundown?
+    there will be a small leakage current current through the low side mux. but better to not have the integrator loop and buffer op swinging around during this time.
+    ------
+
+  it is a two variable model,
+    reset-time (op buffers slope feedback).  then setup-time (op buffers signal ).
+
+  ----------
   - under 30MHz. and it seems to be unstable / the integration  starts to have slight timing deviations observable on scope.
   - need to try nextpnr.  see if it improves.
   - removing unused counts used for test/debug. appears that may actually improve speed. and reduce power consumption
@@ -392,6 +401,10 @@ module my_modulation (
 
           end
 
+        // there are leakage issues with the low-side switching, so need to be careful with high-side switching / and op settling.
+        // case STATE_BUFFER_RESET    - hi-mux buffers the slope feedback to reset integrator.
+        // case STATE_BUFFER_SIGNAL   - hi-mux buffers the source signal, wait for op to settle.
+
 
         `STATE_INIT:
           begin
@@ -449,6 +462,7 @@ module my_modulation (
           end
 
         `STATE_FIX_NEG:
+          // TODO add switch here for 3 phase modulation variation.
           if(clk_count == clk_count_fix_n)
             state <= `STATE_VAR2_START;
 
