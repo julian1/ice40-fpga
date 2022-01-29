@@ -60,7 +60,7 @@ module my_register_bank   #(parameter MSB=32)   (
 
   // To use in an inout. the initial block is a driver. so must be placed here.
   initial begin
-//    reg_led           = 3'b101;
+    reg_led           = 3'b101;
     clk_count_init_n  =  10000;
     clk_count_fix_n   = 700;
     clk_count_var_n   = 5500;
