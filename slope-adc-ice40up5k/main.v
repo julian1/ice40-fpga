@@ -19,6 +19,33 @@
       this wold be fast and simple.
   - one-hot encoding
       http://asics.chuckbenz.com/OneHotCodingBestPractices.htm
+  -----------
+
+
+  Auto-zero and Auto-cal.
+
+    auto-zero
+      - need the switching to be done in the fpga.
+      just swapping the input.
+      or should only be a couple of lines of code.
+
+    and acal/gain.
+      is just measuring the ref-hi .  every so often. eg. once every 10obs.
+
+      - think this would just need to be a separate verilog module.
+      either switchable state machine.  on every data generated.
+
+    - then the data read - will have a flag as to what is loaded.
+      - NO. not separate state-machine strategies.  because may want to do both together.
+      - eg.   autozero every second measurement.
+      - and   acal     every 10th   measurement.
+    
+    - we need a flag with the returned data. as to what the value represents.
+
+    - having modes - for what is sampled - ref-hi, ref-lo, sig-hi is usefulful.
+        then just add two numbers. and use modulus as to when to do azero, acal .
+
+
 */
 
 
