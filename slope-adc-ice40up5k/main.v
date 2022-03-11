@@ -39,7 +39,7 @@
       - NO. not separate state-machine strategies.  because may want to do both together.
       - eg.   autozero every second measurement.
       - and   acal     every 10th   measurement.
-    
+
     - we need a flag with the returned data. as to what the value represents.
 
     - having modes - for what is sampled - ref-hi, ref-lo, sig-hi is usefulful.
@@ -212,9 +212,15 @@ module my_register_bank   #(parameter MSB=32)   (
           // these slow things down from 40MHz to 34MHz. need piplining.
           // but the PROBLEM - is the sensitivity list does not include clk.
 
-          // 34MHz.
-          22: clk_count_int_n <= (clk_count_int_n & 32'hff000000) | val;           // lo 24 bits
+          // 34MHz. aracnne,  38MHz nextpnr.
+          22: clk_count_int_n <= (clk_count_int_n & 32'hff000000) | val;          // lo 24 bits
           23: clk_count_int_n <= (clk_count_int_n & 32'h00ffffff) | (val << 24);  // hi 8 bits
+
+          // 39MHz nextpnr 
+          // this only routes correctly in nextpnr. not arachne-pnr
+          // 22: clk_count_int_n <=   { clk_count_int_n[MSB - 1 : MSB - 8 - 1], val  };                  // lo 24 bits
+          // 23: clk_count_int_n <=   { val[ MSB - 1: MSB - 8 - 1 ], clk_count_int_n[ MSB - 8 - 1: 0] };  // hi 8 bits
+
           24: use_slow_rundown <= val;
 
           25: himux_sel <= val;
