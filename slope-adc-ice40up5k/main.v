@@ -53,6 +53,39 @@
 
 // ‘default_nettype none  // turn off implicit data types
 
+  // weird weird weird. time went to 54MHz by using defines????
+  // something with the scope????
+
+  `define REG_LED               7
+
+  // run parameters
+  `define REG_COUNT_UP          9
+  `define REG_COUNT_DOWN        10
+  `define REG_CLK_COUNT_RUNDOWN 11
+  `define REG_COUNT_TRANS_UP    12
+  `define REG_COUNT_TRANS_DOWN  14
+  `define REG_COUNT_FIX_UP      26
+  `define REG_COUNT_FIX_DOWN    27
+  `define REG_COUNT_FLIP        17
+
+  `define REG_TEST              15
+  `define REG_RUNDOWN_DIR       16
+
+  // control parameters
+  // N for could??
+  `define REG_CLK_COUNT_INIT_N  18
+  `define REG_CLK_COUNT_FIX_N   20
+  `define REG_CLK_COUNT_VAR_N   21
+
+  `define REG_CLK_COUNT_INT_N_LO   22   // aperture. rename?
+  `define REG_CLK_COUNT_INT_N_HI 23
+
+  `define REG_USE_SLOW_RUNDOWN  24
+  `define REG_HIMUX_SEL         25
+
+  `define REG_MEAS_COUNT        28
+
+
 module my_register_bank   #(parameter MSB=32)   (
 
   // spi
@@ -112,8 +145,6 @@ module my_register_bank   #(parameter MSB=32)   (
   end
 
 
-  `define REG_COUNT_UP 9
-
   // read
   // clock value into into out var
   always @ (negedge clk or posedge cs)
@@ -150,41 +181,40 @@ module my_register_bank   #(parameter MSB=32)   (
             // allows us to read a register, without writing, by setting hi bit of register addr
             case (in[8 - 1 - 1: 0 ] )
 
+              `REG_LED:              out <= reg_led << 8;
 
-              7:  out <= reg_led << 8;
-
-              9:  out <= count_up << 8;
-              10: out <= count_down << 8;
-              12: out <= count_trans_up << 8;
-              14: out <= count_trans_down << 8;
+              `REG_COUNT_UP:         out <= count_up << 8;
+              `REG_COUNT_DOWN:       out <= count_down << 8;
+              `REG_COUNT_TRANS_UP:   out <= count_trans_up << 8;
+              `REG_COUNT_TRANS_DOWN: out <= count_trans_down << 8;
 
               // TODO reorder.
-              26: out <= count_fix_up << 8;
-              27: out <= count_fix_down << 8;
+              `REG_COUNT_FIX_UP:     out <= count_fix_up << 8;
+              `REG_COUNT_FIX_DOWN:   out <= count_fix_down << 8;
 
 
-              11: out <= clk_count_rundown << 8;
+              `REG_CLK_COUNT_RUNDOWN: out <= clk_count_rundown << 8;
 
               // fixed value, test value
-              15: out <= 24'hffffff << 8;
+              `REG_TEST:                   out <= 24'hffffff << 8;
 
-              16: out <= rundown_dir << 8;   // correct for single bit?
-              17: out <= count_flip << 8;
+              `REG_RUNDOWN_DIR:      out <= rundown_dir << 8;   // correct for single bit?
+              `REG_COUNT_FLIP:       out <= count_flip << 8;
 
               // read/write registers
-              18: out <= clk_count_init_n << 8;
-              20: out <= clk_count_fix_n << 8;
-              21: out <= clk_count_var_n << 8;
-              22: out <= clk_count_int_n << 8;           // lo 24 bits
-              23: out <= (clk_count_int_n >> 24) << 8;   // hi 8 bits
-              24: out <= use_slow_rundown << 8;
+              `REG_CLK_COUNT_INIT_N: out <= clk_count_init_n << 8;
+              `REG_CLK_COUNT_FIX_N:  out <= clk_count_fix_n << 8;
+              `REG_CLK_COUNT_VAR_N:  out <= clk_count_var_n << 8;
+              `REG_CLK_COUNT_INT_N_LO: out <= clk_count_int_n << 8;           // lo 24 bits
+              `REG_CLK_COUNT_INT_N_HI: out <= (clk_count_int_n >> 24) << 8;   // hi 8 bits
+              `REG_USE_SLOW_RUNDOWN: out <= use_slow_rundown << 8;
 
               /* could convert numerical argument - to avoid accidently turning on more than one source.
                 no. mux switch has 1.5k impedance. should not break anything
               */
-              25: out <= himux_sel << 8;
+              `REG_HIMUX_SEL:        out <= himux_sel << 8;
 
-              28: out <= meas_count << 8;
+              `REG_MEAS_COUNT:       out <= meas_count << 8;
 
               default: out <= 12345 << 8;
 
@@ -213,29 +243,29 @@ module my_register_bank   #(parameter MSB=32)   (
           // use high bit - to do a xfer (read+writ) while avoiding actually writing a register
           // leds
 
-          7 : reg_led <= val;
+          `REG_LED:                reg_led <= val;
 
-          18: clk_count_init_n <= val;  // aperture
-          20: clk_count_fix_n <= val;
-          21: clk_count_var_n <= val;
+          `REG_CLK_COUNT_INIT_N:   clk_count_init_n <= val;  // aperture
+          `REG_CLK_COUNT_FIX_N:    clk_count_fix_n <= val;
+          `REG_CLK_COUNT_VAR_N:    clk_count_var_n <= val;
 
           // TODO
           // these slow things down from 40MHz to 34MHz. need piplining.
           // but the PROBLEM - is the sensitivity list does not include clk.
 
           // 34MHz. aracnne,  38MHz nextpnr. now getting 39MHz.
-          22: clk_count_int_n <= (clk_count_int_n & 32'hff000000) | val;          // lo 24 bits
-          23: clk_count_int_n <= (clk_count_int_n & 32'h00ffffff) | (val << 24);  // hi 8 bits
+          `REG_CLK_COUNT_INT_N_LO: clk_count_int_n <= (clk_count_int_n & 32'hff000000) | val;          // lo 24 bits
+          `REG_CLK_COUNT_INT_N_HI: clk_count_int_n <= (clk_count_int_n & 32'h00ffffff) | (val << 24);  // hi 8 bits
 
           // 39MHz nextpnr
           // this only routes correctly in nextpnr. not arachne-pnr
           // these are not equivalent.
-//          22: clk_count_int_n <=   { clk_count_int_n[MSB - 1 : MSB - 8 - 1], val  };                  // lo 24 bits
- //         23: clk_count_int_n <=   { val[ MSB - 1: MSB - 8 - 1 ], clk_count_int_n[ MSB - 8 - 1: 0] };  // hi 8 bits
+          // REG_CLK_COUNT_INT_N_LO: clk_count_int_n <=   { clk_count_int_n[MSB - 1 : MSB - 8 - 1], val  };                  // lo 24 bits
+          // REG_CLK_COUNT_INT_N_HI: clk_count_int_n <=   { val[ MSB - 1: MSB - 8 - 1 ], clk_count_int_n[ MSB - 8 - 1: 0] };  // hi 8 bits
 
-          24: use_slow_rundown <= val;
+          `REG_USE_SLOW_RUNDOWN:   use_slow_rundown <= val;
 
-          25: himux_sel <= val;
+          `REG_HIMUX_SEL:          himux_sel <= val;
 
         endcase
       end
