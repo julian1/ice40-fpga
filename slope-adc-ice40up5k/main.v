@@ -112,6 +112,7 @@ module my_register_bank   #(parameter MSB=32)   (
   end
 
 
+  `define REG_COUNT_UP 9
 
   // read
   // clock value into into out var

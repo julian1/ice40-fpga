@@ -2,6 +2,10 @@
 
 # see https://github.com/damdoy/ice40_ultraplus_mains/tree/master/leds
 
+echo DEPRECATED.
+echo use build2 instead.
+exit
+
 set -e
 
 rm -rf ./build
