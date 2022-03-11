@@ -58,34 +58,31 @@
 // so it doesn't matter where it goes
 
 `define REG_LED               7
-`define REG_TEST              15
+`define REG_TEST              8
 
 // run parameters
-`define REG_COUNT_UP          9
-`define REG_COUNT_DOWN        10
+`define REG_COUNT_UP          10
+`define REG_COUNT_DOWN        11
 `define REG_COUNT_TRANS_UP    12
-`define REG_COUNT_TRANS_DOWN  14
-`define REG_COUNT_FIX_UP      26
-`define REG_COUNT_FIX_DOWN    27
-`define REG_COUNT_FLIP        17
+`define REG_COUNT_TRANS_DOWN  13
+`define REG_COUNT_FIX_UP      14
+`define REG_COUNT_FIX_DOWN    15
+`define REG_COUNT_FLIP        16  // deprecated
+`define REG_CLK_COUNT_RUNDOWN 17
+`define REG_RUNDOWN_DIR       16  // deprecated
 
-`define REG_CLK_COUNT_RUNDOWN 11
 
-`define REG_RUNDOWN_DIR       16
+// modulation control parameters
+`define REG_CLK_COUNT_INIT_N  30
+`define REG_CLK_COUNT_FIX_N   31
+`define REG_CLK_COUNT_VAR_N   32
+`define REG_CLK_COUNT_INT_N_LO 33    // aperture. rename?
+`define REG_CLK_COUNT_INT_N_HI 34
 
-// control parameters
-// N for could??
-`define REG_CLK_COUNT_INIT_N  18
-`define REG_CLK_COUNT_FIX_N   20
-`define REG_CLK_COUNT_VAR_N   21
+`define REG_USE_SLOW_RUNDOWN  35
+`define REG_HIMUX_SEL         36
 
-`define REG_CLK_COUNT_INT_N_LO   22   // aperture. rename?
-`define REG_CLK_COUNT_INT_N_HI 23
-
-`define REG_USE_SLOW_RUNDOWN  24
-`define REG_HIMUX_SEL         25
-
-`define REG_MEAS_COUNT        28
+`define REG_MEAS_COUNT        40
 
 
 module my_register_bank   #(parameter MSB=32)   (
@@ -172,11 +169,11 @@ module my_register_bank   #(parameter MSB=32)   (
         out = out << 1; // this *is* zero fill operator.
 
         /*
-          // OK. pipelining this, with one clk delay increases speed 33MHz to 38MHz. 
+          // OK. pipelining this, with one clk delay increases speed 33MHz to 38MHz.
         */
         count <= count + 1;
 
-        // if(count == 8)  
+        // if(count == 8)
         if(count == 7)  // we have read the register to use
           begin
             // ignore hi bit.
@@ -666,7 +663,7 @@ endmodule
   - if can do that. then we can inject and also change the modulation parameters
 
   --------------
-  OK. adding the meas count has slowed it down to 35MHz. 
+  OK. adding the meas count has slowed it down to 35MHz.
   ----------
 
   are we doing this wrong. it should be available on next clock. which is ok.
@@ -687,7 +684,7 @@ module my_control (
 
     if(!com_interupt)
       begin
-        // this is being driven. but it has input type 
+        // this is being driven. but it has input type
         count <= count + 1;
       end
   end
