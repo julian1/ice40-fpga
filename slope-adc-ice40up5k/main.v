@@ -147,40 +147,42 @@ module my_register_bank   #(parameter MSB=32)   (
             case (in[8 - 1 - 1: 0 ] )
 
 
-              7:  out = reg_led << 8;
+              7:  out <= reg_led << 8;
 
-              9:  out = count_up << 8;
-              10: out = count_down << 8;
-              12: out = count_trans_up << 8;
-              14: out = count_trans_down << 8;
+              9:  out <= count_up << 8;
+              10: out <= count_down << 8;
+              12: out <= count_trans_up << 8;
+              14: out <= count_trans_down << 8;
 
               // TODO reorder.
-              26: out = count_fix_up << 8;
-              27: out = count_fix_down << 8;
+              26: out <= count_fix_up << 8;
+              27: out <= count_fix_down << 8;
 
 
-              11: out = clk_count_rundown << 8;
+              11: out <= clk_count_rundown << 8;
 
               // fixed value, test value
-              15: out = 24'hffffff << 8;
+              15: out <= 24'hffffff << 8;
 
-              16: out = rundown_dir << 8;   // correct for single bit?
-              17: out = count_flip << 8;
+              16: out <= rundown_dir << 8;   // correct for single bit?
+              17: out <= count_flip << 8;
 
               // read/write registers
-              18: out = clk_count_init_n << 8;
-              20: out = clk_count_fix_n << 8;
-              21: out = clk_count_var_n << 8;
-              22: out = clk_count_int_n << 8;           // lo 24 bits
-              23: out = (clk_count_int_n >> 24) << 8;   // hi 8 bits
-              24: out = use_slow_rundown << 8;
+              18: out <= clk_count_init_n << 8;
+              20: out <= clk_count_fix_n << 8;
+              21: out <= clk_count_var_n << 8;
+              22: out <= clk_count_int_n << 8;           // lo 24 bits
+              23: out <= (clk_count_int_n >> 24) << 8;   // hi 8 bits
+              24: out <= use_slow_rundown << 8;
 
               /* could convert numerical argument - to avoid accidently turning on more than one source.
                 no. mux switch has 1.5k impedance. should not break anything
               */
-              25: out = himux_sel << 8;
+              25: out <= himux_sel << 8;
 
-              28: out = meas_count << 8;
+              28: out <= meas_count << 8;
+
+              default: out <= 12345 << 8;
 
             endcase
           end
@@ -223,8 +225,9 @@ module my_register_bank   #(parameter MSB=32)   (
 
           // 39MHz nextpnr
           // this only routes correctly in nextpnr. not arachne-pnr
-          // 22: clk_count_int_n <=   { clk_count_int_n[MSB - 1 : MSB - 8 - 1], val  };                  // lo 24 bits
-          // 23: clk_count_int_n <=   { val[ MSB - 1: MSB - 8 - 1 ], clk_count_int_n[ MSB - 8 - 1: 0] };  // hi 8 bits
+          // these are not equivalent.
+//          22: clk_count_int_n <=   { clk_count_int_n[MSB - 1 : MSB - 8 - 1], val  };                  // lo 24 bits
+ //         23: clk_count_int_n <=   { val[ MSB - 1: MSB - 8 - 1 ], clk_count_int_n[ MSB - 8 - 1: 0] };  // hi 8 bits
 
           24: use_slow_rundown <= val;
 
@@ -631,25 +634,28 @@ endmodule
   - if can do that. then we can inject and also change the modulation parameters
 
   --------------
-  OK. adding the meas count has slowed it down to 32MHz. 
+  OK. adding the meas count has slowed it down to 35MHz. 
+  ----------
+
+  are we doing this wrong. it should be available on next clock. which is ok.
 */
 
 module my_control (
   input           clk,
   input           com_interupt,
-  input [24-1:0]  count
+  input wire [24-1:0]  count
 );
 
-/*
+
   initial begin
     count = 0;
   end
-*/
+
   always@(posedge clk) begin
 
     if(!com_interupt)
       begin
-        // this is being driven. so it should have type output?
+        // this is being driven. but it has input type 
         count <= count + 1;
       end
   end
