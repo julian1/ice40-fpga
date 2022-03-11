@@ -214,7 +214,7 @@ module my_register_bank   #(parameter MSB=32)   (
 
           7 : reg_led <= val;
 
-          18: clk_count_init_n <= val;
+          18: clk_count_init_n <= val;  // aperture
           20: clk_count_fix_n <= val;
           21: clk_count_var_n <= val;
 
