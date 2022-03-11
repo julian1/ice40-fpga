@@ -137,10 +137,13 @@ module my_register_bank   #(parameter MSB=32)   (
         // shift data from out register
         out = out << 1; // this *is* zero fill operator.
 
-        // this must be sequential, for equality test...
-        count = count + 1;
+        /*
+          // OK. pipelining this, with one clk delay increases speed 33MHz to 38MHz. 
+        */
+        count <= count + 1;
 
-        if(count == 8)  // we have read the register to use
+        // if(count == 8)  
+        if(count == 7)  // we have read the register to use
           begin
             // ignore hi bit.
             // allows us to read a register, without writing, by setting hi bit of register addr
