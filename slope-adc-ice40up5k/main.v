@@ -54,13 +54,13 @@
 // ‘default_nettype none  // turn off implicit data types
 
 
-// define scope persists beyond module.
 // so it doesn't matter where it goes
 
+// general,mix start 0
 `define REG_LED               7
 `define REG_TEST              8
 
-// run parameters
+// run parameters, start 10
 `define REG_COUNT_UP          10
 `define REG_COUNT_DOWN        11
 `define REG_COUNT_TRANS_UP    12
@@ -72,10 +72,15 @@
 `define REG_RUNDOWN_DIR       16  // deprecated
 
 
-// modulation control parameters
+// modulation control parameters, start 30.
 `define REG_CLK_COUNT_INIT_N  30
 `define REG_CLK_COUNT_FIX_N   31
-`define REG_CLK_COUNT_VAR_N   32
+// `define REG_CLK_COUNT_VAR_N   32
+
+`define REG_CLK_COUNT_VAR_POS_N   37
+`define REG_CLK_COUNT_VAR_NEG_N   38
+
+
 `define REG_CLK_COUNT_INT_N_LO 33    // aperture. rename?
 `define REG_CLK_COUNT_INT_N_HI 34
 
@@ -98,7 +103,10 @@ module my_register_bank   #(parameter MSB=32)   (
   inout wire [24-1:0] reg_led ,    // need to be very careful. only 4 bits. or else screws set/reset calculation ...
   inout [24-1:0]  clk_count_init_n,
   inout [24-1:0]  clk_count_fix_n,
-  inout [24-1:0]  clk_count_var_n,
+  // inout [24-1:0]  clk_count_var_n,
+  inout [24-1:0]  clk_count_var_pos_n,
+  inout [24-1:0]  clk_count_var_neg_n,
+
   inout [31:0]    clk_count_int_n,
   inout           use_slow_rundown,
   inout [4-1:0]   himux_sel,
@@ -133,7 +141,14 @@ module my_register_bank   #(parameter MSB=32)   (
     reg_led           = 3'b101;
     clk_count_init_n  =  10000;
     clk_count_fix_n   = 700;
-    clk_count_var_n   = 5500;
+
+    // clk_count_var_n   = 5500;
+    clk_count_var_pos_n = 5500;
+    clk_count_var_neg_n = 5500;
+
+
+
+
     clk_count_int_n   = (2 * 2000000);    // 200ms
     // clk_count_int_n = (5 * 20000000);   // 5 sec.
     use_slow_rundown  = 1;
@@ -199,7 +214,11 @@ module my_register_bank   #(parameter MSB=32)   (
               // params
               `REG_CLK_COUNT_INIT_N:  out <= clk_count_init_n << 8;
               `REG_CLK_COUNT_FIX_N:   out <= clk_count_fix_n << 8;
-              `REG_CLK_COUNT_VAR_N:   out <= clk_count_var_n << 8;
+              // `REG_CLK_COUNT_VAR_N:   out <= clk_count_var_n << 8;
+              `REG_CLK_COUNT_VAR_POS_N:  out <= clk_count_var_pos_n << 8;
+              `REG_CLK_COUNT_VAR_NEG_N:  out <= clk_count_var_neg_n << 8;
+
+
               `REG_CLK_COUNT_INT_N_LO: out <= clk_count_int_n << 8;           // lo 24 bits  aperture
               `REG_CLK_COUNT_INT_N_HI: out <= (clk_count_int_n >> 24) << 8;   // hi 8 bits
               `REG_USE_SLOW_RUNDOWN:  out <= use_slow_rundown << 8;
@@ -242,7 +261,12 @@ module my_register_bank   #(parameter MSB=32)   (
 
           `REG_CLK_COUNT_INIT_N:    clk_count_init_n <= val;  // aperture
           `REG_CLK_COUNT_FIX_N:     clk_count_fix_n <= val;
-          `REG_CLK_COUNT_VAR_N:     clk_count_var_n <= val;
+
+          // `REG_CLK_COUNT_VAR_N:     clk_count_var_n <= val;
+          `REG_CLK_COUNT_VAR_POS_N:  clk_count_var_pos_n <= val;
+          `REG_CLK_COUNT_VAR_NEG_N:  clk_count_var_neg_n <= val;
+
+
 
           // TODO
           // these slow things down from 40MHz to 34MHz. need piplining.
@@ -300,7 +324,14 @@ module my_modulation (
   // modulation parameters/count limits to use
   input [24-1:0]  clk_count_init_n,
   input [24-1:0]  clk_count_fix_n,
-  input [24-1:0]  clk_count_var_n,
+
+  // input [24-1:0]  clk_count_var_n,
+  // unbalancing these is going to do what????
+  inout [24-1:0]  clk_count_var_pos_n,
+  inout [24-1:0]  clk_count_var_neg_n,
+
+
+
   input [31:0]    clk_count_int_n,
   input           use_slow_rundown,
   input [4-1:0]   himux_sel,
@@ -518,8 +549,14 @@ module my_modulation (
               end
           end
 
+        // we are confusing neg. pos. and up. down.   neg == up. pos == down.
+
         `STATE_VAR:
-          if(clk_count == clk_count_var_n)
+          // if(clk_count == clk_count_var_n)
+          if(
+              ( refmux == `MUX_REF_NEG && clk_count == clk_count_var_neg_n )
+            || (refmux == `MUX_REF_POS && clk_count == clk_count_var_pos_n )
+            )    // should be neg....
             state <= `STATE_FIX_NEG_START;
 
         `STATE_FIX_NEG_START:
@@ -561,7 +598,12 @@ module my_modulation (
           end
 
         `STATE_VAR2:
-          if(clk_count == clk_count_var_n)
+          // if(clk_count == clk_count_var_n)
+          if(
+              ( refmux == `MUX_REF_NEG && clk_count == clk_count_var_neg_n )
+            || (refmux == `MUX_REF_POS && clk_count == clk_count_var_pos_n )
+            )    // should be neg....
+
             begin
               ///////////////////////////
               // this code here, with flip_count is very speed sensitive. eg. 39MHz to 32MHz.
@@ -773,7 +815,12 @@ module top (
   // input parameters
   reg [24-1:0]  clk_count_init_n;
   reg [24-1:0]  clk_count_fix_n;
-  reg [24-1:0]  clk_count_var_n;
+
+  // reg [24-1:0]  clk_count_var_n;
+  reg [24-1:0]  clk_count_var_pos_n; 
+  reg [24-1:0] clk_count_var_neg_n;
+
+
   reg [31:0]    clk_count_int_n;
   reg use_slow_rundown;
 
@@ -851,7 +898,11 @@ module top (
     . reg_led(reg_led),
     . clk_count_init_n( clk_count_init_n ) ,
     . clk_count_fix_n( clk_count_fix_n ) ,
-    . clk_count_var_n( clk_count_var_n ) ,
+    // . clk_count_var_n( clk_count_var_n ) ,
+    . clk_count_var_pos_n( clk_count_var_pos_n) ,
+    . clk_count_var_neg_n( clk_count_var_neg_n),
+
+
     . clk_count_int_n( clk_count_int_n ) ,
     . use_slow_rundown( use_slow_rundown),
     . himux_sel( himux_sel ),
@@ -892,7 +943,11 @@ module top (
     // parameters
     . clk_count_init_n( clk_count_init_n ) ,
     . clk_count_fix_n( clk_count_fix_n ) ,
-    . clk_count_var_n( clk_count_var_n ) ,
+
+    // . clk_count_var_n( clk_count_var_n ) ,
+    . clk_count_var_pos_n( clk_count_var_pos_n) ,
+    . clk_count_var_neg_n( clk_count_var_neg_n),
+
     . clk_count_int_n( clk_count_int_n ) ,
     . use_slow_rundown( use_slow_rundown),
     . himux_sel( himux_sel ),
