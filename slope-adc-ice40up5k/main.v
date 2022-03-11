@@ -71,6 +71,8 @@ module my_register_bank   #(parameter MSB=32)   (
   inout           use_slow_rundown,
   inout [4-1:0]   himux_sel,
 
+  input wire [24-1:0]  meas_count,    // how many actual measurements we have done.
+
   // outputs only
   input wire [24-1:0] count_up,
   input wire [24-1:0] count_down,
@@ -106,6 +108,7 @@ module my_register_bank   #(parameter MSB=32)   (
     // himux_sel      = 4'b1011;        // ref lo/agnd
     // himux_sel      = 4'b1101;     // ref in
     himux_sel         = 4'b1011;        // ref lo/agnd
+
   end
 
 
@@ -177,6 +180,8 @@ module my_register_bank   #(parameter MSB=32)   (
               */
               25: out = himux_sel << 8;
 
+              28: out = meas_count << 8;
+
             endcase
           end
 
@@ -212,11 +217,11 @@ module my_register_bank   #(parameter MSB=32)   (
           // these slow things down from 40MHz to 34MHz. need piplining.
           // but the PROBLEM - is the sensitivity list does not include clk.
 
-          // 34MHz. aracnne,  38MHz nextpnr.
+          // 34MHz. aracnne,  38MHz nextpnr. now getting 39MHz.
           22: clk_count_int_n <= (clk_count_int_n & 32'hff000000) | val;          // lo 24 bits
           23: clk_count_int_n <= (clk_count_int_n & 32'h00ffffff) | (val << 24);  // hi 8 bits
 
-          // 39MHz nextpnr 
+          // 39MHz nextpnr
           // this only routes correctly in nextpnr. not arachne-pnr
           // 22: clk_count_int_n <=   { clk_count_int_n[MSB - 1 : MSB - 8 - 1], val  };                  // lo 24 bits
           // 23: clk_count_int_n <=   { val[ MSB - 1: MSB - 8 - 1 ], clk_count_int_n[ MSB - 8 - 1: 0] };  // hi 8 bits
@@ -620,7 +625,36 @@ module my_modulation (
 endmodule
 
 
+/*
+  // OK. we want to write a module. that whenever we get com_interupt lo. indicating completion
+  // then we update a count,   and test it.
+  - if can do that. then we can inject and also change the modulation parameters
 
+  --------------
+  OK. adding the meas count has slowed it down to 32MHz. 
+*/
+
+module my_control (
+  input           clk,
+  input           com_interupt,
+  input [24-1:0]  count
+);
+
+/*
+  initial begin
+    count = 0;
+  end
+*/
+  always@(posedge clk) begin
+
+    if(!com_interupt)
+      begin
+        // this is being driven. so it should have type output?
+        count <= count + 1;
+      end
+  end
+
+endmodule
 
 
 
@@ -724,6 +758,9 @@ module top (
 
   reg [4-1:0] himux_sel;    // himux signal selection
 
+  reg [24-1:0] meas_count;    // how many actual measurements we have done.
+
+
 
   /*
     registers mux_sel |= 0x ... turn a bit on.
@@ -758,6 +795,14 @@ module top (
 
 
 
+  my_control
+  control(
+    . clk(clk),
+    . com_interupt( COM_INTERUPT ),
+    . count( meas_count)
+  );
+
+
   my_register_bank #( 32 )   // register bank  . change name 'registers'
   bank
     (
@@ -767,7 +812,7 @@ module top (
     . din(COM_MOSI),
     . dout(COM_MISO),
 
-    // parameters
+    // modulation parameters
     . reg_led(reg_led),
     . clk_count_init_n( clk_count_init_n ) ,
     . clk_count_fix_n( clk_count_fix_n ) ,
@@ -776,6 +821,10 @@ module top (
     . use_slow_rundown( use_slow_rundown),
     . himux_sel( himux_sel ),
 
+    // control
+    . meas_count( meas_count ),
+
+    // TODO prefix with modulation. or mod_count ?
     // counts
     . count_up(count_up),
     . count_down(count_down),
@@ -798,7 +847,8 @@ module top (
 
 
 
-  my_modulation  m1 (
+  my_modulation
+  m1 (
 
     // inputs
     . clk(clk),
