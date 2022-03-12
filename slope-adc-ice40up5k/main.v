@@ -59,6 +59,7 @@
 // general,mix start 0
 `define REG_LED               7
 `define REG_TEST              8
+`define REG_RESET             9   // active low. for the modulator only. not spi.
 
 // run parameters, start 10
 `define REG_COUNT_UP          10
@@ -257,6 +258,8 @@ module my_register_bank   #(parameter MSB=32)   (
           // use high bit - to do a xfer (read+writ) while avoiding actually writing a register
           // leds
 
+          `REG_RESET:            reset <= val;
+
           `REG_LED:                 reg_led <= val;
 
           `REG_CLK_COUNT_INIT_N:    clk_count_init_n <= val;  // aperture
@@ -448,11 +451,15 @@ module my_modulation (
       - add another count period. But think it should be time of fix+var. so that it can be counted normally.
   */
 
+  // IMPORTANT ! is not.   ~ is complement.
 
+  wire reset = 1;
 
   always @(posedge clk)
+    if(!reset)
+      state = `STATE_INIT_START;
+    else
     begin
-
 
       // could/should specify bitwidth of constants eg. 24'b1. but result is smae.
       // default behavior at top of verilog block.
@@ -475,8 +482,8 @@ module my_modulation (
             // reset vars, and transition to runup state
             state <= `STATE_INIT;
 
-            clk_count <= 0;
-            clk_count_int <= 0;   // start of signal integration time.
+            clk_count       <= 0;
+            clk_count_int   <= 0;   // start of signal integration time.
 
             done <= 0;
 
@@ -509,7 +516,7 @@ module my_modulation (
 
         `STATE_INIT:
           begin
-            if(clk_count == clk_count_init_n)
+            if(clk_count >= clk_count_init_n)
               begin
                 state <= `STATE_FIX_POS_START;
                 // turn on signal input, to start signal integration
@@ -527,7 +534,7 @@ module my_modulation (
           end
 
         `STATE_FIX_POS:
-          if(clk_count == clk_count_fix_n)       // walk up.  dir = 1
+          if(clk_count >= clk_count_fix_n)       // walk up.  dir = 1
             state <= `STATE_VAR_START;
 
         // variable direction
@@ -549,14 +556,19 @@ module my_modulation (
               end
           end
 
+        /*
+          should use === for equality. avoids high-z case.
+        */
         // we are confusing neg. pos. and up. down.   neg == up. pos == down.
 
         `STATE_VAR:
-          // if(clk_count == clk_count_var_n)
+          if(clk_count >= clk_count_var_pos_n)
+/*
           if(
-              ( refmux == `MUX_REF_NEG && clk_count == clk_count_var_neg_n )
-            || (refmux == `MUX_REF_POS && clk_count == clk_count_var_pos_n )
+              ( refmux == `MUX_REF_NEG && clk_count >= clk_count_var_neg_n )
+            || (refmux == `MUX_REF_POS && clk_count >= clk_count_var_pos_n )
             )    // should be neg....
+*/
             state <= `STATE_FIX_NEG_START;
 
         `STATE_FIX_NEG_START:
@@ -570,7 +582,7 @@ module my_modulation (
 
         `STATE_FIX_NEG:
           // TODO add switch here for 3 phase modulation variation.
-          if(clk_count == clk_count_fix_n)
+          if(clk_count >= clk_count_fix_n)
             state <= `STATE_VAR2_START;
 
         // variable direction
@@ -598,12 +610,13 @@ module my_modulation (
           end
 
         `STATE_VAR2:
-          // if(clk_count == clk_count_var_n)
+          if(clk_count >= clk_count_var_pos_n)
+/*
           if(
-              ( refmux == `MUX_REF_NEG && clk_count == clk_count_var_neg_n )
-            || (refmux == `MUX_REF_POS && clk_count == clk_count_var_pos_n )
+              ( refmux == `MUX_REF_NEG && clk_count >= clk_count_var_neg_n )
+            || (refmux == `MUX_REF_POS && clk_count >= clk_count_var_pos_n )
             )    // should be neg....
-
+*/
             begin
               ///////////////////////////
               // this code here, with flip_count is very speed sensitive. eg. 39MHz to 32MHz.
@@ -612,7 +625,7 @@ module my_modulation (
               // perhaps - could reduce the bit length of count_flip and it would propagate faster.
 
               // end of integration condition. and above zero cross
-              if(done && ~ comparator_val)
+              if(done && ! comparator_val)
                 // go straight to the final rundown.
                 state <= `STATE_RUNDOWN_START;
               else
