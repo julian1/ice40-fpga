@@ -569,6 +569,8 @@ module my_modulation (
                 // start the aperture counter
                 // we should not really be incrementing it - elsewhere...
                 clk_count_int <= 0;
+
+                done <= 0;
               end
           end
 
