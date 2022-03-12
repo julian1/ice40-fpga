@@ -69,7 +69,7 @@
 `define REG_COUNT_FIX_DOWN    15
 `define REG_COUNT_FLIP        16  // deprecated
 `define REG_CLK_COUNT_RUNDOWN 17
-`define REG_RUNDOWN_DIR       16  // deprecated
+`define REG_RUNDOWN_DIR       18  // deprecated
 
 
 // modulation control parameters, start 30.
