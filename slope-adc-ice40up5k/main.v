@@ -375,6 +375,12 @@ module my_modulation (
   // advantage of macros is that they generate errors if not defined.
   `define STATE_INIT_START    0
   `define STATE_INIT          1    // initialsation state
+
+  `define STATE_HIMUX_SETTLE_START 4
+  `define STATE_HIMUX_SETTLE  5
+
+
+
   `define STATE_FIX_POS_START 6
   `define STATE_FIX_POS       7
   `define STATE_VAR_START     8
@@ -387,12 +393,15 @@ module my_modulation (
   `define STATE_RUNDOWN       16
   `define STATE_DONE          17
 
-
+  // change prefix LOMUX ?
   `define MUX_REF_NONE        2'b00
   `define MUX_REF_POS         2'b01
   `define MUX_REF_NEG         2'b10
   `define MUX_REF_SLOW_POS    2'b11
 
+  // ---
+
+  `define HIMUX_SEL_ANG       4'b0111 //  (0xf & ~(1 << 3))   // 0b0111
 
   wire [2-1:0] refmux;
   // assign {  INT_IN_N_CTL, INT_IN_P_CTL } = lomux ;
@@ -467,7 +476,10 @@ module my_modulation (
       // could/should specify bitwidth of constants eg. 24'b1. but result is smae.
       // default behavior at top of verilog block.
       clk_count     <= clk_count + 1;
-      clk_count_int <= clk_count_int + 1;
+
+      // should be wrapped in a signal integrating.
+
+      clk_count_int <= clk_count_int + 1; // THIS IS NOT GREAT.  we risk turning off the signal
 
 
       // test regardless of state
@@ -483,12 +495,17 @@ module my_modulation (
         `STATE_INIT_START:
           begin
             // reset vars, and transition to runup state
-            state <= `STATE_INIT;
+            state           <= `STATE_INIT;
 
             clk_count       <= 0;
-            clk_count_int   <= 0;   // start of signal integration time.
 
-            done            <= 0;
+
+            // hang on this is wrong.
+            clk_count_int   <= 0;   // start of signal integration time.
+                                    // actually why bother don't
+
+            done            <= 0;   // this is no good.
+                                    // rather than binary. 
 
             count_up        <= 0;
             count_down      <= 0;
@@ -504,28 +521,59 @@ module my_modulation (
             // TODO this is wrong. should be muxing reset signal.
             // select input signal
             // IMPORTANT. buffer op must now be given time to settle to new input.
-            himux           <= himux_sel;
+            // himux           <= himux_sel;
+
+            // switch op to analog input
+            himux           <= HIMUX_SEL_ANG;
+            sigmux          <= 1;
 
             // mux ctrl
-            sigmux          <= 0; // off.
+            // sigmux          <= 0; // off. ahoudl be on.
             refmux          <= `MUX_REF_NONE;
 
           end
 
-        // there are leakage issues with the low-side switching, so need to be careful with high-side switching / and op settling.
-        // case STATE_BUFFER_RESET    - hi-mux buffers the slope feedback to reset integrator.
-        // case STATE_BUFFER_SIGNAL   - hi-mux buffers the source signal, wait for op to settle.
 
+        // init shoudl be called RESET
+        `STATE_INIT:    // let integrator reset.
+          begin
+            if(clk_count >= clk_count_init_n)
+              begin
+                state <= `STATE_HIMUX_SETTLE_START;
+              end
+          end
 
-        `STATE_INIT:
+          // need to get this all on a scope
+
+        `STATE_HIMUX_SETTLE_START:
+          begin
+            state <= `STATE_HIMUX_SETTLE;
+            clk_count       <= 0;
+
+            // switch himux to signal
+            himux           <= himux_sel;
+            // switch signal off
+            sigmux          <= 0;
+          end
+
+        `STATE_HIMUX_SETTLE:
           begin
             if(clk_count >= clk_count_init_n)
               begin
                 state <= `STATE_FIX_POS_START;
+
+                // TODO - this is the most important bit. 
+                // shoudl probably be factored into a condition.
                 // turn on signal input, to start signal integration
                 sigmux <= 1;
+                // start the aperture counter
+                // we should not really be incrementing it - elsewhere...
+                clk_count_int <= 0;
               end
           end
+
+
+
 
         `STATE_FIX_POS_START:
           begin
