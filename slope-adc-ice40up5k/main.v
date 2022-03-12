@@ -426,7 +426,7 @@ module my_modulation (
 
   // reg [24-1:0]  clk_count ;         // clk_count for the current phase.
   reg [31:0]  clk_count ;         // 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
-  reg [31:0]  clk_count_int ;     // from the start of the signal integration. eg. 5sec*20MHz=100m count. won't fit in 24 bit value. would need to split between read registers.
+  reg [31:0]  clk_count_aper ;     // from the start of the signal integration. eg. 5sec*20MHz=100m count. won't fit in 24 bit value. would need to split between read registers.
                                   // could also record clk_count_actual.
 
   reg         done;
@@ -479,11 +479,11 @@ module my_modulation (
 
       // should be wrapped in a signal integrating.
 
-      clk_count_int <= clk_count_int + 1; // THIS IS NOT GREAT.  we risk turning off the signal
+      clk_count_aper <= clk_count_aper + 1; // THIS IS NOT GREAT.  we risk turning off the signal
 
 
       // test regardless of state
-      if(clk_count_int >= clk_count_aper_n)
+      if(clk_count_aper >= clk_count_aper_n)
         begin
           done    <= 1; // indicate end of signal input. maybe change name to sigdone.
           sigmux  <= 0; // turn off signal input
@@ -501,7 +501,7 @@ module my_modulation (
 
 
             // hang on this is wrong.
-            clk_count_int   <= 0;   // start of signal integration time.
+            clk_count_aper   <= 0;   // start of signal integration time.
                                     // actually why bother don't
 
             done            <= 0;   // this is no good.
@@ -568,7 +568,7 @@ module my_modulation (
                 sigmux <= 1;
                 // start the aperture counter
                 // we should not really be incrementing it - elsewhere...
-                clk_count_int <= 0;
+                clk_count_aper <= 0;
 
                 done <= 0;
               end
