@@ -388,7 +388,7 @@ module my_modulation (
   `define STATE_DONE          17
 
 
-  `define MUX_NONE            2'b00
+  `define MUX_REF_NONE        2'b00
   `define MUX_REF_POS         2'b01
   `define MUX_REF_NEG         2'b10
   `define MUX_REF_SLOW_POS    2'b11
@@ -452,6 +452,10 @@ module my_modulation (
 
   // IMPORTANT ! is not.   ~ is complement.
 
+  /*
+    after the integration....
+    what do we do.
+  */
   wire reset = 1;
 
   always @(posedge clk)
@@ -484,7 +488,7 @@ module my_modulation (
             clk_count       <= 0;
             clk_count_int   <= 0;   // start of signal integration time.
 
-            done <= 0;
+            done            <= 0;
 
             count_up        <= 0;
             count_down      <= 0;
@@ -500,11 +504,11 @@ module my_modulation (
             // TODO this is wrong. should be muxing reset signal.
             // select input signal
             // IMPORTANT. buffer op must now be given time to settle to new input.
-            himux <= himux_sel;
+            himux           <= himux_sel;
 
             // mux ctrl
-            sigmux <= 0;
-            refmux <= `MUX_NONE;
+            sigmux          <= 0; // off.
+            refmux          <= `MUX_REF_NONE;
 
           end
 
@@ -649,6 +653,8 @@ module my_modulation (
             state <= `STATE_RUNDOWN;
             clk_count <= 0;
 
+
+
             if( use_slow_rundown )
               // turn on both references - to create +ve bias, to drive integrator down.
               refmux <= `MUX_REF_SLOW_POS;
@@ -671,7 +677,7 @@ module my_modulation (
                   clk_count <= 0;    // ok.
 
                   // turn off all inputs. actually should leave. because we will turn on to reset the integrator.
-                  refmux <= `MUX_NONE;
+                  refmux <= `MUX_REF_NONE;
 
                   COM_INTERUPT <= 0;   // active lo, set interupt
 
@@ -829,7 +835,7 @@ module top (
   reg [24-1:0]  clk_count_fix_n;
 
   // reg [24-1:0]  clk_count_var_n;
-  reg [24-1:0]  clk_count_var_pos_n; 
+  reg [24-1:0]  clk_count_var_pos_n;
   reg [24-1:0] clk_count_var_neg_n;
 
 
