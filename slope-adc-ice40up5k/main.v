@@ -82,8 +82,8 @@
 `define REG_CLK_COUNT_VAR_NEG_N   38
 
 
-`define REG_CLK_COUNT_INT_N_LO 33    // aperture. rename?
-`define REG_CLK_COUNT_INT_N_HI 34
+`define REG_CLK_COUNT_APER_N_LO 33    // aperture. rename?
+`define REG_CLK_COUNT_APER_N_HI 34
 
 `define REG_USE_SLOW_RUNDOWN  35
 `define REG_HIMUX_SEL         36
@@ -108,7 +108,7 @@ module my_register_bank   #(parameter MSB=32)   (
   inout [24-1:0]  clk_count_var_pos_n,
   inout [24-1:0]  clk_count_var_neg_n,
 
-  inout [31:0]    clk_count_int_n,
+  inout [31:0]    clk_count_aper_n,
   inout           use_slow_rundown,
   inout [4-1:0]   himux_sel,
 
@@ -150,8 +150,8 @@ module my_register_bank   #(parameter MSB=32)   (
 
 
 
-    clk_count_int_n   = (2 * 2000000);    // 200ms
-    // clk_count_int_n = (5 * 20000000);   // 5 sec.
+    clk_count_aper_n   = (2 * 2000000);    // 200ms
+    // clk_count_aper_n = (5 * 20000000);   // 5 sec.
     use_slow_rundown  = 1;
     // himux_sel      = 4'b1011;        // ref lo/agnd
     // himux_sel      = 4'b1101;     // ref in
@@ -220,8 +220,8 @@ module my_register_bank   #(parameter MSB=32)   (
               `REG_CLK_COUNT_VAR_NEG_N:  out <= clk_count_var_neg_n << 8;
 
 
-              `REG_CLK_COUNT_INT_N_LO: out <= clk_count_int_n << 8;           // lo 24 bits  aperture
-              `REG_CLK_COUNT_INT_N_HI: out <= (clk_count_int_n >> 24) << 8;   // hi 8 bits
+              `REG_CLK_COUNT_APER_N_LO: out <= clk_count_aper_n << 8;           // lo 24 bits  aperture
+              `REG_CLK_COUNT_APER_N_HI: out <= (clk_count_aper_n >> 24) << 8;   // hi 8 bits
               `REG_USE_SLOW_RUNDOWN:  out <= use_slow_rundown << 8;
 
               /* could convert numerical argument - to avoid accidently turning on more than one source.
@@ -258,16 +258,15 @@ module my_register_bank   #(parameter MSB=32)   (
           // use high bit - to do a xfer (read+writ) while avoiding actually writing a register
           // leds
 
-          `REG_RESET:            reset <= val;
-
+          // `REG_RESET:               reset <= val;
           `REG_LED:                 reg_led <= val;
 
           `REG_CLK_COUNT_INIT_N:    clk_count_init_n <= val;  // aperture
           `REG_CLK_COUNT_FIX_N:     clk_count_fix_n <= val;
 
-          // `REG_CLK_COUNT_VAR_N:     clk_count_var_n <= val;
-          `REG_CLK_COUNT_VAR_POS_N:  clk_count_var_pos_n <= val;
-          `REG_CLK_COUNT_VAR_NEG_N:  clk_count_var_neg_n <= val;
+          // `REG_CLK_COUNT_VAR_N:  clk_count_var_n <= val;
+          `REG_CLK_COUNT_VAR_POS_N: clk_count_var_pos_n <= val;
+          `REG_CLK_COUNT_VAR_NEG_N: clk_count_var_neg_n <= val;
 
 
 
@@ -276,14 +275,14 @@ module my_register_bank   #(parameter MSB=32)   (
           // but the PROBLEM - is the sensitivity list does not include clk.
 
           // 34MHz. aracnne,  38MHz nextpnr. now getting 39MHz.
-          `REG_CLK_COUNT_INT_N_LO:  clk_count_int_n <= (clk_count_int_n & 32'hff000000) | val;          // lo 24 bits
-          `REG_CLK_COUNT_INT_N_HI:  clk_count_int_n <= (clk_count_int_n & 32'h00ffffff) | (val << 24);  // hi 8 bits
+          `REG_CLK_COUNT_APER_N_LO:  clk_count_aper_n <= (clk_count_aper_n & 32'hff000000) | val;          // lo 24 bits
+          `REG_CLK_COUNT_APER_N_HI:  clk_count_aper_n <= (clk_count_aper_n & 32'h00ffffff) | (val << 24);  // hi 8 bits
 
           // 39MHz nextpnr
           // this only routes correctly in nextpnr. not arachne-pnr
           // these are not equivalent.
-          // REG_CLK_COUNT_INT_N_LO: clk_count_int_n <=   { clk_count_int_n[MSB - 1 : MSB - 8 - 1], val  };                  // lo 24 bits
-          // REG_CLK_COUNT_INT_N_HI: clk_count_int_n <=   { val[ MSB - 1: MSB - 8 - 1 ], clk_count_int_n[ MSB - 8 - 1: 0] };  // hi 8 bits
+          // REG_CLK_COUNT_APER_N_LO: clk_count_aper_n <=   { clk_count_aper_n[MSB - 1 : MSB - 8 - 1], val  };                  // lo 24 bits
+          // REG_CLK_COUNT_APER_N_HI: clk_count_aper_n <=   { val[ MSB - 1: MSB - 8 - 1 ], clk_count_aper_n[ MSB - 8 - 1: 0] };  // hi 8 bits
 
           `REG_USE_SLOW_RUNDOWN:    use_slow_rundown <= val;
 
@@ -335,7 +334,7 @@ module my_modulation (
 
 
 
-  input [31:0]    clk_count_int_n,
+  input [31:0]    clk_count_aper_n,
   input           use_slow_rundown,
   input [4-1:0]   himux_sel,
 
@@ -468,7 +467,7 @@ module my_modulation (
 
 
       // test regardless of state
-      if(clk_count_int >= clk_count_int_n)
+      if(clk_count_int >= clk_count_aper_n)
         begin
           done    <= 1; // indicate end of signal input. maybe change name to sigdone.
           sigmux  <= 0; // turn off signal input
@@ -834,7 +833,7 @@ module top (
   reg [24-1:0] clk_count_var_neg_n;
 
 
-  reg [31:0]    clk_count_int_n;
+  reg [31:0]    clk_count_aper_n;
   reg use_slow_rundown;
 
   // output counts to read
@@ -916,7 +915,7 @@ module top (
     . clk_count_var_neg_n( clk_count_var_neg_n),
 
 
-    . clk_count_int_n( clk_count_int_n ) ,
+    . clk_count_aper_n( clk_count_aper_n ) ,
     . use_slow_rundown( use_slow_rundown),
     . himux_sel( himux_sel ),
 
@@ -961,7 +960,7 @@ module top (
     . clk_count_var_pos_n( clk_count_var_pos_n) ,
     . clk_count_var_neg_n( clk_count_var_neg_n),
 
-    . clk_count_int_n( clk_count_int_n ) ,
+    . clk_count_aper_n( clk_count_aper_n ) ,
     . use_slow_rundown( use_slow_rundown),
     . himux_sel( himux_sel ),
 
