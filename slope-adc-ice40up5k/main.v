@@ -489,10 +489,20 @@ module my_modulation (
 
 
   always @(posedge clk)
-    if(!reset)
+    if(!reset)  // active lo
+      begin
       // can use to easily update/write control parameters during reset. without confusing modulation
       // eg. hold in reset, write, release reset
-      state = `STATE_RESET_START;
+
+      // OK. I think this isn't quite right because the state is not evaluated.
+      state           <= `STATE_RESET_START;
+
+      // switch op to integrator analog input, and sigmux on, to reset the integrator
+      himux           <= `HIMUX_SEL_ANG;
+      sigmux          <= 1;
+      refmux          <= `MUX_REF_NONE;
+
+      end 
     else
     begin
 
