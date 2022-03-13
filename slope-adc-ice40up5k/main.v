@@ -358,26 +358,14 @@ module my_modulation (
   inout [24-1:0]  clk_count_var_pos_n,
   inout [24-1:0]  clk_count_var_neg_n,
 
-
-
   input [31:0]    clk_count_aper_n,
   input           use_slow_rundown,
 
   input [4-1:0]   himux_sel,
 
-  // TODO split up the lomux externally. into the ref mux and sigmux
-
-/*
-  // low mux
-  output [3-1:0] lomux,
-  // high mux
-*/
-
-  output [4-1:0] himux,
-
-  input wire [ 2-1:0] refmux  ,
-
-  input wire          sigmux,
+  output [4-1:0]  himux,
+  input [ 2-1:0]  refmux  ,
+  input           sigmux,
 
 
   // values from last run, available in order to read
