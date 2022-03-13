@@ -459,7 +459,7 @@ module my_modulation (
   assign sig_active     = himux == himux_sel     && sigmux == 1;    // j
 
   // ref active.
-  
+
   assign reset_active   = himux === HIMUX_SEL_ANG && sigmux === 1;
 
 
@@ -473,28 +473,26 @@ module my_modulation (
     else
     begin
 
-      // could/should specify bitwidth of constants eg. 24'b1. but result is smae.
-      // default behavior at top of verilog block.
+
+      // always increment clk for the current phase
       clk_count     <= clk_count + 1;
 
-      // should be wrapped in a signal integrating.
 
       if(sig_active)
+        // while integrating the signal
         begin
-          clk_count_aper <= clk_count_aper + 1; // THIS IS NOT GREAT.  we risk turning off the signal
+          // increment aperture clk count
+          clk_count_aper <= clk_count_aper + 1;
 
-          // test regardless of state
+          // have we reached end of aperture
           if(clk_count_aper >= clk_count_aper_n)
             begin
-              // indicate end of signal input. maybe change name to sigdone.
-              // todo maybe change name done
-              // done    <= 1;
+
               // turn off signal input
               sigmux  <= 0;
 
-              // note that himux is still high.
-              // but we still need to allow the ref integration.
-
+              // note himux is set to signal
+              // and we are continuing to integrate reference currents
             end
         end
 
@@ -680,17 +678,17 @@ module my_modulation (
               // This code doesn't quite look right.
 
               // end of integration condition. and above zero cross
-              if( !sig_active  && ! comparator_val)  
+              if( !sig_active  && ! comparator_val)
                 // begin
                   // if(! comparator_val)
-          
+
                     // go straight to the final rundown.
                     state <= `STATE_RUNDOWN_START;
                   else
                     // do another cycle
                     state <= `STATE_FIX_POS_START;
                     // TODO rename extra_cycle
-  
+
                 // end
 /*
                // slow??? 32MHz.
