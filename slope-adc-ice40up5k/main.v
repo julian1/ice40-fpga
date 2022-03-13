@@ -68,7 +68,7 @@
 `define REG_COUNT_TRANS_DOWN  13
 `define REG_COUNT_FIX_UP      14
 `define REG_COUNT_FIX_DOWN    15
-`define REG_COUNT_FLIP        16  // deprecated
+// `define REG_COUNT_FLIP        16  // deprecated
 `define REG_CLK_COUNT_RUNDOWN 17
 `define REG_RUNDOWN_DIR       18  // deprecated
 
@@ -121,7 +121,7 @@ module my_register_bank   #(parameter MSB=32)   (
   input wire [24-1:0] count_trans_down,
   input wire [24-1:0] count_fix_up,
   input wire [24-1:0] count_fix_down,
-  input wire [24-1:0] count_flip, // should be a count. possible could require two up modulations
+  // input wire [24-1:0] count_flip, // should be a count. possible could require two up modulations
 
   input wire [24-1:0] clk_count_rundown,
 
@@ -206,7 +206,7 @@ module my_register_bank   #(parameter MSB=32)   (
               `REG_COUNT_TRANS_DOWN:  out <= count_trans_down << 8;
               `REG_COUNT_FIX_UP:      out <= count_fix_up << 8;
               `REG_COUNT_FIX_DOWN:    out <= count_fix_down << 8;
-              `REG_COUNT_FLIP:        out <= count_flip << 8;
+              // `REG_COUNT_FLIP:        out <= count_flip << 8;
 
               `REG_CLK_COUNT_RUNDOWN: out <= clk_count_rundown << 8;
 
@@ -381,7 +381,7 @@ module my_modulation (
   output [24-1:0] count_trans_down_last,
   output [24-1:0] count_fix_up_last,
   output [24-1:0] count_fix_down_last,
-  output [24-1:0] count_flip_last,
+//   output [24-1:0] count_flip_last,
 
   output [24-1:0] clk_count_rundown_last,
 
@@ -439,7 +439,7 @@ module my_modulation (
   reg [24-1:0] count_trans_down;
   reg [24-1:0] count_fix_up;
   reg [24-1:0] count_fix_down;
-  reg [24-1:0] count_flip;
+  // reg [24-1:0] count_flip;
 
   /////////////////////////
   // this should be pushed into a separate module...
@@ -517,10 +517,6 @@ module my_modulation (
             COM_INTERUPT    <= 1; // active lo
             CMPR_LATCH_CTL  <= 0; // enable comparator
 
-            // TODO this is wrong. should be muxing reset signal.
-            // select input signal
-            // IMPORTANT. buffer op must now be given time to settle to new input.
-            // himux           <= himux_sel;
 
             // switch op to analog input, no ref input
             himux           <= HIMUX_SEL_ANG;
@@ -673,36 +669,15 @@ module my_modulation (
             )    // should be neg....
 */
             begin
-              ///////////////////////////
-              // this code here, with flip_count is very speed sensitive. eg. 39MHz to 32MHz.
-              // integration becomes unstable around 30MHz. waveform starts flipping.
-              // its OK. we can remove the count_flip if we want.
-              // perhaps - could reduce the bit length of count_flip and it would propagate faster.
-
-              // This code doesn't quite look right.
-
               // end of integration condition. and above zero cross
               if( !sig_active  && ! comparator_val)
-                // begin
-                  // if(! comparator_val)
 
-                    // go straight to the final rundown.
-                    state <= `STATE_RUNDOWN_START;
-                  else
-                    // do another cycle
-                    state <= `STATE_FIX_POS_START;
-                    // TODO rename extra_cycle
-
-                // end
-/*
-               // slow??? 32MHz.
-                if(done)
-                  begin
-                    // simple pipeline won't work. because constrained by the done condition to only propagate once.
-                    count_flip <= count_flip + 1;
-                  end
-*/
-
+                // go straight to the final rundown.
+                state <= `STATE_RUNDOWN_START;
+              else
+                // do another cycle
+                state <= `STATE_FIX_POS_START;
+                // TODO rename extra_cycle
 
             end
 
@@ -747,7 +722,7 @@ module my_modulation (
                   // count_flip_last     <= count_flip;
 
                   // weird.// appears to improve speed.
-                  count_flip_last     <= 0;
+                  // count_flip_last     <= 0;
 
                   clk_count_rundown_last <= clk_count;// TODO change nmae  clk_clk_count_rundown
 
@@ -906,7 +881,7 @@ module top (
   reg [24-1:0] count_trans_down;
   reg [24-1:0] count_fix_up;
   reg [24-1:0] count_fix_down;
-  reg [24-1:0] count_flip;
+//   reg [24-1:0] count_flip;
 
   reg [24-1:0] clk_count_rundown;
 
@@ -994,7 +969,7 @@ module top (
     . count_fix_up(count_fix_up),
     . count_fix_down(count_fix_down),
 
-    . count_flip(count_flip),
+    // . count_flip(count_flip),
     // . count_flip( 33 ),
 
     // clk counts
@@ -1038,7 +1013,7 @@ module top (
     . count_trans_down_last(count_trans_down),
     . count_fix_up_last(count_fix_up),
     . count_fix_down_last(count_fix_down),
-    . count_flip_last(count_flip),
+    // . count_flip_last(count_flip),
 
     // clk counts
     . clk_count_rundown_last(clk_count_rundown),
