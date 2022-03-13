@@ -386,28 +386,6 @@ module my_modulation (
   output          CMPR_LATCH_CTL
 );
 
-  /*
-  // so need
-  //   1. state to buffer the reset signal. and the lomux takes the input .
-  //   2. state to switch op back to the signal. while holding the switch at intlomux at gnd.
-  // **** actually at the end of the initegration - we would not turn off teh lowlomux.
-  // instead just switch the highlomux to feedback and settle
-  // then
-    */
-
-/*
-  input  [ 2-1:0] refmux  ;
-
-  input           sigmux;
-
-
-  wire [2-1:0] refmux;
-  // assign {  INT_IN_N_CTL, INT_IN_P_CTL } = lomux ;
-  assign refmux  = lomux [ 2-1:0] ;
-
-  wire sigmux;
-  assign sigmux = lomux [ 3-1 ];
-*/
 
     // 2^5 = 32
   reg [5-1:0] state;
@@ -426,8 +404,6 @@ module my_modulation (
   reg [31:0]  clk_count ;         // 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
   reg [31:0]  clk_count_aper ;     // from the start of the signal integration. eg. 5sec*20MHz=100m count. won't fit in 24 bit value. would need to split between read registers.
                                   // could also record clk_count_actual.
-
-  // reg         done;
 
   // modulation counts
   reg [24-1:0] count_up;
@@ -483,12 +459,11 @@ module my_modulation (
           // have we reached end of aperture
           if(clk_count_aper >= clk_count_aper_n)
             begin
-
               // turn off signal input
               sigmux  <= 0;
 
               // note himux is set to signal
-              // and we are continuing to integrate reference currents
+              // could turn off the himux to ref-lo, to prevent leakage, but switching instability probably worse
             end
         end
 
@@ -575,6 +550,7 @@ module my_modulation (
         `STATE_FIX_POS:
           if(clk_count >= clk_count_fix_n)       // walk up.  dir = 1
             state <= `STATE_VAR_START;
+
 
         // variable direction
         `STATE_VAR_START:
@@ -889,9 +865,12 @@ module top (
 
   // we can probe the leds for signals....
 
+  /*
   // start everything off...
   reg [3-1:0] lomux ;
   assign { INT_IN_SIG_CTL, INT_IN_N_CTL, INT_IN_P_CTL } = lomux;
+  */
+
 
   /*
     blinky blinky_ (
@@ -974,15 +953,9 @@ module top (
     . use_slow_rundown( use_slow_rundown),
     . himux_sel( himux_sel ),
 
-    // lomux
-    // . lomux(lomux),
     . himux(himux),
-    // { INT_IN_SIG_CTL, INT_IN_N_CTL, INT_IN_P_CTL } 
     . refmux( { INT_IN_N_CTL, INT_IN_P_CTL } ),
-
     . sigmux( INT_IN_SIG_CTL  ),
-
-
 
 
     // counts
