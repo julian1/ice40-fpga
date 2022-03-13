@@ -524,15 +524,15 @@ module my_modulation (
         `STATE_SIG_START:
           begin
             state <= `STATE_FIX_POS_START;
-            clk_count       <= 0;
+            clk_count     <= 0;
 
             // clear the aperture counter
-            clk_count_aper  <= 0;
+            clk_count_aper<= 0;
 
             // turn on signal input, to start signal integration
-            // himux       <= himux_sel;
-            sigmux <= 1;
-            // refmux      <= `MUX_REF_NONE;
+            // himux      <= himux_sel;
+            sigmux        <= 1;
+            // refmux     <= `MUX_REF_NONE;
           end
 
 
