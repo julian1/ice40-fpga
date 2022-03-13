@@ -68,9 +68,7 @@
 `define REG_COUNT_TRANS_DOWN  13
 `define REG_COUNT_FIX_UP      14
 `define REG_COUNT_FIX_DOWN    15
-// `define REG_COUNT_FLIP        16  // deprecated
 `define REG_CLK_COUNT_RUNDOWN 17
-// `define REG_RUNDOWN_DIR       18  // deprecated
 
 
 // modulation control parameters, start 30.
@@ -124,7 +122,6 @@ module my_register_bank   #(parameter MSB=32)   (
 
   input wire [24-1:0] clk_count_rundown,
 
-  input wire          rundown_dir
 );
 
   // TODO rename these...
@@ -207,8 +204,6 @@ module my_register_bank   #(parameter MSB=32)   (
               `REG_COUNT_FIX_DOWN:    out <= count_fix_down << 8;
 
               `REG_CLK_COUNT_RUNDOWN: out <= clk_count_rundown << 8;
-
-              // `REG_RUNDOWN_DIR:       out <= rundown_dir << 8;   // correct for single bit?
 
               // params
               `REG_CLK_COUNT_INIT_N:  out <= clk_count_init_n << 8;
@@ -384,11 +379,10 @@ module my_modulation (
 
   // could also record the initial dir.
   // these (the outputs) could be combined into single bitfield.
-  // output          rundown_dir_last,
 
   // TODO change lower case
-  output COM_INTERUPT,
-  output CMPR_LATCH_CTL
+  output          COM_INTERUPT,
+  output          CMPR_LATCH_CTL
 );
 
   /*
@@ -664,7 +658,7 @@ module my_modulation (
             )    // should be neg....
 */
             begin
-              // end of integration condition. and above zero cross
+              // integration finished. and above zero cross
               if( !sig_active  && ! comparator_val)
 
                 // go straight to the final rundown.
@@ -672,8 +666,6 @@ module my_modulation (
               else
                 // do another cycle
                 state <= `STATE_FIX_POS_START;
-                // TODO rename extra_cycle
-
             end
 
 
@@ -716,9 +708,6 @@ module my_modulation (
                   count_fix_down_last <= count_fix_down;
 
                   clk_count_rundown_last <= clk_count;// TODO change nmae  clk_clk_count_rundown
-
-                  // record last // unused. could remove.
-                  // rundown_dir_last <= refmux; // up
 
               end
           end
@@ -873,8 +862,6 @@ module top (
 
   reg [24-1:0] clk_count_rundown;
 
-  reg          rundown_dir;
-
 
   reg [4-1:0] himux_sel;    // himux signal selection
 
@@ -960,9 +947,6 @@ module top (
     // clk counts
     . clk_count_rundown(clk_count_rundown),
 
-    // other vars
-    . rundown_dir(rundown_dir),
-
   );
 
 
@@ -1002,8 +986,6 @@ module top (
     // clk counts
     . clk_count_rundown_last(clk_count_rundown),
 
-    // other vars
-    // . rundown_dir_last(rundown_dir),
 
     . COM_INTERUPT(COM_INTERUPT),
     . CMPR_LATCH_CTL(CMPR_LATCH_CTL)
