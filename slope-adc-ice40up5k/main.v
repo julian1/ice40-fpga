@@ -364,7 +364,7 @@ module my_modulation (
   input [4-1:0]   himux_sel,
 
   output [4-1:0]  himux,
-  input [ 2-1:0]  refmux  ,
+  input [ 2-1:0]  refmux,
   input           sigmux,
 
   // values from last run, available in order to read
@@ -377,8 +377,9 @@ module my_modulation (
 
   output [24-1:0] clk_count_rundown_last,
 
-  input   com_interupt,
-  output  cmpr_latch_ctl
+  // both should be input wires. both are driven. 
+  input           com_interupt,
+  output          cmpr_latch_ctl
 );
 
 
