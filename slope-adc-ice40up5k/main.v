@@ -492,10 +492,10 @@ module my_modulation (
 
     if(!reset)  // active lo
       begin
-        // OK. I think this isn't quite right because the state is not evaluated.
+        // set up next state, for when reset goes hi.
         state           <= `STATE_RESET_START;
 
-        // switch op to integrator analog input, and sigmux on, to reset the integrator
+        // ensure integrator is feeding back on it's output, to hold integrator in reset
         himux           <= `HIMUX_SEL_ANG;
         sigmux          <= 1;
         refmux          <= `MUX_REF_NONE;
