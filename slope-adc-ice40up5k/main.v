@@ -61,7 +61,24 @@
 `define REG_TEST              8
 `define REG_RESET             9   // TODO active low. for the modulator only. not spi.
 
-// meas/run parameters, start 10
+
+// control/param vars
+// we don't necessarily need to expose all these
+// just set once in pattern controller.
+// modulation control parameters, start 30.
+`define REG_CLK_COUNT_RESET_N   30
+`define REG_CLK_COUNT_FIX_N     31
+// `define REG_CLK_COUNT_VAR_N  32
+`define REG_CLK_COUNT_VAR_POS_N 37
+`define REG_CLK_COUNT_VAR_NEG_N 38
+`define REG_CLK_COUNT_APER_N_LO 33    // aperture. rename?
+`define REG_CLK_COUNT_APER_N_HI 34
+`define REG_USE_SLOW_RUNDOWN  35
+// `define REG_HIMUX_SEL         36      // we
+`define REG_PATTERN           37      // we
+
+
+// meas/run vars
 `define REG_COUNT_UP          10
 `define REG_COUNT_DOWN        11
 `define REG_COUNT_TRANS_UP    12
@@ -71,24 +88,6 @@
 `define REG_CLK_COUNT_RUNDOWN 17
 
 
-// we don't necessarily need to expose all these
-// just set once in pattern controller.
-// modulation control parameters, start 30.
-`define REG_CLK_COUNT_RESET_N   30
-`define REG_CLK_COUNT_FIX_N     31
-// `define REG_CLK_COUNT_VAR_N  32
-`define REG_CLK_COUNT_VAR_POS_N 37
-`define REG_CLK_COUNT_VAR_NEG_N 38
-
-
-`define REG_CLK_COUNT_APER_N_LO 33    // aperture. rename?
-`define REG_CLK_COUNT_APER_N_HI 34
-
-`define REG_USE_SLOW_RUNDOWN  35
-// `define REG_HIMUX_SEL         36      // we
-
-`define REG_PATTERN           37      // we
-
 
 `define REG_MEAS_COUNT        40
 
@@ -97,7 +96,12 @@
 `define REG_MEAS_VAR_POS_N    42      //
 
 
-
+/*
+  - verilog registers defined in top
+  - injected into register_bank as inout if read/writable
+  - injected into controllers as readable.
+  
+*/
 
 module my_register_bank   #(parameter MSB=32)   (
 
@@ -107,7 +111,7 @@ module my_register_bank   #(parameter MSB=32)   (
   input  din,       // sdi
   output dout,       // sdo
 
-
+  // read/write control vars
   // use ' inout',  must be inout to write
   inout wire [24-1:0] reg_led ,    // need to be very careful. only 4 bits. or else screws set/reset calculation ...
   inout [24-1:0]  clk_count_reset_n,
@@ -115,23 +119,23 @@ module my_register_bank   #(parameter MSB=32)   (
   // inout [24-1:0]  clk_count_var_n,
   inout [24-1:0]  clk_count_var_pos_n,
   inout [24-1:0]  clk_count_var_neg_n,
-
   inout [31:0]    clk_count_aper_n,
+
   inout           use_slow_rundown,
 
   inout [8-1:0]   pattern,
 
-  input wire [24-1:0]  meas_count,    // how many actual measurements we have done.
-
-  // outputs only
   input wire [24-1:0] count_up,
   input wire [24-1:0] count_down,
   input wire [24-1:0] count_trans_up,
   input wire [24-1:0] count_trans_down,
   input wire [24-1:0] count_fix_up,
   input wire [24-1:0] count_fix_down,
-
   input wire [24-1:0] clk_count_rundown,
+
+  // readable only
+  input wire [24-1:0]  meas_count,    // how many actual measurements we have done.
+
 
 );
 
@@ -154,7 +158,7 @@ module my_register_bank   #(parameter MSB=32)   (
     clk_count_var_pos_n = 5500;
     clk_count_var_neg_n = 5500;
 
-    clk_count_aper_n    = (2 * 2000000);    // 200ms
+    clk_count_aper_n    = (2 * 2000000);    // ? 200ms
     use_slow_rundown    = 1;
 
     pattern             = 10;
@@ -200,16 +204,6 @@ module my_register_bank   #(parameter MSB=32)   (
               `REG_LED:               out <= reg_led << 8;
               `REG_TEST:              out <= 24'hffffff << 8;    // fixed value, test value
 
-              // measure/run
-              `REG_COUNT_UP:          out <= count_up << 8;
-              `REG_COUNT_DOWN:        out <= count_down << 8;
-              `REG_COUNT_TRANS_UP:    out <= count_trans_up << 8;
-              `REG_COUNT_TRANS_DOWN:  out <= count_trans_down << 8;
-              `REG_COUNT_FIX_UP:      out <= count_fix_up << 8;
-              `REG_COUNT_FIX_DOWN:    out <= count_fix_down << 8;
-
-              `REG_CLK_COUNT_RUNDOWN: out <= clk_count_rundown << 8;
-
               // params
               `REG_CLK_COUNT_RESET_N: out <= clk_count_reset_n << 8;
               `REG_CLK_COUNT_FIX_N:   out <= clk_count_fix_n << 8;
@@ -225,10 +219,19 @@ module my_register_bank   #(parameter MSB=32)   (
               /* could convert numerical argument - to avoid accidently turning on more than one source.
                 no. mux switch has 1.5k impedance. should not break anything
               */
-              // `REG_HIMUX_SEL:     out <= himux_sel << 8;
+              // `REG_HIMUX_SEL:      out <= himux_sel << 8;
               `REG_PATTERN:           out <= pattern << 8;
-
               `REG_MEAS_COUNT:        out <= meas_count << 8;
+
+
+              // measure/run
+              `REG_COUNT_UP:          out <= count_up << 8;
+              `REG_COUNT_DOWN:        out <= count_down << 8;
+              `REG_COUNT_TRANS_UP:    out <= count_trans_up << 8;
+              `REG_COUNT_TRANS_DOWN:  out <= count_trans_down << 8;
+              `REG_COUNT_FIX_UP:      out <= count_fix_up << 8;
+              `REG_COUNT_FIX_DOWN:    out <= count_fix_down << 8;
+              `REG_CLK_COUNT_RUNDOWN: out <= clk_count_rundown << 8;
 
               default:                out <= 12345 << 8;
 
@@ -794,7 +797,8 @@ endmodule
 module my_control_pattern_2 (
   input           clk,
   input           com_interupt,
-  input [4-1:0]   pattern,
+
+  input [8-1:0]   pattern,
   output [4-1:0]   himux_sel,  // output. declares a local register?
 );
 
@@ -947,7 +951,9 @@ module top (
 
   reg [4-1:0] himux_sel;    // himux signal selection
   reg [4-1:0] himux_sel_dummy;    // himux signal selection
-  reg [4-1:0] pattern ;    // himux signal selection
+
+
+  reg [8-1:0] pattern;
 
   reg [24-1:0] meas_count;    // how many actual measurements we have done.
 
@@ -1011,8 +1017,6 @@ module top (
     // . clk_count_var_n( clk_count_var_n ) ,
     . clk_count_var_pos_n( clk_count_var_pos_n) ,
     . clk_count_var_neg_n( clk_count_var_neg_n),
-
-
     . clk_count_aper_n( clk_count_aper_n ) ,
     . use_slow_rundown( use_slow_rundown),
 
