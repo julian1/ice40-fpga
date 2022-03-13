@@ -377,7 +377,7 @@ module my_modulation (
 
   output [24-1:0] clk_count_rundown_last,
 
-  // both should be input wires. both are driven. 
+  // both should be input wires. both are driven.
   input           com_interupt,
   output          cmpr_latch_ctl
 );
@@ -673,13 +673,12 @@ module my_modulation (
                 // transition
                 state     <= `STATE_DONE;
                 clk_count <= 0;    // ok.
-  
+
                 // IS THERE AN ISSUE with the case conflicting with the global?
 
                 // turn off all inputs. actually should leave. because we will turn on to reset the integrator.
                 refmux    <= `MUX_REF_NONE;
 
-                // OHHHHHHHHH
                 com_interupt <= 0;   // active lo, set interupt
 
                 // record everything
@@ -690,11 +689,13 @@ module my_modulation (
                 count_fix_up_last   <= count_fix_up;
                 count_fix_down_last <= count_fix_down;
 
-                clk_count_rundown_last <= clk_count;// TODO change nmae  clk_clk_count_rundown
+                clk_count_rundown_last <= clk_count;
 
               end
           end
 
+        // OK. the timing of the com_interupt is not right either - about 4uS.  too weird.
+        // No. we were scoping CS. rather than INT.
 
         `STATE_DONE:
           begin
@@ -727,7 +728,6 @@ module my_control (
   input           com_interupt,
   input wire [24-1:0]  count
 );
-
 
   initial begin
     count = 0;

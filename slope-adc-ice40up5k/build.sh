@@ -19,8 +19,6 @@ nextpnr-ice40 --up5k  --package  sg48 --pcf  main.pcf --json ./build/main.json  
 
 icepack ./build/main.asc ./build/main.bin
 
-# TODO check
-#icetime ./build/main.asc -d hx4k
 
 icetime ./build/main.asc -d up5k
 
