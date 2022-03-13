@@ -179,7 +179,7 @@ module my_register_bank   #(parameter MSB=32)   (
     use_slow_rundown    = 1;
     himux_sel           = `HIMUX_SEL_REF_HI;   // when not controlled by pattern controller.
     pattern             = 10;
-    reset               = 1; // active lo
+    reset               = 1; // for modulation, active lo
 
   end
 
@@ -344,13 +344,9 @@ endmodule
 
 `define STATE_RESET_START    0    // initial state
 `define STATE_RESET          1
-
 `define STATE_SIG_SETTLE_START 3
 `define STATE_SIG_SETTLE    4
-
 `define STATE_SIG_START     5
-
-
 `define STATE_FIX_POS_START 6
 `define STATE_FIX_POS       7
 `define STATE_VAR_START     8
@@ -490,7 +486,7 @@ module my_modulation (
 
   always @(posedge clk)
 
-    if(!reset)  // active lo
+    if(!reset)  // external reset, active lo
       begin
         // set up next state, for when reset goes hi.
         state           <= `STATE_RESET_START;
@@ -501,7 +497,6 @@ module my_modulation (
         refmux          <= `MUX_REF_NONE;
       end
     else
-
     begin
 
 
