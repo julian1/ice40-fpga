@@ -347,10 +347,10 @@ endmodule
 
 module my_modulation (
 
-  input  clk,
+  input           clk,
 
   // comparator input
-  input comparator_val,
+  input           comparator_val,
 
   // modulation parameters/count limits to use
   input [24-1:0]  clk_count_init_n,
@@ -384,7 +384,7 @@ module my_modulation (
 
   // could also record the initial dir.
   // these (the outputs) could be combined into single bitfield.
-  output rundown_dir_last,
+  output          rundown_dir_last,
 
   // TODO change lower case
   output COM_INTERUPT,
