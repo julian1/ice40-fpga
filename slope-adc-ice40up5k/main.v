@@ -403,6 +403,11 @@ module my_modulation (
   // initial begin does seem to be supported.
   initial begin
     state = `STATE_RESET_START;
+
+    COM_INTERUPT    = 1; // active lo move this to an initial condition.
+    CMPR_LATCH_CTL  = 0; // enable comparator
+
+
   end
 
 
@@ -480,21 +485,13 @@ module my_modulation (
 
       case (state)
 
+        // IMPORTANT. might can improved performance by reducing the reset and sig-settle times
+
         `STATE_RESET_START:
           begin
             // reset vars, and transition to runup state
             state           <= `STATE_RESET;
             clk_count       <= 0;
-
-            count_up        <= 0;
-            count_down      <= 0;
-            count_trans_up  <= 0;
-            count_trans_down <= 0;
-            count_fix_up    <= 0;
-            count_fix_down  <= 0;
-
-            COM_INTERUPT    <= 1; // active lo
-            CMPR_LATCH_CTL  <= 0; // enable comparator
 
 
             // switch op to analog input, and sigmux on, to reset the integrator
@@ -536,6 +533,15 @@ module my_modulation (
             state <= `STATE_FIX_POS_START;
             clk_count     <= 0;
 
+            // clear the clocks
+            count_up        <= 0;
+            count_down      <= 0;
+            count_trans_up  <= 0;
+            count_trans_down <= 0;
+            count_fix_up    <= 0;
+            count_fix_down  <= 0;
+
+
             // clear the aperture counter
             clk_count_aper<= 0;
 
@@ -546,6 +552,7 @@ module my_modulation (
           end
 
 
+        // from here on, we are cycling +-ref currents, with/or without signal
 
         `STATE_FIX_POS_START:
           begin
@@ -704,8 +711,8 @@ module my_modulation (
 
         `STATE_DONE:
           begin
-            COM_INTERUPT <= 1;   // active hi. turn off.
-            state     <= `STATE_RESET_START;
+            COM_INTERUPT  <= 1;   // active hi. turn off.
+            state         <= `STATE_RESET_START;
           end
 
 
