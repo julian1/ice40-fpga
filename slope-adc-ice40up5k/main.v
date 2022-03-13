@@ -58,7 +58,6 @@
 // general,mix start 0
 `define REG_LED                 7
 `define REG_TEST                8
-`define REG_RESET               9   // TODO active low. for the modulator only. not spi.
 
 // control/param vars
 // we don't necessarily need to expose all these
@@ -69,15 +68,17 @@
 // `define REG_CLK_COUNT_VAR_N  12
 `define REG_CLK_COUNT_VAR_POS_N 13
 `define REG_CLK_COUNT_VAR_NEG_N 14
-`define REG_CLK_COUNT_APER_N_LO 15// aperture. rename?
+`define REG_CLK_COUNT_APER_N_LO 15
 `define REG_CLK_COUNT_APER_N_HI 16
+
 `define REG_USE_SLOW_RUNDOWN    17
-// `define REG_HIMUX_SEL         18
+`define REG_HIMUX_SEL           18       // keep in register bank. pass dummy var, if don't use.
 `define REG_PATTERN             19
+`define REG_RESET               9     // hold modulation in reset.
 
 
 // meas/run vars
-`define REG_COUNT_UP            20
+`define REG_COUNT_UP            20  // need to start at 30
 `define REG_COUNT_DOWN          21
 `define REG_COUNT_TRANS_UP      22
 `define REG_COUNT_TRANS_DOWN    23
@@ -89,22 +90,28 @@
 
 `define REG_MEAS_COUNT          40
 
+// We don't need to read the values that were used. if we instead write. and have proper sequencing control.
 // these are output registers dependent upon the pattern used.
 `define REG_MEAS_HIMUX_SEL      41      // what was being muxed for integration. sig, azero, acal .
 `define REG_MEAS_VAR_POS_N      42      // we don't need this...
 
+
+
+
+
+`define HIMUX_SEL_SIG_HI      4'b1110
+`define HIMUX_SEL_REF_HI      4'b1101
+`define HIMUX_SEL_REF_LO      4'b1011
+`define HIMUX_SEL_ANG         4'b0111
+
+
+
+
 /*
-  ok. hang on.
-  - rather than have separate variables. for the last himux_sel etc. can wekkkkkk
-  -
-
-*/
-
-
-/*
-  - verilog registers defined in top
-  - injected into register_bank as inout if read/writable
-  - injected into controllers as readable.
+  registers
+    - verilog reg should be defined in top
+    - injected into register_bank as inout if read/writable
+    - injected into controllers as readable.
 
 */
 
@@ -116,19 +123,22 @@ module my_register_bank   #(parameter MSB=32)   (
   input  din,       // sdi
   output dout,       // sdo
 
+  // input == input wire
+
   // read/write control vars
   // use ' inout',  must be inout to write
   inout wire [24-1:0] reg_led ,    // need to be very careful. only 4 bits. or else screws set/reset calculation ...
-  inout [24-1:0]  clk_count_reset_n,
-  inout [24-1:0]  clk_count_fix_n,
+  inout [24-1:0]      clk_count_reset_n,
+  inout [24-1:0]      clk_count_fix_n,
   // inout [24-1:0]  clk_count_var_n,
-  inout [24-1:0]  clk_count_var_pos_n,
-  inout [24-1:0]  clk_count_var_neg_n,
-  inout [31:0]    clk_count_aper_n,
+  inout [24-1:0]      clk_count_var_pos_n,
+  inout [24-1:0]      clk_count_var_neg_n,
+  inout [31:0]        clk_count_aper_n,
 
-  inout           use_slow_rundown,
-
-  inout [24-1:0]   pattern,
+  inout               use_slow_rundown,
+  inout [4-1:0]       himux_sel,
+  inout [24-1:0]      pattern,          // TODO change to 8-1
+  inout               reset,            // register_reset for modulation, not a reset for my_register_bank.
 
   input wire [24-1:0] count_up,
   input wire [24-1:0] count_down,
@@ -139,7 +149,7 @@ module my_register_bank   #(parameter MSB=32)   (
   input wire [24-1:0] clk_count_rundown,
 
   // readable only
-  input wire [24-1:0]  meas_count,    // measurements count, useful to check if stalled
+  input wire [24-1:0] meas_count,    // measurements count, useful to check if stalled
                                       // actually just probe switches with scope.
 
 
@@ -167,8 +177,10 @@ module my_register_bank   #(parameter MSB=32)   (
     clk_count_aper_n    = (2 * 2000000);    // ? 200ms TODO check this.
                                             // yes. 4000000 == 10PNLC, 5 sps.
     use_slow_rundown    = 1;
-
+    himux_sel           = `HIMUX_SEL_REF_HI;   // when not controlled by pattern controller. 
     pattern             = 10;
+    reset               = 1; // active lo
+
   end
 
 
@@ -226,8 +238,11 @@ module my_register_bank   #(parameter MSB=32)   (
               /* could convert numerical argument - to avoid accidently turning on more than one source.
                 no. mux switch has 1.5k impedance. should not break anything
               */
-              // `REG_HIMUX_SEL:      out <= himux_sel << 8;
+              `REG_HIMUX_SEL:         out <= himux_sel << 8;
               `REG_PATTERN:           out <= pattern << 8;
+
+              // `REG_RESET:             out <= pattern << 8; need to shift 24 bits....
+
               `REG_MEAS_COUNT:        out <= meas_count << 8;
 
 
@@ -267,7 +282,6 @@ module my_register_bank   #(parameter MSB=32)   (
           // use high bit - to do a xfer (read+writ) while avoiding actually writing a register
           // leds
 
-          // `REG_RESET:               reset <= val;
           `REG_LED:                 reg_led <= val;
 
           `REG_CLK_COUNT_RESET_N:   clk_count_reset_n <= val;  // aperture
@@ -294,8 +308,9 @@ module my_register_bank   #(parameter MSB=32)   (
           // REG_CLK_COUNT_APER_N_HI: clk_count_aper_n <=   { val[ MSB - 1: MSB - 8 - 1 ], clk_count_aper_n[ MSB - 8 - 1: 0] };  // hi 8 bits
 
           `REG_USE_SLOW_RUNDOWN:    use_slow_rundown <= val;
-          // `REG_HIMUX_SEL:        himux_sel <= val;
+          `REG_HIMUX_SEL:           himux_sel <= val;
           `REG_PATTERN:             pattern <= val;
+          `REG_RESET:               reset <= val;
 
         endcase
       end
@@ -361,11 +376,6 @@ endmodule
 // define HIMUX_SEL_ANG       4'b0111 //  (0xf & ~(1 << 3))   // 0b0111
 
 
-`define HIMUX_SEL_SIG_HI      4'b1110
-`define HIMUX_SEL_REF_HI      4'b1101
-`define HIMUX_SEL_REF_LO      4'b1011
-`define HIMUX_SEL_ANG         4'b0111
-
 
 /*
 #define HIMUX_SEL_SIG_HI      (0xf & ~(1 << 0))
@@ -390,8 +400,8 @@ module my_modulation (
   input [31:0]    clk_count_aper_n,
 
   input           use_slow_rundown,
-
   input [4-1:0]   himux_sel,
+  inout           reset,            // for modulation
 
   output [4-1:0]  himux,
   input [ 2-1:0]  refmux,
@@ -477,7 +487,6 @@ module my_modulation (
 
   // IMPORTANT ! is not.   ~ is complement.
 
-  wire reset = 1;
 
   always @(posedge clk)
     if(!reset)
@@ -540,6 +549,13 @@ module my_modulation (
 
             // switch himux to signal, but lo mux off whlie op settles
             himux         <= himux_sel;
+            /*
+              if(pattern_himux_sel != 4'b0000)
+               himux    <= pattern_himux_sel;
+              else
+                himux   <= register_himux_sel;
+            */
+
             sigmux        <= 0;
             // refmux     <= `MUX_REF_NONE;
           end
@@ -810,6 +826,9 @@ endmodule
 
 
 /*
+
+  there are two resets - reset for modulation. / and there is value_reset.
+
   how to write modulation vars.
 
   (1) write variables in the interupt handler for the mcu.
@@ -817,15 +836,31 @@ endmodule
         ensures. no downtime.
         have a delegatinig interupt handler, and can them implement arbitary strategies
 
+        - values - can/could be timestamped on the interupt.  to avoid reading.
+
   (2) hold reset down. write variables. then release reset.
         this is pretty damn simple and nice.
+        the advantage of setting a variable cleanly. is that we don't have to read it back again.
 
   (3) use pattern controller
       ensures. no downtime.
+      extra queries are needed - to discover what parameters were used.
 
   -----
   TODO
   - we should be synchronizing writes regardless. at the interupt. or by using reset.
+  ------
+
+  - rather than try to read bak the hires mux.   why not assign a unique tag id. that can be returned.
+
+
+  - EXTR>
+      no. we can avoid tagging/reading back extra parameters.
+      if do the write/update during the interupt/reset period.
+      eg. we know what parameters will be used .
+
+      - we don't have to read back to find out what value the pattern controller used. etc
+      - or use a tag.
 
 */
 
@@ -862,6 +897,10 @@ module my_control_pattern_2 (
         count <= count + 1;
 
         case(pattern)
+
+          // 5:  himux_sel <= `reg_himux_sel; // register_bank_himux_sel ;
+                                            // problem is taht this won't get updated, when the register_bank is updated.
+                                            // but if we had a reset here. then it would work.
 
           0:  himux_sel <= `HIMUX_SEL_SIG_HI;
           1:  himux_sel <= `HIMUX_SEL_REF_HI;
@@ -1018,6 +1057,7 @@ module top (
 
 
   reg [8-1:0] pattern;
+  reg         reset;
 
   reg [24-1:0] meas_count;    // how many actual measurements we have done.
 
@@ -1082,11 +1122,11 @@ module top (
     . clk_count_var_pos_n( clk_count_var_pos_n) ,
     . clk_count_var_neg_n( clk_count_var_neg_n),
     . clk_count_aper_n( clk_count_aper_n ) ,
-    . use_slow_rundown( use_slow_rundown),
 
-    // NO. this
-    // . himux_sel( himux_sel_dummy ),         // HACK.
+    . use_slow_rundown( use_slow_rundown),
+    . himux_sel( himux_sel ),
     . pattern( pattern),
+    . reset( reset),
 
     // control
     . meas_count( meas_count ),
@@ -1112,7 +1152,7 @@ module top (
     . clk(clk),
     . com_interupt(COM_INTERUPT),
     . pattern( pattern),
-    . himux_sel(himux_sel),
+    . himux_sel( himux_sel_dummy ),   // disable.
   );
 
 
@@ -1128,14 +1168,14 @@ module top (
     // parameters
     . clk_count_reset_n( clk_count_reset_n ) ,
     . clk_count_fix_n( clk_count_fix_n ) ,
-
     // . clk_count_var_n( clk_count_var_n ) ,
     . clk_count_var_pos_n( clk_count_var_pos_n) ,
     . clk_count_var_neg_n( clk_count_var_neg_n),
-
     . clk_count_aper_n( clk_count_aper_n ) ,
+
     . use_slow_rundown( use_slow_rundown),
     . himux_sel( himux_sel ),
+    . reset( reset),
 
     . himux(himux),
     . refmux( { INT_IN_N_CTL, INT_IN_P_CTL } ),
