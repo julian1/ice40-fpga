@@ -74,17 +74,17 @@
 `define REG_USE_SLOW_RUNDOWN    17
 `define REG_HIMUX_SEL           18       // keep in register bank. pass dummy var, if don't use.
 `define REG_PATTERN             19
-`define REG_RESET               9     // hold modulation in reset.
+`define REG_RESET               20// hold modulation in reset.
 
 
 // meas/run vars
-`define REG_COUNT_UP            20  // need to start at 30
-`define REG_COUNT_DOWN          21
-`define REG_COUNT_TRANS_UP      22
-`define REG_COUNT_TRANS_DOWN    23
-`define REG_COUNT_FIX_UP        24
-`define REG_COUNT_FIX_DOWN      25
-`define REG_CLK_COUNT_RUNDOWN   27
+`define REG_COUNT_UP            30  // need to start at 30
+`define REG_COUNT_DOWN          31
+`define REG_COUNT_TRANS_UP      32
+`define REG_COUNT_TRANS_DOWN    33
+`define REG_COUNT_FIX_UP        34
+`define REG_COUNT_FIX_DOWN      35
+`define REG_CLK_COUNT_RUNDOWN   37
 
 
 
