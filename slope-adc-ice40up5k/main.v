@@ -72,10 +72,9 @@
 
 
 // modulation control parameters, start 30.
-`define REG_CLK_COUNT_INIT_N  30
+`define REG_CLK_COUNT_RESET_N  30
 `define REG_CLK_COUNT_FIX_N   31
 // `define REG_CLK_COUNT_VAR_N   32
-
 `define REG_CLK_COUNT_VAR_POS_N   37
 `define REG_CLK_COUNT_VAR_NEG_N   38
 
@@ -100,7 +99,7 @@ module my_register_bank   #(parameter MSB=32)   (
 
   // use ' inout',  must be inout to write
   inout wire [24-1:0] reg_led ,    // need to be very careful. only 4 bits. or else screws set/reset calculation ...
-  inout [24-1:0]  clk_count_init_n,
+  inout [24-1:0]  clk_count_reset_n,
   inout [24-1:0]  clk_count_fix_n,
   // inout [24-1:0]  clk_count_var_n,
   inout [24-1:0]  clk_count_var_pos_n,
@@ -136,7 +135,7 @@ module my_register_bank   #(parameter MSB=32)   (
   // To use in an inout. the initial block is a driver. so must be placed here.
   initial begin
     reg_led           = 3'b101;
-    clk_count_init_n  =  10000;
+    clk_count_reset_n  =  10000;
     clk_count_fix_n   = 700;
 
     // clk_count_var_n   = 5500;
@@ -206,7 +205,7 @@ module my_register_bank   #(parameter MSB=32)   (
               `REG_CLK_COUNT_RUNDOWN: out <= clk_count_rundown << 8;
 
               // params
-              `REG_CLK_COUNT_INIT_N:  out <= clk_count_init_n << 8;
+              `REG_CLK_COUNT_RESET_N:  out <= clk_count_reset_n << 8;
               `REG_CLK_COUNT_FIX_N:   out <= clk_count_fix_n << 8;
               // `REG_CLK_COUNT_VAR_N:   out <= clk_count_var_n << 8;
               `REG_CLK_COUNT_VAR_POS_N:  out <= clk_count_var_pos_n << 8;
@@ -254,7 +253,7 @@ module my_register_bank   #(parameter MSB=32)   (
           // `REG_RESET:               reset <= val;
           `REG_LED:                 reg_led <= val;
 
-          `REG_CLK_COUNT_INIT_N:    clk_count_init_n <= val;  // aperture
+          `REG_CLK_COUNT_RESET_N:    clk_count_reset_n <= val;  // aperture
           `REG_CLK_COUNT_FIX_N:     clk_count_fix_n <= val;
 
           // `REG_CLK_COUNT_VAR_N:  clk_count_var_n <= val;
@@ -353,7 +352,7 @@ module my_modulation (
   input           comparator_val,
 
   // modulation parameters/count limits to use
-  input [24-1:0]  clk_count_init_n,
+  input [24-1:0]  clk_count_reset_n,
   input [24-1:0]  clk_count_fix_n,
   inout [24-1:0]  clk_count_var_pos_n,
   inout [24-1:0]  clk_count_var_neg_n,
@@ -491,7 +490,7 @@ module my_modulation (
 
 
         `STATE_RESET:    // let integrator reset.
-          if(clk_count >= clk_count_init_n)
+          if(clk_count >= clk_count_reset_n)
             state <= `STATE_SIG_SETTLE_START;
 
 
@@ -507,7 +506,7 @@ module my_modulation (
           end
 
         `STATE_SIG_SETTLE:
-          if(clk_count >= clk_count_init_n)
+          if(clk_count >= clk_count_reset_n)
             state <= `STATE_SIG_START;
 
 
@@ -824,7 +823,7 @@ module top (
 
 
   // input parameters
-  reg [24-1:0]  clk_count_init_n;
+  reg [24-1:0]  clk_count_reset_n;
   reg [24-1:0]  clk_count_fix_n;
 
   // reg [24-1:0]  clk_count_var_n;
@@ -907,7 +906,7 @@ module top (
 
     // modulation parameters
     . reg_led(reg_led),
-    . clk_count_init_n( clk_count_init_n ) ,
+    . clk_count_reset_n( clk_count_reset_n ) ,
     . clk_count_fix_n( clk_count_fix_n ) ,
     // . clk_count_var_n( clk_count_var_n ) ,
     . clk_count_var_pos_n( clk_count_var_pos_n) ,
@@ -946,7 +945,7 @@ module top (
     . comparator_val( CMPR_OUT_CTL_P ),
 
     // parameters
-    . clk_count_init_n( clk_count_init_n ) ,
+    . clk_count_reset_n( clk_count_reset_n ) ,
     . clk_count_fix_n( clk_count_fix_n ) ,
 
     // . clk_count_var_n( clk_count_var_n ) ,
