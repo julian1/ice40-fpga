@@ -453,18 +453,13 @@ module my_modulation (
   wire cross_any    = cross_up || cross_down ;
 
 
-  /*
-      - start integration in reverse direction. - eg. it would pautse. won't work. references are not perfectly symmetrical around cross voltage.
-      - perturb length. eg. 50,100,200ms.
-      - add another count period. But think it should be time of fix+var. so that it can be counted normally.
-  */
+  // TODO use something like this, instead of done
+  // the the period that we are integrating the signal.
+  wire sig_active   = himux === himux_sel && sigmux === 1;
+
 
   // IMPORTANT ! is not.   ~ is complement.
 
-  /*
-    after the integration....
-    what do we do.
-  */
   wire reset = 1;
 
   always @(posedge clk)
@@ -479,14 +474,19 @@ module my_modulation (
 
       // should be wrapped in a signal integrating.
 
-      clk_count_aper <= clk_count_aper + 1; // THIS IS NOT GREAT.  we risk turning off the signal
-
-
-      // test regardless of state
-      if(clk_count_aper >= clk_count_aper_n)
+      if(!done )
         begin
-          done    <= 1; // indicate end of signal input. maybe change name to sigdone.
-          sigmux  <= 0; // turn off signal input
+          clk_count_aper <= clk_count_aper + 1; // THIS IS NOT GREAT.  we risk turning off the signal
+
+        // test regardless of state
+        if(clk_count_aper >= clk_count_aper_n)
+          begin
+            // indicate end of signal input. maybe change name to sigdone.
+            // todo maybe change name done
+            done    <= 1;
+            // turn off signal input
+            sigmux  <= 0;
+          end
         end
 
 
@@ -499,13 +499,13 @@ module my_modulation (
 
             clk_count       <= 0;
 
-
+/*
             // hang on this is wrong.
             clk_count_aper   <= 0;   // start of signal integration time.
                                     // actually why bother don't
 
             done            <= 0;   // this is no good.
-                                    // rather than binary. 
+ */                                   // rather than binary.
 
             count_up        <= 0;
             count_down      <= 0;
@@ -552,7 +552,7 @@ module my_modulation (
 
             // switch himux to signal
             himux           <= himux_sel;
-            // switch signal off
+            // switch lo mux signal off
             sigmux          <= 0;
           end
 
@@ -562,7 +562,7 @@ module my_modulation (
               begin
                 state <= `STATE_FIX_POS_START;
 
-                // TODO - this is the most important bit. 
+                // TODO - this is the most important bit.
                 // shoudl probably be factored into a condition.
                 // turn on signal input, to start signal integration
                 sigmux <= 1;
@@ -702,8 +702,6 @@ module my_modulation (
           begin
             state <= `STATE_RUNDOWN;
             clk_count <= 0;
-
-
 
             if( use_slow_rundown )
               // turn on both references - to create +ve bias, to drive integrator down.
