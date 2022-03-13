@@ -669,16 +669,16 @@ module my_modulation (
             if(cross_any )
               begin
                 // trigger for scope
-
                 // transition
-                state <= `STATE_DONE;
+                state     <= `STATE_DONE;
                 clk_count <= 0;    // ok.
 
                 // turn off all inputs. actually should leave. because we will turn on to reset the integrator.
-                refmux <= `MUX_REF_NONE;
+                refmux    <= `MUX_REF_NONE;
 
                 COM_INTERUPT <= 0;   // active lo, set interupt
 
+                // record everything
                 count_up_last       <= count_up;
                 count_down_last     <= count_down;
                 count_trans_up_last <= count_trans_up;
@@ -695,7 +695,7 @@ module my_modulation (
         `STATE_DONE:
           begin
             COM_INTERUPT <= 1;   // active hi. turn off.
-            state <= `STATE_RESET_START;
+            state     <= `STATE_RESET_START;
           end
 
 
