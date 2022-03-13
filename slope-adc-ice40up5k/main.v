@@ -55,46 +55,50 @@
 
 
 // so it doesn't matter where it goes
-
 // general,mix start 0
-`define REG_LED               7
-`define REG_TEST              8
-`define REG_RESET             9   // TODO active low. for the modulator only. not spi.
-
+`define REG_LED                 7
+`define REG_TEST                8
+`define REG_RESET               9   // TODO active low. for the modulator only. not spi.
 
 // control/param vars
 // we don't necessarily need to expose all these
 // just set once in pattern controller.
 // modulation control parameters, start 30.
-`define REG_CLK_COUNT_RESET_N   30
-`define REG_CLK_COUNT_FIX_N     31
-// `define REG_CLK_COUNT_VAR_N  32
-`define REG_CLK_COUNT_VAR_POS_N 37
-`define REG_CLK_COUNT_VAR_NEG_N 38
-`define REG_CLK_COUNT_APER_N_LO 33    // aperture. rename?
-`define REG_CLK_COUNT_APER_N_HI 34
-`define REG_USE_SLOW_RUNDOWN  35
-// `define REG_HIMUX_SEL         36      // we
-
-`define REG_PATTERN           39      // we
+`define REG_CLK_COUNT_RESET_N   10
+`define REG_CLK_COUNT_FIX_N     11
+// `define REG_CLK_COUNT_VAR_N  12
+`define REG_CLK_COUNT_VAR_POS_N 13
+`define REG_CLK_COUNT_VAR_NEG_N 14
+`define REG_CLK_COUNT_APER_N_LO 15// aperture. rename?
+`define REG_CLK_COUNT_APER_N_HI 16
+`define REG_USE_SLOW_RUNDOWN    17
+// `define REG_HIMUX_SEL         18
+`define REG_PATTERN             19
 
 
 // meas/run vars
-`define REG_COUNT_UP          10
-`define REG_COUNT_DOWN        11
-`define REG_COUNT_TRANS_UP    12
-`define REG_COUNT_TRANS_DOWN  13
-`define REG_COUNT_FIX_UP      14
-`define REG_COUNT_FIX_DOWN    15
-`define REG_CLK_COUNT_RUNDOWN 17
+`define REG_COUNT_UP            20
+`define REG_COUNT_DOWN          21
+`define REG_COUNT_TRANS_UP      22
+`define REG_COUNT_TRANS_DOWN    23
+`define REG_COUNT_FIX_UP        24
+`define REG_COUNT_FIX_DOWN      25
+`define REG_CLK_COUNT_RUNDOWN   27
 
 
 
-`define REG_MEAS_COUNT        40
+`define REG_MEAS_COUNT          40
 
 // these are output registers dependent upon the pattern used.
-`define REG_MEAS_HIMUX_SEL    41      // what was being muxed for integration. sig, azero, acal .
-`define REG_MEAS_VAR_POS_N    42      //
+`define REG_MEAS_HIMUX_SEL      41      // what was being muxed for integration. sig, azero, acal .
+`define REG_MEAS_VAR_POS_N      42      // we don't need this...
+
+/*
+  ok. hang on.
+  - rather than have separate variables. for the last himux_sel etc. can wekkkkkk
+  -
+
+*/
 
 
 /*
@@ -860,13 +864,13 @@ module my_control_pattern_2 (
 
           // what about a value outside the bounds...
           // that cannot be set...
-      
+
           // OK. it's actually looks like a short. the negative power supply is at limit. weird.
           // is the com_interupt --- staying low - and it's cycling every count?
 
 /*
           default:
-            // we need a way to indicate error. 
+            // we need a way to indicate error.
             // eg. an error flag.
             case (count)
               0:  himux_sel <= `HIMUX_SEL_REF_LO;    // azero
