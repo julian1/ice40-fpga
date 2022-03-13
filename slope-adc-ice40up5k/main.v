@@ -807,14 +807,17 @@ module my_control_pattern_2 (
           1:  himux_sel <= `HIMUX_SEL_REF_HI; 
           2:  himux_sel <= `HIMUX_SEL_REF_LO; 
           3:  himux_sel <= `HIMUX_SEL_ANG;   // don't use
-
-
+            
+          /*
+            integrator does not seem to be resetting well. eg. countdown there are  runs very well. but it could be DA.
+          */
           10:
             case (count)
               0:  himux_sel <= `HIMUX_SEL_REF_LO;    // azero
-              // 1:  himux_sel <= `HIMUX_SEL_SIG_HI;
-              1:  himux_sel <= `HIMUX_SEL_REF_HI;   // change to sig-hi
-              default: count <= 0;
+              1:  begin
+                  himux_sel <= `HIMUX_SEL_REF_HI;   // change to sig-hi
+                  count <= 0;  // should take priorty over the addition.
+                  end
             endcase
 
           11:
