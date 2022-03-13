@@ -481,6 +481,8 @@ module my_modulation (
 
   always @(posedge clk)
     if(!reset)
+      // can use to easily update/write control parameters during reset. without confusing modulation
+      // eg. hold in reset, write, release reset
       state = `STATE_RESET_START;
     else
     begin
@@ -793,7 +795,6 @@ endmodule
     do we really need to write them across from the mcu.
     - when being able to generate sequences quickly and locally on the fpga, might be a lot more interesting.
     - alternatively small programs that run locally might be simpler.
-
 */
 
 /*
@@ -807,7 +808,35 @@ endmodule
   - also - we could just return the internal count - and therefore be able to deduce what the value is
 */
 
-// we will mux the output of one of the different patterns.
+
+/*
+  how to write modulation vars.
+
+  (1) write variables in the interupt handler for the mcu.
+        eg. we would have a queue/buffer. or strategy fsm to use in the interupt.
+        ensures. no downtime.
+        have a delegatinig interupt handler, and can them implement arbitary strategies
+
+  (2) hold reset down. write variables. then release reset.
+        this is pretty damn simple and nice.
+
+  (3) use pattern controller
+      ensures. no downtime.
+
+  -----
+  TODO
+  - we should be synchronizing writes regardless. at the interupt. or by using reset.
+
+*/
+
+/*
+  pattern controller only updates on completion / interupt.
+
+  that means - we don't get immediate response.
+  wonn't coincide with reset.
+
+  actually make it active on reset
+*/
 
 module my_control_pattern_2 (
   input           clk,
@@ -826,7 +855,7 @@ module my_control_pattern_2 (
   end
 
   always@(posedge clk)
-    if(!com_interupt)
+    if(!com_interupt /* || !reset */)
       begin
 
         // this is being driven. but it has input type
