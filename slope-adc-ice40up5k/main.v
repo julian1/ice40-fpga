@@ -355,13 +355,10 @@ module my_modulation (
   // modulation parameters/count limits to use
   input [24-1:0]  clk_count_init_n,
   input [24-1:0]  clk_count_fix_n,
-
-  // input [24-1:0]  clk_count_var_n,
-  // unbalancing these is going to do what????
   inout [24-1:0]  clk_count_var_pos_n,
   inout [24-1:0]  clk_count_var_neg_n,
-
   input [31:0]    clk_count_aper_n,
+
   input           use_slow_rundown,
 
   input [4-1:0]   himux_sel,
@@ -369,7 +366,6 @@ module my_modulation (
   output [4-1:0]  himux,
   input [ 2-1:0]  refmux  ,
   input           sigmux,
-
 
   // values from last run, available in order to read
   output [24-1:0] count_up_last,
@@ -381,19 +377,16 @@ module my_modulation (
 
   output [24-1:0] clk_count_rundown_last,
 
-  // could also record the initial dir.
-  // these (the outputs) could be combined into single bitfield.
-
-/*
-  we need to review all this input / output.
-  and input wire can still be driven.
-*/
-
-  // TODO change lower case
-  // should be an input ??? eg. it's being driven here as a wire.
   input   com_interupt,
-  output  CMPR_LATCH_CTL
+  output  cmpr_latch_ctl
 );
+
+
+  /*
+    we need to review all this input / output.
+    and input wire can still be driven.
+  */
+
 
 
     // 2^5 = 32
@@ -404,7 +397,7 @@ module my_modulation (
     state = `STATE_RESET_START;
 
     com_interupt    = 1; // active lo move this to an initial condition.
-    CMPR_LATCH_CTL  = 0; // enable comparator
+    cmpr_latch_ctl  = 0; // enable comparator
 
   end
 
@@ -981,7 +974,7 @@ module top (
 
 
     . com_interupt(COM_INTERUPT),
-    . CMPR_LATCH_CTL(CMPR_LATCH_CTL)
+    . cmpr_latch_ctl(CMPR_LATCH_CTL)
   );
 
 
