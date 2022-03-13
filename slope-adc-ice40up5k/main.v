@@ -70,7 +70,7 @@
 `define REG_COUNT_FIX_DOWN    15
 // `define REG_COUNT_FLIP        16  // deprecated
 `define REG_CLK_COUNT_RUNDOWN 17
-`define REG_RUNDOWN_DIR       18  // deprecated
+// `define REG_RUNDOWN_DIR       18  // deprecated
 
 
 // modulation control parameters, start 30.
@@ -208,7 +208,7 @@ module my_register_bank   #(parameter MSB=32)   (
 
               `REG_CLK_COUNT_RUNDOWN: out <= clk_count_rundown << 8;
 
-              `REG_RUNDOWN_DIR:       out <= rundown_dir << 8;   // correct for single bit?
+              // `REG_RUNDOWN_DIR:       out <= rundown_dir << 8;   // correct for single bit?
 
               // params
               `REG_CLK_COUNT_INIT_N:  out <= clk_count_init_n << 8;
@@ -384,7 +384,7 @@ module my_modulation (
 
   // could also record the initial dir.
   // these (the outputs) could be combined into single bitfield.
-  output          rundown_dir_last,
+  // output          rundown_dir_last,
 
   // TODO change lower case
   output COM_INTERUPT,
@@ -718,7 +718,7 @@ module my_modulation (
                   clk_count_rundown_last <= clk_count;// TODO change nmae  clk_clk_count_rundown
 
                   // record last // unused. could remove.
-                  rundown_dir_last <= refmux; // up
+                  // rundown_dir_last <= refmux; // up
 
               end
           end
@@ -1003,7 +1003,7 @@ module top (
     . clk_count_rundown_last(clk_count_rundown),
 
     // other vars
-    . rundown_dir_last(rundown_dir),
+    // . rundown_dir_last(rundown_dir),
 
     . COM_INTERUPT(COM_INTERUPT),
     . CMPR_LATCH_CTL(CMPR_LATCH_CTL)
