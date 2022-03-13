@@ -315,6 +315,36 @@ endmodule
     https://patentimages.storage.googleapis.com/e2/ba/5a/ff3abe723b7230/US5200752.pdf
 */
 
+// advantage of macros is that they generate errors if not defined.
+`define STATE_INIT_START    0
+`define STATE_INIT          1    // initialsation state
+
+`define STATE_HIMUX_SETTLE_START 4
+`define STATE_HIMUX_SETTLE  5
+
+
+
+`define STATE_FIX_POS_START 6
+`define STATE_FIX_POS       7
+`define STATE_VAR_START     8
+`define STATE_VAR           9
+`define STATE_FIX_NEG_START 10
+`define STATE_FIX_NEG       11
+`define STATE_VAR2_START    12
+`define STATE_VAR2          14
+`define STATE_RUNDOWN_START 15
+`define STATE_RUNDOWN       16
+`define STATE_DONE          17
+
+// change prefix LOMUX ?
+`define MUX_REF_NONE        2'b00
+`define MUX_REF_POS         2'b01
+`define MUX_REF_NEG         2'b10
+`define MUX_REF_SLOW_POS    2'b11
+
+// ---
+
+`define HIMUX_SEL_ANG       4'b0111 //  (0xf & ~(1 << 3))   // 0b0111
 
 module my_modulation (
 
@@ -372,36 +402,6 @@ module my_modulation (
   // then
     */
 
-  // advantage of macros is that they generate errors if not defined.
-  `define STATE_INIT_START    0
-  `define STATE_INIT          1    // initialsation state
-
-  `define STATE_HIMUX_SETTLE_START 4
-  `define STATE_HIMUX_SETTLE  5
-
-
-
-  `define STATE_FIX_POS_START 6
-  `define STATE_FIX_POS       7
-  `define STATE_VAR_START     8
-  `define STATE_VAR           9
-  `define STATE_FIX_NEG_START 10
-  `define STATE_FIX_NEG       11
-  `define STATE_VAR2_START    12
-  `define STATE_VAR2          14
-  `define STATE_RUNDOWN_START 15
-  `define STATE_RUNDOWN       16
-  `define STATE_DONE          17
-
-  // change prefix LOMUX ?
-  `define MUX_REF_NONE        2'b00
-  `define MUX_REF_POS         2'b01
-  `define MUX_REF_NEG         2'b10
-  `define MUX_REF_SLOW_POS    2'b11
-
-  // ---
-
-  `define HIMUX_SEL_ANG       4'b0111 //  (0xf & ~(1 << 3))   // 0b0111
 
   wire [2-1:0] refmux;
   // assign {  INT_IN_N_CTL, INT_IN_P_CTL } = lomux ;
