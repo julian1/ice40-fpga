@@ -432,7 +432,7 @@ module my_modulation (
 
   // ref active.
 
-  assign reset_active   = himux === HIMUX_SEL_ANG && sigmux === 1;
+  assign reset_active   = himux === `HIMUX_SEL_ANG && sigmux === 1;
 
 
   // IMPORTANT ! is not.   ~ is complement.
@@ -488,7 +488,7 @@ module my_modulation (
 
 
             // switch op to analog input, and sigmux on, to reset the integrator
-            himux           <= HIMUX_SEL_ANG;
+            himux           <= `HIMUX_SEL_ANG;
             sigmux          <= 1;
             refmux          <= `MUX_REF_NONE;
           end
