@@ -75,7 +75,8 @@
 `define REG_CLK_COUNT_APER_N_HI 34
 `define REG_USE_SLOW_RUNDOWN  35
 // `define REG_HIMUX_SEL         36      // we
-`define REG_PATTERN           37      // we
+
+`define REG_PATTERN           39      // we
 
 
 // meas/run vars
@@ -808,7 +809,7 @@ module my_control_pattern_2 (
   input           clk,
   input           com_interupt,
 
-  input [8-1:0]   pattern,
+  input  [8-1:0]   pattern,
   output [4-1:0]   himux_sel,  // output. declares a local register?
 );
 
@@ -857,6 +858,13 @@ module my_control_pattern_2 (
                   end
             endcase
 
+          // what about a value outside the bounds...
+          // that cannot be set...
+      
+          // OK. it's actually looks like a short. the negative power supply is at limit. weird.
+          // is the com_interupt --- staying low - and it's cycling every count?
+
+/*
           default:
             // we need a way to indicate error. 
             // eg. an error flag.
@@ -867,7 +875,7 @@ module my_control_pattern_2 (
                   count <= 0;  // should take priorty over the addition.
                   end
             endcase
-
+*/
 
 
         endcase
