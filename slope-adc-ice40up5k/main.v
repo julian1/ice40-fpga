@@ -429,7 +429,7 @@ module my_modulation (
   reg [31:0]  clk_count_aper ;     // from the start of the signal integration. eg. 5sec*20MHz=100m count. won't fit in 24 bit value. would need to split between read registers.
                                   // could also record clk_count_actual.
 
-  reg         done;
+  // reg         done;
 
   // modulation counts
   reg [24-1:0] count_up;
@@ -455,7 +455,11 @@ module my_modulation (
 
   // TODO use something like this, instead of done
   // the the period that we are integrating the signal.
-  wire sig_active   = himux === himux_sel && sigmux === 1;
+  assign sig_active     = himux == himux_sel     && sigmux == 1;    // j
+
+  // ref active.
+  
+  assign reset_active   = himux === HIMUX_SEL_ANG && sigmux === 1;
 
 
   // IMPORTANT ! is not.   ~ is complement.
@@ -474,19 +478,23 @@ module my_modulation (
 
       // should be wrapped in a signal integrating.
 
-      if(!done )
+      if(sig_active)
         begin
           clk_count_aper <= clk_count_aper + 1; // THIS IS NOT GREAT.  we risk turning off the signal
 
-        // test regardless of state
-        if(clk_count_aper >= clk_count_aper_n)
-          begin
-            // indicate end of signal input. maybe change name to sigdone.
-            // todo maybe change name done
-            done    <= 1;
-            // turn off signal input
-            sigmux  <= 0;
-          end
+          // test regardless of state
+          if(clk_count_aper >= clk_count_aper_n)
+            begin
+              // indicate end of signal input. maybe change name to sigdone.
+              // todo maybe change name done
+              // done    <= 1;
+              // turn off signal input
+              sigmux  <= 0;
+
+              // note that himux is still high.
+              // but we still need to allow the ref integration.
+
+            end
         end
 
 
@@ -499,13 +507,6 @@ module my_modulation (
 
             clk_count       <= 0;
 
-/*
-            // hang on this is wrong.
-            clk_count_aper   <= 0;   // start of signal integration time.
-                                    // actually why bother don't
-
-            done            <= 0;   // this is no good.
- */                                   // rather than binary.
 
             count_up        <= 0;
             count_down      <= 0;
@@ -523,12 +524,9 @@ module my_modulation (
             // IMPORTANT. buffer op must now be given time to settle to new input.
             // himux           <= himux_sel;
 
-            // switch op to analog input
+            // switch op to analog input, no ref input
             himux           <= HIMUX_SEL_ANG;
             sigmux          <= 1;
-
-            // mux ctrl
-            // sigmux          <= 0; // off. ahoudl be on.
             refmux          <= `MUX_REF_NONE;
 
           end
@@ -550,10 +548,10 @@ module my_modulation (
             state <= `STATE_HIMUX_SETTLE;
             clk_count       <= 0;
 
-            // switch himux to signal
+            // switch himux to signal, but lo mux off whlie op settles
             himux           <= himux_sel;
-            // switch lo mux signal off
             sigmux          <= 0;
+            // refmux          <= `MUX_REF_NONE;
           end
 
         `STATE_HIMUX_SETTLE:
@@ -570,7 +568,7 @@ module my_modulation (
                 // we should not really be incrementing it - elsewhere...
                 clk_count_aper <= 0;
 
-                done <= 0;
+                // done <= 0;
               end
           end
 
@@ -677,14 +675,21 @@ module my_modulation (
               // its OK. we can remove the count_flip if we want.
               // perhaps - could reduce the bit length of count_flip and it would propagate faster.
 
+              // This code doesn't quite look right.
+
               // end of integration condition. and above zero cross
-              if(done && ! comparator_val)
-                // go straight to the final rundown.
-                state <= `STATE_RUNDOWN_START;
-              else
-                // do another cycle
-                state <= `STATE_FIX_POS_START;
-                // TODO rename extra_cycle
+              if( !sig_active  && ! comparator_val)  
+                // begin
+                  // if(! comparator_val)
+          
+                    // go straight to the final rundown.
+                    state <= `STATE_RUNDOWN_START;
+                  else
+                    // do another cycle
+                    state <= `STATE_FIX_POS_START;
+                    // TODO rename extra_cycle
+  
+                // end
 /*
                // slow??? 32MHz.
                 if(done)
