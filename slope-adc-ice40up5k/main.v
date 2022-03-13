@@ -316,8 +316,8 @@ endmodule
 */
 
 // advantage of macros is that they generate errors if not defined.
-`define STATE_INIT_START    0
-`define STATE_INIT          1    // initialsation state
+`define STATE_RESET_START    0
+`define STATE_RESET          1    // initialsation state
 
 `define STATE_HIMUX_SETTLE_START 3
 `define STATE_HIMUX_SETTLE  4
@@ -417,7 +417,7 @@ module my_modulation (
 
   // INITIAL BEGIN DOES SEEM TO BE supported.
   initial begin
-    state = `STATE_INIT_START;
+    state = `STATE_RESET_START;
   end
 
 
@@ -469,7 +469,7 @@ module my_modulation (
 
   always @(posedge clk)
     if(!reset)
-      state = `STATE_INIT_START;
+      state = `STATE_RESET_START;
     else
     begin
 
@@ -499,13 +499,12 @@ module my_modulation (
 
       case (state)
 
-        `STATE_INIT_START:
+        `STATE_RESET_START:
           begin
             // reset vars, and transition to runup state
-            state           <= `STATE_INIT;
+            state           <= `STATE_RESET;
 
             clk_count       <= 0;
-
 
             count_up        <= 0;
             count_down      <= 0;
@@ -532,7 +531,7 @@ module my_modulation (
 
 
         // init shoudl be called RESET
-        `STATE_INIT:    // let integrator reset.
+        `STATE_RESET:    // let integrator reset.
           begin
             if(clk_count >= clk_count_init_n)
               state <= `STATE_HIMUX_SETTLE_START;
@@ -542,7 +541,7 @@ module my_modulation (
 
         `STATE_HIMUX_SETTLE_START:
           begin
-            state <= `STATE_HIMUX_SETTLE;
+            state           <= `STATE_HIMUX_SETTLE;
             clk_count       <= 0;
 
             // switch himux to signal, but lo mux off whlie op settles
@@ -562,15 +561,16 @@ module my_modulation (
         `STATE_SIG_START:
           begin
             state <= `STATE_FIX_POS_START;
-            // turn on signal input, to start signal integration
-            sigmux <= 1;
+            clk_count       <= 0;
+
             // clear the aperture counter
             clk_count_aper <= 0;
-            // done <= 0;
+
+            // turn on signal input, to start signal integration
+            // himux           <= himux_sel;
+            sigmux <= 1;
+            // refmux          <= `MUX_REF_NONE;
           end
-
-
-
 
 
 
@@ -578,8 +578,9 @@ module my_modulation (
         `STATE_FIX_POS_START:
           begin
             state <= `STATE_FIX_POS;
-            count_fix_down <= count_fix_down + 1;
             clk_count <= 0;
+
+            count_fix_down <= count_fix_down + 1;
             refmux <= `MUX_REF_POS; // initial direction
             if(refmux != `MUX_REF_POS) count_trans_down <= count_trans_down + 1 ;
           end
@@ -593,6 +594,7 @@ module my_modulation (
           begin
             state <= `STATE_VAR;
             clk_count <= 0;
+
             if( comparator_val)   // test below the zero-cross
               begin
                 refmux <= `MUX_REF_NEG;  // add negative ref. to drive up.
@@ -625,8 +627,9 @@ module my_modulation (
         `STATE_FIX_NEG_START:
           begin
             state <= `STATE_FIX_NEG;
-            count_fix_up <= count_fix_up + 1;
             clk_count <= 0;
+
+            count_fix_up <= count_fix_up + 1;
             refmux <= `MUX_REF_NEG;
             if(refmux != `MUX_REF_NEG) count_trans_up <= count_trans_up + 1 ;
           end
@@ -646,6 +649,7 @@ module my_modulation (
           begin
             state <= `STATE_VAR2;
             clk_count <= 0;
+
             if( comparator_val) // below zero-cross
               begin
                 refmux <= `MUX_REF_NEG;
@@ -759,7 +763,7 @@ module my_modulation (
         `STATE_DONE:
           begin
             COM_INTERUPT <= 1;   // active hi. turn off.
-            state <= `STATE_INIT_START;
+            state <= `STATE_RESET_START;
           end
 
 
