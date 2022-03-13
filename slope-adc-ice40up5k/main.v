@@ -83,9 +83,14 @@
 `define REG_CLK_COUNT_APER_N_HI 34
 
 `define REG_USE_SLOW_RUNDOWN  35
-`define REG_HIMUX_SEL         36
+`define REG_HIMUX_SEL         36      // we
 
 `define REG_MEAS_COUNT        40
+                                      // we need to know what was actual input.
+`define REG_MEAS_HIMUX_SEL    41      // what was being muxed for integration. sig, azero, acal .
+`define REG_MEAS_VAR_POS_N    42      //
+
+
 
 
 module my_register_bank   #(parameter MSB=32)   (
@@ -340,8 +345,22 @@ endmodule
 
 // feed integrator output back on itself to reset.
 // appears to work. op flips from sig-in to low etc
-`define HIMUX_SEL_ANG       4'b0111 //  (0xf & ~(1 << 3))   // 0b0111
 
+// define HIMUX_SEL_ANG       4'b0111 //  (0xf & ~(1 << 3))   // 0b0111
+
+
+`define HIMUX_SEL_SIG_HI      4'b1110
+`define HIMUX_SEL_REF_HI      4'b1101
+`define HIMUX_SEL_REF_LO      4'b1011
+`define HIMUX_SEL_ANG         4'b0111
+
+
+/*
+#define HIMUX_SEL_SIG_HI      (0xf & ~(1 << 0))
+#define HIMUX_SEL_REF_HI      (0xf & ~(1 << 1))
+#define HIMUX_SEL_REF_LO      (0xf & ~(1 << 2))
+#define HIMUX_SEL_ANG         (0xf & ~(1 << 3))   // 0b0111
+*/
 
 
 module my_modulation (
@@ -723,6 +742,7 @@ endmodule
 module my_control (
   input           clk,
   input           com_interupt,
+  // why is it an input????
   input wire [24-1:0]  count
 );
 
@@ -738,8 +758,73 @@ module my_control (
         count <= count + 1;
       end
   end
-
 endmodule
+
+
+
+
+/*
+  - perhaps get rid of exposing himux_sel altogether.
+  - instead have static patterns for each output
+
+  - so we just have a single pattern control variable.
+  - eg. 0 to 4 correspond with himux_sel.
+  -------------
+
+  - also - we could just return the internal count - and therefore be able to deduce what the value is
+*/
+
+// we will mux the output of one of the different patterns.
+
+module my_control_pattern_2 (
+  input           clk,
+  input           com_interupt,
+  inout [4-1:0]   himux_sel,  // output
+  inout [4-1:0]   pattern
+);
+
+  // count of interupts.
+  reg [5-1:0]  count;
+
+  initial begin
+    count = 0;
+  end
+
+  always@(posedge clk) 
+    if(!com_interupt)
+      begin
+
+        // this is being driven. but it has input type
+        count <= count + 1;
+
+        case(pattern)
+          1:
+            case (count)
+              0:  himux_sel <= HIMUX_SEL_REF_LO;
+              1:  himux_sel <= HIMUX_SEL_SIG_HI;
+              default: count <= 0;
+            endcase
+
+
+
+        endcase
+
+
+
+  end
+endmodule
+
+
+
+/*
+`define HIMUX_SEL_SIG_HI      4'b1110
+`define HIMUX_SEL_REF_HI      4'b1101
+`define HIMUX_SEL_REF_LO      4'b1011
+`define HIMUX_SEL_ANG         4'b0111
+
+*/
+
+
 
 
 
