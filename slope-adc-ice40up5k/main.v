@@ -486,6 +486,9 @@ module my_modulation (
 
   always @(posedge clk)
 
+
+    // EXTR. use if(!reset) to force, because `STATE_RESET_START only runs for a single clk cycle;
+    // it's also slightly faster
     if(!reset)  // external reset, active lo
       begin
         // set up next state, for when reset goes hi.
@@ -497,15 +500,11 @@ module my_modulation (
         refmux          <= `MUX_REF_NONE;
       end
     else
-    begin
 
+    begin
 
       // always increment clk for the current phase
       clk_count     <= clk_count + 1;
-
-      // active lo
-      // if(!reset)
-      //  state           <= `STATE_RESET_START;
 
 
       if(sig_active)
@@ -1153,7 +1152,7 @@ module top (
   );
 
 
-
+/*
   my_control_pattern_2
   p1 (
     . clk(clk),
@@ -1162,7 +1161,7 @@ module top (
     . himux_sel( himux_sel_dummy ),   // disable.
   );
 
-
+*/
 
 
   my_modulation
