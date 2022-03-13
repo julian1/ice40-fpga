@@ -100,7 +100,7 @@
   - verilog registers defined in top
   - injected into register_bank as inout if read/writable
   - injected into controllers as readable.
-  
+
 */
 
 module my_register_bank   #(parameter MSB=32)   (
@@ -449,6 +449,14 @@ module my_modulation (
   wire cross_up     = (crossr[2:1]==2'b10);  // message starts at falling edge
   wire cross_down   = (crossr[2:1]==2'b01);  // message stops at rising edge
   wire cross_any    = cross_up || cross_down ;
+
+
+
+  /* IMPORTANT
+      - we should potentially copy himux_sel.  no. because it's set only by the pattern controller.
+      which is synchronized.
+
+  */
 
 
   // TODO use something like this, instead of done
