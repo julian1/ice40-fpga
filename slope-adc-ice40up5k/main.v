@@ -766,6 +766,19 @@ endmodule
 
 
 /*
+  - this pattern thing is very interesting.
+  - does it make sense - to make it control the timings?
+  - eg. we only want to set the timings once - mainly depending on capcitor size, and supply/reference voltage.
+    - then perhaps a variation for inl.
+
+    eg. only really need to set once.
+    do we really need to write them across from the mcu.
+    - when being able to generate sequences quickly and locally on the fpga, might be a lot more interesting.
+    - alternatively small programs that run locally might be simpler.
+
+*/
+
+/*
   - perhaps get rid of exposing himux_sel altogether.
   - instead have static patterns for each output
 
@@ -809,7 +822,8 @@ module my_control_pattern_2 (
           3:  himux_sel <= `HIMUX_SEL_ANG;   // don't use
 
           /*
-            integrator does not seem to be resetting well. eg. countdown there are  runs very well. but it could be DA.
+            - integrator does not seem to be resetting well. eg. countdown there are  runs very well. but it could be DA. rather than issue with reset circuitry.
+            - if we added a simple cap for sample and hold, on the reset signal. then could integrate the residual.
           */
           10:
             case (count)
