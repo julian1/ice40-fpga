@@ -340,6 +340,8 @@ endmodule
 
 `define HIMUX_SEL_ANG       4'b0111 //  (0xf & ~(1 << 3))   // 0b0111
 
+
+
 module my_modulation (
 
   input           clk,
@@ -360,12 +362,23 @@ module my_modulation (
 
   input [31:0]    clk_count_aper_n,
   input           use_slow_rundown,
+
   input [4-1:0]   himux_sel,
 
+  // TODO split up the lomux externally. into the ref mux and sigmux
+
+/*
   // low mux
   output [3-1:0] lomux,
   // high mux
+*/
+
   output [4-1:0] himux,
+
+  input wire [ 2-1:0] refmux  ,
+
+  input wire          sigmux,
+
 
   // values from last run, available in order to read
   output [24-1:0] count_up_last,
@@ -394,6 +407,11 @@ module my_modulation (
   // then
     */
 
+/*
+  input  [ 2-1:0] refmux  ;
+
+  input           sigmux;
+
 
   wire [2-1:0] refmux;
   // assign {  INT_IN_N_CTL, INT_IN_P_CTL } = lomux ;
@@ -401,12 +419,12 @@ module my_modulation (
 
   wire sigmux;
   assign sigmux = lomux [ 3-1 ];
-
+*/
 
     // 2^5 = 32
   reg [5-1:0] state;
 
-  // INITIAL BEGIN DOES SEEM TO BE supported.
+  // initial begin does seem to be supported.
   initial begin
     state = `STATE_RESET_START;
   end
@@ -686,25 +704,25 @@ module my_modulation (
             // zero-cross to finish.
             if(cross_any )
               begin
-                  // trigger for scope
+                // trigger for scope
 
-                  // transition
-                  state <= `STATE_DONE;
-                  clk_count <= 0;    // ok.
+                // transition
+                state <= `STATE_DONE;
+                clk_count <= 0;    // ok.
 
-                  // turn off all inputs. actually should leave. because we will turn on to reset the integrator.
-                  refmux <= `MUX_REF_NONE;
+                // turn off all inputs. actually should leave. because we will turn on to reset the integrator.
+                refmux <= `MUX_REF_NONE;
 
-                  COM_INTERUPT <= 0;   // active lo, set interupt
+                COM_INTERUPT <= 0;   // active lo, set interupt
 
-                  count_up_last       <= count_up;
-                  count_down_last     <= count_down;
-                  count_trans_up_last <= count_trans_up;
-                  count_trans_down_last <= count_trans_down;
-                  count_fix_up_last   <= count_fix_up;
-                  count_fix_down_last <= count_fix_down;
+                count_up_last       <= count_up;
+                count_down_last     <= count_down;
+                count_trans_up_last <= count_trans_up;
+                count_trans_down_last <= count_trans_down;
+                count_fix_up_last   <= count_fix_up;
+                count_fix_down_last <= count_fix_down;
 
-                  clk_count_rundown_last <= clk_count;// TODO change nmae  clk_clk_count_rundown
+                clk_count_rundown_last <= clk_count;// TODO change nmae  clk_clk_count_rundown
 
               end
           end
@@ -969,8 +987,15 @@ module top (
     . himux_sel( himux_sel ),
 
     // lomux
-    . lomux(lomux),
+    // . lomux(lomux),
     . himux(himux),
+    // { INT_IN_SIG_CTL, INT_IN_N_CTL, INT_IN_P_CTL } 
+    . refmux( { INT_IN_N_CTL, INT_IN_P_CTL } ),
+
+    . sigmux( INT_IN_SIG_CTL  ),
+
+
+
 
     // counts
     . count_up_last(count_up),
