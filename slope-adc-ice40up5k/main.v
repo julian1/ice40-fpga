@@ -387,13 +387,12 @@ module my_modulation (
 /*
   we need to review all this input / output.
   and input wire can still be driven.
-
 */
 
   // TODO change lower case
   // should be an input ??? eg. it's being driven here as a wire.
   input   COM_INTERUPT,
-  output          CMPR_LATCH_CTL
+  output  CMPR_LATCH_CTL
 );
 
 
@@ -407,18 +406,13 @@ module my_modulation (
     COM_INTERUPT    = 1; // active lo move this to an initial condition.
     CMPR_LATCH_CTL  = 0; // enable comparator
 
-
   end
-
 
   //////////////////////////////////////////////////////
   // counters and settings  ...
-  // for an individual phase.
 
-  // reg [24-1:0]  clk_count ;         // clk_count for the current phase.
-  reg [31:0]  clk_count ;         // 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
-  reg [31:0]  clk_count_aper ;     // from the start of the signal integration. eg. 5sec*20MHz=100m count. won't fit in 24 bit value. would need to split between read registers.
-                                  // could also record clk_count_actual.
+  reg [31:0]  clk_count;           // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
+  reg [31:0]  clk_count_aper ;      // from the start of the signal integration. eg. 5sec*20MHz=100m count. won't fit in 24 bit value. would need to split between read registers.
 
   // modulation counts
   reg [24-1:0] count_up;
@@ -494,7 +488,7 @@ module my_modulation (
             clk_count       <= 0;
 
 
-            // switch op to analog input, and sigmux on, to reset the integrator
+            // switch op to integrator analog input, and sigmux on, to reset the integrator
             himux           <= `HIMUX_SEL_ANG;
             sigmux          <= 1;
             refmux          <= `MUX_REF_NONE;
@@ -502,12 +496,9 @@ module my_modulation (
 
 
         `STATE_RESET:    // let integrator reset.
-          begin
-            if(clk_count >= clk_count_init_n)
-              state <= `STATE_SIG_SETTLE_START;
-          end
+          if(clk_count >= clk_count_init_n)
+            state <= `STATE_SIG_SETTLE_START;
 
-          // need to get this all on a scope
 
         `STATE_SIG_SETTLE_START:
           begin
@@ -521,10 +512,8 @@ module my_modulation (
           end
 
         `STATE_SIG_SETTLE:
-          begin
-            if(clk_count >= clk_count_init_n)
-              state <= `STATE_SIG_START;
-          end
+          if(clk_count >= clk_count_init_n)
+            state <= `STATE_SIG_START;
 
 
         // beginning of signal integration
