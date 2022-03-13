@@ -123,7 +123,7 @@ module my_register_bank   #(parameter MSB=32)   (
 
   inout           use_slow_rundown,
 
-  inout [8-1:0]   pattern,
+  inout [24-1:0]   pattern,
 
   input wire [24-1:0] count_up,
   input wire [24-1:0] count_down,
@@ -135,6 +135,7 @@ module my_register_bank   #(parameter MSB=32)   (
 
   // readable only
   input wire [24-1:0]  meas_count,    // measurements count, useful to check if stalled
+                                      // actually just probe switches with scope.
 
 
 );
@@ -855,6 +856,19 @@ module my_control_pattern_2 (
                   count <= 0;
                   end
             endcase
+
+          default:
+            // we need a way to indicate error. 
+            // eg. an error flag.
+            case (count)
+              0:  himux_sel <= `HIMUX_SEL_REF_LO;    // azero
+              1:  begin
+                  himux_sel <= `HIMUX_SEL_REF_HI;   // change to sig-hi
+                  count <= 0;  // should take priorty over the addition.
+                  end
+            endcase
+
+
 
         endcase
 
