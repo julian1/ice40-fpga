@@ -59,9 +59,9 @@
 // general,mix start 0
 `define REG_LED               7
 `define REG_TEST              8
-`define REG_RESET             9   // active low. for the modulator only. not spi.
+`define REG_RESET             9   // TODO active low. for the modulator only. not spi.
 
-// run parameters, start 10
+// meas/run parameters, start 10
 `define REG_COUNT_UP          10
 `define REG_COUNT_DOWN        11
 `define REG_COUNT_TRANS_UP    12
@@ -72,11 +72,11 @@
 
 
 // modulation control parameters, start 30.
-`define REG_CLK_COUNT_RESET_N  30
-`define REG_CLK_COUNT_FIX_N   31
-// `define REG_CLK_COUNT_VAR_N   32
-`define REG_CLK_COUNT_VAR_POS_N   37
-`define REG_CLK_COUNT_VAR_NEG_N   38
+`define REG_CLK_COUNT_RESET_N   30
+`define REG_CLK_COUNT_FIX_N     31
+// `define REG_CLK_COUNT_VAR_N  32
+`define REG_CLK_COUNT_VAR_POS_N 37
+`define REG_CLK_COUNT_VAR_NEG_N 38
 
 
 `define REG_CLK_COUNT_APER_N_LO 33    // aperture. rename?
@@ -307,14 +307,14 @@ endmodule
     https://patentimages.storage.googleapis.com/e2/ba/5a/ff3abe723b7230/US5200752.pdf
 */
 
-// advantage of macros is that they generate errors if not defined.
+// advantage of macros over localparam enum, is that they generate errors if not defined.
+// disdvantage is that it is easy to forget the backtick
 
-// change name STAT_HIMUX_RESET_START etc.
-`define STATE_RESET_START    0
-`define STATE_RESET          1    // initialsation state
+`define STATE_RESET_START    0    // initial state
+`define STATE_RESET          1
 
 `define STATE_SIG_SETTLE_START 3
-`define STATE_SIG_SETTLE  4
+`define STATE_SIG_SETTLE    4
 
 `define STATE_SIG_START     5
 
@@ -331,14 +331,14 @@ endmodule
 `define STATE_RUNDOWN       16
 `define STATE_DONE          17
 
-// change prefix LOMUX ?
+// ref mux state.
 `define MUX_REF_NONE        2'b00
 `define MUX_REF_POS         2'b01
 `define MUX_REF_NEG         2'b10
 `define MUX_REF_SLOW_POS    2'b11
 
 
-// switch himux to integrator feedback, to reset.
+// feed integrator output back on itself to reset.
 // appears to work. op flips from sig-in to low etc
 `define HIMUX_SEL_ANG       4'b0111 //  (0xf & ~(1 << 3))   // 0b0111
 
@@ -388,8 +388,7 @@ module my_modulation (
   */
 
 
-
-    // 2^5 = 32
+  // 2^5 = 32
   reg [5-1:0] state;
 
   // initial begin does seem to be supported.
@@ -432,7 +431,6 @@ module my_modulation (
   // the the period that we are integrating the signal.
   assign sig_active     = himux == himux_sel     && sigmux == 1;    // j
 
-  // ref active.
 
   assign reset_active   = himux === `HIMUX_SEL_ANG && sigmux === 1;
 
@@ -474,13 +472,13 @@ module my_modulation (
       case (state)
 
         // IMPORTANT. might can improved performance by reducing the reset and sig-settle times
+        // reset time is also used for settle time.
 
         `STATE_RESET_START:
           begin
             // reset vars, and transition to runup state
             state           <= `STATE_RESET;
             clk_count       <= 0;
-
 
             // switch op to integrator analog input, and sigmux on, to reset the integrator
             himux           <= `HIMUX_SEL_ANG;
@@ -815,22 +813,14 @@ module top (
 
   // wire [24-1:0] reg_led ;
   reg [24-1:0] reg_led ;
-  // assign { LED_B, LED_G, LED_R } =   reg_led ;   // not inverted for easier scope probing.inverted for common drain.
-  // assign { LED_B, LED_G, LED_R } = 3'b010 ;       // works...
-                                                    // Ok. it really looks correct on the leds...
-  // assign { COM_MOSI , COM_CLK, COM_CS} =  reg_led ;
-
 
 
   // input parameters
   reg [24-1:0]  clk_count_reset_n;
   reg [24-1:0]  clk_count_fix_n;
-
   // reg [24-1:0]  clk_count_var_n;
   reg [24-1:0]  clk_count_var_pos_n;
-  reg [24-1:0] clk_count_var_neg_n;
-
-
+  reg [24-1:0]  clk_count_var_neg_n;
   reg [31:0]    clk_count_aper_n;
   reg use_slow_rundown;
 
@@ -850,12 +840,10 @@ module top (
   reg [24-1:0] meas_count;    // how many actual measurements we have done.
 
 
-
   /*
     registers mux_sel |= 0x ... turn a bit on.
     registers mux_sel &= ~ 0x ... turn a bit on.
   */
-
 
   reg [4-1:0] himux;
   assign { MUX_SLOPE_ANG_CTL, MUX_REF_LO_CTL, MUX_REF_HI_CTL, MUX_SIG_HI_CTL } = himux;
