@@ -309,11 +309,13 @@ endmodule
 */
 
 // advantage of macros is that they generate errors if not defined.
+
+// change name STAT_HIMUX_RESET_START etc.
 `define STATE_RESET_START    0
 `define STATE_RESET          1    // initialsation state
 
-`define STATE_HIMUX_SETTLE_START 3
-`define STATE_HIMUX_SETTLE  4
+`define STATE_SIG_SETTLE_START 3
+`define STATE_SIG_SETTLE  4
 
 `define STATE_SIG_START     5
 
@@ -382,8 +384,15 @@ module my_modulation (
   // could also record the initial dir.
   // these (the outputs) could be combined into single bitfield.
 
+/*
+  we need to review all this input / output.
+  and input wire can still be driven.
+
+*/
+
   // TODO change lower case
-  output          COM_INTERUPT,
+  // should be an input ??? eg. it's being driven here as a wire.
+  input   COM_INTERUPT,
   output          CMPR_LATCH_CTL
 );
 
@@ -498,14 +507,14 @@ module my_modulation (
         `STATE_RESET:    // let integrator reset.
           begin
             if(clk_count >= clk_count_init_n)
-              state <= `STATE_HIMUX_SETTLE_START;
+              state <= `STATE_SIG_SETTLE_START;
           end
 
           // need to get this all on a scope
 
-        `STATE_HIMUX_SETTLE_START:
+        `STATE_SIG_SETTLE_START:
           begin
-            state         <= `STATE_HIMUX_SETTLE;
+            state         <= `STATE_SIG_SETTLE;
             clk_count     <= 0;
 
             // switch himux to signal, but lo mux off whlie op settles
@@ -514,7 +523,7 @@ module my_modulation (
             // refmux     <= `MUX_REF_NONE;
           end
 
-        `STATE_HIMUX_SETTLE:
+        `STATE_SIG_SETTLE:
           begin
             if(clk_count >= clk_count_init_n)
               state <= `STATE_SIG_START;
