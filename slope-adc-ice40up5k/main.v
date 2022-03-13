@@ -155,7 +155,9 @@ module my_register_bank   #(parameter MSB=32)   (
     use_slow_rundown  = 1;
     // himux_sel      = 4'b1011;        // ref lo/agnd
     // himux_sel      = 4'b1101;     // ref in
-    himux_sel         = 4'b1011;        // ref lo/agnd
+    himux_sel         = 4'b1011;        // ref lo/agnd . this is a dummy
+
+
 
   end
 
@@ -779,15 +781,17 @@ endmodule
 module my_control_pattern_2 (
   input           clk,
   input           com_interupt,
-  inout [4-1:0]   himux_sel,  // output
-  inout [4-1:0]   pattern
+  input [4-1:0]   pattern,
+  output [4-1:0]   himux_sel,  // output. declares a local register?
 );
 
-  // count of interupts.
+  // count of interupts, not clk
   reg [5-1:0]  count;
 
   initial begin
-    count = 0;
+    count   = 0;
+    //pattern = 0;
+    himux_sel <= `HIMUX_SEL_REF_LO;
   end
 
   always@(posedge clk) 
@@ -798,18 +802,30 @@ module my_control_pattern_2 (
         count <= count + 1;
 
         case(pattern)
-          1:
+
+          0:  himux_sel <= `HIMUX_SEL_SIG_HI; 
+          1:  himux_sel <= `HIMUX_SEL_REF_HI; 
+          2:  himux_sel <= `HIMUX_SEL_REF_LO; 
+          3:  himux_sel <= `HIMUX_SEL_ANG;   // don't use
+
+
+          10:
             case (count)
-              0:  himux_sel <= HIMUX_SEL_REF_LO;
-              1:  himux_sel <= HIMUX_SEL_SIG_HI;
+              0:  himux_sel <= `HIMUX_SEL_REF_LO;    // azero
+              // 1:  himux_sel <= `HIMUX_SEL_SIG_HI;
+              1:  himux_sel <= `HIMUX_SEL_REF_HI;   // change to sig-hi
               default: count <= 0;
             endcase
 
-
+          11:
+            case (count)
+              0:  himux_sel <= `HIMUX_SEL_REF_LO;    // azero
+              1:  himux_sel <= `HIMUX_SEL_SIG_HI;
+              2:  himux_sel <= `HIMUX_SEL_REF_HI;    // acal  can change to do acal at different interval
+              default: count <= 0;
+            endcase
 
         endcase
-
-
 
   end
 endmodule
@@ -921,6 +937,8 @@ module top (
 
 
   reg [4-1:0] himux_sel;    // himux signal selection
+  reg [4-1:0] himux_sel_dummy;    // himux signal selection
+  reg [4-1:0] pattern = 10;    // himux signal selection
 
   reg [24-1:0] meas_count;    // how many actual measurements we have done.
 
@@ -988,7 +1006,9 @@ module top (
 
     . clk_count_aper_n( clk_count_aper_n ) ,
     . use_slow_rundown( use_slow_rundown),
-    . himux_sel( himux_sel ),
+
+    // NO. this 
+    . himux_sel( himux_sel_dummy ),         // HACK. 
 
     // control
     . meas_count( meas_count ),
@@ -1005,6 +1025,16 @@ module top (
     // clk counts
     . clk_count_rundown(clk_count_rundown),
 
+  );
+
+
+
+  my_control_pattern_2 
+  p1 (
+    . clk(clk),
+    . com_interupt(COM_INTERUPT),
+    . pattern( pattern),    
+    . himux_sel(himux_sel),  
   );
 
 
