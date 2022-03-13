@@ -391,7 +391,7 @@ module my_modulation (
 
   // TODO change lower case
   // should be an input ??? eg. it's being driven here as a wire.
-  input   COM_INTERUPT,
+  input   com_interupt,
   output  CMPR_LATCH_CTL
 );
 
@@ -403,7 +403,7 @@ module my_modulation (
   initial begin
     state = `STATE_RESET_START;
 
-    COM_INTERUPT    = 1; // active lo move this to an initial condition.
+    com_interupt    = 1; // active lo move this to an initial condition.
     CMPR_LATCH_CTL  = 0; // enable comparator
 
   end
@@ -679,11 +679,14 @@ module my_modulation (
                 // transition
                 state     <= `STATE_DONE;
                 clk_count <= 0;    // ok.
+  
+                // IS THERE AN ISSUE with the case conflicting with the global?
 
                 // turn off all inputs. actually should leave. because we will turn on to reset the integrator.
                 refmux    <= `MUX_REF_NONE;
 
-                COM_INTERUPT <= 0;   // active lo, set interupt
+                // OHHHHHHHHH
+                com_interupt <= 0;   // active lo, set interupt
 
                 // record everything
                 count_up_last       <= count_up;
@@ -701,7 +704,7 @@ module my_modulation (
 
         `STATE_DONE:
           begin
-            COM_INTERUPT  <= 1;   // active hi. turn off.
+            com_interupt  <= 1;   // active hi. turn off.
             state         <= `STATE_RESET_START;
           end
 
@@ -977,7 +980,7 @@ module top (
     . clk_count_rundown_last(clk_count_rundown),
 
 
-    . COM_INTERUPT(COM_INTERUPT),
+    . com_interupt(COM_INTERUPT),
     . CMPR_LATCH_CTL(CMPR_LATCH_CTL)
   );
 
