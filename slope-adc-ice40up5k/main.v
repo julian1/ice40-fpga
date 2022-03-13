@@ -336,8 +336,9 @@ endmodule
 `define MUX_REF_NEG         2'b10
 `define MUX_REF_SLOW_POS    2'b11
 
-// ---
 
+// switch himux to integrator feedback, to reset.
+// appears to work. op flips from sig-in to low etc
 `define HIMUX_SEL_ANG       4'b0111 //  (0xf & ~(1 << 3))   // 0b0111
 
 
