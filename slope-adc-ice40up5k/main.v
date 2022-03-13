@@ -177,7 +177,7 @@ module my_register_bank   #(parameter MSB=32)   (
     clk_count_aper_n    = (2 * 2000000);    // ? 200ms TODO check this.
                                             // yes. 4000000 == 10PNLC, 5 sps.
     use_slow_rundown    = 1;
-    himux_sel           = `HIMUX_SEL_REF_HI;   // when not controlled by pattern controller. 
+    himux_sel           = `HIMUX_SEL_REF_HI;   // when not controlled by pattern controller.
     pattern             = 10;
     reset               = 1; // active lo
 
@@ -489,26 +489,28 @@ module my_modulation (
 
 
   always @(posedge clk)
+
     if(!reset)  // active lo
       begin
-      // can use to easily update/write control parameters during reset. without confusing modulation
-      // eg. hold in reset, write, release reset
+        // OK. I think this isn't quite right because the state is not evaluated.
+        state           <= `STATE_RESET_START;
 
-      // OK. I think this isn't quite right because the state is not evaluated.
-      state           <= `STATE_RESET_START;
-
-      // switch op to integrator analog input, and sigmux on, to reset the integrator
-      himux           <= `HIMUX_SEL_ANG;
-      sigmux          <= 1;
-      refmux          <= `MUX_REF_NONE;
-
-      end 
+        // switch op to integrator analog input, and sigmux on, to reset the integrator
+        himux           <= `HIMUX_SEL_ANG;
+        sigmux          <= 1;
+        refmux          <= `MUX_REF_NONE;
+      end
     else
+
     begin
 
 
       // always increment clk for the current phase
       clk_count     <= clk_count + 1;
+
+      // active lo
+      // if(!reset)
+      //  state           <= `STATE_RESET_START;
 
 
       if(sig_active)
