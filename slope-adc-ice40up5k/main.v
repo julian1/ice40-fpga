@@ -443,6 +443,7 @@ module my_modulation (
 
   assign reset_active   = himux === `HIMUX_SEL_ANG && sigmux === 1;
 
+  // OK. it's working with good values at nplc 10, 11, 12. for cal loop. after very heavy refactor mar 13. 2022.
 
   // IMPORTANT ! is not.   ~ is complement.
 
