@@ -493,7 +493,6 @@ module my_modulation (
           begin
             // reset vars, and transition to runup state
             state           <= `STATE_RESET;
-
             clk_count       <= 0;
 
             count_up        <= 0;
@@ -507,15 +506,13 @@ module my_modulation (
             CMPR_LATCH_CTL  <= 0; // enable comparator
 
 
-            // switch op to analog input, no ref input
+            // switch op to analog input, and sigmux on, to reset the integrator
             himux           <= HIMUX_SEL_ANG;
             sigmux          <= 1;
             refmux          <= `MUX_REF_NONE;
-
           end
 
 
-        // init shoudl be called RESET
         `STATE_RESET:    // let integrator reset.
           begin
             if(clk_count >= clk_count_init_n)
@@ -526,13 +523,13 @@ module my_modulation (
 
         `STATE_HIMUX_SETTLE_START:
           begin
-            state           <= `STATE_HIMUX_SETTLE;
-            clk_count       <= 0;
+            state         <= `STATE_HIMUX_SETTLE;
+            clk_count     <= 0;
 
             // switch himux to signal, but lo mux off whlie op settles
-            himux           <= himux_sel;
-            sigmux          <= 0;
-            // refmux          <= `MUX_REF_NONE;
+            himux         <= himux_sel;
+            sigmux        <= 0;
+            // refmux     <= `MUX_REF_NONE;
           end
 
         `STATE_HIMUX_SETTLE:
@@ -549,24 +546,23 @@ module my_modulation (
             clk_count       <= 0;
 
             // clear the aperture counter
-            clk_count_aper <= 0;
+            clk_count_aper  <= 0;
 
             // turn on signal input, to start signal integration
-            // himux           <= himux_sel;
+            // himux       <= himux_sel;
             sigmux <= 1;
-            // refmux          <= `MUX_REF_NONE;
+            // refmux      <= `MUX_REF_NONE;
           end
-
 
 
 
         `STATE_FIX_POS_START:
           begin
-            state <= `STATE_FIX_POS;
-            clk_count <= 0;
+            state         <= `STATE_FIX_POS;
+            clk_count     <= 0;
 
             count_fix_down <= count_fix_down + 1;
-            refmux <= `MUX_REF_POS; // initial direction
+            refmux        <= `MUX_REF_POS; // initial direction
             if(refmux != `MUX_REF_POS) count_trans_down <= count_trans_down + 1 ;
           end
 
@@ -577,18 +573,18 @@ module my_modulation (
         // variable direction
         `STATE_VAR_START:
           begin
-            state <= `STATE_VAR;
-            clk_count <= 0;
+            state         <= `STATE_VAR;
+            clk_count     <= 0;
 
             if( comparator_val)   // test below the zero-cross
               begin
-                refmux <= `MUX_REF_NEG;  // add negative ref. to drive up.
+                refmux    <= `MUX_REF_NEG;  // add negative ref. to drive up.
                 if(refmux != `MUX_REF_NEG) count_trans_up <= count_trans_up + 1 ;
-                count_up <= count_up + 1;
+                count_up  <= count_up + 1;
               end
             else
               begin
-                refmux <= `MUX_REF_POS;
+                refmux    <= `MUX_REF_POS;
                 if(refmux != `MUX_REF_POS) count_trans_down <= count_trans_down + 1 ;
                 count_down <= count_down + 1;
               end
@@ -609,13 +605,14 @@ module my_modulation (
 */
             state <= `STATE_FIX_NEG_START;
 
+
         `STATE_FIX_NEG_START:
           begin
-            state <= `STATE_FIX_NEG;
-            clk_count <= 0;
+            state         <= `STATE_FIX_NEG;
+            clk_count     <= 0;
 
-            count_fix_up <= count_fix_up + 1;
-            refmux <= `MUX_REF_NEG;
+            count_fix_up  <= count_fix_up + 1;
+            refmux        <= `MUX_REF_NEG;
             if(refmux != `MUX_REF_NEG) count_trans_up <= count_trans_up + 1 ;
           end
 
@@ -632,18 +629,18 @@ module my_modulation (
           // so just keep running complete 4 phase cycles until we get a cross. rather than force positive vars.
           //////////
           begin
-            state <= `STATE_VAR2;
-            clk_count <= 0;
+            state         <= `STATE_VAR2;
+            clk_count     <= 0;
 
             if( comparator_val) // below zero-cross
               begin
-                refmux <= `MUX_REF_NEG;
+                refmux    <= `MUX_REF_NEG;
                 if(refmux != `MUX_REF_NEG) count_trans_up <= count_trans_up + 1 ;
-                count_up <= count_up + 1;
+                count_up  <= count_up + 1;
               end
             else
               begin
-                refmux <= `MUX_REF_POS;
+                refmux    <= `MUX_REF_POS;
                 if(refmux != `MUX_REF_POS) count_trans_down <= count_trans_down + 1 ;
                 count_down <= count_down + 1;
               end
@@ -671,15 +668,15 @@ module my_modulation (
 
         `STATE_RUNDOWN_START:
           begin
-            state <= `STATE_RUNDOWN;
-            clk_count <= 0;
+            state         <= `STATE_RUNDOWN;
+            clk_count     <= 0;
 
             if( use_slow_rundown )
               // turn on both references - to create +ve bias, to drive integrator down.
-              refmux <= `MUX_REF_SLOW_POS;
+              refmux      <= `MUX_REF_SLOW_POS;
             else
               // fast rundown
-              refmux <= `MUX_REF_POS;
+              refmux      <= `MUX_REF_POS;
           end
 
 
