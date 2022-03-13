@@ -121,7 +121,6 @@ module my_register_bank   #(parameter MSB=32)   (
   input wire [24-1:0] count_trans_down,
   input wire [24-1:0] count_fix_up,
   input wire [24-1:0] count_fix_down,
-  // input wire [24-1:0] count_flip, // should be a count. possible could require two up modulations
 
   input wire [24-1:0] clk_count_rundown,
 
@@ -206,7 +205,6 @@ module my_register_bank   #(parameter MSB=32)   (
               `REG_COUNT_TRANS_DOWN:  out <= count_trans_down << 8;
               `REG_COUNT_FIX_UP:      out <= count_fix_up << 8;
               `REG_COUNT_FIX_DOWN:    out <= count_fix_down << 8;
-              // `REG_COUNT_FLIP:        out <= count_flip << 8;
 
               `REG_CLK_COUNT_RUNDOWN: out <= clk_count_rundown << 8;
 
@@ -381,7 +379,6 @@ module my_modulation (
   output [24-1:0] count_trans_down_last,
   output [24-1:0] count_fix_up_last,
   output [24-1:0] count_fix_down_last,
-//   output [24-1:0] count_flip_last,
 
   output [24-1:0] clk_count_rundown_last,
 
@@ -439,7 +436,6 @@ module my_modulation (
   reg [24-1:0] count_trans_down;
   reg [24-1:0] count_fix_up;
   reg [24-1:0] count_fix_down;
-  // reg [24-1:0] count_flip;
 
   /////////////////////////
   // this should be pushed into a separate module...
@@ -512,7 +508,6 @@ module my_modulation (
             count_trans_down <= 0;
             count_fix_up    <= 0;
             count_fix_down  <= 0;
-            // count_flip      <= 0;
 
             COM_INTERUPT    <= 1; // active lo
             CMPR_LATCH_CTL  <= 0; // enable comparator
@@ -719,14 +714,8 @@ module my_modulation (
                   count_trans_down_last <= count_trans_down;
                   count_fix_up_last   <= count_fix_up;
                   count_fix_down_last <= count_fix_down;
-                  // count_flip_last     <= count_flip;
-
-                  // weird.// appears to improve speed.
-                  // count_flip_last     <= 0;
 
                   clk_count_rundown_last <= clk_count;// TODO change nmae  clk_clk_count_rundown
-
-
 
                   // record last // unused. could remove.
                   rundown_dir_last <= refmux; // up
@@ -881,7 +870,6 @@ module top (
   reg [24-1:0] count_trans_down;
   reg [24-1:0] count_fix_up;
   reg [24-1:0] count_fix_down;
-//   reg [24-1:0] count_flip;
 
   reg [24-1:0] clk_count_rundown;
 
@@ -969,9 +957,6 @@ module top (
     . count_fix_up(count_fix_up),
     . count_fix_down(count_fix_down),
 
-    // . count_flip(count_flip),
-    // . count_flip( 33 ),
-
     // clk counts
     . clk_count_rundown(clk_count_rundown),
 
@@ -1013,7 +998,6 @@ module top (
     . count_trans_down_last(count_trans_down),
     . count_fix_up_last(count_fix_up),
     . count_fix_down_last(count_fix_down),
-    // . count_flip_last(count_flip),
 
     // clk counts
     . clk_count_rundown_last(clk_count_rundown),
