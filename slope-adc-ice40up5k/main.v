@@ -794,7 +794,7 @@ module my_control_pattern_2 (
     himux_sel <= `HIMUX_SEL_REF_LO;
   end
 
-  always@(posedge clk) 
+  always@(posedge clk)
     if(!com_interupt)
       begin
 
@@ -803,11 +803,11 @@ module my_control_pattern_2 (
 
         case(pattern)
 
-          0:  himux_sel <= `HIMUX_SEL_SIG_HI; 
-          1:  himux_sel <= `HIMUX_SEL_REF_HI; 
-          2:  himux_sel <= `HIMUX_SEL_REF_LO; 
+          0:  himux_sel <= `HIMUX_SEL_SIG_HI;
+          1:  himux_sel <= `HIMUX_SEL_REF_HI;
+          2:  himux_sel <= `HIMUX_SEL_REF_LO;
           3:  himux_sel <= `HIMUX_SEL_ANG;   // don't use
-            
+
           /*
             integrator does not seem to be resetting well. eg. countdown there are  runs very well. but it could be DA.
           */
@@ -824,8 +824,10 @@ module my_control_pattern_2 (
             case (count)
               0:  himux_sel <= `HIMUX_SEL_REF_LO;    // azero
               1:  himux_sel <= `HIMUX_SEL_SIG_HI;
-              2:  himux_sel <= `HIMUX_SEL_REF_HI;    // acal  can change to do acal at different interval
-              default: count <= 0;
+              2:  begin
+                  himux_sel <= `HIMUX_SEL_REF_HI;    // acal  can change to do acal at different interval
+                  count <= 0;
+                  end
             endcase
 
         endcase
@@ -833,15 +835,6 @@ module my_control_pattern_2 (
   end
 endmodule
 
-
-
-/*
-`define HIMUX_SEL_SIG_HI      4'b1110
-`define HIMUX_SEL_REF_HI      4'b1101
-`define HIMUX_SEL_REF_LO      4'b1011
-`define HIMUX_SEL_ANG         4'b0111
-
-*/
 
 
 
@@ -1010,8 +1003,8 @@ module top (
     . clk_count_aper_n( clk_count_aper_n ) ,
     . use_slow_rundown( use_slow_rundown),
 
-    // NO. this 
-    . himux_sel( himux_sel_dummy ),         // HACK. 
+    // NO. this
+    . himux_sel( himux_sel_dummy ),         // HACK.
 
     // control
     . meas_count( meas_count ),
@@ -1032,12 +1025,12 @@ module top (
 
 
 
-  my_control_pattern_2 
+  my_control_pattern_2
   p1 (
     . clk(clk),
     . com_interupt(COM_INTERUPT),
-    . pattern( pattern),    
-    . himux_sel(himux_sel),  
+    . pattern( pattern),
+    . himux_sel(himux_sel),
   );
 
 
