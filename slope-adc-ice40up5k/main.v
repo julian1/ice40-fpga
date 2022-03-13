@@ -71,6 +71,8 @@
 `define REG_CLK_COUNT_RUNDOWN 17
 
 
+// we don't necessarily need to expose all these
+// just set once in pattern controller.
 // modulation control parameters, start 30.
 `define REG_CLK_COUNT_RESET_N   30
 `define REG_CLK_COUNT_FIX_N     31
@@ -83,10 +85,14 @@
 `define REG_CLK_COUNT_APER_N_HI 34
 
 `define REG_USE_SLOW_RUNDOWN  35
-`define REG_HIMUX_SEL         36      // we
+// `define REG_HIMUX_SEL         36      // we
+
+`define REG_PATTERN           37      // we
+
 
 `define REG_MEAS_COUNT        40
-                                      // we need to know what was actual input.
+
+// these are output registers dependent upon the pattern used.
 `define REG_MEAS_HIMUX_SEL    41      // what was being muxed for integration. sig, azero, acal .
 `define REG_MEAS_VAR_POS_N    42      //
 
@@ -112,7 +118,8 @@ module my_register_bank   #(parameter MSB=32)   (
 
   inout [31:0]    clk_count_aper_n,
   inout           use_slow_rundown,
-  inout [4-1:0]   himux_sel,
+
+  inout [8-1:0]   pattern,
 
   input wire [24-1:0]  meas_count,    // how many actual measurements we have done.
 
@@ -139,26 +146,18 @@ module my_register_bank   #(parameter MSB=32)   (
 
   // To use in an inout. the initial block is a driver. so must be placed here.
   initial begin
-    reg_led           = 3'b101;
-    clk_count_reset_n  =  10000;
-    clk_count_fix_n   = 700;
+    reg_led             = 3'b101;
+    clk_count_reset_n   =  10000;
+    clk_count_fix_n     = 700;
 
     // clk_count_var_n   = 5500;
     clk_count_var_pos_n = 5500;
     clk_count_var_neg_n = 5500;
 
+    clk_count_aper_n    = (2 * 2000000);    // 200ms
+    use_slow_rundown    = 1;
 
-
-
-    clk_count_aper_n   = (2 * 2000000);    // 200ms
-    // clk_count_aper_n = (5 * 20000000);   // 5 sec.
-    use_slow_rundown  = 1;
-    // himux_sel      = 4'b1011;        // ref lo/agnd
-    // himux_sel      = 4'b1101;     // ref in
-    himux_sel         = 4'b1011;        // ref lo/agnd . this is a dummy
-
-
-
+    pattern             = 10;
   end
 
 
@@ -212,7 +211,7 @@ module my_register_bank   #(parameter MSB=32)   (
               `REG_CLK_COUNT_RUNDOWN: out <= clk_count_rundown << 8;
 
               // params
-              `REG_CLK_COUNT_RESET_N:  out <= clk_count_reset_n << 8;
+              `REG_CLK_COUNT_RESET_N: out <= clk_count_reset_n << 8;
               `REG_CLK_COUNT_FIX_N:   out <= clk_count_fix_n << 8;
               // `REG_CLK_COUNT_VAR_N:   out <= clk_count_var_n << 8;
               `REG_CLK_COUNT_VAR_POS_N:  out <= clk_count_var_pos_n << 8;
@@ -226,7 +225,8 @@ module my_register_bank   #(parameter MSB=32)   (
               /* could convert numerical argument - to avoid accidently turning on more than one source.
                 no. mux switch has 1.5k impedance. should not break anything
               */
-              `REG_HIMUX_SEL:         out <= himux_sel << 8;
+              // `REG_HIMUX_SEL:     out <= himux_sel << 8;
+              `REG_PATTERN:           out <= pattern << 8;
 
               `REG_MEAS_COUNT:        out <= meas_count << 8;
 
@@ -260,22 +260,22 @@ module my_register_bank   #(parameter MSB=32)   (
           // `REG_RESET:               reset <= val;
           `REG_LED:                 reg_led <= val;
 
-          `REG_CLK_COUNT_RESET_N:    clk_count_reset_n <= val;  // aperture
+          `REG_CLK_COUNT_RESET_N:   clk_count_reset_n <= val;  // aperture
           `REG_CLK_COUNT_FIX_N:     clk_count_fix_n <= val;
 
           // `REG_CLK_COUNT_VAR_N:  clk_count_var_n <= val;
           `REG_CLK_COUNT_VAR_POS_N: clk_count_var_pos_n <= val;
           `REG_CLK_COUNT_VAR_NEG_N: clk_count_var_neg_n <= val;
 
-
-
           // TODO
           // these slow things down from 40MHz to 34MHz. need piplining.
           // but the PROBLEM - is the sensitivity list does not include clk.
 
+          // SOLUTION - just continuously calculate them. but assign once.
+
           // 34MHz. aracnne,  38MHz nextpnr. now getting 39MHz.
-          `REG_CLK_COUNT_APER_N_LO:  clk_count_aper_n <= (clk_count_aper_n & 32'hff000000) | val;          // lo 24 bits
-          `REG_CLK_COUNT_APER_N_HI:  clk_count_aper_n <= (clk_count_aper_n & 32'h00ffffff) | (val << 24);  // hi 8 bits
+          `REG_CLK_COUNT_APER_N_LO: clk_count_aper_n <= (clk_count_aper_n & 32'hff000000) | val;          // lo 24 bits
+          `REG_CLK_COUNT_APER_N_HI: clk_count_aper_n <= (clk_count_aper_n & 32'h00ffffff) | (val << 24);  // hi 8 bits
 
           // 39MHz nextpnr
           // this only routes correctly in nextpnr. not arachne-pnr
@@ -284,8 +284,8 @@ module my_register_bank   #(parameter MSB=32)   (
           // REG_CLK_COUNT_APER_N_HI: clk_count_aper_n <=   { val[ MSB - 1: MSB - 8 - 1 ], clk_count_aper_n[ MSB - 8 - 1: 0] };  // hi 8 bits
 
           `REG_USE_SLOW_RUNDOWN:    use_slow_rundown <= val;
-
-          `REG_HIMUX_SEL:           himux_sel <= val;
+          // `REG_HIMUX_SEL:        himux_sel <= val;
+          `REG_PATTERN:             pattern <= val;
 
         endcase
       end
@@ -803,7 +803,6 @@ module my_control_pattern_2 (
 
   initial begin
     count   = 0;
-    //pattern = 0;
     himux_sel <= `HIMUX_SEL_REF_LO;
   end
 
@@ -948,7 +947,7 @@ module top (
 
   reg [4-1:0] himux_sel;    // himux signal selection
   reg [4-1:0] himux_sel_dummy;    // himux signal selection
-  reg [4-1:0] pattern = 10;    // himux signal selection
+  reg [4-1:0] pattern ;    // himux signal selection
 
   reg [24-1:0] meas_count;    // how many actual measurements we have done.
 
@@ -1018,7 +1017,8 @@ module top (
     . use_slow_rundown( use_slow_rundown),
 
     // NO. this
-    . himux_sel( himux_sel_dummy ),         // HACK.
+    // . himux_sel( himux_sel_dummy ),         // HACK.
+    . pattern( pattern),
 
     // control
     . meas_count( meas_count ),
