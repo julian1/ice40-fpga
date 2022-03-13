@@ -319,9 +319,10 @@ endmodule
 `define STATE_INIT_START    0
 `define STATE_INIT          1    // initialsation state
 
-`define STATE_HIMUX_SETTLE_START 4
-`define STATE_HIMUX_SETTLE  5
+`define STATE_HIMUX_SETTLE_START 3
+`define STATE_HIMUX_SETTLE  4
 
+`define STATE_SIG_START     5
 
 
 `define STATE_FIX_POS_START 6
@@ -536,9 +537,7 @@ module my_modulation (
         `STATE_INIT:    // let integrator reset.
           begin
             if(clk_count >= clk_count_init_n)
-              begin
-                state <= `STATE_HIMUX_SETTLE_START;
-              end
+              state <= `STATE_HIMUX_SETTLE_START;
           end
 
           // need to get this all on a scope
@@ -557,20 +556,23 @@ module my_modulation (
         `STATE_HIMUX_SETTLE:
           begin
             if(clk_count >= clk_count_init_n)
-              begin
-                state <= `STATE_FIX_POS_START;
-
-                // TODO - this is the most important bit.
-                // shoudl probably be factored into a condition.
-                // turn on signal input, to start signal integration
-                sigmux <= 1;
-                // start the aperture counter
-                // we should not really be incrementing it - elsewhere...
-                clk_count_aper <= 0;
-
-                // done <= 0;
-              end
+              state <= `STATE_SIG_START;
           end
+
+
+        // beginning of signal integration
+        `STATE_SIG_START:
+          begin
+            state <= `STATE_FIX_POS_START;
+            // turn on signal input, to start signal integration
+            sigmux <= 1;
+            // clear the aperture counter
+            clk_count_aper <= 0;
+            // done <= 0;
+          end
+
+
+
 
 
 
