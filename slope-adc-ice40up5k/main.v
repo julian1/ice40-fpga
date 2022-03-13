@@ -134,7 +134,7 @@ module my_register_bank   #(parameter MSB=32)   (
   input wire [24-1:0] clk_count_rundown,
 
   // readable only
-  input wire [24-1:0]  meas_count,    // how many actual measurements we have done.
+  input wire [24-1:0]  meas_count,    // measurements count, useful to check if stalled
 
 
 );
@@ -158,7 +158,8 @@ module my_register_bank   #(parameter MSB=32)   (
     clk_count_var_pos_n = 5500;
     clk_count_var_neg_n = 5500;
 
-    clk_count_aper_n    = (2 * 2000000);    // ? 200ms
+    clk_count_aper_n    = (2 * 2000000);    // ? 200ms TODO check this.
+                                            // yes. 4000000 == 10PNLC, 5 sps.
     use_slow_rundown    = 1;
 
     pattern             = 10;
