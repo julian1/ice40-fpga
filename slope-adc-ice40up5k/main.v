@@ -140,6 +140,7 @@ module my_register_bank   #(parameter MSB=32)   (
   inout [24-1:0]      pattern,          // TODO change to 8-1
   inout               reset,            // register_reset for modulation, not a reset for my_register_bank.
 
+  // inputs/ readable
   input wire [24-1:0] count_up,
   input wire [24-1:0] count_down,
   input wire [24-1:0] count_trans_up,
@@ -148,10 +149,8 @@ module my_register_bank   #(parameter MSB=32)   (
   input wire [24-1:0] count_fix_down,
   input wire [24-1:0] clk_count_rundown,
 
-  // readable only
-  input wire [24-1:0] meas_count,    // measurements count, useful to check if stalled
+  input wire [24-1:0] meas_count,     // useful to check if stalled
                                       // actually just probe switches with scope.
-
 
 );
 
@@ -241,7 +240,7 @@ module my_register_bank   #(parameter MSB=32)   (
               `REG_HIMUX_SEL:         out <= himux_sel << 8;
               `REG_PATTERN:           out <= pattern << 8;
 
-              // `REG_RESET:             out <= pattern << 8; need to shift 24 bits....
+              // `REG_RESET:             out <= pattern << 8; need to shift 24 bits?
 
               `REG_MEAS_COUNT:        out <= meas_count << 8;
 
@@ -394,6 +393,9 @@ module my_modulation (
   inout [24-1:0]  clk_count_var_pos_n,
   inout [24-1:0]  clk_count_var_neg_n,
   input [31:0]    clk_count_aper_n,
+
+  // is himux_sel being overwritten?  because wrong length...
+  // or reset is being written...
 
   input           use_slow_rundown,
   input [4-1:0]   himux_sel,
@@ -1059,7 +1061,7 @@ module top (
 
 
   reg [4-1:0] himux_sel;    // himux signal selection
-  reg [4-1:0] himux_sel_dummy;    // himux signal selection
+  // reg [4-1:0] himux_sel_dummy;    // himux signal selection
 
 
   reg [8-1:0] pattern;
