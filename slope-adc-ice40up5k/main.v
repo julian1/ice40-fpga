@@ -90,10 +90,11 @@
 
 `define REG_MEAS_COUNT          40
 
-// We don't need to read the values that were used. if we instead write. and have proper sequencing control.
-// these are output registers dependent upon the pattern used.
-`define REG_MEAS_HIMUX_SEL      41      // what was being muxed for integration. sig, azero, acal .
-`define REG_MEAS_VAR_POS_N      42      // we don't need this...
+/* We shouldn't need to read the control parameters used back. 
+    if instead we always write. and have proper sequencing control with mcu.
+*/
+// `define REG_MEAS_HIMUX_SEL      41      // what was being muxed for integration. sig, azero, acal .
+// `define REG_MEAS_VAR_POS_N      42      // we don't need this...
 
 
 
