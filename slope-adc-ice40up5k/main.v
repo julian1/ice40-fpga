@@ -625,14 +625,14 @@ module my_modulation (
             if( comparator_val)   // test below the zero-cross
               begin
                 refmux    <= `MUX_REF_NEG;  // add negative ref. to drive up.
-                if(refmux != `MUX_REF_NEG) count_trans_up <= count_trans_up + 1 ;
                 count_up  <= count_up + 1;
+                if(refmux != `MUX_REF_NEG) count_trans_up <= count_trans_up + 1 ;
               end
             else
               begin
                 refmux    <= `MUX_REF_POS;
-                if(refmux != `MUX_REF_POS) count_trans_down <= count_trans_down + 1 ;
                 count_down <= count_down + 1;
+                if(refmux != `MUX_REF_POS) count_trans_down <= count_trans_down + 1 ;
               end
           end
 
@@ -681,14 +681,14 @@ module my_modulation (
             if( comparator_val) // below zero-cross
               begin
                 refmux    <= `MUX_REF_NEG;
-                if(refmux != `MUX_REF_NEG) count_trans_up <= count_trans_up + 1 ;
                 count_up  <= count_up + 1;
+                if(refmux != `MUX_REF_NEG) count_trans_up <= count_trans_up + 1 ;
               end
             else
               begin
                 refmux    <= `MUX_REF_POS;
-                if(refmux != `MUX_REF_POS) count_trans_down <= count_trans_down + 1 ;
                 count_down <= count_down + 1;
+                if(refmux != `MUX_REF_POS) count_trans_down <= count_trans_down + 1 ;
               end
           end
 
