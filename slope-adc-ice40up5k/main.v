@@ -458,6 +458,9 @@ module my_modulation (
   // this should be pushed into a separate module...
   // should be possible to set latch hi immediately on any event here...
   // change name  zero_cross.. or just cross_
+
+  // TODO move this into the main block.
+
   reg [2:0] crossr;
   always @(posedge clk)
     crossr <= {crossr[1:0], comparator_val};
@@ -499,7 +502,7 @@ module my_modulation (
         // set up next state, for when reset goes hi.
         state           <= `STATE_RESET_START;
 
-        // ensure integrator is feeding back on it's output, to hold integrator in reset
+        // keep integrator analog input, and sigmux on, to reset the integrator
         himux           <= `HIMUX_SEL_ANG;
         sigmux          <= 1;
         refmux          <= `MUX_REF_NONE;
@@ -511,7 +514,7 @@ module my_modulation (
       // always increment clk for the current phase
       clk_count     <= clk_count + 1;
 
-      // lock comparator val in on clock edge. improves speed.
+      // sample/bind comparator val once on clock edge. improves speed.
       comparator_val_last <=  comparator_val;
 
 
