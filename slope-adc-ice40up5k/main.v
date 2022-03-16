@@ -608,7 +608,7 @@ module my_modulation (
 
             count_fix_down <= count_fix_down + 1;
             refmux        <= `MUX_REF_POS; // initial direction
-            if(refmux != `MUX_REF_POS) count_trans_down <= count_trans_down + 1 ;
+//            if(refmux != `MUX_REF_POS) count_trans_down <= count_trans_down + 1 ;
           end
 
         `STATE_FIX_POS:
@@ -626,13 +626,13 @@ module my_modulation (
               begin
                 refmux    <= `MUX_REF_NEG;  // add negative ref. to drive up.
                 count_up  <= count_up + 1;
-                if(refmux != `MUX_REF_NEG) count_trans_up <= count_trans_up + 1 ;
+//                if(refmux != `MUX_REF_NEG) count_trans_up <= count_trans_up + 1 ;
               end
             else
               begin
                 refmux    <= `MUX_REF_POS;
                 count_down <= count_down + 1;
-                if(refmux != `MUX_REF_POS) count_trans_down <= count_trans_down + 1 ;
+//                if(refmux != `MUX_REF_POS) count_trans_down <= count_trans_down + 1 ;
               end
           end
 
@@ -659,7 +659,7 @@ module my_modulation (
 
             count_fix_up  <= count_fix_up + 1;
             refmux        <= `MUX_REF_NEG;
-            if(refmux != `MUX_REF_NEG) count_trans_up <= count_trans_up + 1 ;
+//            if(refmux != `MUX_REF_NEG) count_trans_up <= count_trans_up + 1 ;
           end
 
         `STATE_FIX_NEG:
@@ -682,13 +682,13 @@ module my_modulation (
               begin
                 refmux    <= `MUX_REF_NEG;
                 count_up  <= count_up + 1;
-                if(refmux != `MUX_REF_NEG) count_trans_up <= count_trans_up + 1 ;
+ //               if(refmux != `MUX_REF_NEG) count_trans_up <= count_trans_up + 1 ;
               end
             else
               begin
                 refmux    <= `MUX_REF_POS;
                 count_down <= count_down + 1;
-                if(refmux != `MUX_REF_POS) count_trans_down <= count_trans_down + 1 ;
+  //              if(refmux != `MUX_REF_POS) count_trans_down <= count_trans_down + 1 ;
               end
           end
 
