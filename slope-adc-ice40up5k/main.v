@@ -487,6 +487,8 @@ module my_modulation (
   // IMPORTANT ! is not.   ~ is complement.
 
 
+  reg comparator_val_last;
+
   always @(posedge clk)
 
 
@@ -508,6 +510,10 @@ module my_modulation (
 
       // always increment clk for the current phase
       clk_count     <= clk_count + 1;
+
+      // lock comparator val in on clock edge. improves speed.
+      comparator_val_last <=  comparator_val;
+
 
 
       if(sig_active)
@@ -622,7 +628,7 @@ module my_modulation (
             state         <= `STATE_VAR;
             clk_count     <= 0;
 
-            if( comparator_val)   // test below the zero-cross
+            if( comparator_val_last)   // test below the zero-cross
               begin
                 refmux    <= `MUX_REF_NEG;  // add negative ref. to drive up.
                 count_up  <= count_up + 1;
@@ -678,7 +684,7 @@ module my_modulation (
             state         <= `STATE_VAR2;
             clk_count     <= 0;
 
-            if( comparator_val) // below zero-cross
+            if( comparator_val_last) // below zero-cross
               begin
                 refmux    <= `MUX_REF_NEG;
                 count_up  <= count_up + 1;
@@ -702,7 +708,7 @@ module my_modulation (
 */
             begin
               // integration finished. and above zero cross
-              if( !sig_active  && ! comparator_val)
+              if( !sig_active  && ! comparator_val_last)
 
                 // go straight to the final rundown.
                 state <= `STATE_RUNDOWN_START;
