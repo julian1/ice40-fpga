@@ -85,17 +85,31 @@
 `define REG_COUNT_FIX_UP        34
 `define REG_COUNT_FIX_DOWN      35
 `define REG_CLK_COUNT_RUNDOWN   37
-
+// treat as ordinary run variable
+`define REG_HIMUX_SEL_LAST      38// what was being muxed for integration. sig, azero, acal .
+// `define REG_CLK_COUNT_VAR_POS_N_LAST    39// we don't need this... only required, if do permute
+                                              //  and we could just write bit flags into himux_sel
 
 
 `define REG_MEAS_COUNT          40
 
-/* We shouldn't need to read the control parameters used back. 
-    if instead we always write. and have proper sequencing control with mcu.
-*/
-// `define REG_MEAS_HIMUX_SEL      41      // what was being muxed for integration. sig, azero, acal .
-// `define REG_MEAS_VAR_POS_N      42      // we don't need this...
 
+
+
+/*
+  --------
+    We shouldn't need to read the control parameters used back.
+    if instead we always write. and have proper sequencing control with mcu.
+    -----
+    but fast changing parameters (eg. azero, again ) need lost of work.
+
+  ********
+  - returning himux_sel_last enables support for pattern controller.
+  - and easier handling of collect_obs()  because we just record the himux_sel as a variable.
+
+  ********
+
+*/
 
 
 
@@ -126,7 +140,7 @@ module my_register_bank   #(parameter MSB=32)   (
 
   // input == input wire
 
-  // read/write control vars
+  // control read/write control vars
   // use ' inout',  must be inout to write
   inout wire [24-1:0] reg_led ,    // need to be very careful. only 4 bits. or else screws set/reset calculation ...
   inout [24-1:0]      clk_count_reset_n,
@@ -142,6 +156,7 @@ module my_register_bank   #(parameter MSB=32)   (
   inout               reset,            // register_reset for modulation, not a reset for my_register_bank.
 
   // inputs/ readable
+  // these are all last
   input wire [24-1:0] count_up,
   input wire [24-1:0] count_down,
   input wire [24-1:0] count_trans_up,
@@ -149,6 +164,7 @@ module my_register_bank   #(parameter MSB=32)   (
   input wire [24-1:0] count_fix_up,
   input wire [24-1:0] count_fix_down,
   input wire [24-1:0] clk_count_rundown,
+  input wire [24-1:0] himux_sel_last,
 
   input wire [24-1:0] meas_count,     // useful to check if stalled
                                       // actually just probe switches with scope.
@@ -254,6 +270,7 @@ module my_register_bank   #(parameter MSB=32)   (
               `REG_COUNT_FIX_UP:      out <= count_fix_up << 8;
               `REG_COUNT_FIX_DOWN:    out <= count_fix_down << 8;
               `REG_CLK_COUNT_RUNDOWN: out <= clk_count_rundown << 8;
+              `REG_HIMUX_SEL_LAST:    out <= himux_sel_last << 8;
 
               default:                out <= 12345 << 8;
 
@@ -413,8 +430,8 @@ module my_modulation (
   output [24-1:0] count_trans_down_last,
   output [24-1:0] count_fix_up_last,
   output [24-1:0] count_fix_down_last,
-
   output [24-1:0] clk_count_rundown_last,
+  output [24-1:0] himux_sel_last,
 
   // both should be input wires. both are driven.
   input           com_interupt,
@@ -567,13 +584,6 @@ module my_modulation (
 
             // switch himux to signal, but lo mux off whlie op settles
             himux         <= himux_sel;
-            /*
-              if(pattern_himux_sel != 4'b0000)
-               himux    <= pattern_himux_sel;
-              else
-                himux   <= register_himux_sel;
-            */
-
             sigmux        <= 0;
             // refmux     <= `MUX_REF_NONE;
           end
@@ -760,9 +770,8 @@ module my_modulation (
                 count_trans_down_last <= count_trans_down;
                 count_fix_up_last   <= count_fix_up;
                 count_fix_down_last <= count_fix_down;
-
                 clk_count_rundown_last <= clk_count;
-
+                himux_sel_last      <= himux; // we have not turned off the himux yet 
               end
           end
 
@@ -884,10 +893,20 @@ endmodule
 
 /*
 
-    main issue with pattern_controller.
-    - is that we have to duplicate every register variable. - so that mcu can read valid parameters for the run just completed.
-    - or else read everything quicly enough. that its correct for the last modulation, before the pattern controller changes things.
-      but this doesn't work, because it switches on the interupt.
+  main issue with pattern_controller.
+  - is that we have to duplicate every register variable. - so that mcu can read valid parameters for the run just completed.
+  - or else read everything quicly enough. that its correct for the last modulation, before the pattern controller changes things.
+    but this doesn't work, because it switches on the interupt.
+
+  - no. it's only 4 or 5 variables. max.
+  - and using the pattern controller. for just modulating himux_sel for azero,again is just one variable.
+  -----------------
+
+  actually it's only 1 var.  himux_sel   to achieve auto cal.
+  and if want to modulate the run timing. then set values.  and then set other bits in himux_sel. as a means to communicate to mcu.
+
+  So implementing a reading mimux_sel_last - enables a lot of behavior.
+
 
 */
 
@@ -895,8 +914,10 @@ module my_control_pattern_2 (
   input           clk,
   input           com_interupt,
 
-  input  [8-1:0]   pattern,
-  output [4-1:0]   himux_sel,  // output. declares a local register?
+  input  [8-1:0]  pattern,    // call it reg_pattern? or rb_pattern?
+
+  input [4-1:0]   register_bank_himux_sel,
+  output [4-1:0]  himux_sel,  // output. declares a local register?
 );
 
   // count of interupts, not clk
@@ -916,15 +937,9 @@ module my_control_pattern_2 (
 
         case(pattern)
 
-          // 5:  himux_sel <= `reg_himux_sel; // register_bank_himux_sel ;
-                                            // problem is taht this won't get updated, when the register_bank is updated.
-                                            // but if we had a reset here. then it would work.
-
-          0:  himux_sel <= `HIMUX_SEL_SIG_HI;
-          1:  himux_sel <= `HIMUX_SEL_REF_HI;
-          2:  himux_sel <= `HIMUX_SEL_REF_LO;
-          3:  himux_sel <= `HIMUX_SEL_ANG;   // don't use
-
+          0:
+              himux_sel <= register_bank_himux_sel ;
+              // ie. take all register values directly.
           /*
             - integrator does not seem to be resetting well. eg. countdown there are  runs very well. but it could be DA. rather than issue with reset circuitry.
             - if we added a simple cap for sample and hold, on the reset signal. then could integrate the residual.
@@ -1066,8 +1081,9 @@ module top (
   reg [24-1:0] count_trans_down;
   reg [24-1:0] count_fix_up;
   reg [24-1:0] count_fix_down;
-
   reg [24-1:0] clk_count_rundown;
+  reg [24-1:0] himux_sel_last;
+
 
 
   reg [4-1:0] himux_sel;    // himux signal selection
@@ -1149,7 +1165,6 @@ module top (
     // control
     . meas_count( meas_count ),
 
-    // TODO prefix with modulation. or mod_count ?
     // counts
     . count_up(count_up),
     . count_down(count_down),
@@ -1157,9 +1172,8 @@ module top (
     . count_trans_down(count_trans_down),
     . count_fix_up(count_fix_up),
     . count_fix_down(count_fix_down),
-
-    // clk counts
     . clk_count_rundown(clk_count_rundown),
+    . himux_sel_last(himux_sel_last)
 
   );
 
@@ -1207,9 +1221,8 @@ module top (
     . count_trans_down_last(count_trans_down),
     . count_fix_up_last(count_fix_up),
     . count_fix_down_last(count_fix_down),
-
-    // clk counts
     . clk_count_rundown_last(clk_count_rundown),
+    . himux_sel_last(himux_sel_last),
 
 
     . com_interupt(COM_INTERUPT),
