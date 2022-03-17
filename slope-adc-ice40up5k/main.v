@@ -273,7 +273,7 @@ module my_register_bank   #(parameter MSB=32)   (
               `REG_MEAS_COUNT:        out <= meas_count << 8;
 
 
-              // measure/run
+              // measure/run/counts
               `REG_COUNT_UP:          out <= count_up << 8;
               `REG_COUNT_DOWN:        out <= count_down << 8;
               `REG_COUNT_TRANS_UP:    out <= count_trans_up << 8;
@@ -283,6 +283,7 @@ module my_register_bank   #(parameter MSB=32)   (
               `REG_CLK_COUNT_RUNDOWN: out <= clk_count_rundown << 8;
 
 
+              // param recorded at last run
               `REG_LAST_HIMUX_SEL:           out <= last_himux_sel << 8;
               `REG_LAST_CLK_COUNT_FIX_N:     out <= last_clk_count_fix_n << 8;
               `REG_LAST_CLK_COUNT_VAR_POS_N: out <= last_clk_count_var_pos_n << 8;
@@ -402,19 +403,7 @@ endmodule
 `define MUX_REF_SLOW_POS    2'b11
 
 
-// feed integrator output back on itself to reset.
-// appears to work. op flips from sig-in to low etc
 
-// define HIMUX_SEL_ANG       4'b0111 //  (0xf & ~(1 << 3))   // 0b0111
-
-
-
-/*
-#define HIMUX_SEL_SIG_HI      (0xf & ~(1 << 0))
-#define HIMUX_SEL_REF_HI      (0xf & ~(1 << 1))
-#define HIMUX_SEL_REF_LO      (0xf & ~(1 << 2))
-#define HIMUX_SEL_ANG         (0xf & ~(1 << 3))   // 0b0111
-*/
 
 
 module my_modulation (
@@ -513,12 +502,6 @@ module my_modulation (
   wire cross_any    = cross_up || cross_down ;
 
 
-
-  /* IMPORTANT
-      - we should potentially copy himux_sel.  no. because it's set only by the pattern controller.
-      which is synchronized.
-
-  */
 
 
   // TODO use something like this, instead of done
@@ -796,6 +779,10 @@ module my_modulation (
                 count_fix_down_last     <= count_fix_down;
                 clk_count_rundown_last  <= clk_count;
 
+                // IMPORTANT - it might be better to record these wwhen the sig integrator starts.
+                // because they could be overwritten by register bank writing.
+                // except we will decouple them 
+
                 // it's possible all this could be done in the pattern controller.
                 // record the params used
                 last_himux_sel          <= himux; // we have not turned off the himux yet
@@ -949,7 +936,7 @@ module my_control_pattern_2 (
 
   input  [8-1:0]  pattern,    // call it reg_pattern? or rb_pattern?
 
-  input [4-1:0]   register_bank_himux_sel,
+  input [4-1:0]   rb_himux_sel,
   output [4-1:0]  himux_sel,  // output. declares a local register?
 );
 
@@ -971,7 +958,7 @@ module my_control_pattern_2 (
         case(pattern)
 
           0:
-              himux_sel <= register_bank_himux_sel ;
+              himux_sel <= rb_himux_sel ;
               // ie. take all register values directly.
           /*
             - integrator does not seem to be resetting well. eg. countdown there are  runs very well. but it could be DA. rather than issue with reset circuitry.
@@ -1126,6 +1113,7 @@ module top (
 
   reg [4-1:0] himux_sel;    // himux signal selection
   // reg [4-1:0] himux_sel_dummy;    // himux signal selection
+  reg [4-1:0] rb_himux_sel;
 
 
   reg [8-1:0] pattern;
@@ -1196,7 +1184,7 @@ module top (
     . clk_count_aper_n( clk_count_aper_n ) ,
 
     . use_slow_rundown( use_slow_rundown),
-    . himux_sel( himux_sel ),
+    . himux_sel( rb_himux_sel ),
     . pattern( pattern),
     . reset( reset),
 
@@ -1224,15 +1212,29 @@ module top (
 
 
 /*
+
+module my_control_pattern_2 (
+  input           clk,
+  input           com_interupt,
+
+  input  [8-1:0]  pattern,    // call it reg_pattern? or rb_pattern?
+
+  input [4-1:0]   rb_himux_sel,
+  output [4-1:0]  himux_sel,  // output. declares a local register?
+);
+*/
+
+
   my_control_pattern_2
   p1 (
     . clk(clk),
     . com_interupt(COM_INTERUPT),
     . pattern( pattern),
-    . himux_sel( himux_sel_dummy ),   // disable.
+    . rb_himux_sel( rb_himux_sel),
+    . himux_sel( himux_sel),
   );
 
-*/
+
 
 
   my_modulation
