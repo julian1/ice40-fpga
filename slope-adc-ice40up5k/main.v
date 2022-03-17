@@ -883,12 +883,12 @@ endmodule
 */
 
 /*
-  pattern controller only updates on completion / interupt.
 
-  that means - we don't get immediate response.
-  wonn't coincide with reset.
+    main issue with pattern_controller.
+    - is that we have to duplicate every register variable. - so that mcu can read valid parameters for the run just completed.
+    - or else read everything quicly enough. that its correct for the last modulation, before the pattern controller changes things.
+      but this doesn't work, because it switches on the interupt.
 
-  actually make it active on reset
 */
 
 module my_control_pattern_2 (
