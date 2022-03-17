@@ -46,7 +46,8 @@ set_io MUX_SLOPE_ANG_CTL 42
 
 ####
 # prefix COM for comms, or MCU_CS or SPI1 ?
-set_io COM_CLK          6       # VOA
+# set_io COM_CLK          6       # VOA
+set_io COM_CLK          20 # VOA
 set_io COM_CS           9       # VOB
 set_io COM_MOSI         10      # VOC
 set_io COM_SPECIAL      11   # VOD
