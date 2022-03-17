@@ -85,14 +85,21 @@
 `define REG_COUNT_FIX_UP        34
 `define REG_COUNT_FIX_DOWN      35
 `define REG_CLK_COUNT_RUNDOWN   37
-// treat as ordinary run variable
-`define REG_HIMUX_SEL_LAST      38// what was being muxed for integration. sig, azero, acal .
-// `define REG_CLK_COUNT_VAR_POS_N_LAST    39// we don't need this... only required, if do permute
-                                              //  and we could just write bit flags into himux_sel
 
 
-`define REG_MEAS_COUNT          40
+// treat as param variable
+`define REG_LAST_HIMUX_SEL           40 // what was being muxed for integration. sig, azero, acal .
+`define REG_LAST_CLK_COUNT_FIX_N     41
+`define REG_LAST_CLK_COUNT_VAR_POS_N 42
+`define REG_LAST_CLK_COUNT_VAR_NEG_N 43
+`define REG_LAST_CLK_COUNT_APER_N_LO 44
+`define REG_LAST_CLK_COUNT_APER_N_HI 45
 
+
+`define REG_MEAS_COUNT          50
+
+// we don't need this... only required, if do permute
+//  and we could just write bit flags into himux_sel
 
 
 
@@ -104,7 +111,7 @@
     but fast changing parameters (eg. azero, again ) need lost of work.
 
   ********
-  - returning himux_sel_last enables support for pattern controller.
+  - returning last_himux_sel enables support for pattern controller.
   - and easier handling of collect_obs()  because we just record the himux_sel as a variable.
 
   ********
@@ -155,8 +162,7 @@ module my_register_bank   #(parameter MSB=32)   (
   inout [24-1:0]      pattern,          // TODO change to 8-1
   inout               reset,            // register_reset for modulation, not a reset for my_register_bank.
 
-  // inputs/ readable
-  // these are all last
+  // readable measurement counts, these are all last
   input wire [24-1:0] count_up,
   input wire [24-1:0] count_down,
   input wire [24-1:0] count_trans_up,
@@ -164,7 +170,15 @@ module my_register_bank   #(parameter MSB=32)   (
   input wire [24-1:0] count_fix_up,
   input wire [24-1:0] count_fix_down,
   input wire [24-1:0] clk_count_rundown,
-  input wire [24-1:0] himux_sel_last,
+
+
+  // readable params
+  input wire [24-1:0] last_himux_sel,
+  input wire [24-1:0] last_clk_count_fix_n,
+  input wire [24-1:0] last_clk_count_var_pos_n,
+  input wire [24-1:0] last_clk_count_var_neg_n,
+  input wire [24-1:0] last_clk_count_aper_n,
+
 
   input wire [24-1:0] meas_count,     // useful to check if stalled
                                       // actually just probe switches with scope.
@@ -242,11 +256,8 @@ module my_register_bank   #(parameter MSB=32)   (
               // params
               `REG_CLK_COUNT_RESET_N: out <= clk_count_reset_n << 8;
               `REG_CLK_COUNT_FIX_N:   out <= clk_count_fix_n << 8;
-              // `REG_CLK_COUNT_VAR_N:   out <= clk_count_var_n << 8;
               `REG_CLK_COUNT_VAR_POS_N:  out <= clk_count_var_pos_n << 8;
               `REG_CLK_COUNT_VAR_NEG_N:  out <= clk_count_var_neg_n << 8;
-
-
               `REG_CLK_COUNT_APER_N_LO: out <= clk_count_aper_n << 8;           // lo 24 bits  aperture
               `REG_CLK_COUNT_APER_N_HI: out <= (clk_count_aper_n >> 24) << 8;   // hi 8 bits
               `REG_USE_SLOW_RUNDOWN:  out <= use_slow_rundown << 8;
@@ -270,7 +281,15 @@ module my_register_bank   #(parameter MSB=32)   (
               `REG_COUNT_FIX_UP:      out <= count_fix_up << 8;
               `REG_COUNT_FIX_DOWN:    out <= count_fix_down << 8;
               `REG_CLK_COUNT_RUNDOWN: out <= clk_count_rundown << 8;
-              `REG_HIMUX_SEL_LAST:    out <= himux_sel_last << 8;
+
+
+              `REG_LAST_HIMUX_SEL:           out <= last_himux_sel << 8;
+              `REG_LAST_CLK_COUNT_FIX_N:     out <= last_clk_count_fix_n << 8;
+              `REG_LAST_CLK_COUNT_VAR_POS_N: out <= last_clk_count_var_pos_n << 8;
+              `REG_LAST_CLK_COUNT_VAR_NEG_N: out <= last_clk_count_var_neg_n << 8;
+              `REG_LAST_CLK_COUNT_APER_N_LO: out <= last_clk_count_aper_n << 8;           // lo 24 bits  aperture
+              `REG_LAST_CLK_COUNT_APER_N_HI: out <= (last_clk_count_aper_n >> 24) << 8;   // hi 8 bits
+
 
               default:                out <= 12345 << 8;
 
@@ -431,7 +450,14 @@ module my_modulation (
   output [24-1:0] count_fix_up_last,
   output [24-1:0] count_fix_down_last,
   output [24-1:0] clk_count_rundown_last,
-  output [24-1:0] himux_sel_last,
+
+  // param
+  output [24-1:0] last_himux_sel,
+  output [24-1:0] last_clk_count_fix_n,
+  output [24-1:0] last_clk_count_var_pos_n,
+  output [24-1:0] last_clk_count_var_neg_n,
+  output [24-1:0] last_clk_count_aper_n,
+
 
   // both should be input wires. both are driven.
   input           com_interupt,
@@ -753,25 +779,32 @@ module my_modulation (
               begin
                 // trigger for scope
                 // transition
-                state     <= `STATE_DONE;
-                clk_count <= 0;    // ok.
-
-                // IS THERE AN ISSUE with the case conflicting with the global?
+                state         <= `STATE_DONE;
+                clk_count     <= 0;    // ok.
 
                 // turn off all inputs. actually should leave. because we will turn on to reset the integrator.
-                refmux    <= `MUX_REF_NONE;
+                refmux        <= `MUX_REF_NONE;
 
-                com_interupt <= 0;   // active lo, set interupt
+                com_interupt  <= 0;   // active lo, set interupt
 
-                // record everything
-                count_up_last       <= count_up;
-                count_down_last     <= count_down;
-                count_trans_up_last <= count_trans_up;
-                count_trans_down_last <= count_trans_down;
-                count_fix_up_last   <= count_fix_up;
-                count_fix_down_last <= count_fix_down;
-                clk_count_rundown_last <= clk_count;
-                himux_sel_last      <= himux; // we have not turned off the himux yet 
+                // record all the counts and rundown everything
+                count_up_last           <= count_up;
+                count_down_last         <= count_down;
+                count_trans_up_last     <= count_trans_up;
+                count_trans_down_last   <= count_trans_down;
+                count_fix_up_last       <= count_fix_up;
+                count_fix_down_last     <= count_fix_down;
+                clk_count_rundown_last  <= clk_count;
+
+                // it's possible all this could be done in the pattern controller.
+                // record the params used
+                last_himux_sel          <= himux; // we have not turned off the himux yet
+                last_clk_count_fix_n    <= clk_count_fix_n;
+                last_clk_count_var_pos_n <= clk_count_var_pos_n;
+                last_clk_count_var_neg_n <= clk_count_var_neg_n;
+                last_clk_count_aper_n   <= clk_count_aper_n ;
+
+
               end
           end
 
@@ -1082,7 +1115,12 @@ module top (
   reg [24-1:0] count_fix_up;
   reg [24-1:0] count_fix_down;
   reg [24-1:0] clk_count_rundown;
-  reg [24-1:0] himux_sel_last;
+
+  reg [24-1:0] last_himux_sel;
+  reg [24-1:0] last_clk_count_fix_n;
+  reg [24-1:0] last_clk_count_var_pos_n;
+  reg [24-1:0] last_clk_count_var_neg_n;
+  reg [24-1:0] last_clk_count_aper_n;
 
 
 
@@ -1173,7 +1211,14 @@ module top (
     . count_fix_up(count_fix_up),
     . count_fix_down(count_fix_down),
     . clk_count_rundown(clk_count_rundown),
-    . himux_sel_last(himux_sel_last)
+
+    // params used for run
+    . last_himux_sel(last_himux_sel),
+    . last_clk_count_fix_n( last_clk_count_fix_n ),
+    . last_clk_count_var_pos_n( last_clk_count_var_pos_n),
+    . last_clk_count_var_neg_n( last_clk_count_var_neg_n),
+    . last_clk_count_aper_n( last_clk_count_aper_n),
+
 
   );
 
@@ -1222,7 +1267,13 @@ module top (
     . count_fix_up_last(count_fix_up),
     . count_fix_down_last(count_fix_down),
     . clk_count_rundown_last(clk_count_rundown),
-    . himux_sel_last(himux_sel_last),
+
+    . last_himux_sel(last_himux_sel),
+    . last_clk_count_fix_n( last_clk_count_fix_n ),
+    . last_clk_count_var_pos_n( last_clk_count_var_pos_n),
+    . last_clk_count_var_neg_n( last_clk_count_var_neg_n),
+    . last_clk_count_aper_n( last_clk_count_aper_n),
+
 
 
     . com_interupt(COM_INTERUPT),
