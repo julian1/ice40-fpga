@@ -528,6 +528,8 @@ module my_modulation (
         // set up next state, for when reset goes hi.
         state           <= `STATE_RESET_START;
 
+        com_interupt  <= 1;   // active lo. turn off.
+
         // keep integrator analog input, and sigmux on, to reset the integrator
         himux           <= `HIMUX_SEL_ANG;
         sigmux          <= 1;
@@ -573,6 +575,8 @@ module my_modulation (
             // reset vars, and transition to runup state
             state           <= `STATE_RESET;
             clk_count       <= 0;
+
+            com_interupt  <= 1;   // active lo. turn off.
 
             // switch op to integrator analog input, and sigmux on, to reset the integrator
             himux           <= `HIMUX_SEL_ANG;
@@ -800,7 +804,9 @@ module my_modulation (
 
         `STATE_DONE:
           begin
-            com_interupt  <= 1;   // active hi. turn off.
+            // com_interupt  <= 1;   // active lo. turn off.
+                                  // we don't really need to do this here.
+                                  // it needs to be done in reset
             state         <= `STATE_RESET_START;
           end
 
@@ -1198,7 +1204,8 @@ module top (
     . clk_count_aper_n( clk_count_aper_n ) ,
 
     . use_slow_rundown( use_slow_rundown),
-    . himux_sel( rb_himux_sel ),
+    // . himux_sel( rb_himux_sel ),
+    . himux_sel( himux_sel ),
     . pattern( pattern),
     . reset( reset),
 
@@ -1227,18 +1234,6 @@ module top (
 
 /*
 
-module my_control_pattern_2 (
-  input           clk,
-  input           com_interupt,
-
-  input  [8-1:0]  pattern,    // call it reg_pattern? or rb_pattern?
-
-  input [4-1:0]   rb_himux_sel,
-  output [4-1:0]  himux_sel,  // output. declares a local register?
-);
-*/
-
-
   my_control_pattern_2
   p1 (
     . clk(clk),
@@ -1247,7 +1242,7 @@ module my_control_pattern_2 (
     . rb_himux_sel( rb_himux_sel),
     . himux_sel( himux_sel),
   );
-
+*/
 
 
 
