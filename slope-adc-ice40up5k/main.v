@@ -941,47 +941,70 @@ module my_control_pattern_2 (
 );
 
   // count of interupts, not clk
-  reg [5-1:0]  count;
+  // reg [5-1:0]  count;
 
   initial begin
-    count   = 0;
+    // count   = 0;
     himux_sel <= `HIMUX_SEL_REF_LO;
   end
 
   always@(posedge clk)
-    if(!com_interupt /* || !reset */)
-      begin
+
+    if(com_interupt ) // during modulation
+
+      // always has the register value
+      case(pattern)
+        0:
+            himux_sel <= rb_himux_sel ;
+
+      endcase
+    else
+        
+      // start of new modulation
+      case(pattern)
+
+        10:
+          case (count)
+            0:  himux_sel <= `HIMUX_SEL_REF_LO;    // azero
+            1:  begin
+                himux_sel <= `HIMUX_SEL_REF_HI;   // change to sig-hi
+                count <= 0;  // should take priorty over the addition.
+                end
+          endcase
+
+        11:
+          case (count)
+            0:  himux_sel <= `HIMUX_SEL_REF_LO;    // azero
+            1:  himux_sel <= `HIMUX_SEL_SIG_HI;
+            2:  begin
+                himux_sel <= `HIMUX_SEL_REF_HI;    // acal  can change to do acal at different interval
+                count <= 0;
+                end
+          endcase
+
+      endcase
+
+endmodule
 
         // this is being driven. but it has input type
-        count <= count + 1;
+        // count <= count + 1;
 
-        case(pattern)
+        /*
+          - problem is that this is only setting himux sel on the interupt after the completion of the run.
+          - 
+
+        */
+
+/*
 
           0:
               himux_sel <= rb_himux_sel ;
               // ie. take all register values directly.
+*/
           /*
             - integrator does not seem to be resetting well. eg. countdown there are  runs very well. but it could be DA. rather than issue with reset circuitry.
             - if we added a simple cap for sample and hold, on the reset signal. then could integrate the residual.
           */
-          10:
-            case (count)
-              0:  himux_sel <= `HIMUX_SEL_REF_LO;    // azero
-              1:  begin
-                  himux_sel <= `HIMUX_SEL_REF_HI;   // change to sig-hi
-                  count <= 0;  // should take priorty over the addition.
-                  end
-            endcase
-
-          11:
-            case (count)
-              0:  himux_sel <= `HIMUX_SEL_REF_LO;    // azero
-              1:  himux_sel <= `HIMUX_SEL_SIG_HI;
-              2:  begin
-                  himux_sel <= `HIMUX_SEL_REF_HI;    // acal  can change to do acal at different interval
-                  count <= 0;
-                  end
-            endcase
 
           // what about a value outside the bounds...
           // that cannot be set...
@@ -1001,15 +1024,6 @@ module my_control_pattern_2 (
                   end
             endcase
 */
-
-
-        endcase
-
-  end
-endmodule
-
-
-
 
 
 
