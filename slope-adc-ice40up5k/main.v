@@ -177,7 +177,7 @@ module my_register_bank   #(parameter MSB=32)   (
   input wire [24-1:0] last_clk_count_fix_n,
   input wire [24-1:0] last_clk_count_var_pos_n,
   input wire [24-1:0] last_clk_count_var_neg_n,
-  input wire [24-1:0] last_clk_count_aper_n,
+  input wire [32-1:0] last_clk_count_aper_n,
 
 
   input wire [24-1:0] meas_count,     // useful to check if stalled
@@ -445,7 +445,7 @@ module my_modulation (
   output [24-1:0] last_clk_count_fix_n,
   output [24-1:0] last_clk_count_var_pos_n,
   output [24-1:0] last_clk_count_var_neg_n,
-  output [24-1:0] last_clk_count_aper_n,
+  output [32-1:0] last_clk_count_aper_n,
 
 
   // both should be input wires. both are driven.
@@ -1107,7 +1107,7 @@ module top (
   reg [24-1:0] last_clk_count_fix_n;
   reg [24-1:0] last_clk_count_var_pos_n;
   reg [24-1:0] last_clk_count_var_neg_n;
-  reg [24-1:0] last_clk_count_aper_n;
+  reg [32-1:0] last_clk_count_aper_n;
 
 
 
