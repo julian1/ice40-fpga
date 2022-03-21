@@ -631,8 +631,7 @@ module my_modulation (
           end
 
 
-        // from here on, we are cycling +-ref currents, with/or without signal
-
+        // cycle +-ref currents, with/or without signal
         `STATE_FIX_POS_START:
           begin
             state         <= `STATE_FIX_POS;
