@@ -198,11 +198,11 @@ module my_register_bank   #(parameter MSB=32)   (
   initial begin
     reg_led             = 3'b101;
     clk_count_reset_n   =  10000;
-    clk_count_fix_n     = 700;
+    clk_count_fix_n     = 70;
 
     // clk_count_var_n   = 5500;
-    clk_count_var_pos_n = 5500;
-    clk_count_var_neg_n = 5500;
+    clk_count_var_pos_n = 550;
+    clk_count_var_neg_n = 550;
 
     clk_count_aper_n    = (2 * 2000000);    // ? 200ms TODO check this.
                                             // yes. 4000000 == 10PNLC, 5 sps.
