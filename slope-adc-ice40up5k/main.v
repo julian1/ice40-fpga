@@ -461,6 +461,11 @@ module my_modulation (
 
 
   // 2^5 = 32
+
+  /*
+     EXTR. could be useful to spi query the current state 
+    - could then determine that were updated during the reset period. and we don't have to call reset again.
+  */
   reg [5-1:0] state;
 
   // initial begin does seem to be supported.
@@ -559,8 +564,8 @@ module my_modulation (
               // turn off signal input
               sigmux  <= 0;
 
-              // note himux is set to signal
-              // could turn off the himux to ref-lo, to prevent leakage, but switching instability probably worse
+              // swith himux to ref-lo, to prevent leakage, but switching instability probably worse
+              // himux   <= `HIMUX_SEL_REF_LO;
             end
         end
 
