@@ -66,7 +66,7 @@
 `define REG_CLK_COUNT_RESET_N   10
 `define REG_CLK_COUNT_FIX_N     11
 // `define REG_CLK_COUNT_VAR_N  12
-`define REG_CLK_COUNT_VAR_POS_N 13
+`define REG_CLK_COUNT_VAR_N 13
 `define REG_CLK_COUNT_APER_N_LO 15
 `define REG_CLK_COUNT_APER_N_HI 16
 
@@ -89,7 +89,7 @@
 // treat as param variable
 `define REG_LAST_HIMUX_SEL           40 // what was being muxed for integration. sig, azero, acal .
 `define REG_LAST_CLK_COUNT_FIX_N     41
-`define REG_LAST_CLK_COUNT_VAR_POS_N 42
+`define REG_LAST_CLK_COUNT_VAR_N 42
 `define REG_LAST_CLK_COUNT_APER_N_LO 44
 `define REG_LAST_CLK_COUNT_APER_N_HI 45
 
@@ -151,7 +151,7 @@ module my_register_bank   #(parameter MSB=32)   (
   inout [24-1:0]      clk_count_reset_n,
   inout [24-1:0]      clk_count_fix_n,
   // inout [24-1:0]  clk_count_var_n,
-  inout [24-1:0]      clk_count_var_pos_n,
+  inout [24-1:0]      clk_count_var_n,
   inout [31:0]        clk_count_aper_n,
 
   inout               use_slow_rundown,
@@ -172,7 +172,7 @@ module my_register_bank   #(parameter MSB=32)   (
   // readable params
   input wire [24-1:0] last_himux_sel,
   input wire [24-1:0] last_clk_count_fix_n,
-  input wire [24-1:0] last_clk_count_var_pos_n,
+  input wire [24-1:0] last_clk_count_var_n,
   input wire [32-1:0] last_clk_count_aper_n,
 
 
@@ -197,7 +197,7 @@ module my_register_bank   #(parameter MSB=32)   (
     clk_count_fix_n     = 70;
 
     // clk_count_var_n   = 5500;
-    clk_count_var_pos_n = 550;
+    clk_count_var_n = 550;
 
     clk_count_aper_n    = (2 * 2000000);    // ? 200ms TODO check this.
                                             // yes. 4000000 == 10PNLC, 5 sps.
@@ -251,7 +251,7 @@ module my_register_bank   #(parameter MSB=32)   (
               // params
               `REG_CLK_COUNT_RESET_N: out <= clk_count_reset_n << 8;
               `REG_CLK_COUNT_FIX_N:   out <= clk_count_fix_n << 8;
-              `REG_CLK_COUNT_VAR_POS_N:  out <= clk_count_var_pos_n << 8;
+              `REG_CLK_COUNT_VAR_N:  out <= clk_count_var_n << 8;
               `REG_CLK_COUNT_APER_N_LO: out <= clk_count_aper_n << 8;           // lo 24 bits  aperture
               `REG_CLK_COUNT_APER_N_HI: out <= (clk_count_aper_n >> 24) << 8;   // hi 8 bits
               `REG_USE_SLOW_RUNDOWN:  out <= use_slow_rundown << 8;
@@ -280,7 +280,7 @@ module my_register_bank   #(parameter MSB=32)   (
               // param recorded at last run
               `REG_LAST_HIMUX_SEL:           out <= last_himux_sel << 8;
               `REG_LAST_CLK_COUNT_FIX_N:     out <= last_clk_count_fix_n << 8;
-              `REG_LAST_CLK_COUNT_VAR_POS_N: out <= last_clk_count_var_pos_n << 8;
+              `REG_LAST_CLK_COUNT_VAR_N: out <= last_clk_count_var_n << 8;
               `REG_LAST_CLK_COUNT_APER_N_LO: out <= last_clk_count_aper_n << 8;           // lo 24 bits  aperture
               `REG_LAST_CLK_COUNT_APER_N_HI: out <= (last_clk_count_aper_n >> 24) << 8;   // hi 8 bits
 
@@ -318,7 +318,7 @@ module my_register_bank   #(parameter MSB=32)   (
           `REG_CLK_COUNT_FIX_N:     clk_count_fix_n <= val;
 
           // `REG_CLK_COUNT_VAR_N:  clk_count_var_n <= val;
-          `REG_CLK_COUNT_VAR_POS_N: clk_count_var_pos_n <= val;
+          `REG_CLK_COUNT_VAR_N: clk_count_var_n <= val;
 
           // TODO
           // these slow things down from 40MHz to 34MHz. need piplining.
@@ -408,7 +408,7 @@ module my_modulation (
   // modulation parameters/count limits to use
   input [24-1:0]  clk_count_reset_n,
   input [24-1:0]  clk_count_fix_n,
-  inout [24-1:0]  clk_count_var_pos_n,
+  inout [24-1:0]  clk_count_var_n,
   input [31:0]    clk_count_aper_n,
 
   // is himux_sel being overwritten?  because wrong length...
@@ -434,7 +434,7 @@ module my_modulation (
   // param
   output [24-1:0] last_himux_sel,
   output [24-1:0] last_clk_count_fix_n,
-  output [24-1:0] last_clk_count_var_pos_n,
+  output [24-1:0] last_clk_count_var_n,
   output [32-1:0] last_clk_count_aper_n,
 
 
@@ -668,7 +668,7 @@ module my_modulation (
         // we are confusing neg. pos. and up. down.   neg == up. pos == down.
 
         `STATE_VAR:
-          if(clk_count >= clk_count_var_pos_n)
+          if(clk_count >= clk_count_var_n)
             state <= `STATE_FIX_NEG_START;
 
 
@@ -713,7 +713,7 @@ module my_modulation (
           end
 
         `STATE_VAR2:
-          if(clk_count >= clk_count_var_pos_n)
+          if(clk_count >= clk_count_var_n)
             begin
               // integration finished. and above zero cross
               if( !sig_active  && ! comparator_val_last)
@@ -773,7 +773,7 @@ module my_modulation (
                 // record the params used
                 last_himux_sel          <= himux; // we have not turned off the himux yet
                 last_clk_count_fix_n    <= clk_count_fix_n;
-                last_clk_count_var_pos_n <= clk_count_var_pos_n;
+                last_clk_count_var_n <= clk_count_var_n;
                 last_clk_count_aper_n   <= clk_count_aper_n ;
 
 
@@ -1090,7 +1090,7 @@ module top (
   reg [24-1:0]  clk_count_reset_n;
   reg [24-1:0]  clk_count_fix_n;
   // reg [24-1:0]  clk_count_var_n;
-  reg [24-1:0]  clk_count_var_pos_n;
+  reg [24-1:0]  clk_count_var_n;
   reg [31:0]    clk_count_aper_n;
   reg use_slow_rundown;
 
@@ -1105,7 +1105,7 @@ module top (
 
   reg [24-1:0] last_himux_sel;
   reg [24-1:0] last_clk_count_fix_n;
-  reg [24-1:0] last_clk_count_var_pos_n;
+  reg [24-1:0] last_clk_count_var_n;
   reg [32-1:0] last_clk_count_aper_n;
 
 
@@ -1178,7 +1178,7 @@ module top (
     . clk_count_reset_n( clk_count_reset_n ) ,
     . clk_count_fix_n( clk_count_fix_n ) ,
     // . clk_count_var_n( clk_count_var_n ) ,
-    . clk_count_var_pos_n( clk_count_var_pos_n) ,
+    . clk_count_var_n( clk_count_var_n) ,
     . clk_count_aper_n( clk_count_aper_n ) ,
 
     . use_slow_rundown( use_slow_rundown),
@@ -1202,7 +1202,7 @@ module top (
     // params used for run
     . last_himux_sel(last_himux_sel),
     . last_clk_count_fix_n( last_clk_count_fix_n ),
-    . last_clk_count_var_pos_n( last_clk_count_var_pos_n),
+    . last_clk_count_var_n( last_clk_count_var_n),
     . last_clk_count_aper_n( last_clk_count_aper_n),
 
 
@@ -1234,7 +1234,7 @@ module top (
     . clk_count_reset_n( clk_count_reset_n ) ,
     . clk_count_fix_n( clk_count_fix_n ) ,
     // . clk_count_var_n( clk_count_var_n ) ,
-    . clk_count_var_pos_n( clk_count_var_pos_n) ,
+    . clk_count_var_n( clk_count_var_n) ,
     . clk_count_aper_n( clk_count_aper_n ) ,
 
     . use_slow_rundown( use_slow_rundown),
@@ -1257,7 +1257,7 @@ module top (
 
     . last_himux_sel(last_himux_sel),
     . last_clk_count_fix_n( last_clk_count_fix_n ),
-    . last_clk_count_var_pos_n( last_clk_count_var_pos_n),
+    . last_clk_count_var_n( last_clk_count_var_n),
     . last_clk_count_aper_n( last_clk_count_aper_n),
 
 
