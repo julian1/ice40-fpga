@@ -341,8 +341,8 @@ module my_register_bank   #(parameter MSB=32)   (
           // 39MHz nextpnr
           // this only routes correctly in nextpnr. not arachne-pnr
           // these are not equivalent.
-          // REG_CLK_COUNT_APER_N_LO: clk_count_aper_n <=   { clk_count_aper_n[MSB - 1 : MSB - 8 - 1], val  };                  // lo 24 bits
-          // REG_CLK_COUNT_APER_N_HI: clk_count_aper_n <=   { val[ MSB - 1: MSB - 8 - 1 ], clk_count_aper_n[ MSB - 8 - 1: 0] };  // hi 8 bits
+          // `REG_CLK_COUNT_APER_N_LO: clk_count_aper_n <=   { clk_count_aper_n[MSB - 1 : MSB - 8 - 1], val  };                  // lo 24 bits
+          // `REG_CLK_COUNT_APER_N_HI: clk_count_aper_n <=   { val[ MSB - 1: MSB - 8 - 1 ], clk_count_aper_n[ MSB - 8 - 1: 0] };  // hi 8 bits
 
           `REG_USE_SLOW_RUNDOWN:    use_slow_rundown <= val;
           `REG_HIMUX_SEL:           himux_sel <= val;
@@ -463,7 +463,7 @@ module my_modulation (
   // 2^5 = 32
 
   /*
-     EXTR. could be useful to spi query the current state 
+     EXTR. could be useful to spi query the current state
     - could then determine that were updated during the reset period. and we don't have to call reset again.
   */
   reg [5-1:0] state;
@@ -614,8 +614,8 @@ module my_modulation (
         // beginning of signal integration
         `STATE_SIG_START:
           begin
-            state <= `STATE_FIX_POS_START;
-            clk_count     <= 0;
+            state           <= `STATE_FIX_POS_START;
+            clk_count       <= 0;
 
             // clear the clocks
             count_up        <= 0;
@@ -627,12 +627,12 @@ module my_modulation (
 
 
             // clear the aperture counter
-            clk_count_aper<= 0;
+            clk_count_aper  <= 0;
 
             // turn on signal input, to start signal integration
-            // himux      <= himux_sel;
-            sigmux        <= 1;
-            // refmux     <= `MUX_REF_NONE;
+            // himux        <= himux_sel;
+            sigmux          <= 1;
+            // refmux       <= `MUX_REF_NONE;
           end
 
 
@@ -789,7 +789,7 @@ module my_modulation (
 
                 // IMPORTANT - it might be better to record these wwhen the sig integrator starts.
                 // because they could be overwritten by register bank writing.
-                // except we will decouple them 
+                // except we will decouple them
 
                 // it's possible all this could be done in the pattern controller.
                 // record the params used
@@ -969,7 +969,7 @@ module my_control_pattern_2 (
 
       endcase
     else
-        
+
       // start of new modulation
       case(pattern)
 
@@ -1001,7 +1001,7 @@ endmodule
 
         /*
           - problem is that this is only setting himux sel on the interupt after the completion of the run.
-          - 
+          -
 
         */
 
