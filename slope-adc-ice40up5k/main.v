@@ -84,13 +84,12 @@
 `define REG_CLK_COUNT_RUNDOWN   37
 
 
-// treat as param variable
-`define REG_LAST_HIMUX_SEL           40 // what was being muxed for integration. sig, azero, acal .
-`define REG_LAST_CLK_COUNT_FIX_N     41
-`define REG_LAST_CLK_COUNT_VAR_N 42
-`define REG_LAST_CLK_COUNT_APER_N_LO 44
-`define REG_LAST_CLK_COUNT_APER_N_HI 45
-
+/* 
+  EXTR. we already have to read count_up/count_down etc. during the reset period, 
+  because we don't copy them.
+  so may as well do the same for parameter stuff.
+*/
+  
 
 `define REG_MEAS_COUNT          50
 
@@ -167,14 +166,7 @@ module my_register_bank   #(parameter MSB=32)   (
   input wire [24-1:0] clk_count_rundown,
 
 
-  // readable params
-  input wire [24-1:0] last_himux_sel,
-  input wire [24-1:0] last_clk_count_fix_n,
-  input wire [24-1:0] last_clk_count_var_n,
-  input wire [32-1:0] last_clk_count_aper_n,
-
-
-  input wire [24-1:0] meas_count,     // useful to check if stalled
+  input wire [24-1:0] meas_count     // useful to check if stalled
                                       // actually just probe switches with scope.
 
 );
@@ -273,14 +265,6 @@ module my_register_bank   #(parameter MSB=32)   (
               `REG_COUNT_FIX_UP:      out <= count_fix_up << 8;
               `REG_COUNT_FIX_DOWN:    out <= count_fix_down << 8;
               `REG_CLK_COUNT_RUNDOWN: out <= clk_count_rundown << 8;
-
-
-              // param recorded at last run
-              `REG_LAST_HIMUX_SEL:           out <= last_himux_sel << 8;
-              `REG_LAST_CLK_COUNT_FIX_N:     out <= last_clk_count_fix_n << 8;
-              `REG_LAST_CLK_COUNT_VAR_N: out <= last_clk_count_var_n << 8;
-              `REG_LAST_CLK_COUNT_APER_N_LO: out <= last_clk_count_aper_n << 8;           // lo 24 bits  aperture
-              `REG_LAST_CLK_COUNT_APER_N_HI: out <= (last_clk_count_aper_n >> 24) << 8;   // hi 8 bits
 
 
               default:                out <= 12345 << 8;
@@ -436,12 +420,6 @@ module my_modulation (
   output [24-1:0] count_fix_up_last,
   output [24-1:0] count_fix_down_last,
   output [24-1:0] clk_count_rundown_last,
-
-  // param
-  output [24-1:0] last_himux_sel,
-  output [24-1:0] last_clk_count_fix_n,
-  output [24-1:0] last_clk_count_var_n,
-  output [32-1:0] last_clk_count_aper_n,
 
 
   // both should be input wires. both are driven.
@@ -771,18 +749,6 @@ module my_modulation (
                 count_fix_down_last     <= count_fix_down;
                 clk_count_rundown_last  <= clk_count;
 
-                // IMPORTANT - it might be better to record these wwhen the sig integrator starts.
-                // because they could be overwritten by register bank writing.
-                // except we will decouple them
-
-                // it's possible all this could be done in the pattern controller.
-                // record the params used
-                last_himux_sel          <= himux; // we have not turned off the himux yet
-                last_clk_count_fix_n    <= clk_count_fix_n;
-                last_clk_count_var_n <= clk_count_var_n;
-                last_clk_count_aper_n   <= clk_count_aper_n ;
-
-
               end
           end
 
@@ -895,13 +861,6 @@ module top (
   reg [24-1:0] count_fix_down;
   reg [24-1:0] clk_count_rundown;
 
-  reg [24-1:0] last_himux_sel;
-  reg [24-1:0] last_clk_count_fix_n;
-  reg [24-1:0] last_clk_count_var_n;
-  reg [32-1:0] last_clk_count_aper_n;
-
-
-
   reg [4-1:0] himux_sel;    // himux signal selection
   reg [4-1:0] rb_himux_sel;
   reg [5-1:0] state;
@@ -956,13 +915,7 @@ module top (
     . count_trans_down(count_trans_down),
     . count_fix_up(count_fix_up),
     . count_fix_down(count_fix_down),
-    . clk_count_rundown(clk_count_rundown),
-
-    // params used for run
-    . last_himux_sel(last_himux_sel),
-    . last_clk_count_fix_n( last_clk_count_fix_n ),
-    . last_clk_count_var_n( last_clk_count_var_n),
-    . last_clk_count_aper_n( last_clk_count_aper_n),
+    . clk_count_rundown(clk_count_rundown)
 
 
   );
@@ -1002,12 +955,6 @@ module top (
     . count_fix_up_last(count_fix_up),
     . count_fix_down_last(count_fix_down),
     . clk_count_rundown_last(clk_count_rundown),
-
-    . last_himux_sel(last_himux_sel),
-    . last_clk_count_fix_n( last_clk_count_fix_n ),
-    . last_clk_count_var_n( last_clk_count_var_n),
-    . last_clk_count_aper_n( last_clk_count_aper_n),
-
 
 
     . com_interupt(COM_INTERUPT),
