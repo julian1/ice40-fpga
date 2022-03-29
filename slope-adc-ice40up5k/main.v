@@ -84,12 +84,12 @@
 `define REG_CLK_COUNT_RUNDOWN   37
 
 
-/* 
-  EXTR. we already have to read count_up/count_down etc. during the reset period, 
+/*
+  EXTR. we already have to read count_up/count_down etc. during the reset period,
   because we don't copy them.
-  so may as well do the same for parameter stuff.
+  so there is no reason to preserve reg_last.
 */
-  
+
 
 `define REG_MEAS_COUNT          50
 
@@ -153,7 +153,7 @@ module my_register_bank   #(parameter MSB=32)   (
   inout               use_slow_rundown,
   inout [4-1:0]       himux_sel,
 
-  input [5-1:0]       state,     // only thing that writes the 
+  input [5-1:0]       state,     // only thing that writes the
   inout               reset,          // register_reset for modulation, not a reset for my_register_bank.
 
   // readable measurement counts, these are all last
@@ -392,20 +392,11 @@ module my_modulation (
   inout [24-1:0]  clk_count_var_n,
   input [31:0]    clk_count_aper_n,
 
-  // is himux_sel being overwritten?  because wrong length...
-  // or reset is being written...
-
-/*
-  inout               use_slow_rundown,
-  inout [4-1:0]       himux_sel,
-  inout [24-1:0]      state,          // TODO change to 8-1
-  inout               reset,            // register_reset for modulation, not a reset for my_register_bank.
-*/
-
+  // REVIEW input/output.
 
   input           use_slow_rundown,
   input [4-1:0]   himux_sel,
-  output [5-1:0]   state,     // only thing that writes the 
+  output [5-1:0]   state,     // only thing that writes the
   inout           reset,
 
   output [4-1:0]  himux,
@@ -434,7 +425,6 @@ module my_modulation (
   */
 
 
-  // 2^5 = 32
 
   /*
      EXTR. could be useful to spi query the current state
@@ -956,7 +946,7 @@ module top (
     . count_fix_down_last(count_fix_down),
     . clk_count_rundown_last(clk_count_rundown),
 
-
+    // outputs
     . com_interupt(COM_INTERUPT),
     . cmpr_latch_ctl(CMPR_LATCH_CTL)
   );
