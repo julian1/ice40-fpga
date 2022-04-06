@@ -81,6 +81,9 @@
 `define REG_COUNT_TRANS_DOWN    33
 `define REG_COUNT_FIX_UP        34
 `define REG_COUNT_FIX_DOWN      35
+`define REG_COUNT_FLIP          36
+
+
 `define REG_CLK_COUNT_RUNDOWN   37
 
 
@@ -163,6 +166,9 @@ module my_register_bank   #(parameter MSB=32)   (
   input wire [24-1:0] count_trans_down,
   input wire [24-1:0] count_fix_up,
   input wire [24-1:0] count_fix_down,
+  input wire [24-1:0] count_flip,
+
+
   input wire [24-1:0] clk_count_rundown,
 
 
@@ -187,11 +193,13 @@ module my_register_bank   #(parameter MSB=32)   (
     // clk_count_var_n   = 5500;    // 10nF
     // clk_count_fix_n   = 700;     //
 
+    // 37Mhz synthesis
     // clk_count_var_n     = 550;
     // clk_count_fix_n     = 70;   // 1nF
 
+    // 26MHz ???
     clk_count_var_n     = 185;    // 330pF
-    clk_count_fix_n     = 23;
+    clk_count_fix_n     = 24;   // 24 is faster than 23... weird.
 
 
 
@@ -247,7 +255,7 @@ module my_register_bank   #(parameter MSB=32)   (
               // params
               `REG_CLK_COUNT_RESET_N: out <= clk_count_reset_n << 8;
               `REG_CLK_COUNT_FIX_N:   out <= clk_count_fix_n << 8;
-              `REG_CLK_COUNT_VAR_N:  out <= clk_count_var_n << 8;
+              `REG_CLK_COUNT_VAR_N:   out <= clk_count_var_n << 8;
               `REG_CLK_COUNT_APER_N_LO: out <= clk_count_aper_n << 8;           // lo 24 bits  aperture
               `REG_CLK_COUNT_APER_N_HI: out <= (clk_count_aper_n >> 24) << 8;   // hi 8 bits
               `REG_USE_SLOW_RUNDOWN:  out <= use_slow_rundown << 8;
@@ -256,9 +264,9 @@ module my_register_bank   #(parameter MSB=32)   (
                 no. mux switch has 1.5k impedance. should not break anything
               */
               `REG_HIMUX_SEL:         out <= himux_sel << 8;
-              `REG_STATE:           out <= state << 8;
+              `REG_STATE:             out <= state << 8;
 
-              // `REG_RESET:             out <= state << 8; need to shift 24 bits?
+              // `REG_RESET:          out <= state << 8; need to shift 24 bits?
 
               `REG_MEAS_COUNT:        out <= meas_count << 8;
 
@@ -270,6 +278,8 @@ module my_register_bank   #(parameter MSB=32)   (
               `REG_COUNT_TRANS_DOWN:  out <= count_trans_down << 8;
               `REG_COUNT_FIX_UP:      out <= count_fix_up << 8;
               `REG_COUNT_FIX_DOWN:    out <= count_fix_down << 8;
+              `REG_COUNT_FLIP:        out <= count_flip << 8;
+
               `REG_CLK_COUNT_RUNDOWN: out <= clk_count_rundown << 8;
 
 
@@ -416,6 +426,9 @@ module my_modulation (
   output [24-1:0] count_trans_down_last,
   output [24-1:0] count_fix_up_last,
   output [24-1:0] count_fix_down_last,
+
+  output [24-1:0] count_flip_last,
+
   output [24-1:0] clk_count_rundown_last,
 
 
@@ -460,6 +473,7 @@ module my_modulation (
   reg [24-1:0] count_trans_down;
   reg [24-1:0] count_fix_up;
   reg [24-1:0] count_fix_down;
+  reg [24-1:0] count_flip;
 
   /////////////////////////
   // this should be pushed into a separate module...
@@ -481,7 +495,7 @@ module my_modulation (
 
   // TODO use something like this, instead of done
   // the the period that we are integrating the signal.
-  assign sig_active     = himux == himux_sel     && sigmux == 1;    // j
+  assign sig_active     = himux == himux_sel     && sigmux == 1;    // j  TODO rather than assign. should be wire.
 
 
   assign reset_active   = himux === `HIMUX_SEL_ANG && sigmux === 1;
@@ -587,7 +601,7 @@ module my_modulation (
             state           <= `STATE_FIX_POS_START;
             clk_count       <= 0;
 
-            // clear the clocks
+            // clear the counts
             count_up        <= 0;
             count_down      <= 0;
             count_trans_up  <= 0;
@@ -595,6 +609,7 @@ module my_modulation (
             count_fix_up    <= 0;
             count_fix_down  <= 0;
 
+            count_flip      <= 0;
 
             // clear the aperture counter
             clk_count_aper  <= 0;
@@ -695,14 +710,28 @@ module my_modulation (
         `STATE_VAR2:
           if(clk_count >= clk_count_var_n)
             begin
-              // integration finished. and above zero cross
-              if( !sig_active  && ! comparator_val_last)
+              // signal integration finished. 
+              if( !sig_active )  
+                  // and above zero cross
+                  if( ! comparator_val_last)
 
-                // go straight to the final rundown.
-                state <= `STATE_RUNDOWN_START;
+                    // go straight to the final rundown.
+                    state <= `STATE_RUNDOWN_START;
+                  // below zero cross
+                  else 
+                    begin
+                      // do another cycle
+                      state <= `STATE_FIX_POS_START;
+
+                      // count_prerundown
+                      count_flip <= count_flip + 1;
+                    end
+              // signal integration not finished
               else
-                // do another cycle
-                state <= `STATE_FIX_POS_START;
+                  // do another cycle
+                  state <= `STATE_FIX_POS_START;
+
+
             end
 
 
@@ -743,6 +772,8 @@ module my_modulation (
                 count_trans_down_last   <= count_trans_down;
                 count_fix_up_last       <= count_fix_up;
                 count_fix_down_last     <= count_fix_down;
+                count_flip_last         <= count_flip;
+
                 clk_count_rundown_last  <= clk_count;
 
               end
@@ -855,6 +886,8 @@ module top (
   reg [24-1:0] count_trans_down;
   reg [24-1:0] count_fix_up;
   reg [24-1:0] count_fix_down;
+  reg [24-1:0] count_flip;
+
   reg [24-1:0] clk_count_rundown;
 
   reg [4-1:0] himux_sel;    // himux signal selection
@@ -911,8 +944,10 @@ module top (
     . count_trans_down(count_trans_down),
     . count_fix_up(count_fix_up),
     . count_fix_down(count_fix_down),
-    . clk_count_rundown(clk_count_rundown)
+    . count_flip(count_flip),
 
+    // clk counts
+    . clk_count_rundown(clk_count_rundown)
 
   );
 
@@ -950,6 +985,8 @@ module top (
     . count_trans_down_last(count_trans_down),
     . count_fix_up_last(count_fix_up),
     . count_fix_down_last(count_fix_down),
+    . count_flip_last(count_flip),
+    // clk counts
     . clk_count_rundown_last(clk_count_rundown),
 
     // outputs
