@@ -795,7 +795,8 @@ module my_modulation (
 
                   // upward slope and above zero cross
                   if( refmux  == `MUX_REF_NEG && ! comparator_val_last) // prior var phase was up. counts/charge equalized.
-                  // if( refmux  == `MUX_REF_POS && ! comparator_val_last) // unreachable, condition which fails to properly cycle due to bias.
+                  // if( refmux  == `MUX_REF_POS && ! comparator_val_last) // may be balanced. but will require an extra var until above zero cross
+                                                                            // 
                   // if( refmux  == `MUX_REF_NEG ) // upward
 
                     // go straight to the prerundown .
