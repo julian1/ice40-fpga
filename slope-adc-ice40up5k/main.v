@@ -385,6 +385,12 @@ endmodule
 `define STATE_RUNDOWN       16
 `define STATE_DONE          17
 
+`define STATE_PRERUNDOWN   18
+`define STATE_PRERUNDOWN_START 19
+
+
+
+
 // ref mux state.
 `define MUX_REF_NONE        2'b00
 `define MUX_REF_POS         2'b01
@@ -544,7 +550,8 @@ module my_modulation (
       // sample/bind comparator val once on clock edge. improves speed.
       comparator_val_last <=  comparator_val;
 
-      // instrumentation on the transitions
+
+      // instrumentation for switch transitions for both pos,neg (and both).
       pos_ref_cross <= { pos_ref_cross[0], refmux[0] }; // old, new
       neg_ref_cross <= { neg_ref_cross[0], refmux[1] };
 
@@ -555,6 +562,7 @@ module my_modulation (
       if(neg_ref_cross == 2'b01)
         count_trans_down <= count_trans_down + 1;
 
+      // count_pos_on
 
 
       if(sig_active)
@@ -604,7 +612,6 @@ module my_modulation (
           begin
             state         <= `STATE_SIG_SETTLE;
             clk_count     <= 0;
-
             // switch himux to signal, but lo mux off whlie op settles
             himux         <= himux_sel;
             sigmux        <= 0;
@@ -625,10 +632,11 @@ module my_modulation (
             // clear the counts
             count_up        <= 0;
             count_down      <= 0;
-            count_trans_up  <= 0;
-            count_trans_down <= 0;
             count_fix_up    <= 0;
             count_fix_down  <= 0;
+            count_trans_up  <= 0;
+            count_trans_down <= 0;
+
 
             count_flip      <= 0;
 
@@ -647,10 +655,8 @@ module my_modulation (
           begin
             state         <= `STATE_FIX_POS;
             clk_count     <= 0;
-
             count_fix_down <= count_fix_down + 1;
             refmux        <= `MUX_REF_POS; // initial direction
-//            if(refmux != `MUX_REF_POS) count_trans_down <= count_trans_down + 1 ;
           end
 
         `STATE_FIX_POS:
@@ -668,13 +674,11 @@ module my_modulation (
               begin
                 refmux    <= `MUX_REF_NEG;  // add negative ref. to drive up.
                 count_up  <= count_up + 1;
-//                if(refmux != `MUX_REF_NEG) count_trans_up <= count_trans_up + 1 ;
               end
             else
               begin
                 refmux    <= `MUX_REF_POS;
                 count_down <= count_down + 1;
-//                if(refmux != `MUX_REF_POS) count_trans_down <= count_trans_down + 1 ;
               end
           end
 
@@ -692,10 +696,8 @@ module my_modulation (
           begin
             state         <= `STATE_FIX_NEG;
             clk_count     <= 0;
-
             count_fix_up  <= count_fix_up + 1;
             refmux        <= `MUX_REF_NEG;
-//            if(refmux != `MUX_REF_NEG) count_trans_up <= count_trans_up + 1 ;
           end
 
         `STATE_FIX_NEG:
@@ -718,13 +720,11 @@ module my_modulation (
               begin
                 refmux    <= `MUX_REF_NEG;
                 count_up  <= count_up + 1;
- //               if(refmux != `MUX_REF_NEG) count_trans_up <= count_trans_up + 1 ;
               end
             else
               begin
                 refmux    <= `MUX_REF_POS;
                 count_down <= count_down + 1;
-  //              if(refmux != `MUX_REF_POS) count_trans_down <= count_trans_down + 1 ;
               end
           end
 
@@ -753,10 +753,18 @@ module my_modulation (
                       - that should equalize the switching events  (even if off by one).
                   */
                   // and above zero cross
-                  if( ! comparator_val_last)
+                  // if( ! comparator_val_last)
 
-                    // go straight to the final rundown.
-                    state <= `STATE_RUNDOWN_START;
+                  // OK. hang on. maybe we just have to wigle the pin to equalize charge balance.
+                  // Rather. than add another up phase or down phase.
+
+                  // ended on a downward action. good.jjjjj
+                  if( refmux  == `MUX_REF_NEG &&  ! comparator_val_last) // downward.
+                  // if( refmux  == `MUX_REF_NEG ) // upward
+
+                    // go straight to the prerundown .
+                    // state <= `STATE_RUNDOWN_START;
+                    state <= `STATE_PRERUNDOWN_START;
                   // below zero cross
                   else
                     begin
@@ -766,13 +774,45 @@ module my_modulation (
                       // count_prerundown
                       count_flip <= count_flip + 1;
                     end
+
               // signal integration not finished
               else
                   // do another cycle
                   state <= `STATE_FIX_POS_START;
-
-
             end
+
+        // the end of signal integration. is different to the end of the 4 phase cycle.
+        // we want a gpio pin. to hit on pre-rundown.
+
+        `STATE_PRERUNDOWN_START:
+           begin
+            state         <= `STATE_PRERUNDOWN;
+            clk_count     <= 0;
+            /*
+              we don't care about landing above the zero-cross. in 4 phase we care about ending on a downward var.
+                thatway we can add a up transition.  before doing the downward transition (for slow) rundown.
+                to balance the up/down transitions.
+                the upward phase - then needs to be enough to push over the zero-cross.  but that is secondary.
+                ----------
+            */
+            // count_fix_up  <= count_fix_up + 1;
+            // drive up.
+            // refmux        <= `MUX_REF_NEG;
+            // refmux        <= `MUX_REF_NEG;
+            refmux        <= `MUX_REF_NONE;
+          end
+
+        // It has to be MUX_NONE  
+
+        `STATE_PRERUNDOWN:
+          // Should drive above the cross.
+          // EXTR. this can just keep driving up, without transitions, and testing until hit the zero cross.
+          // No. i think it would actually depend on whether the last /
+          // then we get
+          if(clk_count >= clk_count_var_n)
+            state <= `STATE_RUNDOWN_START;
+
+
 
 
         `STATE_RUNDOWN_START:
