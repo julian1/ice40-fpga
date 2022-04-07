@@ -482,6 +482,7 @@ module my_modulation (
 
   // TODO move this into the main block.
 
+  // TODO only need two bits. or done with three bits for stability?
   reg [2:0] crossr;
   always @(posedge clk)
     crossr <= {crossr[1:0], comparator_val};
@@ -710,15 +711,34 @@ module my_modulation (
         `STATE_VAR2:
           if(clk_count >= clk_count_var_n)
             begin
-              // signal integration finished. 
-              if( !sig_active )  
+              // signal integration finished.
+              if( !sig_active )
+                  /*
+                      - depending if last var phase was up or down. there may or may not be another switch for run-down.
+                      - if doing extra flip cycling, then in practise last var will be up.
+                      - but if land correct side - var could be approaching from either direction.
+                      ----
+                      - extr. there is a much easier way to count transitions.
+                          just have ref_last;
+                          and then check the transitions. in the same way we do crossing detections/ or clock domain crossing..
+                      ------
+                      - ideally we might want to count each fet switch (eg. each bit in ref mux) separately.
+                      - only need to count up. since rundown ends with both on.
+                      ----
+                      k2002.         - rundown achieved with both switches off. so charge is balanced.  from on to off.
+                      bias resistor  - rundown achived with both switches on. should be the same.
+                      ----
+                      - we should add an extra condition - that last var / approach direction was up.
+                      - to force it to cycle - until hit this condition.
+                      - that should equalize the switching events  (even if off by one).
+                  */
                   // and above zero cross
                   if( ! comparator_val_last)
 
                     // go straight to the final rundown.
                     state <= `STATE_RUNDOWN_START;
                   // below zero cross
-                  else 
+                  else
                     begin
                       // do another cycle
                       state <= `STATE_FIX_POS_START;
@@ -739,6 +759,12 @@ module my_modulation (
           begin
             state         <= `STATE_RUNDOWN;
             clk_count     <= 0;
+
+            /*
+              IMPORTANT. we are not counting a possible switch transition here.
+              Bug?
+
+            */
 
             if( use_slow_rundown )
               // turn on both references - to create +ve bias, to drive integrator down.
