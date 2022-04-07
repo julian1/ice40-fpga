@@ -562,6 +562,31 @@ module my_modulation (
       if(neg_ref_cross == 2'b01)
         count_trans_down <= count_trans_down + 1;
 
+
+      /*
+        EI. could actually use this strategy of reading the mux values - to count total clk times.
+        and avoid having to return count and clk to mcu separately.
+        ----
+        it might also be more cycle accurate - given the phase transition setup, and comparator reads etc.
+        but would need 32 bit values.
+        - reduces spi overhead. if supported 32 byte reads.
+        - reduces littering of count_up/count_down
+        - reduces having to multiply out clk_count_var * count_up etc.
+        - enables having non standar variable periods. eg. to reduce extra cycling to get to the other side.
+        ------
+        the way to evaluate is to use stderr(regression).
+
+      if(refmux ==  MUX_REF_POS)
+        clk_count_pos <= clk_count_pos + 1;
+
+      if(refmux ==  MUX_REF_POS)
+        clk_count_neg <= clk_count_neg + 1;
+
+      if(refmux == MUX_REF_SLOW_POS)
+        clk_count_rundown <= clk_count_rundown + 1;
+      */
+
+
       // count_pos_on
 
 
@@ -728,6 +753,16 @@ module my_modulation (
               end
           end
 
+        /*
+          E. IMPORTANT
+          - solution to jump immediately to pre/rundown. without extra cycling.
+            is just to keep adding up fix periods until above cross.
+            eg. one var might not be enough. and two vars may go out of bound.
+            dand the main advantage is, it is not a unqiue phase length - so doesn't require an extra variable in the regression.
+          - alternatively - it might be better to capture it distinctly as a boolean and extra variable.
+                because its slightly different to the 4 phase modulation switching.
+
+        */
         `STATE_VAR2:
           if(clk_count >= clk_count_var_n)
             begin
@@ -759,7 +794,7 @@ module my_modulation (
                   // Rather. than add another up phase or down phase.
 
                   // upward slope and above zero cross
-                  if( refmux  == `MUX_REF_NEG &&  ! comparator_val_last) // downward.
+                  if( refmux  == `MUX_REF_NEG &&  ! comparator_val_last) // downward.   // EXTR. may not need to be upward, when using both off pause..
                   // if( refmux  == `MUX_REF_NEG ) // upward
 
                     // go straight to the prerundown .
@@ -802,7 +837,7 @@ module my_modulation (
             refmux        <= `MUX_REF_NONE;
           end
 
-        // It has to be MUX_NONE  
+        // It has to be MUX_NONE
 
         `STATE_PRERUNDOWN:
           // Should drive above the cross.
