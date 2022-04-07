@@ -555,7 +555,7 @@ module my_modulation (
       pos_ref_cross <= { pos_ref_cross[0], refmux[0] }; // old, new
       neg_ref_cross <= { neg_ref_cross[0], refmux[1] };
 
-      // trans_up is wrongly named. it's actually pos_ref_switch_on.
+      // TODO must rename. actually represents count of each on switch transiton = count_ref_pos_on and count_ref_neg_on.
       if(pos_ref_cross == 2'b01)
         count_trans_up <= count_trans_up + 1;
 
