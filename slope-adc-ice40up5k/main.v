@@ -482,7 +482,8 @@ module my_modulation (
 
   // TODO move this into the main block.
 
-  // TODO only need two bits. or done with three bits for stability?
+  // TODO  three bits, because comparator_val is not on clock boundary
+  // or use comaprator_val_last
   reg [2:0] crossr;
   always @(posedge clk)
     crossr <= {crossr[1:0], comparator_val};
@@ -492,14 +493,22 @@ module my_modulation (
   wire cross_any    = cross_up || cross_down ;
 
 
+  ////////
+
+  // to check that
+  reg [1:0] pos_ref_cross;
+  reg [1:0] neg_ref_cross;
+
+
+
 
 
   // TODO use something like this, instead of done
   // the the period that we are integrating the signal.
-  assign sig_active     = himux == himux_sel     && sigmux == 1;    // j  TODO rather than assign. should be wire.
+  wire sig_active     = himux == himux_sel     && sigmux == 1;    // j  TODO rather than assign. should be wire.
 
 
-  assign reset_active   = himux === `HIMUX_SEL_ANG && sigmux === 1;
+  wire reset_active   = himux === `HIMUX_SEL_ANG && sigmux === 1;
 
   // OK. it's working with good values at nplc 10, 11, 12. for cal loop. after very heavy refactor mar 13. 2022.
 
@@ -534,6 +543,17 @@ module my_modulation (
 
       // sample/bind comparator val once on clock edge. improves speed.
       comparator_val_last <=  comparator_val;
+
+      // instrumentation on the transitions
+      pos_ref_cross <= { pos_ref_cross[0], refmux[0] }; // old, new
+      neg_ref_cross <= { neg_ref_cross[0], refmux[1] };
+
+      // trans_up is wrongly named. it's actually pos_ref_switch_on.
+      if(pos_ref_cross == 2'b01)
+        count_trans_up <= count_trans_up + 1;
+
+      if(neg_ref_cross == 2'b01)
+        count_trans_down <= count_trans_down + 1;
 
 
 
@@ -794,7 +814,7 @@ module my_modulation (
                 // record all the counts and rundown everything
                 count_up_last           <= count_up;
                 count_down_last         <= count_down;
-                count_trans_up_last     <= count_trans_up;
+                count_trans_up_last     <= count_trans_up; // OK. this works.
                 count_trans_down_last   <= count_trans_down;
                 count_fix_up_last       <= count_fix_up;
                 count_fix_down_last     <= count_fix_down;
