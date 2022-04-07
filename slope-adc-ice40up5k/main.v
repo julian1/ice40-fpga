@@ -758,7 +758,7 @@ module my_modulation (
                   // OK. hang on. maybe we just have to wigle the pin to equalize charge balance.
                   // Rather. than add another up phase or down phase.
 
-                  // ended on a downward action. good.jjjjj
+                  // upward slope and above zero cross
                   if( refmux  == `MUX_REF_NEG &&  ! comparator_val_last) // downward.
                   // if( refmux  == `MUX_REF_NEG ) // upward
 
@@ -809,7 +809,7 @@ module my_modulation (
           // EXTR. this can just keep driving up, without transitions, and testing until hit the zero cross.
           // No. i think it would actually depend on whether the last /
           // then we get
-          if(clk_count >= clk_count_var_n)
+          if(clk_count >= clk_count_fix_n)
             state <= `STATE_RUNDOWN_START;
 
 
