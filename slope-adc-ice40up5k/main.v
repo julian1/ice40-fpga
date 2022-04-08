@@ -772,6 +772,8 @@ module my_modulation (
                 state <= `STATE_FIX_POS_START;
             end
 
+        ////////////////////
+        // we could use extra cycling as prerundown - but include the flip_count extra variable (in the regression) to represent extra charge injection.
 
         ////////////////////
 
@@ -779,7 +781,7 @@ module my_modulation (
 
         // we have actually reversed this... from normal four cycle. which drives down first.
 
-        `STATE_RD_FIX_NEG_START:
+        `STATE_RD_FIX_NEG_START:  // fix up.
           begin
             state         <= `STATE_RD_FIX_NEG;
             clk_count     <= 0;
@@ -796,13 +798,14 @@ module my_modulation (
         `STATE_RD_VAR_START:
           // not a real var. since only ever drives up.
           begin
-            state         <= `STATE_RD_VAR;
             clk_count     <= 0;
 
             if( comparator_val_last)   // test below the zero-cross
               begin
                 // add negative ref. to drive up. 
                 // just continues previous fix neg / upward drive 
+
+                state     <= `STATE_RD_VAR;
                 refmux    <= `MUX_REF_NEG;  
                 count_up  <= count_up + 1;
               end
