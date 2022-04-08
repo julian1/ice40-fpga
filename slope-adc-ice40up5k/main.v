@@ -802,16 +802,18 @@ module my_modulation (
 
             if( comparator_val_last)   // test below the zero-cross
               begin
-                // add negative ref. to drive up. 
-                // just continues previous fix neg / upward drive 
+                // add negative ref. to drive up.
+                // just continues previous fix neg / upward drive
 
                 state     <= `STATE_RD_VAR;
-                refmux    <= `MUX_REF_NEG;  
+                refmux    <= `MUX_REF_NEG;
                 count_up  <= count_up + 1;
               end
             else
               // already above cross.. so just skip to fix-neg / rundown.
 
+              // IMPORTANT - there is a extra clk cycle here - where we don't transition.
+              // eg. should switch off the mux.
               state <= `STATE_PRERUNDOWN_START;
           end
 
