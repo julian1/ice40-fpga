@@ -389,6 +389,11 @@ endmodule
 `define STATE_PRERUNDOWN_START 19
 
 
+`define STATE_RD_FIX_NEG_START 20
+`define STATE_RD_FIX_NEG      21
+`define STATE_RD_VAR_START    22
+`define STATE_RD_VAR          23
+
 
 
 // ref mux state.
@@ -681,7 +686,7 @@ module my_modulation (
             state         <= `STATE_FIX_POS;
             clk_count     <= 0;
             count_fix_down <= count_fix_down + 1;
-            refmux        <= `MUX_REF_POS; // initial direction
+            refmux        <= `MUX_REF_POS; // drive down.
           end
 
         `STATE_FIX_POS:
@@ -756,28 +761,64 @@ module my_modulation (
         `STATE_VAR2:
           if(clk_count >= clk_count_var_n)
             begin
-              // signal integration finished. 
+              // signal integration finished.
               if( !sig_active )
-            
-                  // upward slope and above zero cross
-                  if( refmux  == `MUX_REF_NEG && ! comparator_val_last) // prior var phase was up. counts/charge equalized.
-
-                    state <= `STATE_PRERUNDOWN_START;
-                  // below zero cross
-                  else
-                    begin
-                      // do another cycle
-                      state <= `STATE_FIX_POS_START;
-
-                      // count_prerundown
-                      count_flip <= count_flip + 1;
-                    end
+                // go to rundown sequence
+                state <= `STATE_RD_FIX_NEG_START;
 
               // signal integration not finished
               else
                   // do another cycle
-                  state <= `STATE_FIX_POS_START;
+                state <= `STATE_FIX_POS_START;
             end
+
+
+        ////////////////////
+
+
+
+        // we have actually reversed this... from normal four cycle. which drives down first.
+
+        `STATE_RD_FIX_NEG_START:
+          begin
+            state         <= `STATE_RD_FIX_NEG;
+            clk_count     <= 0;
+            count_fix_up  <= count_fix_up + 1;
+            refmux        <= `MUX_REF_NEG;
+          end
+
+        `STATE_RD_FIX_NEG:
+          // TODO add switch here for 3 phase modulation variation.
+          if(clk_count >= clk_count_fix_n)
+            state <= `STATE_RD_VAR_START;
+
+
+        `STATE_RD_VAR_START:
+          // not a real var. since only ever drives up.
+          begin
+            state         <= `STATE_RD_VAR;
+            clk_count     <= 0;
+
+            if( comparator_val_last)   // test below the zero-cross
+              begin
+                // add negative ref. to drive up. 
+                // just continues previous fix neg / upward drive 
+                refmux    <= `MUX_REF_NEG;  
+                count_up  <= count_up + 1;
+              end
+            else
+              // already above cross.. so just skip to fix-neg / rundown.
+
+              state <= `STATE_PRERUNDOWN_START;
+          end
+
+        `STATE_RD_VAR:
+          if(clk_count >= clk_count_var_n)
+            state <= `STATE_PRERUNDOWN_START;
+
+
+        // perhaps ignore the fix neg - avoids going under.
+
 
         // the end of signal integration. is different to the end of the 4 phase cycle.
         // we want a gpio pin. to hit on pre-rundown.
