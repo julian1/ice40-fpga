@@ -753,54 +753,15 @@ module my_modulation (
               end
           end
 
-        /*
-          E. IMPORTANT
-          - solution to jump immediately to pre/rundown. without extra cycling.
-            is just to keep adding up fix periods until above cross.
-            eg. one var might not be enough. and two vars may go out of bound.
-            dand the main advantage is, it is not a unqiue phase length - so doesn't require an extra variable in the regression.
-          - alternatively - it might be better to capture it distinctly as a boolean and extra variable.
-                because its slightly different to the 4 phase modulation switching.
-
-        */
         `STATE_VAR2:
           if(clk_count >= clk_count_var_n)
             begin
-              // signal integration finished.
+              // signal integration finished. 
               if( !sig_active )
-                  /*
-                      - depending if last var phase was up or down. there may or may not be another switch for run-down.
-                      - if doing extra flip cycling, then in practise last var will be up.
-                      - but if land correct side - var could be approaching from either direction.
-                      ----
-                      - extr. there is a much easier way to count transitions.
-                          just have ref_last;
-                          and then check the transitions. in the same way we do crossing detections/ or clock domain crossing..
-                      ------
-                      - ideally we might want to count each fet switch (eg. each bit in ref mux) separately.
-                      - only need to count up. since rundown ends with both on.
-                      ----
-                      k2002.         - rundown achieved with both switches off. so charge is balanced.  from on to off.
-                      bias resistor  - rundown achived with both switches on. should be the same.
-                      ----
-                      - we should add an extra condition - that last var / approach direction was up.
-                      - to force it to cycle - until hit this condition.
-                      - that should equalize the switching events  (even if off by one).
-                  */
-                  // and above zero cross
-                  // if( ! comparator_val_last)
-
-                  // OK. hang on. maybe we just have to wigle the pin to equalize charge balance.
-                  // Rather. than add another up phase or down phase.
-
+            
                   // upward slope and above zero cross
                   if( refmux  == `MUX_REF_NEG && ! comparator_val_last) // prior var phase was up. counts/charge equalized.
-                  // if( refmux  == `MUX_REF_POS && ! comparator_val_last) // may be balanced. but will require an extra var until above zero cross
-                                                                            // 
-                  // if( refmux  == `MUX_REF_NEG ) // upward
 
-                    // go straight to the prerundown .
-                    // state <= `STATE_RUNDOWN_START;
                     state <= `STATE_PRERUNDOWN_START;
                   // below zero cross
                   else
@@ -825,17 +786,7 @@ module my_modulation (
            begin
             state         <= `STATE_PRERUNDOWN;
             clk_count     <= 0;
-            /*
-              we don't care about landing above the zero-cross. in 4 phase we care about ending on a downward var.
-                thatway we can add a up transition.  before doing the downward transition (for slow) rundown.
-                to balance the up/down transitions.
-                the upward phase - then needs to be enough to push over the zero-cross.  but that is secondary.
-                ----------
-            */
-            // count_fix_up  <= count_fix_up + 1;
-            // drive up.
-            // refmux        <= `MUX_REF_NEG;
-            // refmux        <= `MUX_REF_NEG;
+            // turn off the previous on switch to equalize counts
             refmux        <= `MUX_REF_NONE;
           end
 
@@ -1124,6 +1075,46 @@ module top (
 
 endmodule
 
+            /*
+              we don't care about landing above the zero-cross. in 4 phase we care about ending on a downward var.
+                thatway we can add a up transition.  before doing the downward transition (for slow) rundown.
+                to balance the up/down transitions.
+                the upward phase - then needs to be enough to push over the zero-cross.  but that is secondary.
+                ----------
+            */
+
+
+
+        /*
+          E. IMPORTANT
+          - solution to jump immediately to pre/rundown. without extra cycling.
+            is just to keep adding up fix periods until above cross.
+            eg. one var might not be enough. and two vars may go out of bound.
+            dand the main advantage is, it is not a unqiue phase length - so doesn't require an extra variable in the regression.
+          - alternatively - it might be better to capture it distinctly as a boolean and extra variable.
+                because its slightly different to the 4 phase modulation switching.
+
+        */
+
+                  /*
+                      - depending if last var phase was up or down. there may or may not be another switch for run-down.
+                      - if doing extra flip cycling, then in practise last var will be up.
+                      - but if land correct side - var could be approaching from either direction.
+                      ----
+                      - extr. there is a much easier way to count transitions.
+                          just have ref_last;
+                          and then check the transitions. in the same way we do crossing detections/ or clock domain crossing..
+                      ------
+                      - ideally we might want to count each fet switch (eg. each bit in ref mux) separately.
+                      - only need to count up. since rundown ends with both on.
+                      ----
+                      k2002.         - rundown achieved with both switches off. so charge is balanced.  from on to off.
+                      bias resistor  - rundown achived with both switches on. should be the same.
+                      ----
+                      - we should add an extra condition - that last var / approach direction was up.
+                      - to force it to cycle - until hit this condition.
+                      - that should equalize the switching events  (even if off by one).
+                  */
 
 
 /*
