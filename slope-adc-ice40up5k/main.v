@@ -805,7 +805,7 @@ module my_modulation (
                 // just continues previous fix neg / upward drive
 
                 state     <= `STATE_RD_VAR;
-                refmux    <= `MUX_REF_NEG;
+                refmux    <= `MUX_REF_NEG;  // no change.
                 count_up  <= count_up + 1;
 
                 count_flip <= count_flip + 1;
