@@ -778,7 +778,6 @@ module my_modulation (
         ////////////////////
 
 
-
         // we have actually reversed this... from normal four cycle. which drives down first.
 
         `STATE_RD_FIX_NEG_START:  // fix up.
@@ -808,13 +807,21 @@ module my_modulation (
                 state     <= `STATE_RD_VAR;
                 refmux    <= `MUX_REF_NEG;
                 count_up  <= count_up + 1;
+
+                count_flip <= count_flip + 1;
+
               end
             else
-              // already above cross.. so just skip to fix-neg / rundown.
+              begin
+                // already above cross.. so just skip to fix-neg / rundown.
 
-              // IMPORTANT - there is a extra clk cycle here - where we don't transition.
-              // eg. should switch off the mux.
-              state <= `STATE_PRERUNDOWN_START;
+                // IMPORTANT - there is a extra clk cycle here - where we don't transition.
+                // eg. should switch off the mux.
+                state       <= `STATE_PRERUNDOWN_START;
+
+                // must be pre-emptively turned off here. to be clk/ accurate
+                refmux      <= `MUX_REF_NONE;
+              end
           end
 
         `STATE_RD_VAR:
