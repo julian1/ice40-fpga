@@ -615,7 +615,7 @@ module my_modulation (
         `MUX_REF_POS:
             clk_count_mux_pos <=  clk_count_mux_pos + 1;
 
-        `MUX_REF_SLOW_POS:
+        `MUX_REF_SLOW_POS:  // TODO change name to REF_BOTH. or REF_RD
             clk_count_mux_rd <= clk_count_mux_rd + 1;
 
         `MUX_REF_NONE:
