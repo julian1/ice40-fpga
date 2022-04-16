@@ -37,7 +37,7 @@
     auto-zero
       - need the switching to be done in the fpga.
       just swapping the input.
-      or should only be a couple of lines of code.
+      /Mor should only be a couple of lines of code.
 
     and acal/gain.
       is just measuring the ref-hi .  every so often. eg. once every 10obs.
@@ -579,11 +579,12 @@ module my_modulation (
       // sample/bind comparator val once on clock edge. improves speed.
       comparator_val_last <=  comparator_val;
 
-
+      // TODO change name ref_sw_pos_cross
       // instrumentation for switch transitions for both pos,neg (and both).
       pos_ref_cross <= { pos_ref_cross[0], refmux[0] }; // old, new
       neg_ref_cross <= { neg_ref_cross[0], refmux[1] };
 
+      // TODO count_pos_trans or cross pos_  or just count_pos_trans
       // TODO must rename. actually represents count of each on switch transiton = count_ref_pos_on and count_ref_neg_on.
       if(pos_ref_cross == 2'b01)
         count_trans_up <= count_trans_up + 1;
