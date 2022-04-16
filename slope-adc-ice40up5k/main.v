@@ -1,4 +1,14 @@
 /*
+
+  # warnings
+  grep Warning ./build/yosys.txt | grep -v 'assigned in a block'
+
+  # catch defines without backticks
+  grep -r [A-Z] main.v | grep -v '`' | grep MUX
+  grep -r [A-Z] main.v | grep -v '`' | grep STA
+
+
+  ----------
   switching of the high-side mux is a little tricky.
     eg. do we switch the feedback signal to reset integrator - at the start of rundown or the finish of rundown?
     there will be a small leakage current current through the low side mux. but better to not have the integrator loop and buffer op swinging around during this time.
@@ -27,7 +37,7 @@
     auto-zero
       - need the switching to be done in the fpga.
       just swapping the input.
-      or should only be a couple of lines of code.
+      /Mor should only be a couple of lines of code.
 
     and acal/gain.
       is just measuring the ref-hi .  every so often. eg. once every 10obs.
@@ -83,8 +93,13 @@
 `define REG_COUNT_FIX_DOWN      35
 `define REG_COUNT_FLIP          36
 
-
 `define REG_CLK_COUNT_RUNDOWN   37
+
+
+`define REG_CLK_COUNT_MUX_NEG   40
+`define REG_CLK_COUNT_MUX_POS   41
+`define REG_CLK_COUNT_MUX_RD    42
+
 
 
 /*
@@ -167,9 +182,12 @@ module my_register_bank   #(parameter MSB=32)   (
   input wire [24-1:0] count_fix_up,
   input wire [24-1:0] count_fix_down,
   input wire [24-1:0] count_flip,
-
-
   input wire [24-1:0] clk_count_rundown,
+
+
+  input wire [24-1:0] clk_count_mux_neg,
+  input wire [24-1:0] clk_count_mux_pos,
+  input wire [24-1:0] clk_count_mux_rd,
 
 
   input wire [24-1:0] meas_count     // useful to check if stalled
@@ -282,6 +300,9 @@ module my_register_bank   #(parameter MSB=32)   (
 
               `REG_CLK_COUNT_RUNDOWN: out <= clk_count_rundown << 8;
 
+              `REG_CLK_COUNT_MUX_NEG:  out <= clk_count_mux_neg << 8;
+              `REG_CLK_COUNT_MUX_POS:  out <= clk_count_mux_pos << 8;
+              `REG_CLK_COUNT_MUX_RD:   out <= clk_count_mux_rd << 8;
 
               default:                out <= 12345 << 8;
 
@@ -432,10 +453,13 @@ module my_modulation (
   output [24-1:0] count_trans_down_last,
   output [24-1:0] count_fix_up_last,
   output [24-1:0] count_fix_down_last,
-
   output [24-1:0] count_flip_last,
-
   output [24-1:0] clk_count_rundown_last,
+
+  output [24-1:0] clk_count_mux_neg_last,
+  output [24-1:0] clk_count_mux_pos_last,
+  output [24-1:0] clk_count_mux_rd_last,
+
 
 
   // both should be input wires. both are driven.
@@ -480,6 +504,11 @@ module my_modulation (
   reg [24-1:0] count_fix_up;
   reg [24-1:0] count_fix_down;
   reg [24-1:0] count_flip;
+
+  //
+  reg [24-1:0] clk_count_mux_neg;
+  reg [24-1:0] clk_count_mux_pos;
+  reg [24-1:0] clk_count_mux_rd;
 
   /////////////////////////
   // this should be pushed into a separate module...
@@ -550,11 +579,12 @@ module my_modulation (
       // sample/bind comparator val once on clock edge. improves speed.
       comparator_val_last <=  comparator_val;
 
-
+      // TODO change name ref_sw_pos_cross
       // instrumentation for switch transitions for both pos,neg (and both).
       pos_ref_cross <= { pos_ref_cross[0], refmux[0] }; // old, new
       neg_ref_cross <= { neg_ref_cross[0], refmux[1] };
 
+      // TODO count_pos_trans or cross pos_  or just count_pos_trans
       // TODO must rename. actually represents count of each on switch transiton = count_ref_pos_on and count_ref_neg_on.
       if(pos_ref_cross == 2'b01)
         count_trans_up <= count_trans_up + 1;
@@ -575,18 +605,24 @@ module my_modulation (
         - enables having non standar variable periods. eg. to reduce extra cycling to get to the other side.
         ------
         the way to evaluate is to use stderr(regression).
-
-      if(refmux ==  MUX_REF_POS)
-        clk_count_pos <= clk_count_pos + 1;
-
-      if(refmux ==  MUX_REF_POS)
-        clk_count_neg <= clk_count_neg + 1;
-
-      if(refmux == MUX_REF_SLOW_POS)
-        clk_count_rundown <= clk_count_rundown + 1;
       */
 
+      case (refmux)
 
+        `MUX_REF_NEG:
+            clk_count_mux_neg <= clk_count_mux_neg + 1;
+
+        `MUX_REF_POS:
+            clk_count_mux_pos <=  clk_count_mux_pos + 1;
+
+        `MUX_REF_SLOW_POS:
+            clk_count_mux_rd <= clk_count_mux_rd + 1;
+
+        `MUX_REF_NONE:
+          ; // switches are turned off at start. and also at prerundown.
+
+
+      endcase
       // count_pos_on
 
 
@@ -661,9 +697,12 @@ module my_modulation (
             count_fix_down  <= 0;
             count_trans_up  <= 0;
             count_trans_down <= 0;
-
-
             count_flip      <= 0;
+
+            clk_count_mux_neg <= 0;
+            clk_count_mux_pos <= 0;
+            clk_count_mux_rd <= 0;
+
 
             // clear the aperture counter
             clk_count_aper  <= 0;
@@ -796,7 +835,7 @@ module my_modulation (
                   // upward slope and above zero cross
                   if( refmux  == `MUX_REF_NEG && ! comparator_val_last) // prior var phase was up. counts/charge equalized.
                   // if( refmux  == `MUX_REF_POS && ! comparator_val_last) // may be balanced. but will require an extra var until above zero cross
-                                                                            // 
+                                                                            //
                   // if( refmux  == `MUX_REF_NEG ) // upward
 
                     // go straight to the prerundown .
@@ -896,8 +935,13 @@ module my_modulation (
                 count_fix_up_last       <= count_fix_up;
                 count_fix_down_last     <= count_fix_down;
                 count_flip_last         <= count_flip;
-
                 clk_count_rundown_last  <= clk_count;
+
+                clk_count_mux_neg_last  <= clk_count_mux_neg;
+                clk_count_mux_pos_last  <= clk_count_mux_pos;
+                clk_count_mux_rd_last   <= clk_count_mux_rd;;
+
+
 
               end
           end
@@ -1010,8 +1054,12 @@ module top (
   reg [24-1:0] count_fix_up;
   reg [24-1:0] count_fix_down;
   reg [24-1:0] count_flip;
-
   reg [24-1:0] clk_count_rundown;
+
+  reg [24-1:0] clk_count_mux_neg;
+  reg [24-1:0] clk_count_mux_pos;
+  reg [24-1:0] clk_count_mux_rd;
+
 
   reg [4-1:0] himux_sel;    // himux signal selection
   reg [4-1:0] rb_himux_sel;
@@ -1070,7 +1118,11 @@ module top (
     . count_flip(count_flip),
 
     // clk counts
-    . clk_count_rundown(clk_count_rundown)
+    . clk_count_rundown(clk_count_rundown),
+
+    . clk_count_mux_neg(clk_count_mux_neg),
+    . clk_count_mux_pos(clk_count_mux_pos),
+    . clk_count_mux_rd(clk_count_mux_rd)
 
   );
 
@@ -1111,6 +1163,12 @@ module top (
     . count_flip_last(count_flip),
     // clk counts
     . clk_count_rundown_last(clk_count_rundown),
+
+
+    . clk_count_mux_neg_last(clk_count_mux_neg),
+    . clk_count_mux_pos_last(clk_count_mux_pos),
+    . clk_count_mux_rd_last(clk_count_mux_rd),
+
 
     // outputs
     . com_interupt(COM_INTERUPT),
