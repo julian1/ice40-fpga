@@ -409,8 +409,12 @@ endmodule
 `define STATE_PRERUNDOWN   18
 `define STATE_PRERUNDOWN_START 19
 
+`define STATE_PRERUNDOWN_BELOW_START 20
+`define STATE_PRERUNDOWN_BELOW  21
 
-
+`define STATE_PRERUNDOWN_ABOVE_START 22
+`define STATE_PRERUNDOWN_ABOVE 23
+ 
 
 // ref mux state.
 `define MUX_REF_NONE        2'b00
@@ -807,49 +811,12 @@ module my_modulation (
             begin
               // signal integration finished.
               if( !sig_active )
-                  /*
-                      - depending if last var phase was up or down. there may or may not be another switch for run-down.
-                      - if doing extra flip cycling, then in practise last var will be up.
-                      - but if land correct side - var could be approaching from either direction.
-                      ----
-                      - extr. there is a much easier way to count transitions.
-                          just have ref_last;
-                          and then check the transitions. in the same way we do crossing detections/ or clock domain crossing..
-                      ------
-                      - ideally we might want to count each fet switch (eg. each bit in ref mux) separately.
-                      - only need to count up. since rundown ends with both on.
-                      ----
-                      k2002.         - rundown achieved with both switches off. so charge is balanced.  from on to off.
-                      bias resistor  - rundown achived with both switches on. should be the same.
-                      ----
-                      - we should add an extra condition - that last var / approach direction was up.
-                      - to force it to cycle - until hit this condition.
-                      - that should equalize the switching events  (even if off by one).
-                  */
-                  // and above zero cross
-                  // if( ! comparator_val_last)
 
-                  // OK. hang on. maybe we just have to wigle the pin to equalize charge balance.
-                  // Rather. than add another up phase or down phase.
+                  if(  comparator_val_last) // below cross
+                    state <= `STATE_PRERUNDOWN_BELOW_START;
 
-                  // upward slope and above zero cross
-                  if( refmux  == `MUX_REF_NEG && ! comparator_val_last) // prior var phase was up. counts/charge equalized.
-                  // if( refmux  == `MUX_REF_POS && ! comparator_val_last) // may be balanced. but will require an extra var until above zero cross
-                                                                            //
-                  // if( refmux  == `MUX_REF_NEG ) // upward
-
-                    // go straight to the prerundown .
-                    // state <= `STATE_RUNDOWN_START;
-                    state <= `STATE_PRERUNDOWN_START;
-                  // below zero cross
                   else
-                    begin
-                      // do another cycle
-                      state <= `STATE_FIX_POS_START;
-
-                      // count_prerundown
-                      count_flip <= count_flip + 1;
-                    end
+                    state <= `STATE_PRERUNDOWN_ABOVE_START;
 
               // signal integration not finished
               else
@@ -857,6 +824,49 @@ module my_modulation (
                   state <= `STATE_FIX_POS_START;
             end
 
+
+        // a single fix up. 
+
+
+        // add small down phases. until below
+        `STATE_PRERUNDOWN_ABOVE_START:
+           begin
+            state         <= `STATE_PRERUNDOWN_ABOVE;
+            clk_count     <= 0;
+            refmux        <= `MUX_REF_POS;
+            end
+ 
+        `STATE_PRERUNDOWN_ABOVE:
+          if(clk_count >= clk_count_fix_n)
+            begin
+             if( comparator_val_last) // below zero-cross
+              state <= `STATE_PRERUNDOWN_BELOW_START;       // go to the above
+            else
+              state <= `STATE_PRERUNDOWN_ABOVE_START;
+            end
+
+
+
+        // add small up phases until above
+        `STATE_PRERUNDOWN_BELOW_START:
+           begin
+            state         <= `STATE_PRERUNDOWN_BELOW;
+            clk_count     <= 0;
+            refmux        <= `MUX_REF_NEG;
+            end
+ 
+        `STATE_PRERUNDOWN_BELOW:
+          if(clk_count >= clk_count_fix_n)
+            begin
+             if( ! comparator_val_last) // above zero-cross
+              state <= `STATE_PRERUNDOWN_START;
+            else
+              state <= `STATE_PRERUNDOWN_BELOW_START;
+            end
+
+
+
+        ////////////////////////////////////////////
         // the end of signal integration. is different to the end of the 4 phase cycle.
         // we want a gpio pin. to hit on pre-rundown.
 
@@ -865,16 +875,12 @@ module my_modulation (
             state         <= `STATE_PRERUNDOWN;
             clk_count     <= 0;
             /*
-              we don't care about landing above the zero-cross. in 4 phase we care about ending on a downward var.
+                we don't care about landing above the zero-cross. in 4 phase we care about ending on a downward var.
                 thatway we can add a up transition.  before doing the downward transition (for slow) rundown.
                 to balance the up/down transitions.
                 the upward phase - then needs to be enough to push over the zero-cross.  but that is secondary.
                 ----------
             */
-            // count_fix_up  <= count_fix_up + 1;
-            // drive up.
-            // refmux        <= `MUX_REF_NEG;
-            // refmux        <= `MUX_REF_NEG;
             refmux        <= `MUX_REF_NONE;
           end
 
@@ -1181,6 +1187,31 @@ module top (
 
 
 endmodule
+
+                  /*
+                      - depending if last var phase was up or down. there may or may not be another switch for run-down.
+                      - if doing extra flip cycling, then in practise last var will be up.
+                      - but if land correct side - var could be approaching from either direction.
+                      ----
+                      - extr. there is a much easier way to count transitions.
+                          just have ref_last;
+                          and then check the transitions. in the same way we do crossing detections/ or clock domain crossing..
+                      ------
+                      - ideally we might want to count each fet switch (eg. each bit in ref mux) separately.
+                      - only need to count up. since rundown ends with both on.
+                      ----
+                      k2002.         - rundown achieved with both switches off. so charge is balanced.  from on to off.
+                      bias resistor  - rundown achived with both switches on. should be the same.
+                      ----
+                      - we should add an extra condition - that last var / approach direction was up.
+                      - to force it to cycle - until hit this condition.
+                      - that should equalize the switching events  (even if off by one).
+                  */
+                  // and above zero cross
+                  // if( ! comparator_val_last)
+
+                  // OK. hang on. maybe we just have to wigle the pin to equalize charge balance.
+                  // Rather. than add another up phase or down phase.
 
 
 
