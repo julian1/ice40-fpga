@@ -831,18 +831,18 @@ module my_modulation (
         // add small down phases. until below
         `STATE_PRERUNDOWN_ABOVE_START:
            begin
-            state         <= `STATE_PRERUNDOWN_ABOVE;
-            clk_count     <= 0;
-            refmux        <= `MUX_REF_POS;
+            state     <= `STATE_PRERUNDOWN_ABOVE;
+            clk_count <= 0;
+            refmux    <= `MUX_REF_POS;
             end
  
         `STATE_PRERUNDOWN_ABOVE:
           if(clk_count >= clk_count_fix_n)
             begin
              if( comparator_val_last) // below zero-cross
-              state <= `STATE_PRERUNDOWN_BELOW_START;       // go to the above
+              state   <= `STATE_PRERUNDOWN_BELOW_START;       // go to the above
             else
-              state <= `STATE_PRERUNDOWN_ABOVE_START;
+              state   <= `STATE_PRERUNDOWN_ABOVE_START;
             end
 
 
@@ -850,18 +850,18 @@ module my_modulation (
         // add small up phases until above
         `STATE_PRERUNDOWN_BELOW_START:
            begin
-            state         <= `STATE_PRERUNDOWN_BELOW;
-            clk_count     <= 0;
-            refmux        <= `MUX_REF_NEG;
+            state     <= `STATE_PRERUNDOWN_BELOW;
+            clk_count <= 0;
+            refmux    <= `MUX_REF_NEG;
             end
  
         `STATE_PRERUNDOWN_BELOW:
           if(clk_count >= clk_count_fix_n)
             begin
              if( ! comparator_val_last) // above zero-cross
-              state <= `STATE_PRERUNDOWN_START;
+              state   <= `STATE_PRERUNDOWN_START;
             else
-              state <= `STATE_PRERUNDOWN_BELOW_START;
+              state   <= `STATE_PRERUNDOWN_BELOW_START;
             end
 
 
@@ -872,8 +872,8 @@ module my_modulation (
 
         `STATE_PRERUNDOWN_START:
            begin
-            state         <= `STATE_PRERUNDOWN;
-            clk_count     <= 0;
+            state     <= `STATE_PRERUNDOWN;
+            clk_count <= 0;
             /*
                 we don't care about landing above the zero-cross. in 4 phase we care about ending on a downward var.
                 thatway we can add a up transition.  before doing the downward transition (for slow) rundown.
@@ -881,7 +881,7 @@ module my_modulation (
                 the upward phase - then needs to be enough to push over the zero-cross.  but that is secondary.
                 ----------
             */
-            refmux        <= `MUX_REF_NONE;
+            refmux    <= `MUX_REF_NONE;
           end
 
         // It has to be MUX_NONE
