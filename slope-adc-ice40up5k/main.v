@@ -413,14 +413,14 @@ endmodule
 `define STATE_RUNDOWN       16
 `define STATE_DONE          17
 
-`define STATE_PRERUNDOWN   18
+`define STATE_PRERUNDOWN    18
 `define STATE_PRERUNDOWN_START 19
 
 `define STATE_FAST_BELOW_START 20
-`define STATE_FAST_BELOW  21
+`define STATE_FAST_BELOW    21
 
 `define STATE_FAST_ABOVE_START 22
-`define STATE_FAST_ABOVE 23
+`define STATE_FAST_ABOVE    23
 
 
 // ref mux state.
