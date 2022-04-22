@@ -416,11 +416,11 @@ endmodule
 `define STATE_PRERUNDOWN   18
 `define STATE_PRERUNDOWN_START 19
 
-`define STATE_PRERUNDOWN_BELOW_START 20
-`define STATE_PRERUNDOWN_BELOW  21
+`define STATE_FAST_BELOW_START 20
+`define STATE_FAST_BELOW  21
 
-`define STATE_PRERUNDOWN_ABOVE_START 22
-`define STATE_PRERUNDOWN_ABOVE 23
+`define STATE_FAST_ABOVE_START 22
+`define STATE_FAST_ABOVE 23
 
 
 // ref mux state.
@@ -820,14 +820,14 @@ module my_modulation (
                 if(use_fast_rundown)
                   begin
                     if(  comparator_val_last) // below cross
-                      state <= `STATE_PRERUNDOWN_BELOW_START;
+                      state <= `STATE_FAST_BELOW_START;
                     else                      // above cross
-                      state <= `STATE_PRERUNDOWN_ABOVE_START;
+                      state <= `STATE_FAST_ABOVE_START;
                   end
                 else
                   begin
-
-                    if( refmux  == `MUX_REF_NEG && ! comparator_val_last) // above cross and up phase
+                    // above cross and up phase
+                    if( refmux  == `MUX_REF_NEG && ! comparator_val_last)
                       state <= `STATE_PRERUNDOWN_START;
                     else
                       // keep cycling
@@ -846,38 +846,38 @@ module my_modulation (
         // TODO change name FAST_RD
 
         // add small down phases. until below
-        `STATE_PRERUNDOWN_ABOVE_START:
+        `STATE_FAST_ABOVE_START:
            begin
-            state     <= `STATE_PRERUNDOWN_ABOVE;
+            state     <= `STATE_FAST_ABOVE;
             clk_count <= 0;
             refmux    <= `MUX_REF_POS;
             end
 
-        `STATE_PRERUNDOWN_ABOVE:
+        `STATE_FAST_ABOVE:
           if(clk_count >= clk_count_fix_n)
             begin
              if( comparator_val_last) // below zero-cross
-              state   <= `STATE_PRERUNDOWN_BELOW_START;       // go to the above
+              state   <= `STATE_FAST_BELOW_START;     // go to the above
             else
-              state   <= `STATE_PRERUNDOWN_ABOVE_START;
+              state   <= `STATE_FAST_ABOVE_START;     // do another cycle
             end
 
 
         // add small up phases until above
-        `STATE_PRERUNDOWN_BELOW_START:
+        `STATE_FAST_BELOW_START:
            begin
-            state     <= `STATE_PRERUNDOWN_BELOW;
+            state     <= `STATE_FAST_BELOW;
             clk_count <= 0;
             refmux    <= `MUX_REF_NEG;
             end
 
-        `STATE_PRERUNDOWN_BELOW:
+        `STATE_FAST_BELOW:
           if(clk_count >= clk_count_fix_n)
             begin
              if( ! comparator_val_last) // above zero-cross
-              state   <= `STATE_PRERUNDOWN_START;
+              state   <= `STATE_PRERUNDOWN_START;   // go to prerundown
             else
-              state   <= `STATE_PRERUNDOWN_BELOW_START;
+              state   <= `STATE_FAST_BELOW_START;   // do another cycle
             end
 
 
