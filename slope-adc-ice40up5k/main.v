@@ -79,6 +79,7 @@
 `define REG_CLK_COUNT_APER_N_HI 16
 
 `define REG_USE_SLOW_RUNDOWN    17
+
 `define REG_HIMUX_SEL           18       // keep in register bank. pass dummy var, if don't use.
 `define REG_STATE             19
 `define REG_RESET               20// hold modulation in reset.
@@ -101,6 +102,7 @@
 `define REG_CLK_COUNT_MUX_RD    42
 
 
+`define REG_USE_FAST_RUNDOWN    43
 
 /*
   EXTR. we already have to read count_up/count_down etc. during the reset period,
@@ -169,6 +171,8 @@ module my_register_bank   #(parameter MSB=32)   (
   inout [31:0]        clk_count_aper_n,
 
   inout               use_slow_rundown,
+  inout               use_fast_rundown,
+
   inout [4-1:0]       himux_sel,
 
   input [5-1:0]       state,     // only thing that writes the
@@ -219,13 +223,12 @@ module my_register_bank   #(parameter MSB=32)   (
     clk_count_var_n     = 185;    // 330pF
     clk_count_fix_n     = 24;   // 24 is faster than 23... weird.
 
-
-
     clk_count_aper_n    = (2 * 2000000);    // ? 200ms TODO check this.
                                             // yes. 4000000 == 10PNLC, 5 sps.
     use_slow_rundown    = 1;
-    himux_sel           = `HIMUX_SEL_REF_HI;   // when not controlled by state controller.
+    use_fast_rundown    = 1;
 
+    himux_sel           = `HIMUX_SEL_REF_HI;   // when not controlled by state controller.
     reset               = 1; // for modulation, active lo
 
   end
@@ -276,7 +279,9 @@ module my_register_bank   #(parameter MSB=32)   (
               `REG_CLK_COUNT_VAR_N:   out <= clk_count_var_n << 8;
               `REG_CLK_COUNT_APER_N_LO: out <= clk_count_aper_n << 8;           // lo 24 bits  aperture
               `REG_CLK_COUNT_APER_N_HI: out <= (clk_count_aper_n >> 24) << 8;   // hi 8 bits
+
               `REG_USE_SLOW_RUNDOWN:  out <= use_slow_rundown << 8;
+              `REG_USE_FAST_RUNDOWN:  out <= use_fast_rundown << 8;
 
               /* could convert numerical argument - to avoid accidently turning on more than one source.
                 no. mux switch has 1.5k impedance. should not break anything
@@ -356,6 +361,8 @@ module my_register_bank   #(parameter MSB=32)   (
           // `REG_CLK_COUNT_APER_N_HI: clk_count_aper_n <=   { val[ MSB - 1: MSB - 8 - 1 ], clk_count_aper_n[ MSB - 8 - 1: 0] };  // hi 8 bits
 
           `REG_USE_SLOW_RUNDOWN:    use_slow_rundown <= val;
+          `REG_USE_FAST_RUNDOWN:    use_fast_rundown <= val;
+
           `REG_HIMUX_SEL:           himux_sel <= val;
           `REG_RESET:               reset <= val;
 
@@ -414,7 +421,7 @@ endmodule
 
 `define STATE_PRERUNDOWN_ABOVE_START 22
 `define STATE_PRERUNDOWN_ABOVE 23
- 
+
 
 // ref mux state.
 `define MUX_REF_NONE        2'b00
@@ -442,6 +449,8 @@ module my_modulation (
   // REVIEW input/output.
 
   input           use_slow_rundown,
+  input           use_fast_rundown,
+
   input [4-1:0]   himux_sel,
   output [5-1:0]   state,     // only thing that writes the
   inout           reset,
@@ -800,10 +809,6 @@ module my_modulation (
           E. IMPORTANT
           - solution to jump immediately to pre/rundown. without extra cycling.
             is just to keep adding up fix periods until above cross.
-            eg. one var might not be enough. and two vars may go out of bound.
-            dand the main advantage is, it is not a unqiue phase length - so doesn't require an extra variable in the regression.
-          - alternatively - it might be better to capture it distinctly as a boolean and extra variable.
-                because its slightly different to the 4 phase modulation switching.
 
         */
         `STATE_VAR2:
@@ -812,11 +817,22 @@ module my_modulation (
               // signal integration finished.
               if( !sig_active )
 
-                  if(  comparator_val_last) // below cross
-                    state <= `STATE_PRERUNDOWN_BELOW_START;
+                if(use_fast_rundown)
+                  begin
+                    if(  comparator_val_last) // below cross
+                      state <= `STATE_PRERUNDOWN_BELOW_START;
+                    else                      // above cross
+                      state <= `STATE_PRERUNDOWN_ABOVE_START;
+                  end
+                else
+                  begin
 
-                  else
-                    state <= `STATE_PRERUNDOWN_ABOVE_START;
+                    if( refmux  == `MUX_REF_NEG && ! comparator_val_last) // above cross and up phase
+                      state <= `STATE_PRERUNDOWN_START;
+                    else
+                      // keep cycling
+                      state <= `STATE_FIX_POS_START;
+                  end
 
               // signal integration not finished
               else
@@ -825,8 +841,9 @@ module my_modulation (
             end
 
 
-        // a single fix up. 
-
+        // fast rundown.
+        // add small fix phases until we are in a position to do slow rundown
+        // TODO change name FAST_RD
 
         // add small down phases. until below
         `STATE_PRERUNDOWN_ABOVE_START:
@@ -835,7 +852,7 @@ module my_modulation (
             clk_count <= 0;
             refmux    <= `MUX_REF_POS;
             end
- 
+
         `STATE_PRERUNDOWN_ABOVE:
           if(clk_count >= clk_count_fix_n)
             begin
@@ -846,7 +863,6 @@ module my_modulation (
             end
 
 
-
         // add small up phases until above
         `STATE_PRERUNDOWN_BELOW_START:
            begin
@@ -854,7 +870,7 @@ module my_modulation (
             clk_count <= 0;
             refmux    <= `MUX_REF_NEG;
             end
- 
+
         `STATE_PRERUNDOWN_BELOW:
           if(clk_count >= clk_count_fix_n)
             begin
@@ -905,9 +921,7 @@ module my_modulation (
             /*
               IMPORTANT. we are not counting a possible switch transition here.
               Bug?
-
             */
-
             if( use_slow_rundown )
               // turn on both references - to create +ve bias, to drive integrator down.
               refmux      <= `MUX_REF_SLOW_POS;
@@ -919,8 +933,8 @@ module my_modulation (
 
         `STATE_RUNDOWN:
           begin
-
-            // zero-cross to finish.
+            // TODO change to comparator_val test.
+            // zero-cross to finish. should probably change to use last_comparator
             if(cross_any )
               begin
                 // trigger for scope
@@ -946,8 +960,6 @@ module my_modulation (
                 clk_count_mux_neg_last  <= clk_count_mux_neg;
                 clk_count_mux_pos_last  <= clk_count_mux_pos;
                 clk_count_mux_rd_last   <= clk_count_mux_rd;;
-
-
 
               end
           end
@@ -1051,6 +1063,7 @@ module top (
   reg [24-1:0]  clk_count_var_n;
   reg [31:0]    clk_count_aper_n;
   reg use_slow_rundown;
+  reg use_fast_rundown;
 
   // output counts to read
   reg [24-1:0] count_up;
@@ -1107,6 +1120,8 @@ module top (
     . clk_count_aper_n( clk_count_aper_n ) ,
 
     . use_slow_rundown( use_slow_rundown),
+    . use_fast_rundown( use_fast_rundown),
+
     . himux_sel( himux_sel ),
     . state( state),
     . reset( reset),
@@ -1150,6 +1165,8 @@ module top (
     . clk_count_aper_n( clk_count_aper_n ) ,
 
     . use_slow_rundown( use_slow_rundown),
+    . use_fast_rundown( use_fast_rundown),
+
     . himux_sel( himux_sel ),
     . reset( reset),
 
