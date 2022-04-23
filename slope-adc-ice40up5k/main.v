@@ -826,12 +826,14 @@ module my_modulation (
                   end
                 else
                   begin
-                    // above cross and up phase
+                    // above cross and last var was up phase
                     if( refmux  == `MUX_REF_NEG && ! comparator_val_last)
                       state <= `STATE_PRERUNDOWN_START;
                     else
                       // keep cycling
                       state <= `STATE_FIX_POS_START;
+
+                      count_flip <= count_flip + 1;
                   end
 
               // signal integration not finished
