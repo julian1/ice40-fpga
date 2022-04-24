@@ -741,6 +741,11 @@ module my_modulation (
           end
 
         `STATE_FIX_POS:
+          /*
+          // half way through first fix, enable the comparator
+          if(clk_count >= (clk_count_fix_n >> 1))
+            // cmpr_latch_ctl  <= 0
+          */
           if(clk_count >= clk_count_fix_n)       // walk up.  dir = 1
             begin
               state <= `STATE_VAR_START;
