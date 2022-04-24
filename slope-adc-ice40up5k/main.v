@@ -496,10 +496,11 @@ module my_modulation (
 
   // initial begin does seem to be supported.
   initial begin
-    state = `STATE_RESET_START;
+    state           = `STATE_RESET_START;   // 0
 
     com_interupt    = 1; // active lo move this to an initial condition.
-    cmpr_latch_ctl  = 0; // enable comparator
+
+    cmpr_latch_ctl  = 1; // disable comparator,
 
   end
 
@@ -734,11 +735,19 @@ module my_modulation (
             clk_count     <= 0;
             count_fix_down <= count_fix_down + 1;
             refmux        <= `MUX_REF_POS; // initial direction
+
+
+            cmpr_latch_ctl  <= 0; // enable comparator,
           end
 
         `STATE_FIX_POS:
           if(clk_count >= clk_count_fix_n)       // walk up.  dir = 1
-            state <= `STATE_VAR_START;
+            begin
+              state <= `STATE_VAR_START;
+
+              // cmpr_latch_ctl  <= 0; // enable comparator, we test the comparator_last value in the next clock cycle - not enough time...
+
+            end
 
 
         // variable direction
@@ -939,15 +948,18 @@ module my_modulation (
             // zero-cross to finish. should probably change to use last_comparator
             if(cross_any )
               begin
+
+                cmpr_latch_ctl          <= 1; // disable comparator,
+
                 // trigger for scope
                 // transition
-                state         <= `STATE_DONE;
-                clk_count     <= 0;    // ok.
+                state                   <= `STATE_DONE;
+                clk_count               <= 0;    // ok.
 
                 // turn off all inputs. actually should leave. because we will turn on to reset the integrator.
-                refmux        <= `MUX_REF_NONE;
+                refmux                  <= `MUX_REF_NONE;
 
-                com_interupt  <= 0;   // active lo, set interupt
+                com_interupt            <= 0;   // active lo, set interupt
 
                 // record all the counts and rundown everything
                 count_up_last           <= count_up;
