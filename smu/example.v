@@ -120,14 +120,14 @@ module my_register_bank   #(parameter MSB=16)   (
 );
 
 
-  reg [MSB-1:0] tmp;      // register used to read val
+  reg [MSB-1:0] tmp;      // input value
   reg [MSB-1:0] ret  ;    // padding bit
   reg [8-1:0]   count;
 
 
 
   // does this work? wire is effectively an alias in combinatorial code
-  wire [8-1:0] addr  = tmp[ MSB-1:8 ]; // high byte for reg/address, lo byte for val.
+  // wire [8-1:0] addr  = tmp[ MSB-1:8 ]; // high byte for reg/address, lo byte for val.
   wire [8-1:0] val   = tmp;
 
 
@@ -139,47 +139,26 @@ module my_register_bank   #(parameter MSB=16)   (
       begin
         count = 0;
 
-        // dropping of the highest bit maybe cannot avoid...
-        // because it is the first bit.
-        // no. 255 is wrong. it overclocks it
-
-        // ret = 16'b1111110111011010 ;
-        // ret = 255 ;
+        // dummy value
         ret = 255 << 8;
-        //ret = 0;
-        //ret = 0;
-
-        // highest bit looks problematic...
-        // ret = 65535 ;
 
       end
     else
-       // cs asserted 
+       // cs asserted
       begin
 
         // d into lsb, shift left toward msb
         tmp = {tmp[MSB-2:0], din};
 
-        /*
-        // appears to work. actually we could return the address...
-        if(count == 0)
-          ret = 255 << 7;
-        // have the address, so can start sending current value back...
-        if(count == 7)
-          ret = 255 << 7;
-        */
-
+        // reading stuff.
         if(count == 7)
           begin
-            case ( tmp[ 7:0]   )   // register to use
+            case ( tmp[ 7:0]   )   // register to read
               // leds
-              7 :
-                begin
-                  ret = reg_led << 7;
-                end
-     
+              7 :   ret = reg_led << 7;
+
             endcase
-            
+
             // ret = reg_led << 7;
             // ret = tmp << 7;
           end
@@ -203,7 +182,7 @@ module my_register_bank   #(parameter MSB=16)   (
     // we can assert a done flag here... and factor this code...
     if(/*cs && !cs2 &&*/ count == 16 )
       begin
-        case (addr)
+        case (tmp[ MSB-1:8 ])   // register to write
           // leds
           7 :
             begin
@@ -457,8 +436,8 @@ module top (
   output IRANGE_X_SW4_CTL,
 
 
-  // reg_mon_rails 
-  input XP15V_UP_OUT, 
+  // reg_mon_rails
+  input XP15V_UP_OUT,
   input XN15V_UP_OUT,
 
 
