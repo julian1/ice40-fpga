@@ -122,12 +122,10 @@ module my_register_bank   #(parameter MSB=16)   (
 
   reg [MSB-1:0] tmp;      // input value
   reg [MSB-1:0] ret  ;    // output value
-  reg [8-1:0]   count;
+  reg [8-1:0]   count;    // number of bits, in spi
 
 
 
-  // does this work? wire is effectively an alias in combinatorial code
-  // wire [8-1:0] addr  = tmp[ MSB-1:8 ]; // high byte for reg/address, lo byte for val.
   wire [8-1:0] val   = tmp;
 
 
