@@ -160,8 +160,6 @@ module my_register_bank   #(parameter MSB=16)   (
               19 : ret = reg_mon_rails << 7;
             endcase
 
-            // ret = reg_led << 7;
-            // ret = tmp << 7;
           end
 
 
