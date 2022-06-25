@@ -121,7 +121,7 @@ module my_register_bank   #(parameter MSB=16)   (
 
 
   reg [MSB-1:0] tmp;      // input value
-  reg [MSB-1:0] ret  ;    // padding bit
+  reg [MSB-1:0] ret  ;    // output value
   reg [8-1:0]   count;
 
 
