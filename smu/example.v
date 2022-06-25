@@ -124,6 +124,14 @@ module my_register_bank   #(parameter MSB=16)   (
   reg [MSB-1:0] ret  ;    // padding bit
   reg [8-1:0]   count;
 
+
+
+  // does this work? wire is effectively an alias in combinatorial code
+  wire [8-1:0] addr  = tmp[ MSB-1:8 ]; // high byte for reg/address, lo byte for val.
+  wire [8-1:0] val   = tmp;
+
+
+
   // clock value into tmp var
   always @ (negedge clk or posedge cs)
   begin
@@ -162,7 +170,19 @@ module my_register_bank   #(parameter MSB=16)   (
         */
 
         if(count == 7)
-          ret = reg_led << 7;
+          begin
+            case ( tmp[ 7:0]   )   // register to use
+              // leds
+              7 :
+                begin
+                  ret = reg_led << 7;
+                end
+     
+            endcase
+            
+            // ret = reg_led << 7;
+            // ret = tmp << 7;
+          end
 
 
         // return value
@@ -175,11 +195,6 @@ module my_register_bank   #(parameter MSB=16)   (
 
       end
   end
-
-
-  // does this work? wire is effectively an alias in combinatorial code
-  wire [8-1:0] addr  = tmp[ MSB-1:8 ]; // high byte for reg/address, lo byte for val.
-  wire [8-1:0] val   = tmp;
 
 
 
