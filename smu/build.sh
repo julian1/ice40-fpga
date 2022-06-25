@@ -6,7 +6,7 @@
 
 # ./build.sh  2>&1  | grep warning
 
-# should add a trap for failure
+# trap for failure
 set -e
 
 rm -rf ./build

@@ -94,7 +94,8 @@ module my_register_bank   #(parameter MSB=16)   (
   output dout,   // sdo
 
   // latched val, rename
-  output reg [4-1:0] reg_led,     // need to be very careful. only 4 bits. or else screws set/reset calculation ...
+  inout [4-1:0] reg_led,     // need to be very careful. only 4 bits. or else screws set/reset calculation ...
+
   output reg [4-1:0] reg_mux,
   output reg [4-1:0] reg_dac,
   output reg [4-1:0] reg_rails,   /* reg_rails_initital */
@@ -103,6 +104,10 @@ module my_register_bank   #(parameter MSB=16)   (
   output reg [4-1:0] reg_clamp1,
   output reg [4-1:0] reg_clamp2,
   output reg [4-1:0] reg_relay_com,
+
+  // output or input???
+  input [4-1:0] reg_mon_rails,
+
   output reg [4-1:0] reg_irange_x_sw,
   output reg [4-1:0] reg_rails_oe,
   output reg [4-1:0] reg_ina_vfb_sw,
@@ -138,6 +143,7 @@ module my_register_bank   #(parameter MSB=16)   (
 
         // highest bit looks problematic...
         // ret = 65535 ;
+
       end
     else
        // cs asserted 
@@ -154,6 +160,11 @@ module my_register_bank   #(parameter MSB=16)   (
         if(count == 7)
           ret = 255 << 7;
         */
+
+        if(count == 7)
+          ret = reg_led << 7;
+
+
         // return value
 
         // TODO generates a warning....
@@ -208,6 +219,9 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_clamp1        = 4'b1111;  // active lo. turn off
               reg_clamp2        = 4'b1111;  // active lo. turn off
               reg_relay_com     = 0;
+
+
+              // reg_mon_rails,
               reg_irange_x_sw    = 0;   // adg1334
               reg_rails_oe      = 4'b0001;   // active lo. IMPORTANT.  keep hi. until ready to turn on rails.  // weird. for smu09, on first flash. ice40 pins came up lo.
               reg_ina_vfb_sw    = 0;
@@ -428,6 +442,12 @@ module top (
   output IRANGE_X_SW4_CTL,
 
 
+  // reg_mon_rails 
+  input XP15V_UP_OUT, 
+  input XN15V_UP_OUT,
+
+
+
   // irange_yz
   output IRANGE_YZ_SW1_CTL,
   output IRANGE_YZ_SW2_CTL,
@@ -533,6 +553,15 @@ module top (
   wire [4-1:0] reg_relay_com;
   assign { RELAY_COM_Z, RELAY_COM_Y, RELAY_COM_X } = reg_relay_com;
 
+
+
+  wire [4-1:0] reg_mon_rails;
+  assign { XN15V_UP_OUT, XP15V_UP_OUT  } = reg_mon_rails;
+
+
+
+
+
   wire [4-1:0] reg_irange_x_sw;
   assign { IRANGE_X_SW4_CTL, IRANGE_X_SW3_CTL, IRANGE_X_SW2_CTL, IRANGE_X_SW1_CTL } = reg_irange_x_sw;
 
@@ -589,6 +618,9 @@ module top (
     . reg_clamp1(reg_clamp1),
     . reg_clamp2(reg_clamp2),
     . reg_relay_com(reg_relay_com),
+
+    . reg_mon_rails(reg_mon_rails),
+
     . reg_irange_x_sw(reg_irange_x_sw),
     . reg_rails_oe(reg_rails_oe),
     . reg_ina_vfb_sw(reg_ina_vfb_sw),

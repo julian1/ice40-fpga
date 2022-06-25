@@ -90,6 +90,10 @@ set_io DAC_UNI_BIP_A 31
 set_io DAC_UNI_BIP_B 32
 
 
+
+
+
+
 # reg_rails 10
 set_io RAILS_LP5V   37    # smu10
 set_io RAILS_LP15V  38
@@ -137,6 +141,12 @@ set_io IRANGE_X_SW1_CTL 119
 set_io IRANGE_X_SW2_CTL 120
 set_io IRANGE_X_SW3_CTL 121
 set_io IRANGE_X_SW4_CTL 122
+
+
+
+# reg_mon_rails 19
+set_io XP15V_UP_OUT 128
+set_io XN15V_UP_OUT 129
 
 
 # reg_rails_oe 24
