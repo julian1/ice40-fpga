@@ -155,8 +155,9 @@ module my_register_bank   #(parameter MSB=16)   (
           begin
             case ( tmp[ 7:0]   )   // register to read
               // leds
-              7 :   ret = reg_led << 7;
-
+              7 :  ret = reg_led << 7;
+    
+              19 : ret = reg_mon_rails << 7;
             endcase
 
             // ret = reg_led << 7;
