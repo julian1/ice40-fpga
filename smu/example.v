@@ -154,7 +154,7 @@ module my_register_bank   #(parameter MSB=16)   (
             case ( tmp[ 7:0]   )   // register to read
               // leds
               7 :  ret = reg_led << 7;
-    
+
               19 : ret = reg_mon_rails << 7;
             endcase
 
@@ -356,7 +356,7 @@ module top (
   output RAILS_LP5V,
   output RAILS_LP15V,
   output RAILS_LP30V,
-  // output RAILS_LP60V,
+  output RAILS_LP50V,
 
   output RAILS_OE,
 
@@ -525,7 +525,7 @@ module top (
   assign {DAC_RST, DAC_UNI_BIP_B, DAC_UNI_BIP_A, DAC_LDAC } = reg_dac;
 
   wire [4-1:0] reg_rails ;
-  assign { /*RAILS_LP60V,*/ RAILS_LP30V, RAILS_LP15V, RAILS_LP5V } = reg_rails;
+  assign { RAILS_LP50V, RAILS_LP30V, RAILS_LP15V, RAILS_LP5V } = reg_rails;
 
   // reg_soft_reset
 

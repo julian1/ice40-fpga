@@ -98,7 +98,7 @@ set_io DAC_UNI_BIP_B 32
 set_io RAILS_LP5V   37    # smu10
 set_io RAILS_LP15V  38
 set_io RAILS_LP30V  39
-# set_io RAILS_LP60V  41
+set_io RAILS_LP50V  41
 
 # soft_reset 11
 
