@@ -343,7 +343,7 @@ module top (
   // input  FLASH_MISO,   // input
 
   output ICE_SS,
-  output ICE_FLASH_SS,
+  output FLASH_SS,
 
   output ICE_SCK,
   output ICE_MOSI,
@@ -457,7 +457,7 @@ module top (
   wire [8-1:0] reg_mux ;// = 8'b00000001; // test
 
   wire [8-1:0] cs_vec ;
-  assign { ADC02_CS, ICE_FLASH_SS,  DAC_SPI_CS, ADC03_CS } = cs_vec;
+  assign { ADC02_CS, FLASH_SS, DAC_SPI_CS, ADC03_CS } = cs_vec;
 
   wire [8-1:0] miso_vec ;
   assign { ADC02_MISO, ICE_MISO,  DAC_SPI_SDO,  ADC03_MISO } = miso_vec;

@@ -59,7 +59,10 @@ set_io ICE_MOSI     67
 set_io ICE_MISO     68
 set_io ICE_SCK      70
 set_io ICE_SS       71   # eg write flash.
-set_io ICE_FLASH_SS       41   # change name for consistent prefix.
+
+
+# set_io ICE_FLASH_SS       41   # change name for consistent prefix.
+set_io FLASH_SS       50   # june 2022.
 
 
 
