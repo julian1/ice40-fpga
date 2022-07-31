@@ -183,13 +183,11 @@ set_io ISENSE_MUX3_CTL   80
 
 
 # reg_relay 31
-set_io RELAY_OUT_COM_HC 112
-set_io RELAY_OUT_COM_LC 113
+set_io RELAY_OUT_COM_HC_CTL 112
+set_io RELAY_GUARD_CTL      113
+set_io RELAY_SENSE_EXT_CTL  114
+set_io RELAY_SENSE_INT_CTL  115
 
-
-
-# reg_relay_vsense 32
-set_io RELAY_VSENSE_CTL  115
 
 
 

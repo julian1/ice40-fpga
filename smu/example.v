@@ -115,7 +115,7 @@ module my_register_bank   #(parameter MSB=16)   (
   output reg [4-1:0] reg_ina_vfb_atten_sw,
   output reg [4-1:0] reg_isense_mux,
   output reg [4-1:0] reg_relay_out,
-  output reg [4-1:0] reg_relay_vsense,
+  // output reg [4-1:0] reg_relay_vsense,
   output reg [4-1:0] reg_irange_yz_sw
 );
 
@@ -220,7 +220,7 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_ina_vfb_atten_sw = 4'b1111; // active lo. dg444 and 74hc04
               reg_isense_mux     = 4'b1111;
               reg_relay_out       = 0;
-              reg_relay_vsense    = 0;
+              // reg_relay_vsense    = 0;
               reg_irange_yz_sw    = 0;  // adg1334
             end
 
@@ -237,7 +237,7 @@ module my_register_bank   #(parameter MSB=16)   (
           29 : reg_ina_vfb_atten_sw = update(reg_ina_vfb_atten_sw, val);
           30 : reg_isense_mux  = update(reg_isense_mux, val);
           31 : reg_relay_out    = update(reg_relay_out, val);
-          32 : reg_relay_vsense = update(reg_relay_vsense, val);
+          // 32 : reg_relay_vsense = update(reg_relay_vsense, val);
           33 : reg_irange_yz_sw = update( reg_irange_yz_sw, val);
 
         endcase
@@ -418,12 +418,18 @@ module top (
   output ISENSE_MUX3_CTL,
 
   // reg_relay_out
-  output RELAY_OUT_COM_HC,
-  output RELAY_OUT_COM_LC,
+  // output RELAY_OUT_COM_HC,
+  // output RELAY_OUT_COM_LC,
+
+  output RELAY_OUT_COM_HC_CTL,
+  output RELAY_GUARD_CTL,
+  output RELAY_SENSE_EXT_CTL,
+  output RELAY_SENSE_INT_CTL,
+
 
 
   // reg_relay_vsense
-  output RELAY_VSENSE_CTL,
+  // output RELAY_VSENSE_CTL,
 
 
   // irange_x
@@ -572,10 +578,12 @@ module top (
   assign { ISENSE_MUX3_CTL,  ISENSE_MUX2_CTL , ISENSE_MUX1_CTL } = reg_isense_mux;
 
   wire [4-1:0] reg_relay_out;
-  assign {  RELAY_OUT_COM_LC, RELAY_OUT_COM_HC} = reg_relay_out;
+  assign {  RELAY_SENSE_INT_CTL, RELAY_SENSE_EXT_CTL, RELAY_GUARD_CTL, RELAY_OUT_COM_HC_CTL } = reg_relay_out;
 
-  wire [4-1:0] reg_relay_vsense;
-  assign {  RELAY_VSENSE_CTL } = reg_relay_vsense;
+
+
+  // wire [4-1:0] reg_relay_vsense;
+  // assign {  RELAY_VSENSE_CTL } = reg_relay_vsense;
 
   // wire [4-1:0] reg_relay_vsense;
   // assign {  RELAY_VSENSE_CTL } = reg_relay_vsense;
@@ -619,7 +627,7 @@ module top (
     . reg_ina_vfb_atten_sw(reg_ina_vfb_atten_sw),
     . reg_isense_mux(reg_isense_mux),
     . reg_relay_out(reg_relay_out),
-    . reg_relay_vsense(reg_relay_vsense),
+    // . reg_relay_vsense(reg_relay_vsense),
     . reg_irange_yz_sw(reg_irange_yz_sw)
 
   );
