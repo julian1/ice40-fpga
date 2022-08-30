@@ -181,51 +181,10 @@ module my_register_bank   #(parameter MSB=16)   (
       begin
         case (tmp[ MSB-1:8 ])   // register to write
           // leds
-          7 :
-            begin
-              reg_led = update(reg_led, val);
-            end
-          8 :  reg_mux =    update(reg_mux, val);
-          9 :  reg_dac =    update(reg_dac, val);
-          10 : reg_rails =  update(reg_rails, val);
-
-
-          // soft reset
-          11 :
-            /*
-              No. just pass the reset value as a vec, just like pass the reg.
-              eg.  output reg_rails,  input reg_rails_init.
-              but. note that everything comes up hi anyway before flash load
-              OR. just those that are *not* to be set to zer.
-            */
-            begin
-              // none of this is any good... we need mux ctl pulled high etc.
-              // does verilog expand 0 constant to fill all bits?
-              reg_led           = 0;
-              reg_mux           = 0;            // should just be 0b
-              reg_dac           = 0;
-              reg_rails         = 4'b0000;
-              // reg_dac_ref_mux   = 4'b1111;   // dg444 active lo
-              reg_dac_ref_mux   = 4'b0000;      // aug 29 2022. if high, without rails power, then dg444 ESD diodes activate 
-              reg_adc           = 0;
-              reg_clamp1        = 4'b1111;      // dg444 active lo. turn off
-              reg_clamp2        = 4'b1111;      // dg444 active lo. turn off
-              reg_relay_com     = 0;
-
-
-              // reg_mon_rails,
-              reg_irange_x_sw    = 0;           // adg1334
-              reg_rails_oe      = 4'b0001;      // active lo. IMPORTANT.  keep hi. until ready to turn on rails.  // weird. for smu09, on first flash. ice40 pins came up lo.
-              reg_ina_vfb_sw    = 0;            // dg444
-              reg_ina_ifb_sw    = 4'b1111;      // dg444
-              reg_ina_vfb_atten_sw = 4'b1111;   // opto coupler
-              reg_isense_mux     = 4'b1111;     // dg444
-              reg_relay_out       = 0;
-              // reg_relay_vsense    = 0;
-              reg_irange_yz_sw    = 0;          // adg1334
-            end
-
-          // dac ref mux
+          7 :  reg_led =         update(reg_led, val);
+          8 :  reg_mux =        update(reg_mux, val);
+          9 :  reg_dac =        update(reg_dac, val);
+          10 : reg_rails =      update(reg_rails, val);
           12 : reg_dac_ref_mux  = update(reg_dac_ref_mux, val);
           14 : reg_adc          = update(reg_adc, val);
           15 : reg_clamp1       = update(reg_clamp1, val);
@@ -240,6 +199,63 @@ module my_register_bank   #(parameter MSB=16)   (
           31 : reg_relay_out    = update(reg_relay_out, val);
           // 32 : reg_relay_vsense = update(reg_relay_vsense, val);
           33 : reg_irange_yz_sw = update( reg_irange_yz_sw, val);
+
+
+          // soft reset
+          // should be the same as initial starting
+          11 :
+            begin
+              reg_led           = 0;
+              reg_mux           = 0;            // TODO. should leave. eg. don't change the muxing in the middle of spi 
+              reg_dac           = 0;
+              reg_rails         = 4'b0000;
+              // reg_dac_ref_mux   = 4'b1111;   // dg444 active lo
+              reg_dac_ref_mux   = 2'b00;          // aug 29 2022. if high, without rails power, then dg444 ESD diodes activate 
+              reg_adc           = 0;
+              reg_clamp1        = 4'b1111;      // dg444 active lo. turn off
+              reg_clamp2        = 4'b1111;      // dg444 active lo. turn off
+              reg_relay_com     = 0;
+              // reg_mon_rails,
+              reg_irange_x_sw   = 0;            // adg1334
+              reg_rails_oe      = 1'b1;      // active lo. IMPORTANT.  keep hi. until ready to turn on rails.  // weird. for smu09, on first flash. ice40 pins came up lo.
+              reg_ina_vfb_sw    = 0;            // dg444
+              reg_ina_ifb_sw    = 4'b1111;      // dg444
+              reg_ina_vfb_atten_sw = 2'b11;   // opto coupler
+              reg_isense_mux    = 4'b1111;      // dg444
+              reg_relay_out     = 0;
+              // reg_relay_vsense    = 0;
+              reg_irange_yz_sw  = 0;            // adg1334
+            end
+
+          // powerup contingent upon checking rails
+          6 :
+            begin
+              reg_led           = 0;
+              // reg_mux           = 0;            // should just be 0b
+              reg_dac           = 0;
+              reg_rails         = 4'b0011;      // turn on +5V and +-15V rails.
+              reg_dac_ref_mux   = 2'b11;        // aug 29 2022. if high, without rails power, then dg444 ESD diodes activate 
+              reg_adc           = 0;
+              reg_clamp1        = 4'b1111;      // dg444 active lo. turn off
+              reg_clamp2        = 4'b1111;      // dg444 active lo. turn off
+              reg_relay_com     = 0;
+              // reg_mon_rails,
+              reg_irange_x_sw   = 0;            // adg1334
+              reg_rails_oe      = 1'b0;         // on. active lo. 
+              reg_ina_vfb_sw    = 4'b1111;            // dg444
+              reg_ina_ifb_sw    = 4'b1111;      // dg444
+              reg_ina_vfb_atten_sw = 2'b11;       // opto coupler
+              reg_isense_mux    = 4'b1111;      // dg444
+              reg_relay_out     = 0;
+              // reg_relay_vsense    = 0;
+              reg_irange_yz_sw  = 0;          // adg1334
+            end
+
+
+
+
+
+
 
         endcase
       end
@@ -408,9 +424,9 @@ module top (
 
 
   // reg_ina_vfb_atten_sw
-  output INA_VFB_ATTEN_SW3_CTL,
-  output INA_VFB_ATTEN_SW2_CTL,
   output INA_VFB_ATTEN_SW1_CTL,
+  output INA_VFB_ATTEN_SW2_CTL,
+  // output INA_VFB_ATTEN_SW3_CTL,
 
   // reg_isense_mux
   // better name?
@@ -573,7 +589,7 @@ module top (
   assign { INA_IFB_SW3_CTL, INA_IFB_SW2_CTL, INA_IFB_SW1_CTL } = reg_ina_ifb_sw;
 
   wire [4-1:0] reg_ina_vfb_atten_sw;
-  assign { INA_VFB_ATTEN_SW3_CTL, INA_VFB_ATTEN_SW2_CTL, INA_VFB_ATTEN_SW1_CTL } = reg_ina_vfb_atten_sw;
+  assign { /*INA_VFB_ATTEN_SW3_CTL,*/ INA_VFB_ATTEN_SW2_CTL, INA_VFB_ATTEN_SW1_CTL } = reg_ina_vfb_atten_sw;
 
   wire [4-1:0] reg_isense_mux;
   assign { ISENSE_MUX3_CTL,  ISENSE_MUX2_CTL , ISENSE_MUX1_CTL } = reg_isense_mux;

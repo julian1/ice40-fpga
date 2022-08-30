@@ -199,7 +199,7 @@ set_io INA_IFB_SW3_CTL  105
 # aqy212
 set_io INA_VFB_ATTEN_SW1_CTL 137
 set_io INA_VFB_ATTEN_SW2_CTL 138
-set_io INA_VFB_ATTEN_SW3_CTL 139
+# set_io INA_VFB_ATTEN_SW3_CTL 139      # unused. 30 aug 2022
 
 
 # reg_isense_mux 30
