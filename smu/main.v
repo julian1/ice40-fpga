@@ -231,8 +231,10 @@ module my_register_bank   #(parameter MSB=16)   (
           6 :
             begin
               reg_led           = 0;
-              // reg_mux           = 0;            // should just be 0b
-              reg_dac           = 0;
+              // reg_mux           = 0;         // should just be 0b
+              // reg_dac           = 0;         // dac is already configured. before turning on rails, so don't touch again!!
+
+
               reg_rails         = 4'b0011;      // turn on +5V and +-15V rails.
               reg_dac_ref_mux   = 2'b11;        // aug 29 2022. if high, without rails power, then dg444 ESD diodes activate 
               reg_adc           = 0;
