@@ -218,7 +218,7 @@ set_io RELAY_SENSE_INT_CTL  115
 
 
 # reg_irange_yz_sw  33
-# dg333
+# adg1334/ dg333
 set_io IRANGE_YZ_SW1_CTL 73
 set_io IRANGE_YZ_SW2_CTL 74
 set_io IRANGE_YZ_SW3_CTL 75

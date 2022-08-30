@@ -202,27 +202,27 @@ module my_register_bank   #(parameter MSB=16)   (
               // none of this is any good... we need mux ctl pulled high etc.
               // does verilog expand 0 constant to fill all bits?
               reg_led           = 0;
-              reg_mux           = 0;  // should just be 0b
+              reg_mux           = 0;            // should just be 0b
               reg_dac           = 0;
               reg_rails         = 4'b0000;
-              // reg_dac_ref_mux   = 4'b1111;  // dg444 active lo
+              // reg_dac_ref_mux   = 4'b1111;   // dg444 active lo
               reg_dac_ref_mux   = 4'b0000;      // aug 29 2022. if high, without rails power, then dg444 ESD diodes activate 
               reg_adc           = 0;
-              reg_clamp1        = 4'b1111;  // dg444 active lo. turn off
-              reg_clamp2        = 4'b1111;  // dg444 active lo. turn off
+              reg_clamp1        = 4'b1111;      // dg444 active lo. turn off
+              reg_clamp2        = 4'b1111;      // dg444 active lo. turn off
               reg_relay_com     = 0;
 
 
               // reg_mon_rails,
-              reg_irange_x_sw    = 0;   // adg1334
-              reg_rails_oe      = 4'b0001;   // active lo. IMPORTANT.  keep hi. until ready to turn on rails.  // weird. for smu09, on first flash. ice40 pins came up lo.
-              reg_ina_vfb_sw    = 0;
-              reg_ina_ifb_sw    = 4'b1111;
-              reg_ina_vfb_atten_sw = 4'b1111; // active lo. dg444 and 74hc04
-              reg_isense_mux     = 4'b1111;
+              reg_irange_x_sw    = 0;           // adg1334
+              reg_rails_oe      = 4'b0001;      // active lo. IMPORTANT.  keep hi. until ready to turn on rails.  // weird. for smu09, on first flash. ice40 pins came up lo.
+              reg_ina_vfb_sw    = 0;            // dg444
+              reg_ina_ifb_sw    = 4'b1111;      // dg444
+              reg_ina_vfb_atten_sw = 4'b1111;   // opto coupler
+              reg_isense_mux     = 4'b1111;     // dg444
               reg_relay_out       = 0;
               // reg_relay_vsense    = 0;
-              reg_irange_yz_sw    = 0;  // adg1334
+              reg_irange_yz_sw    = 0;          // adg1334
             end
 
           // dac ref mux
