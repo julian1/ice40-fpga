@@ -13,14 +13,14 @@ rm -rf ./build
 mkdir ./build
 
 
-yosys -p 'synth_ice40 -top top -blif ./build/example.blif' example.v 
+yosys -p 'synth_ice40 -top top -blif ./build/main.blif' main.v 
 
-arachne-pnr -d 1k -o ./build/example.asc -p example.pcf ./build/example.blif 
+arachne-pnr -d 1k -o ./build/main.asc -p main.pcf ./build/main.blif 
 
 
-icepack ./build/example.asc ./build/example.bin
+icepack ./build/main.asc ./build/main.bin
 
-icetime ./build/example.asc -d hx1k
+icetime ./build/main.asc -d hx1k
 
 #
 echo "finished"

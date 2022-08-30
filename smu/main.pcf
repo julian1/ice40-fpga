@@ -32,6 +32,7 @@ set_io INTERUPT_OUT   48
 # spi
 
 # these are badly ordered in schematic
+# mcp3208
 set_io ADC03_CLK    87
 set_io ADC03_MISO   88
 set_io ADC03_MOSI   90
@@ -39,6 +40,7 @@ set_io ADC03_CS     91
 
 
 # dac
+# dac8734
 set_io DAC_SPI_CS   29
 set_io DAC_SPI_CLK  28
 set_io DAC_SPI_SDI  26
