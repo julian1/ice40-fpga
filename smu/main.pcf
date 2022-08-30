@@ -12,8 +12,11 @@ set_io XTALCLK 21
 
 #    pa6 = miso.  vie=voe  = pin 47
 
+
+
 # should prefix these
-# use COMM_
+# use SPI_
+# adumn262/162
 set_io CLK        42
 
 set_io CS         43
@@ -57,6 +60,7 @@ set_io DAC_SPI_SDO  25
 
 # general spi bus.
 # TODO better naming.
+# gpio
 set_io ICE_MOSI     67
 set_io ICE_MISO     68
 set_io ICE_SCK      70
@@ -83,19 +87,20 @@ set_io ADC02_CLK    8
 
 
 # reg_led  7
+# gpio
 set_io LED1         106
 set_io LED2         107
 
+
 # TODO rename reg_mux_spi
 # reg_mux  8
+
 
 # reg_dac 9
 set_io DAC_LDAC     24
 set_io DAC_RST      23
 set_io DAC_UNI_BIP_A 31
 set_io DAC_UNI_BIP_B 32
-
-
 
 
 
@@ -176,7 +181,7 @@ set_io RAILS_OE         95    # smu10 not contig.
 
 
 # reg_ina_vfb_sw  25
-# dg444 and optocoupler. via 74hc04 inverter
+# dg444 and aqy212 optocoupler. via 74hc04 inverter
 set_io INA_VFB_SW1_CTL 134
 set_io INA_VFB_SW2_CTL 135
 set_io INA_VFB_SW3_CTL 136
