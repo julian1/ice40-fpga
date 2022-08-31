@@ -16,7 +16,7 @@ set_io XTALCLK 21
 
 # should prefix these
 # use SPI_
-# or COMMS_SPI_MOSI etc  shoudl be consisent.
+# or COMMS_SPI_MOSI, or SPI_ICE40_  etc  shoudl be consisent.
 # adumn262/162
 set_io CLK        42
 
@@ -50,13 +50,6 @@ set_io DAC_SPI_CLK  28
 set_io DAC_SPI_SDI  26
 set_io DAC_SPI_SDO  25
 
-
-# flash
-# TODO really bad pin assignment. should not be in different gpio banks.
-#set_io FLASH_CS     22     # flash_ss
-#set_io FLASH_CLK    101     # flash_sck
-#set_io FLASH_MOSI   144
-#set_io FLASH_MISO   114
 
 
 # general spi bus.
@@ -230,6 +223,16 @@ set_io IRANGE_YZ_SW4_CTL 76
 
 ###########################
 # old
+
+
+# flash
+# TODO really bad pin assignment. should not be in different gpio banks.
+#set_io FLASH_CS     22     # flash_ss
+#set_io FLASH_CLK    101     # flash_sck
+#set_io FLASH_MOSI   144
+#set_io FLASH_MISO   114
+
+
 
 # irange sense
 # deprecated
