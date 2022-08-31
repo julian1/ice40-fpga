@@ -460,7 +460,7 @@ module top (
 
   // reg_mon_rails
   input XP15V_UP_OUT,
-  input XN15V_UP_OUT,
+  // input XN15V_UP_OUT,
 
 
 
@@ -572,7 +572,7 @@ module top (
 
 
   wire [4-1:0] reg_mon_rails;
-  assign { XN15V_UP_OUT, XP15V_UP_OUT  } = reg_mon_rails;
+  assign { /*XN15V_UP_OUT, */ XP15V_UP_OUT  } = reg_mon_rails;
 
 
 

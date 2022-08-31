@@ -171,7 +171,7 @@ set_io IRANGE_X_SW4_CTL 122
 # reg_mon_rails 19
 # lm393
 set_io XP15V_UP_OUT 128
-set_io XN15V_UP_OUT 129
+# set_io XN15V_UP_OUT 129
 
 
 # reg_rails_oe 24
