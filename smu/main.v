@@ -101,8 +101,8 @@ module my_register_bank   #(parameter MSB=16)   (
   output reg [4-1:0] reg_rails,   /* reg_rails_initital */
   output reg [4-1:0] reg_dac_ref_mux,
   output reg [4-1:0] reg_adc,
-  output reg [4-1:0] reg_clamp1,
-  output reg [4-1:0] reg_clamp2,
+  output reg [4-1:0] reg_mux_pol,
+  output reg [4-1:0] reg_mux_sel,
   output reg [4-1:0] reg_relay_com,
 
   // output or input???
@@ -187,8 +187,8 @@ module my_register_bank   #(parameter MSB=16)   (
           10 : reg_rails        = update(reg_rails, val);
           12 : reg_dac_ref_mux  = update(reg_dac_ref_mux, val);
           14 : reg_adc          = update(reg_adc, val);
-          15 : reg_clamp1       = update(reg_clamp1, val);
-          16 : reg_clamp2       = update(reg_clamp2, val);
+          15 : reg_mux_pol       = update(reg_mux_pol, val);
+          16 : reg_mux_sel       = update(reg_mux_sel, val);
           17 : reg_relay_com    = update(reg_relay_com, val);
           18 : reg_irange_x_sw  = update(reg_irange_x_sw, val);
           24 : reg_rails_oe     = update(reg_rails_oe, val);
@@ -212,8 +212,8 @@ module my_register_bank   #(parameter MSB=16)   (
               // reg_dac_ref_mux = 4'b1111;     // dg444 active lo
               reg_dac_ref_mux   = 2'b00;        // aug 29 2022. if high, without rails power, then dg444 ESD diodes activate
               reg_adc           = 0;
-              reg_clamp1        = 4'b1111;      // dg444 active lo. turn off
-              reg_clamp2        = 4'b1111;      // dg444 active lo. turn off
+              reg_mux_pol        = 4'b1111;      // dg444 active lo. turn off
+              reg_mux_sel        = 4'b1111;      // dg444 active lo. turn off
               reg_relay_com     = 0;
               // reg_mon_rails,
               reg_irange_x_sw   = 0;            // adg1334
@@ -238,8 +238,8 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_rails         = 4'b0011;      // turn on +5V and +-15V rails.
               reg_dac_ref_mux   = 2'b11;        // aug 29 2022. if high, without rails power, then dg444 ESD diodes activate
               reg_adc           = 0;
-              reg_clamp1        = 4'b1111;      // dg444 active lo. turn off
-              reg_clamp2        = 4'b1111;      // dg444 active lo. turn off
+              reg_mux_pol        = 4'b1111;      // dg444 active lo. turn off
+              reg_mux_sel        = 4'b1111;      // dg444 active lo. turn off
               reg_relay_com     = 0;
               // reg_mon_rails,
               reg_irange_x_sw   = 0;            // adg1334
@@ -398,15 +398,15 @@ module top (
 
   // TODO must be a better name
   // clamps
-  output CLAMP1_VSET,
-  output CLAMP1_ISET,
-  output CLAMP1_ISET_INV,
-  output CLAMP1_VSET_INV,
+  output MUX_POL_VSET,
+  output MUX_POL_ISET,
+  output MUX_POL_ISET_INV,
+  output MUX_POL_VSET_INV,
 
-  output CLAMP2_MIN,
-  output CLAMP2_INJECT_ERR,
-  output CLAMP2_INJECT_VFB,
-  output CLAMP2_MAX,
+  output MUX_SEL_MIN,
+  output MUX_SEL_INJECT_ERR,
+  output MUX_SEL_INJECT_VFB,
+  output MUX_SEL_MAX,
 
   // relay com
   output RELAY_COM_X,
@@ -563,11 +563,11 @@ module top (
   wire [4-1:0] reg_adc;
   assign { ADC02_RST, ADC02_M2, ADC02_M1, ADC02_M0 } = reg_adc;
 
-  wire [4-1:0] reg_clamp1;
-  assign { CLAMP1_VSET_INV, CLAMP1_ISET_INV, CLAMP1_ISET, CLAMP1_VSET } = reg_clamp1;
+  wire [4-1:0] reg_mux_pol;
+  assign { MUX_POL_VSET_INV, MUX_POL_ISET_INV, MUX_POL_ISET, MUX_POL_VSET } = reg_mux_pol;
 
-  wire [4-1:0] reg_clamp2;
-  assign { CLAMP2_MAX, CLAMP2_INJECT_VFB, CLAMP2_INJECT_ERR, CLAMP2_MIN} = reg_clamp2;
+  wire [4-1:0] reg_mux_sel;
+  assign { MUX_SEL_MAX, MUX_SEL_INJECT_VFB, MUX_SEL_INJECT_ERR, MUX_SEL_MIN} = reg_mux_sel;
 
   wire [4-1:0] reg_relay_com;
   assign { RELAY_COM_Z, RELAY_COM_Y, RELAY_COM_X } = reg_relay_com;
@@ -636,8 +636,8 @@ module top (
     . reg_rails(reg_rails),
     . reg_dac_ref_mux(reg_dac_ref_mux),
     . reg_adc(reg_adc),
-    . reg_clamp1(reg_clamp1),
-    . reg_clamp2(reg_clamp2),
+    . reg_mux_pol(reg_mux_pol),
+    . reg_mux_sel(reg_mux_sel),
     . reg_relay_com(reg_relay_com),
 
     . reg_mon_rails(reg_mon_rails),

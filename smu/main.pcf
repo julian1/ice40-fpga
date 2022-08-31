@@ -124,23 +124,23 @@ set_io ADC02_M1     11
 set_io ADC02_M2     12
 
 
-# reg_clamp1 15
+# reg_mux_pol 15
 # does not match the schem nets. and is
 # reg_mux_polarity etc.
 # dg444
-set_io CLAMP1_VSET     61
-set_io CLAMP1_ISET     64
-set_io CLAMP1_ISET_INV 63
-set_io CLAMP1_VSET_INV 62
+set_io MUX_POL_VSET     61
+set_io MUX_POL_ISET     64
+set_io MUX_POL_ISET_INV 63
+set_io MUX_POL_VSET_INV 62
 
 
-# reg_clamp2 16
+# reg_mux_sel 16
 # rename. mux_sel. dir or something.
 # dg444
-set_io CLAMP2_MIN        52
-set_io CLAMP2_INJECT_ERR 58
-set_io CLAMP2_INJECT_VFB 60
-set_io CLAMP2_MAX        56
+set_io MUX_SEL_MIN        52
+set_io MUX_SEL_INJECT_ERR 58
+set_io MUX_SEL_INJECT_VFB 60
+set_io MUX_SEL_MAX        56
 
 
 
