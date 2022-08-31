@@ -60,7 +60,7 @@ set_io ICE_MISO     68
 set_io ICE_SCK      70
 
 set_io ICE_SS       71   # eg write flash.
-set_io FLASH_SS     50   # june 2022.
+set_io FLASH_SS     50   # june 2022.   should share the same prefix... if other spi lines are common
 set_io HEADER_SS    49
 
 
