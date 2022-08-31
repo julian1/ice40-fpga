@@ -42,7 +42,7 @@ set_io ADC03_MISO   88
 set_io ADC03_MOSI   90
 set_io ADC03_CS     91
 
-
+# should renam SPI_DAC_CS etc. 
 # dac
 # dac8734
 set_io DAC_SPI_CS   29
@@ -65,12 +65,10 @@ set_io DAC_SPI_SDO  25
 set_io ICE_MOSI     67
 set_io ICE_MISO     68
 set_io ICE_SCK      70
+
 set_io ICE_SS       71   # eg write flash.
-
-
-# set_io ICE_FLASH_SS       41   # change name for consistent prefix.
-set_io FLASH_SS       50   # june 2022.
-
+set_io FLASH_SS     50   # june 2022.
+set_io HEADER_SS    49
 
 
 

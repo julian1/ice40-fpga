@@ -363,6 +363,7 @@ module top (
 
   output ICE_SS,
   output FLASH_SS,
+  output HEADER_SS,
 
   output ICE_SCK,
   output ICE_MOSI,
@@ -484,6 +485,7 @@ module top (
 
   wire [8-1:0] cs_vec ;
   assign { ADC02_CS, FLASH_SS, DAC_SPI_CS, ADC03_CS } = cs_vec;
+  // HEADER_SS
 
   wire [8-1:0] miso_vec ;
   assign { ADC02_MISO, ICE_MISO,  DAC_SPI_SDO,  ADC03_MISO } = miso_vec;
