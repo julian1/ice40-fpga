@@ -16,6 +16,7 @@ set_io XTALCLK 21
 
 # should prefix these
 # use SPI_
+# or COMMS_SPI_MOSI etc  shoudl be consisent.
 # adumn262/162
 set_io CLK        42
 
@@ -170,6 +171,7 @@ set_io IRANGE_X_SW4_CTL 122
 
 # reg_mon_rails 19
 # lm393
+# TODO should renam X15V_MON_OUT
 set_io XP15V_UP_OUT 128
 # set_io XN15V_UP_OUT 129
 
