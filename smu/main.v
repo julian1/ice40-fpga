@@ -181,21 +181,21 @@ module my_register_bank   #(parameter MSB=16)   (
       begin
         case (tmp[ MSB-1:8 ])   // register to write
           // leds
-          7 :  reg_led =         update(reg_led, val);
-          8 :  reg_mux =        update(reg_mux, val);
-          9 :  reg_dac =        update(reg_dac, val);
-          10 : reg_rails =      update(reg_rails, val);
+          7 :  reg_led          = update(reg_led, val);
+          8 :  reg_mux          = update(reg_mux, val);
+          9 :  reg_dac          = update(reg_dac, val);
+          10 : reg_rails        = update(reg_rails, val);
           12 : reg_dac_ref_mux  = update(reg_dac_ref_mux, val);
           14 : reg_adc          = update(reg_adc, val);
           15 : reg_clamp1       = update(reg_clamp1, val);
           16 : reg_clamp2       = update(reg_clamp2, val);
           17 : reg_relay_com    = update(reg_relay_com, val);
-          18 : reg_irange_x_sw   = update(reg_irange_x_sw, val);
+          18 : reg_irange_x_sw  = update(reg_irange_x_sw, val);
           24 : reg_rails_oe     = update(reg_rails_oe, val);
           25 : reg_ina_vfb_sw   = update(reg_ina_vfb_sw, val);
           28 : reg_ina_ifb_sw   = update(reg_ina_ifb_sw, val);
           29 : reg_ina_vfb_atten_sw = update(reg_ina_vfb_atten_sw, val);
-          30 : reg_isense_mux  = update(reg_isense_mux, val);
+          30 : reg_isense_mux   = update(reg_isense_mux, val);
           31 : reg_relay_out    = update(reg_relay_out, val);
           // 32 : reg_relay_vsense = update(reg_relay_vsense, val);
           33 : reg_irange_yz_sw = update( reg_irange_yz_sw, val);
@@ -206,24 +206,24 @@ module my_register_bank   #(parameter MSB=16)   (
           11 :
             begin
               reg_led           = 0;
-              reg_mux           = 0;            // TODO. should leave. eg. don't change the muxing in the middle of spi 
+              reg_mux           = 0;            // TODO. should leave. eg. don't change the muxing in the middle of spi
               reg_dac           = 0;
               reg_rails         = 4'b0000;
-              // reg_dac_ref_mux   = 4'b1111;   // dg444 active lo
-              reg_dac_ref_mux   = 2'b00;          // aug 29 2022. if high, without rails power, then dg444 ESD diodes activate 
+              // reg_dac_ref_mux = 4'b1111;     // dg444 active lo
+              reg_dac_ref_mux   = 2'b00;        // aug 29 2022. if high, without rails power, then dg444 ESD diodes activate
               reg_adc           = 0;
               reg_clamp1        = 4'b1111;      // dg444 active lo. turn off
               reg_clamp2        = 4'b1111;      // dg444 active lo. turn off
               reg_relay_com     = 0;
               // reg_mon_rails,
               reg_irange_x_sw   = 0;            // adg1334
-              reg_rails_oe      = 1'b1;      // active lo. IMPORTANT.  keep hi. until ready to turn on rails.  // weird. for smu09, on first flash. ice40 pins came up lo.
+              reg_rails_oe      = 1'b1;         // active lo. IMPORTANT.  keep hi. until ready to turn on rails.  // weird. for smu09, on first flash. ice40 pins came up lo.
               reg_ina_vfb_sw    = 0;            // dg444
               reg_ina_ifb_sw    = 4'b1111;      // dg444
-              reg_ina_vfb_atten_sw = 2'b11;   // opto coupler
+              reg_ina_vfb_atten_sw = 2'b11;     // opto coupler
               reg_isense_mux    = 4'b1111;      // dg444
               reg_relay_out     = 0;
-              // reg_relay_vsense    = 0;
+              // reg_relay_vsense = 0;
               reg_irange_yz_sw  = 0;            // adg1334
             end
 
@@ -231,26 +231,26 @@ module my_register_bank   #(parameter MSB=16)   (
           6 :
             begin
               reg_led           = 0;
-              // reg_mux           = 0;         // should just be 0b
-              // reg_dac           = 0;         // dac is already configured. before turning on rails, so don't touch again!!
+              // reg_mux        = 0;            // should just be 0b
+              // reg_dac        = 0;            // dac is already configured. before turning on rails, so don't touch again!!
 
 
               reg_rails         = 4'b0011;      // turn on +5V and +-15V rails.
-              reg_dac_ref_mux   = 2'b11;        // aug 29 2022. if high, without rails power, then dg444 ESD diodes activate 
+              reg_dac_ref_mux   = 2'b11;        // aug 29 2022. if high, without rails power, then dg444 ESD diodes activate
               reg_adc           = 0;
               reg_clamp1        = 4'b1111;      // dg444 active lo. turn off
               reg_clamp2        = 4'b1111;      // dg444 active lo. turn off
               reg_relay_com     = 0;
               // reg_mon_rails,
               reg_irange_x_sw   = 0;            // adg1334
-              reg_rails_oe      = 1'b0;         // on. active lo. 
-              reg_ina_vfb_sw    = 4'b1111;            // dg444
+              reg_rails_oe      = 1'b0;         // on. active lo.
+              reg_ina_vfb_sw    = 4'b1111;      // dg444
               reg_ina_ifb_sw    = 4'b1111;      // dg444
-              reg_ina_vfb_atten_sw = 2'b11;       // opto coupler
+              reg_ina_vfb_atten_sw = 2'b11;     // opto coupler
               reg_isense_mux    = 4'b1111;      // dg444
               reg_relay_out     = 0;
               // reg_relay_vsense    = 0;
-              reg_irange_yz_sw  = 0;          // adg1334
+              reg_irange_yz_sw  = 0;            // adg1334
             end
 
 
@@ -395,6 +395,7 @@ module top (
   output ADC02_M1,
   output ADC02_M2,
 
+  // TODO must be a better name
   // clamps
   output CLAMP1_VSET,
   output CLAMP1_ISET,
