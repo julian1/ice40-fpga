@@ -18,18 +18,18 @@ set_io XTALCLK 21
 # use SPI_
 # or COMMS_SPI_MOSI, or SPI_ICE40_  or SPI1_ etc  shoudl be consisent.
 # adumn262/162
-set_io CLK        42
+set_io CLK          42
 
-set_io CS         43
-set_io MOSI       44
-set_io CS2        45    # TODO change name CS2
-set_io MISO       47     # output from fpga, input to mcu master.
+set_io CS           43
+set_io MOSI         44
+set_io CS2          45    # TODO change name CS2
+set_io MISO         47     # output from fpga, input to mcu master.
 
 
 # VOF/VIF
 # ads131a04  DYDR Data ready; active low; host interrupt and synchronization for multi-devices
 
-set_io INTERUPT_OUT   48
+set_io INTERUPT_OUT 48
 
 
 ########################
