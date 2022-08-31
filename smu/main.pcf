@@ -42,7 +42,7 @@ set_io ADC03_MISO   88
 set_io ADC03_MOSI   90
 set_io ADC03_CS     91
 
-# should renam SPI_DAC_CS etc. 
+# should renam SPI_DAC_CS etc.
 # dac
 # dac8734
 set_io DAC_SPI_CS   29
@@ -66,13 +66,11 @@ set_io HEADER_SS    49
 
 
 # adc spi
-set_io ADC02_RST    1
-set_io ADC02_DONE   2
-set_io ADC02_DRDY   3
+
 set_io ADC02_MOSI   4
 set_io ADC02_MISO   7
 set_io ADC02_CLK    8
-
+set_io ADC02_CS     9
 
 ########################
 
@@ -116,7 +114,11 @@ set_io DAC_REF_MUX_B 34
 
 # reg_adc  14
 # ads131a04
-set_io ADC02_CS     9
+#
+set_io ADC02_RST    1
+set_io ADC02_DONE   2     # UNUSED??? aug 2022.
+set_io ADC02_DRDY   3
+
 set_io ADC02_M0     10
 set_io ADC02_M1     11
 set_io ADC02_M2     12
