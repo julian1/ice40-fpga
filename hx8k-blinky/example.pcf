@@ -1,0 +1,11 @@
+
+# example.pcf
+
+
+# clk is R9  GBIN5
+set_io clk R9
+
+# led is N12, L11
+set_io LED1 N12
+set_io LED2 L11
+
