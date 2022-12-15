@@ -31,5 +31,9 @@ icetime ./build/main.asc -d hx1k 2>&1 | tee ./build/icetime.txt
 
 echo "finished"
 
+if [ "$1" = "-flash" ]; then
+  iceprog ./build/main.bin
+fi
+
 
 

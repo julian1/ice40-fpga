@@ -4,6 +4,9 @@
 // - we can actually handle a toggle. if both set and clear bit are hi then toggle
 // - instead of !cs or !cs2.  would be good if can write asserted(cs)  asserted(cs2)
 
+
+`default_nettype none
+
 module blinker    (
   input clk,
 
@@ -73,6 +76,12 @@ endfunction
 */
 
 
+function [8-1:0] setbit(input [8-1:0] x, input [8-1:0]  val);
+  begin
+    setbit = (1 << val ) >> 1;
+  end
+endfunction
+
 
 
 
@@ -99,27 +108,13 @@ module my_register_bank   #(parameter MSB=16)   (
   // latched val, rename
   output reg [4-1:0] reg_led,     // need to be very careful. only 4 bits. or else screws set/reset calculation ...
 
-  output reg [4-1:0] reg_mux,
-  output reg [4-1:0] reg_dac,
+  output reg [8-1:0] reg_mux,       // change name reg_spi_mux
+
+  output reg [4-1:0] reg_dac = 4'b1111,
   output reg [4-1:0] reg_rails,   /* reg_rails_initital */
   output reg [4-1:0] reg_dac_ref_mux,
-  output reg [4-1:0] reg_adc,
-  output reg [4-1:0] reg_mux_pol,
-  output reg [4-1:0] reg_mux_sel,
-  output reg [4-1:0] reg_relay_com,
+  output reg [4-1:0] reg_adc
 
-  // output or input???
-  input [4-1:0] reg_mon_rails,
-
-  output reg [4-1:0] reg_irange_x_sw,
-  output reg [4-1:0] reg_rails_oe,
-  output reg [4-1:0] reg_ina_vfb_sw,
-  output reg [4-1:0] reg_ina_ifb_sw,
-  output reg [4-1:0] reg_ina_vfb_atten_sw,
-  output reg [4-1:0] reg_isense_mux,
-  output reg [4-1:0] reg_relay_out,
-  // output reg [4-1:0] reg_relay_vsense,
-  output reg [4-1:0] reg_irange_yz_sw
 );
 
 
@@ -157,8 +152,9 @@ module my_register_bank   #(parameter MSB=16)   (
             case ( tmp[ 7:0]   )   // register to read
               // leds
               7 :  ret = reg_led << 7;
+              8 :  ret = reg_mux << 7;      // this will only return the low bits unfortunatley.
+              9 :  ret = reg_dac << 7;
 
-              19 : ret = reg_mon_rails << 7;
             endcase
 
           end
@@ -180,29 +176,22 @@ module my_register_bank   #(parameter MSB=16)   (
   always @ (posedge cs)   // cs done.
   begin
     // we can assert a done flag here... and factor this code...
-    if(/*cs && !cs2 &&*/ count == 16 )
+    if(/*cs && !cs2 &&*/ count == 16  )
       begin
         case (tmp[ MSB-1:8 ])   // register to write
           // leds
           7 :  reg_led          = update(reg_led, val);
-          8 :  reg_mux          = update(reg_mux, val);
-          9 :  reg_dac          = update(reg_dac, val);
-          10 : reg_rails        = update(reg_rails, val);
-          12 : reg_dac_ref_mux  = update(reg_dac_ref_mux, val);
-          14 : reg_adc          = update(reg_adc, val);
-          15 : reg_mux_pol       = update(reg_mux_pol, val);
-          16 : reg_mux_sel       = update(reg_mux_sel, val);
-          17 : reg_relay_com    = update(reg_relay_com, val);
-          18 : reg_irange_x_sw  = update(reg_irange_x_sw, val);
-          24 : reg_rails_oe     = update(reg_rails_oe, val);
-          25 : reg_ina_vfb_sw   = update(reg_ina_vfb_sw, val);
-          28 : reg_ina_ifb_sw   = update(reg_ina_ifb_sw, val);
-          29 : reg_ina_vfb_atten_sw = update(reg_ina_vfb_atten_sw, val);
-          30 : reg_isense_mux   = update(reg_isense_mux, val);
-          31 : reg_relay_out    = update(reg_relay_out, val);
-          // 32 : reg_relay_vsense = update(reg_relay_vsense, val);
-          33 : reg_irange_yz_sw = update( reg_irange_yz_sw, val);
 
+          // 8 :  reg_mux          = (val == 0) ? 0 : (1 << val )   ; // update(reg_mux, val);
+
+
+          // 8 :  reg_mux          =  (1 << val ) >> 1;    // this screws up blinking...  because it overflows inito the led register flip-flops
+          // 8 :  reg_mux          =  (1 << val ) ;    // this is ok
+          8 :  reg_mux          =  setbit( reg_mux, val );    
+
+
+          9 :  reg_dac          = update(reg_dac, val);
+          14 : reg_adc          = update(reg_adc, val);
 
           // soft reset
           // should be the same as initial starting
@@ -211,23 +200,7 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_led           = 0;
               reg_mux           = 0;            // TODO. should leave. eg. don't change the muxing in the middle of spi
               reg_dac           = 0;
-              reg_rails         = 4'b0000;
-              // reg_dac_ref_mux = 4'b1111;     // dg444 active lo
-              reg_dac_ref_mux   = 2'b00;        // aug 29 2022. if high, without rails power, then dg444 ESD diodes activate
               reg_adc           = 0;
-              reg_mux_pol        = 4'b1111;      // dg444 active lo. turn off
-              reg_mux_sel        = 4'b1111;      // dg444 active lo. turn off
-              reg_relay_com     = 0;
-              // reg_mon_rails,
-              reg_irange_x_sw   = 0;            // adg1334
-              reg_rails_oe      = 1'b1;         // active lo. IMPORTANT.  keep hi. until ready to turn on rails.  // weird. for smu09, on first flash. ice40 pins came up lo.
-              reg_ina_vfb_sw    = 0;            // dg444
-              reg_ina_ifb_sw    = 4'b1111;      // dg444
-              reg_ina_vfb_atten_sw = 2'b11;     // opto coupler
-              reg_isense_mux    = 4'b1111;      // dg444
-              reg_relay_out     = 0;
-              // reg_relay_vsense = 0;
-              reg_irange_yz_sw  = 0;            // adg1334
             end
 
           // powerup contingent upon checking rails
@@ -236,29 +209,8 @@ module my_register_bank   #(parameter MSB=16)   (
               reg_led           = 0;
               // reg_mux        = 0;            // should just be 0b
               // reg_dac        = 0;            // dac is already configured. before turning on rails, so don't touch again!!
-
-
-              reg_rails         = 4'b0011;      // turn on +5V and +-15V rails.
-              reg_dac_ref_mux   = 2'b11;        // aug 29 2022. if high, without rails power, then dg444 ESD diodes activate
               reg_adc           = 0;
-              reg_mux_pol        = 4'b1111;      // dg444 active lo. turn off
-              reg_mux_sel        = 4'b1111;      // dg444 active lo. turn off
-              reg_relay_com     = 0;
-              // reg_mon_rails,
-              reg_irange_x_sw   = 0;            // adg1334
-              reg_rails_oe      = 1'b0;         // on. active lo.
-              reg_ina_vfb_sw    = 4'b1111;      // dg444
-              reg_ina_ifb_sw    = 4'b1111;      // dg444
-              reg_ina_vfb_atten_sw = 2'b11;     // opto coupler
-              reg_isense_mux    = 4'b1111;      // dg444
-              reg_relay_out     = 0;
-              // reg_relay_vsense    = 0;
-              reg_irange_yz_sw  = 0;            // adg1334
             end
-
-
-
-
 
 
 
@@ -271,7 +223,7 @@ endmodule
 module my_cs_mux    (
   input wire [8-1:0] reg_mux,
   input cs2,
-  output [8-1:0] cs_vec
+  output reg [8-1:0] cs_vec
 );
 
   always @ (cs2) // both edges...
@@ -290,7 +242,7 @@ module my_miso_mux    (
   input cs2,
   input dout,
   input wire [8-1:0] miso_vec,
-  output miso
+  output reg miso
 );
 
  always @ (cs2)
@@ -340,6 +292,7 @@ module top (
   output INTERUPT_OUT,
 
 
+  //////////////////////////
   // adc 03
   output ADC03_CLK,
   input  ADC03_MISO,    // input
@@ -347,6 +300,7 @@ module top (
   output ADC03_CS,
 
 
+  //////////////////////////
   // dac
   output DAC_SPI_CS ,
   output DAC_SPI_CLK,
@@ -371,23 +325,10 @@ module top (
 
   output ICE_SCK,
   output ICE_MOSI,
-  input ICE_MISO,
+  input  ICE_MISO,
 
 
-
-
-  // rails
-  output RAILS_LP5V,
-  output RAILS_LP15V,
-  output RAILS_LP30V,
-  output RAILS_LP50V,
-
-  output RAILS_OE,
-
-  // dac ref mux
-  output DAC_REF_MUX_A,
-  output DAC_REF_MUX_B,
-
+  //////////////////////////
   // adc
   output ADC02_RST,
   input  ADC02_DONE,  // input
@@ -395,87 +336,26 @@ module top (
   output ADC02_MOSI,
   input  ADC02_MISO,   // input
   output ADC02_CLK,
+
   output ADC02_CS,
   output ADC02_M0,
   output ADC02_M1,
   output ADC02_M2,
 
-  // TODO must be a better name
-  // clamps
-  output MUX_POL_VSET,
-  output MUX_POL_ISET,
-  output MUX_POL_ISET_INV,
-  output MUX_POL_VSET_INV,
 
-  output MUX_SEL_MIN,
-  output MUX_SEL_INJECT_ERR,
-  output MUX_SEL_INJECT_VFB,
-  output MUX_SEL_MAX,
+  //////////////////////////
+  // 4094
+  output GLB_4094_OE,
 
-  // relay com
-  output RELAY_COM_X,
-  output RELAY_COM_Y,
-  output RELAY_COM_Z,
+  output GLB_4094_DATA,
+  output GLB_4094_CLK,
+  output U511_STROBE_CTL,
+  output U514_STROBE_CTL,
+  output A_STROBE_CTL,
 
-
-  //////////////////////////////////////
-
-  // reg_ina_vfb_sw
-  output INA_VFB_SW3_CTL,
-  output INA_VFB_SW2_CTL,
-  output INA_VFB_SW1_CTL,
-
-  // reg_ina_ifb
-  output INA_IFB_SW1_CTL,
-  output INA_IFB_SW2_CTL,
-  // output INA_IFB_SW3_CTL,
-
-
-  // reg_ina_vfb_atten_sw
-  output INA_VFB_ATTEN_SW1_CTL,
-  output INA_VFB_ATTEN_SW2_CTL,
-  // output INA_VFB_ATTEN_SW3_CTL,
-
-  // reg_isense_mux
-  // better name?
-  output ISENSE_MUX1_CTL,
-  output ISENSE_MUX2_CTL,
-  output ISENSE_MUX3_CTL,
-
-  // reg_relay_out
-  // output RELAY_OUT_COM_HC,
-  // output RELAY_OUT_COM_LC,
-
-  output RELAY_OUT_COM_HC_CTL,
-  output RELAY_GUARD_CTL,
-  output RELAY_SENSE_EXT_CTL,
-  output RELAY_SENSE_INT_CTL,
-
-
-
-  // reg_relay_vsense
-  // output RELAY_VSENSE_CTL,
-
-
-  // irange_x
-  output IRANGE_X_SW1_CTL,
-  output IRANGE_X_SW2_CTL,
-  output IRANGE_X_SW3_CTL,
-  output IRANGE_X_SW4_CTL,
-
-
-  // reg_mon_rails
-  input XP15V_UP_OUT,
-  // input XN15V_UP_OUT,
-
-
-
-  // irange_yz
-  output IRANGE_YZ_SW1_CTL,
-  output IRANGE_YZ_SW2_CTL,
-  output IRANGE_YZ_SW3_CTL,
-  output IRANGE_YZ_SW4_CTL
-
+  input  U511_MISO_CTL,
+  input  U514_MISO_CTL,
+  input  U706_MISO_CTL,
 
 
 
@@ -488,11 +368,11 @@ module top (
   wire [8-1:0] reg_mux ;// = 8'b00000001; // test
 
   wire [8-1:0] cs_vec ;
-  assign { ADC02_CS, FLASH_SS, DAC_SPI_CS, ADC03_CS } = cs_vec;
+  assign { A_STROBE_CTL,  ADC02_CS,   FLASH_SS,   DAC_SPI_CS,  ADC03_CS } = cs_vec;
   // HEADER_SS
 
   wire [8-1:0] miso_vec ;
-  assign { ADC02_MISO, ICE_MISO,  DAC_SPI_SDO,  ADC03_MISO } = miso_vec;
+  assign { U706_MISO_CTL, ADC02_MISO, ICE_MISO,  DAC_SPI_SDO,  ADC03_MISO } = miso_vec;
 
   // make sure ice40 programming flash is pulled hi. so that its not asserted.
   // no don't thiink this is issue.
@@ -503,9 +383,9 @@ module top (
 
   // could mux these also, if we want
   // syntax. {a,b,c,d,e} = {5{value}};
-  assign { ADC02_CLK, DAC_SPI_CLK, ADC03_CLK, ICE_SCK  } = { 5{CLK }} ;
+  assign { GLB_4094_CLK,  ADC02_CLK,  DAC_SPI_CLK, ADC03_CLK,  ICE_SCK  } = { 5{CLK }} ;
 
-  assign { ADC02_MOSI, DAC_SPI_SDI, ADC03_MOSI, ICE_MOSI } = { 5{MOSI}} ;
+  assign { GLB_4094_DATA, ADC02_MOSI, DAC_SPI_SDI, ADC03_MOSI, ICE_MOSI } = { 5{MOSI}} ;
 
 
   ////////////////////////////////////////
@@ -556,74 +436,13 @@ module top (
   wire [4-1:0] reg_dac;
   assign {DAC_RST, DAC_UNI_BIP_B, DAC_UNI_BIP_A, DAC_LDAC } = reg_dac;
 
-  wire [4-1:0] reg_rails ;
-  assign { RAILS_LP50V, RAILS_LP30V, RAILS_LP15V, RAILS_LP5V } = reg_rails;
-
-  // reg_soft_reset
-
-  wire [4-1:0] reg_dac_ref_mux;
-  assign { DAC_REF_MUX_B, DAC_REF_MUX_A } = reg_dac_ref_mux;
 
   wire [4-1:0] reg_adc;
   assign { ADC02_RST, ADC02_M2, ADC02_M1, ADC02_M0 } = reg_adc;
 
-  wire [4-1:0] reg_mux_pol;
-  assign { MUX_POL_VSET_INV, MUX_POL_ISET_INV, MUX_POL_ISET, MUX_POL_VSET } = reg_mux_pol;
-
-  wire [4-1:0] reg_mux_sel;
-  assign { MUX_SEL_MAX, MUX_SEL_INJECT_VFB, MUX_SEL_INJECT_ERR, MUX_SEL_MIN} = reg_mux_sel;
-
-  wire [4-1:0] reg_relay_com;
-  assign { RELAY_COM_Z, RELAY_COM_Y, RELAY_COM_X } = reg_relay_com;
 
 
 
-  wire [4-1:0] reg_mon_rails;
-  assign { /*XN15V_UP_OUT, */ XP15V_UP_OUT  } = reg_mon_rails;
-
-
-
-
-
-  wire [4-1:0] reg_irange_x_sw;
-  assign { IRANGE_X_SW4_CTL, IRANGE_X_SW3_CTL, IRANGE_X_SW2_CTL, IRANGE_X_SW1_CTL } = reg_irange_x_sw;
-
-  wire [4-1:0] reg_rails_oe;
-  assign { RAILS_OE  } = reg_rails_oe;
-
-  wire [4-1:0] reg_ina_vfb_sw;
-  assign { INA_VFB_SW3_CTL, INA_VFB_SW2_CTL, INA_VFB_SW1_CTL } = reg_ina_vfb_sw;
-
-  wire [4-1:0] reg_ina_ifb_sw;
-  assign { /*INA_IFB_SW3_CTL, */ INA_IFB_SW2_CTL, INA_IFB_SW1_CTL } = reg_ina_ifb_sw;
-
-  wire [4-1:0] reg_ina_vfb_atten_sw;
-  assign { /*INA_VFB_ATTEN_SW3_CTL,*/ INA_VFB_ATTEN_SW2_CTL, INA_VFB_ATTEN_SW1_CTL } = reg_ina_vfb_atten_sw;
-
-  wire [4-1:0] reg_isense_mux;
-  assign { ISENSE_MUX3_CTL,  ISENSE_MUX2_CTL , ISENSE_MUX1_CTL } = reg_isense_mux;
-
-  wire [4-1:0] reg_relay_out;
-  assign {  RELAY_SENSE_INT_CTL, RELAY_SENSE_EXT_CTL, RELAY_GUARD_CTL, RELAY_OUT_COM_HC_CTL } = reg_relay_out;
-
-
-
-  // wire [4-1:0] reg_relay_vsense;
-  // assign {  RELAY_VSENSE_CTL } = reg_relay_vsense;
-
-  // wire [4-1:0] reg_relay_vsense;
-  // assign {  RELAY_VSENSE_CTL } = reg_relay_vsense;
-
-  wire [4-1:0] reg_irange_yz_sw;
-  assign {  IRANGE_YZ_SW4_CTL, IRANGE_YZ_SW3_CTL, IRANGE_YZ_SW2_CTL, IRANGE_YZ_SW1_CTL } = reg_irange_yz_sw;
-
-
-
-
-  /*
-    input  ADC02_DONE,  // input
-    input  ADC02_DRDY,    // input
-  */
 
   // ok.
   my_register_bank #( 16 )   // register bank
@@ -636,25 +455,10 @@ module top (
 
     . reg_led(reg_led),
     . reg_mux(reg_mux),
+
     . reg_dac(reg_dac),
-    . reg_rails(reg_rails),
-    . reg_dac_ref_mux(reg_dac_ref_mux),
     . reg_adc(reg_adc),
-    . reg_mux_pol(reg_mux_pol),
-    . reg_mux_sel(reg_mux_sel),
-    . reg_relay_com(reg_relay_com),
 
-    . reg_mon_rails(reg_mon_rails),
-
-    . reg_irange_x_sw(reg_irange_x_sw),
-    . reg_rails_oe(reg_rails_oe),
-    . reg_ina_vfb_sw(reg_ina_vfb_sw),
-    . reg_ina_ifb_sw(reg_ina_ifb_sw),
-    . reg_ina_vfb_atten_sw(reg_ina_vfb_atten_sw),
-    . reg_isense_mux(reg_isense_mux),
-    . reg_relay_out(reg_relay_out),
-    // . reg_relay_vsense(reg_relay_vsense),
-    . reg_irange_yz_sw(reg_irange_yz_sw)
 
   );
 
