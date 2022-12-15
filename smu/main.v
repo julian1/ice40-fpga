@@ -94,7 +94,7 @@ module my_register_bank   #(parameter MSB=16)   (
   output dout,   // sdo
 
   // latched val, rename
-  inout [4-1:0] reg_led,     // need to be very careful. only 4 bits. or else screws set/reset calculation ...
+  inout reg [4-1:0] reg_led,     // need to be very careful. only 4 bits. or else screws set/reset calculation ...
 
   output reg [4-1:0] reg_mux,
   output reg [4-1:0] reg_dac,
