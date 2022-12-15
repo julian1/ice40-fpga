@@ -6,12 +6,12 @@
 
 module blinker    (
   input clk,
-  output led1,
-  output led2
+
+  output reg [4-1:0] reg_vec
 
 );
 
-  localparam BITS = 5;
+  localparam BITS = 4;
   // localparam LOG2DELAY = 21;
   localparam LOG2DELAY = 20;
 
@@ -24,7 +24,10 @@ module blinker    (
   end
 
   // assign { led1, led2, LED3, LED4, LED5 } = outcnt ^ (outcnt >> 1);
-  assign {  led1, led2 } = outcnt ^ (outcnt >> 1);
+  // assign {  led1, led2 } = outcnt ^ (outcnt >> 1);
+
+  assign reg_vec = outcnt ^ (outcnt >> 1);
+
 endmodule
 
 
@@ -322,6 +325,7 @@ module top (
   input  XTALCLK,
 
   // leds
+  output LED0,
   output LED1,
   output LED2,
 
@@ -424,7 +428,7 @@ module top (
   // reg_ina_ifb
   output INA_IFB_SW1_CTL,
   output INA_IFB_SW2_CTL,
-  output INA_IFB_SW3_CTL,
+  // output INA_IFB_SW3_CTL,
 
 
   // reg_ina_vfb_atten_sw
@@ -545,7 +549,7 @@ module top (
 
 
   wire [4-1:0] reg_led;
-  assign { LED2, LED1} = reg_led;
+  assign { LED2, LED1, LED0 } = reg_led;
 
   // reg_mux
 
@@ -591,7 +595,7 @@ module top (
   assign { INA_VFB_SW3_CTL, INA_VFB_SW2_CTL, INA_VFB_SW1_CTL } = reg_ina_vfb_sw;
 
   wire [4-1:0] reg_ina_ifb_sw;
-  assign { INA_IFB_SW3_CTL, INA_IFB_SW2_CTL, INA_IFB_SW1_CTL } = reg_ina_ifb_sw;
+  assign { /*INA_IFB_SW3_CTL, */ INA_IFB_SW2_CTL, INA_IFB_SW1_CTL } = reg_ina_ifb_sw;
 
   wire [4-1:0] reg_ina_vfb_atten_sw;
   assign { /*INA_VFB_ATTEN_SW3_CTL,*/ INA_VFB_ATTEN_SW2_CTL, INA_VFB_ATTEN_SW1_CTL } = reg_ina_vfb_atten_sw;
@@ -655,17 +659,17 @@ module top (
   );
 
 
-
 /*
+
   blinker #(  )
   blinker
     (
     .clk(XTALCLK),
-    .led1(LED1),
-    .led2(LED2)
-  );
-*/
+    .reg_vec( reg_led )
 
+  );
+
+*/
 
 
 

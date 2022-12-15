@@ -78,6 +78,7 @@ set_io ADC02_CS     9
 
 # reg_led  7
 # gpio
+set_io LED0         105
 set_io LED1         106
 set_io LED2         107
 
@@ -187,7 +188,7 @@ set_io INA_VFB_SW3_CTL 136
 # dg444
 set_io INA_IFB_SW1_CTL  102
 set_io INA_IFB_SW2_CTL  104
-set_io INA_IFB_SW3_CTL  105
+# set_io INA_IFB_SW3_CTL  105 # remove dec 2022
 
 
 # reg_ina_vfb_atten  29
