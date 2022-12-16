@@ -117,32 +117,37 @@ module my_register_bank   #(parameter MSB=16)   (
 
   reg [MSB-1:0] dinput;   // input value
   reg [MSB-1:0] ret  ;    // output value
-  reg [4-1:0]   count;    // 1<<4==16. number of bits so far, in spi
+  reg [5-1:0]   count;    // 1<<4==16. number of bits so far, in spi
 
   reg           complete;     // valid, avoid using clk
 
   /*
     remember/rules
-      - we don't get another final clk edge at the end of the spi sequence, on which to sample the cs.
+      - we don't get another final clk edge at the end of the spi sequence, on which to sample the cs goiing high/deasserting.
       - and we must avoid two drivers (ie always@ blocks) for all variables.  eg. the count variable.
-      - and we only want to latch value in on valid cs deassert
+      - and we only want to latch value on valid cs deassert
       - so we count the clk, and take actions on the clock count values,
       - so it's effectively a state machine based on the clk.
-      - cs deasserting just latches everything in, provided it looks right.
+      - cs deasserting just latches values, provided it looks right.
       ------
 
       - The important synchronization action, is testing that cs is asserted on the clk edge.
         while holding count=0, after sequence completion.
         This guarantees that that new data begins getting clocking in correctly on a new assertion of cs.
 
-      - trying to sample cs, and having it in the sensitivity list, gives rare random failure.
+      - trying to sample cs, and having it in the sensitivity list, gives rare random metastability failure.
+
+      - if there is an underlength frame, then the next frame will overflow but also reset the clk count=0. and then the subsequent message will be ok.
+      ----
+      no. it's not quite right.  because count is not held at 0.
+      - completion is count==15.
 
   */
 
   // clock value into dinput var
   always @ (negedge clk )
   begin
-                // EXTR.  THIS IS the synchronization action. s
+                // EXTR.  THIS IS the synchronization action. we only clock in when cs is asserted
     if( ! cs)  // cs asserted
       begin
 
@@ -174,7 +179,7 @@ module my_register_bank   #(parameter MSB=16)   (
 
         ret   = ret << 1; // this *is* zero fill operator.
 
-        if(count == 16 )
+        if(count == 15 )
             // we are finished
             // reset the count var. rather than in posedge cs, to avoid having two drivers for var.
             // think this also permits, regaining synchronization , on incorrectly timed cs edge.
@@ -183,12 +188,7 @@ module my_register_bank   #(parameter MSB=16)   (
           count = count + 1;
 
       end
-    else    // cs deasserted
-      begin
-
-        // this is a tx error. eg. we have a clock without cs asserted
-        // count = 0;
-      end
+      // else  doesn't work - because there is no clkedge to sample deassertion of of cs
 
   end
 
