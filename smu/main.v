@@ -176,6 +176,12 @@ module my_register_bank   #(parameter MSB=16)   (
       - eg. both trigger on posedge cs.
       -----------------
       THINK we should remove the posedge cs from top clause.  and set count == 15. instead of count == 16
+      put count = 0
+      might need to adjust the temp register also.
+      ==============
+      - there's a race condition - with these two blocks -
+      eg. on cs  (test count)  (increment count).
+      ==============
   */
   always @ (posedge cs)   // cs done.
   begin
@@ -191,7 +197,7 @@ module my_register_bank   #(parameter MSB=16)   (
 
           // 8 :  reg_mux          =  (1 << val ) >> 1;    // this screws up blinking...  because it overflows inito the led register flip-flops
           // 8 :  reg_mux          =  (1 << val ) ;    // this is ok
-          8 :  reg_mux          =  setbit( reg_mux, val );    
+          8 :  reg_mux          =  setbit( reg_mux, val );
 
 
           9 :  reg_dac          = update(reg_dac, val);
