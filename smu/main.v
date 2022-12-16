@@ -117,7 +117,7 @@ module my_register_bank   #(parameter MSB=16)   (
 
   reg [MSB-1:0] dinput;   // input value
   reg [MSB-1:0] ret  ;    // output value
-  reg [5-1:0]   count;    // 1<<4==16. number of bits so far, in spi
+  reg [5-1:0]   count;    // 1<<4==16. 1<<5==32  number of bits so far, in spi
 
   reg           complete;     // valid, avoid using clk
 
@@ -139,7 +139,8 @@ module my_register_bank   #(parameter MSB=16)   (
 
       - if there is an underlength frame, then the next frame will overflow but also reset the clk count=0. and then the subsequent message will be ok.
       ----
-      no. it's not quite right.  because count is not held at 0.
+          no. it's not quite right.  because count is not held at 0. it
+          synchronization will happen, but be a slow wrap around.
       - completion is count==15.
 
   */
@@ -188,7 +189,7 @@ module my_register_bank   #(parameter MSB=16)   (
           count = count + 1;
 
       end
-      // else  doesn't work - because there is no clkedge to sample deassertion of of cs
+      // else  EXTR. doesn't work - because there is never a guarantee of a clkedge to sample deassertion of of cs.
 
   end
 
