@@ -118,17 +118,17 @@ module my_register_bank   #(parameter MSB=16)   (
 );
 
 
-  reg [MSB-1:0] tmp;      // input value
+  reg [MSB-1:0] dinput;      // input value
   reg [MSB-1:0] ret  ;    // output value
   reg [8-1:0]   count;    // number of bits, in spi
 
 
 
-  //wire [8-1:0] val   = tmp;   // change name to input.
+  //wire [8-1:0] val   = dinput;   // change name to input.
 
 
 
-  // clock value into tmp var
+  // clock value into dinput var
   always @ (negedge clk /*or posedge cs */)
   begin
     if(cs)  // cs not asserted
@@ -145,12 +145,12 @@ module my_register_bank   #(parameter MSB=16)   (
 
 
         // d into lsb, shift left toward msb
-        tmp = {tmp[MSB-2:0], din};
+        dinput = {dinput[MSB-2:0], din};
 
         // reading stuff.
         if(count == 7)
           begin
-            case ( tmp[ 7:0]   )   // register to read
+            case ( dinput[ 7:0]   )   // register to read
               // leds
               7 :  ret = reg_led << 7;
               8 :  ret = reg_mux << 7;      // this will only return the low bits unfortunatley.
@@ -190,20 +190,20 @@ module my_register_bank   #(parameter MSB=16)   (
     // we can assert a done flag here... and factor this code...
     if(/*cs && !cs2 &&*/ /*count == 15 */ 1 )
       begin
-        case (tmp[ MSB-1:8 ])   // register to write
+        case (dinput[ MSB-1:8 ])   // register to write
           // leds
-          7 :  reg_led          = update(reg_led, tmp);
+          7 :  reg_led          = update(reg_led, dinput);
 
           // 8 :  reg_mux          = (val == 0) ? 0 : (1 << val )   ; // update(reg_mux, val);
 
 
           // 8 :  reg_mux          =  (1 << val ) >> 1;    // this screws up blinking...  because it overflows inito the led register flip-flops
           // 8 :  reg_mux          =  (1 << val ) ;    // this is ok
-          8 :  reg_mux          =  setbit( reg_mux, tmp);
+          8 :  reg_mux          =  setbit( reg_mux, dinput);
 
 
-          9 :  reg_dac          = update(reg_dac, tmp );
-          14 : reg_adc          = update(reg_adc, tmp );
+          9 :  reg_dac          = update(reg_dac, dinput );
+          14 : reg_adc          = update(reg_adc, dinput );
 
           // soft reset
           // should be the same as initial starting
