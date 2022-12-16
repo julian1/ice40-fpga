@@ -130,7 +130,7 @@ module my_register_bank   #(parameter MSB=16)   (
   /*
     remember - we don't get a clk edge at the end.  But we can test the count.
   
-    we have two drivers (always blocks) for the count variable.
+    we must avoid two drivers (ie always@ blocks) for all variables.  eg. the count variable.
 
   */
 
@@ -155,9 +155,9 @@ module my_register_bank   #(parameter MSB=16)   (
         dinput = {dinput[MSB-2:0], din};
 
         // reading stuff.
-        if(count == 2)
+        if(count == 7)
           begin
-              ret = 8'b11010101 >> 8;
+              ret = 16'b0101010101010101;
 /*
             case ( dinput[ 7:0]   )   // register to read
               // leds
@@ -175,7 +175,8 @@ module my_register_bank   #(parameter MSB=16)   (
         // dout  = ret[MSB-2];
         // dout  = 1 ;
 
-        dout  = ret;
+        // dout  = ret;
+        dout  = ret[MSB-2];
 
         ret   = ret << 1; // this *is* zero fill operator.
 
