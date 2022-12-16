@@ -143,8 +143,9 @@ module my_register_bank   #(parameter MSB=16)   (
           synchronization will happen, but be a slow wrap around.
       - completion is count==15.
       --------
-      OK. TO BE complete and robust against poor frames - we need the clock crossing MSEE like vector to be able to detect transitions of cs on the clk edge.
-          even when we don't have the clk edge. not sure.
+      OK. TO BE robust against poor frames - we need the clock crossing MSEE like vector to be able to detect transitions of cs on the clk edge.
+          even when we don't have the clk edge. 
+          - not sure. because we *only* get clk edges during cs assertion.
 
   */
 
