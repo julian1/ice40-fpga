@@ -142,6 +142,9 @@ module my_register_bank   #(parameter MSB=16)   (
           no. it's not quite right.  because count is not held at 0. it
           synchronization will happen, but be a slow wrap around.
       - completion is count==15.
+      --------
+      OK. TO BE complete and robust against poor frames - we need the clock crossing MSEE like vector to be able to detect transitions of cs on the clk edge.
+          even when we don't have the clk edge. not sure.
 
   */
 
