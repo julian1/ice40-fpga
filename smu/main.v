@@ -124,9 +124,6 @@ module my_register_bank   #(parameter MSB=16)   (
 
 
 
-  //wire [8-1:0] val   = dinput;   // change name to input.
-
-
   /*
     remember/rules
       - we don't get another final clk edge at the end of the spi sequence, on which to sample the cs.
@@ -194,10 +191,10 @@ module my_register_bank   #(parameter MSB=16)   (
       if(count == 0) // ie. sequence correctly terminated
 
         case (dinput[ MSB-1:8 ])   // register to write
-          // leds
+
           7 :  reg_led          = update(reg_led, dinput);
 
-          8 :  reg_mux          =  setbit( reg_mux, dinput);
+          8 :  reg_mux          = setbit( reg_mux, dinput);
 
           9 :  reg_dac          = update(reg_dac, dinput );
           14 : reg_adc          = update(reg_adc, dinput );
