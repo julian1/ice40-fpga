@@ -154,19 +154,23 @@ module my_register_bank   #(parameter MSB=16)   (
         // d into lsb, shift left toward msb
         dinput = {dinput[MSB-2:0], din};
 
+        if(count == 0)
+          begin
+            ;
+          end
+
         // reading stuff.
         if(count == 7)
           begin
-              // ret = 16'b0101010101010101;
-              ret = 4'b0101 << 7;
-/*
+              // ret = 4'b0101 << 7; test
+
             case ( dinput[ 7:0]   )   // register to read
               // leds
               7 :  ret = reg_led << 7;
               8 :  ret = reg_mux << 7;      // this will only return the low bits unfortunatley.
               9 :  ret = reg_dac << 7;
             endcase
-*/
+
           end
 
 
