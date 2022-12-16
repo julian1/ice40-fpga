@@ -10,7 +10,7 @@
 module blinker    (
   input clk,
 
-  output reg [4-1:0] reg_vec
+  output reg [4-1:0] led_vec
 
 );
 
@@ -29,7 +29,7 @@ module blinker    (
   // assign { led1, led2, LED3, LED4, LED5 } = outcnt ^ (outcnt >> 1);
   // assign {  led1, led2 } = outcnt ^ (outcnt >> 1);
 
-  assign reg_vec = outcnt ^ (outcnt >> 1);
+  assign led_vec = outcnt ^ (outcnt >> 1);
 
 endmodule
 
