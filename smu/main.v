@@ -129,7 +129,7 @@ module my_register_bank   #(parameter MSB=16)   (
 
 
   // clock value into tmp var
-  always @ (negedge clk or posedge cs)
+  always @ (negedge clk /*or posedge cs */)
   begin
     if(cs)  // cs not asserted
       begin
@@ -142,6 +142,7 @@ module my_register_bank   #(parameter MSB=16)   (
     else
        // cs asserted
       begin
+
 
         // d into lsb, shift left toward msb
         tmp = {tmp[MSB-2:0], din};
@@ -163,10 +164,11 @@ module my_register_bank   #(parameter MSB=16)   (
         // return value
 
         // TODO generates a warning....
-        dout = ret[MSB-2];    // OK. doing this gets our high bit. but loses the last bit... because its delayed??
-        ret = ret << 1; // this *is* zero fill operator.
+        dout  = ret[MSB-2];    // OK. doing this gets our high bit. but loses the last bit... because its delayed??
 
-        count = count + 1;
+        ret   = ret << 1; // this *is* zero fill operator.
+
+        count <= count + 1;
 
       end
   end
@@ -186,7 +188,7 @@ module my_register_bank   #(parameter MSB=16)   (
   always @ (posedge cs)   // cs done.
   begin
     // we can assert a done flag here... and factor this code...
-    if(/*cs && !cs2 &&*/ count == 16  )
+    if(/*cs && !cs2 &&*/ /*count == 15 */ 1 )
       begin
         case (tmp[ MSB-1:8 ])   // register to write
           // leds
