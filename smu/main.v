@@ -123,7 +123,6 @@ module my_register_bank   #(parameter MSB=16)   (
 
   /*
     remember/rules
-      - we don't get another final clk edge at the end of the spi sequence, on which to sample the cs goiing high/deasserting.
       - and we must avoid two drivers (ie always@ blocks) for all variables.  eg. the count variable.
       - and we only want to latch value on valid cs deassert
       - so we count the clk, and take actions on the clock count values,
@@ -134,33 +133,13 @@ module my_register_bank   #(parameter MSB=16)   (
       - The important synchronization action, is testing that cs is asserted on the clk edge.
         while holding count=0, after sequence completion.
         This guarantees that that new data begins getting clocking in correctly on a new assertion of cs.
-
-      - trying to sample cs, and having it in the sensitivity list, gives rare random metastability failure.
-
-      - if there is an underlength frame, then the next frame will overflow but also reset the clk count=0. and then the subsequent message will be ok.
-      ----
-          no. it's not quite right.  because count is not held at 0. it is reset.
-          synchronization will happen, but be a slow wrap around.
-      - completion is count==15.
-      --------
-      OK. TO BE robust against poor frames - we need the clock crossing MSEE like vector to be able to detect transitions of cs on the clk edge.
-          even when we don't have the clk edge.
-          - not sure. because we *only* get clk edges during cs assertion. so we cannot detect cs transitions.
-      ------
-      OR - we just rely on device CRESET? or sample both cs,clk on another clock
-      -----
-      as written cs is just a filter for clk cycles.
-      -----------
-
-      see code here.  we needed an OR statement. 
-
   */
 
-  // clock value into dinput var
   always @ (negedge clk or posedge cs)
   begin
-                // EXTR.  THIS IS the synchronization action. we only clock in when cs is asserted
-    if( ! cs)  // cs asserted
+
+    // cs asserted
+    if( ! cs)
       begin
 
         // shift data din into the dinput toward msb
@@ -190,20 +169,15 @@ module my_register_bank   #(parameter MSB=16)   (
         dout  = ret[MSB-2];
 
         ret   = ret << 1; // this *is* zero fill operator.
-/*
-        if(count == 15 )
-            // we are finished
-            // reset the count var. rather than in posedge cs, to avoid having two drivers for var.
-            // think this also permits, regaining synchronization , on incorrectly timed cs edge.
-          count = 0;
-        else
-*/
-          count = count + 1;
 
+        count = count + 1;
       end
-      // this works to reset, because posedge is in sensitivity list
-      else
-        count = 0;
+
+    // cs deasserted
+    // EXTR.  THIS IS the synchronization action. we only clock in when cs is asserted. and reset clock if deasserted
+    // this works to reset, because posedge is in sensitivity list
+    else
+      count = 0;
 
   end
 
@@ -211,6 +185,7 @@ module my_register_bank   #(parameter MSB=16)   (
   always @ (posedge cs)   // cs done.
     begin
 
+      // but we lose access to count when cs is added to both sensitivity lists.
       // if(1 /*count == 0*/) // ie. sequence has correct number of clk cycles.
       if(  1 ) // ie. sequence has correct number of clk cycles.
 
