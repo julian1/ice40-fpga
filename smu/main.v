@@ -119,12 +119,13 @@ module my_register_bank   #(parameter MSB=16)   (
   reg [MSB-1:0] ret  ;    // output value
   reg [4-1:0]   count;    // 1<<4==16. number of bits so far, in spi
 
-
+  reg           complete;     // valid, avoid using clk
 
   /*
     remember/rules
       - we don't get another final clk edge at the end of the spi sequence, on which to sample the cs.
       - and we must avoid two drivers (ie always@ blocks) for all variables.  eg. the count variable.
+      - and we only want to latch value in on valid cs deassert
       - so we count the clk, and take actions on the clock count values,
       - so it's effectively a state machine based on the clk.
       - cs deasserting just latches everything in, provided it looks right.
@@ -135,6 +136,8 @@ module my_register_bank   #(parameter MSB=16)   (
         maybe need a finished var on posedge cs. then sample  in negedge clk.   and reset count .
         - no i think it's ok. eg if cs is premature, then the next message will get garbled, while clk counts to 16 then holds.
         - No. it doesn't hold at 16, it resets.
+      -----
+      NO. it's easy - we just hold count at 0 during a cs deassert.
 
   */
 
@@ -182,6 +185,13 @@ module my_register_bank   #(parameter MSB=16)   (
           count = count + 1;
 
       end
+    else    // cs deasserted
+      begin
+
+        // given an out of sequence cs, this will reset everything.
+        count = 0;
+      end
+
   end
 
 
