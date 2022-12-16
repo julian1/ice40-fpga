@@ -171,8 +171,12 @@ module my_register_bank   #(parameter MSB=16)   (
       end
   end
 
-
-
+  /*
+      is there something like a race condition between these two blocks.
+      - eg. both trigger on posedge cs.
+      -----------------
+      THINK we should remove the posedge cs from top clause.  and set count == 15. instead of count == 16
+  */
   always @ (posedge cs)   // cs done.
   begin
     // we can assert a done flag here... and factor this code...
