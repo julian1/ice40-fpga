@@ -119,8 +119,8 @@ module my_register_bank   #(parameter MSB=16)   (
 
 
   reg [MSB-1:0] dinput;      // input value
-  reg [MSB-1:0] ret  ;    // output value
-  reg [8-1:0]   count;    // number of bits, in spi
+  reg [MSB-1:0] ret  ;    // return/output value
+  reg [4-1:0]   count;    // number of bits, in spi
 
 
 
@@ -131,6 +131,7 @@ module my_register_bank   #(parameter MSB=16)   (
   // clock value into dinput var
   always @ (negedge clk /*or posedge cs */)
   begin
+/*
     if(cs)  // cs not asserted
       begin
         count = 0;
@@ -140,6 +141,8 @@ module my_register_bank   #(parameter MSB=16)   (
 
       end
     else
+*/
+    if( ! cs)  // cs not asserted
        // cs asserted
       begin
 
@@ -148,23 +151,27 @@ module my_register_bank   #(parameter MSB=16)   (
         dinput = {dinput[MSB-2:0], din};
 
         // reading stuff.
-        if(count == 7)
+        if(count == 2)
           begin
+              ret = 8'b11010101 >> 8;
+/*
             case ( dinput[ 7:0]   )   // register to read
               // leds
               7 :  ret = reg_led << 7;
               8 :  ret = reg_mux << 7;      // this will only return the low bits unfortunatley.
               9 :  ret = reg_dac << 7;
-
             endcase
-
+*/
           end
 
 
         // return value
 
         // TODO generates a warning....
-        dout  = ret[MSB-2];    // OK. doing this gets our high bit. but loses the last bit... because its delayed??
+        // dout  = ret[MSB-2];
+        // dout  = 1 ;
+
+        dout  = ret;
 
         ret   = ret << 1; // this *is* zero fill operator.
 
@@ -190,6 +197,9 @@ module my_register_bank   #(parameter MSB=16)   (
     // we can assert a done flag here... and factor this code...
     if(/*cs && !cs2 &&*/ /*count == 15 */ 1 )
       begin
+
+        count = 0;      // reset
+
         case (dinput[ MSB-1:8 ])   // register to write
           // leds
           7 :  reg_led          = update(reg_led, dinput);
