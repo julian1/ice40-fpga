@@ -130,12 +130,14 @@ module my_register_bank   #(parameter MSB=16)   (
       - and we must avoid two drivers (ie always@ blocks) for all variables.  eg. the count variable.
       - so we count the clk, and take actions on the clock count values,
       - so it's effectively a state machine based on the clk.
+      - cs deasserting just latches everything in, provided it looks right.
       ------
       - Issue - does not abandon the sequence - if the cs is prematurely finished.
       - but we can use additional state var to communicate between the two drivers (always blocks).
       ---
-      TODO.
-        need a finished var on posedge cs. then sample  in negedge clk.   and reset count .
+        maybe need a finished var on posedge cs. then sample  in negedge clk.   and reset count .
+        - no i think it's ok. eg if cs is premature, then the next message will get garbled, until clk==16. and clk is reset.
+        - but then the  subsequent message will be correct.
 
   */
 
