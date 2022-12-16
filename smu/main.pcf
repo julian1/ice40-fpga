@@ -37,10 +37,12 @@ set_io INTERUPT_OUT 48
 
 # these are badly ordered in schematic
 # mcp3208
-set_io ADC03_CLK    87
-set_io ADC03_MISO   88
-set_io ADC03_MOSI   90
-set_io ADC03_CS     91
+
+# moved nov 2022
+set_io ADC03_CLK    61
+set_io ADC03_MISO   62
+set_io ADC03_MOSI   63
+set_io ADC03_CS     64
 
 # should prefix rename SPI_DAC_CS etc.
 # dac
@@ -72,12 +74,34 @@ set_io ADC02_MISO   7
 set_io ADC02_CLK    8
 set_io ADC02_CS     9
 
+
+
+# 4094
+
+set_io GLB_4094_OE      75
+
+set_io GLB_4094_DATA    73
+set_io GLB_4094_CLK     74
+set_io U511_STROBE_CTL  76
+set_io U514_STROBE_CTL  78
+set_io A_STROBE_CTL     79
+
+set_io U511_MISO_CTL    81
+set_io U514_MISO_CTL    87
+set_io U706_MISO_CTL    88
+
+
+
+
+
+
 ########################
 
 
 
 # reg_led  7
 # gpio
+set_io LED0         105
 set_io LED1         106
 set_io LED2         107
 
@@ -94,24 +118,6 @@ set_io DAC_UNI_BIP_B 32
 
 
 
-
-# reg_rails 10
-# 74hc125
-set_io RAILS_LP5V   37
-set_io RAILS_LP15V  38
-set_io RAILS_LP30V  39
-set_io RAILS_LP50V  41
-
-# soft_reset 11
-
-
-
-# reg_dac_ref_mux 12
-# dg444
-set_io DAC_REF_MUX_A 33
-set_io DAC_REF_MUX_B 34
-
-
 # reg_adc  14
 # ads131a04
 #
@@ -124,157 +130,4 @@ set_io ADC02_M1     11
 set_io ADC02_M2     12
 
 
-# reg_mux_pol 15
-# does not match the schem nets. and is
-# reg_mux_polarity etc.
-# dg444
-set_io MUX_POL_VSET     61
-set_io MUX_POL_ISET     64
-set_io MUX_POL_ISET_INV 63
-set_io MUX_POL_VSET_INV 62
-
-
-# reg_mux_sel 16
-# rename. mux_sel. dir or something.
-# dg444
-set_io MUX_SEL_MIN        52
-set_io MUX_SEL_INJECT_ERR 58
-set_io MUX_SEL_INJECT_VFB 60
-set_io MUX_SEL_MAX        56
-
-
-
-# reg_relay_com 17
-# uln2003
-set_io RELAY_COM_X  116
-set_io RELAY_COM_Y  117
-set_io RELAY_COM_Z  118
-
-
-
-
-# reg_irange_x 18
-# dg333/adg 12..
-set_io IRANGE_X_SW1_CTL 119
-set_io IRANGE_X_SW2_CTL 120
-set_io IRANGE_X_SW3_CTL 121
-set_io IRANGE_X_SW4_CTL 122
-
-
-
-# reg_mon_rails 19
-# lm393
-# TODO should renam X15V_MON_OUT
-set_io XP15V_UP_OUT 128
-# set_io XN15V_UP_OUT 129
-
-
-# reg_rails_oe 24
-# 74hc125
-set_io RAILS_OE         95    # smu10 not contig.
-
-
-
-# reg_ina_vfb_sw  25
-# dg444 and aqy212 optocoupler. via 74hc04 inverter
-set_io INA_VFB_SW1_CTL 134
-set_io INA_VFB_SW2_CTL 135
-set_io INA_VFB_SW3_CTL 136
-
-
-
-# reg_ina_ifb_sw 28
-# dg444
-set_io INA_IFB_SW1_CTL  102
-set_io INA_IFB_SW2_CTL  104
-set_io INA_IFB_SW3_CTL  105
-
-
-# reg_ina_vfb_atten  29
-# aqy212
-set_io INA_VFB_ATTEN_SW1_CTL 137
-set_io INA_VFB_ATTEN_SW2_CTL 138
-# set_io INA_VFB_ATTEN_SW3_CTL 139      # unused. 30 aug 2022
-
-
-# reg_isense_mux 30
-# dg444
-set_io ISENSE_MUX1_CTL   78
-set_io ISENSE_MUX2_CTL   79
-set_io ISENSE_MUX3_CTL   80
-
-
-# reg_relay 31
-# uln2003
-set_io RELAY_OUT_COM_HC_CTL 112
-set_io RELAY_GUARD_CTL      113
-set_io RELAY_SENSE_EXT_CTL  114
-set_io RELAY_SENSE_INT_CTL  115
-
-
-# reg_irange_yz_sw  33
-# adg1334/ dg333
-set_io IRANGE_YZ_SW1_CTL 73
-set_io IRANGE_YZ_SW2_CTL 74
-set_io IRANGE_YZ_SW3_CTL 75
-set_io IRANGE_YZ_SW4_CTL 76
-
-
-
-
-
-###########################
-# old
-
-
-# flash
-# TODO really bad pin assignment. should not be in different gpio banks.
-#set_io FLASH_CS     22     # flash_ss
-#set_io FLASH_CLK    101     # flash_sck
-#set_io FLASH_MOSI   144
-#set_io FLASH_MISO   114
-
-
-
-# irange sense
-# deprecated
-
-# fb gain register
-# not monotonoic. order is inx order on dg444. TODO maybe swap on ice40
-
-#define GAIN_IFB_REGISTER    21
-#set_io GAIN_IFB_OP1   73
-#set_io GAIN_IFB_OP2   74
-
-
-# IRANGEX_SW58_REGISTER
-# deprecated
-
-
-
-# #define GAIN_VFB_REGISTER    23
-#set_io GAIN_VFB_OP1 75
-#set_io GAIN_VFB_OP2 76
-
-
-
-
-# ina_diff_sw
-# set_io INA_DIFF_SW1_CTL  138
-# set_io INA_DIFF_SW2_CTL  96   # non. contiguous.
-
-
-# reg_isense_sw
-# rename ISENSE_MUX_SW1_CTL in schematic
-#set_io ISENSE_SW1_CTL   78
-#set_io ISENSE_SW2_CTL   79
-#set_io ISENSE_SW3_CTL   80
-
-
-# relay
-# set_io RELAY_VRANGE  113
-# set_io RELAY_OUTCOM   95    # non contiguous.
-
-#####################################
-# smu11 stuff.
 
