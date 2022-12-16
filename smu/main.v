@@ -130,21 +130,19 @@ module my_register_bank   #(parameter MSB=16)   (
       - so it's effectively a state machine based on the clk.
       - cs deasserting just latches everything in, provided it looks right.
       ------
-      - Issue - does not abandon the sequence - if the cs is prematurely finished.
-      - but we can use additional state var to communicate between the two drivers (always blocks).
-      ---
-        maybe need a finished var on posedge cs. then sample  in negedge clk.   and reset count .
-        - no i think it's ok. eg if cs is premature, then the next message will get garbled, while clk counts to 16 then holds.
-        - No. it doesn't hold at 16, it resets.
-      -----
-      NO. it's easy - we just hold count at 0 during a cs deassert.
+
+      - The important synchronization action, is testing that cs is asserted on the clk edge.
+        while holding count=0, after sequence completion.
+        This guarantees that that new data begins getting clocking in correctly on a new assertion of cs.
+
+      - trying to sample cs, and having it in the sensitivity list, gives rare random failure.
 
   */
 
   // clock value into dinput var
   always @ (negedge clk )
   begin
-
+                // EXTR.  THIS IS the synchronization action. s
     if( ! cs)  // cs asserted
       begin
 
