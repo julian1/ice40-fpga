@@ -136,7 +136,7 @@ module my_register_bank   #(parameter MSB=16)   (
       - but we can use additional state var to communicate between the two drivers (always blocks).
       ---
         maybe need a finished var on posedge cs. then sample  in negedge clk.   and reset count .
-        - no i think it's ok. eg if cs is premature, then the next message will get garbled, until clk==16. and clk is reset.
+        - no i think it's ok. eg if cs is premature, then the next message will get garbled, while clk counts to 16 then holds.
         - but then the  subsequent message will be correct.
 
   */
@@ -151,7 +151,7 @@ module my_register_bank   #(parameter MSB=16)   (
         // shift data din into the dinput toward msb
         dinput = {dinput[MSB-2:0], din};
 
-        // anything to do at the start
+        // anything needed at the start of sequence
         if(count == 0)
           begin
             ;
@@ -179,6 +179,7 @@ module my_register_bank   #(parameter MSB=16)   (
         if(count == 16 )
             // we are finished
             // reset the count var. rather than in posedge cs, to avoid having two drivers for var.
+            // think this also permits, regaining synchronization , on incorrectly timed cs edge.
           count = 0;
         else
           count = count + 1;
