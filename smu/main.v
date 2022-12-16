@@ -188,8 +188,8 @@ module my_register_bank   #(parameter MSB=16)   (
     else    // cs deasserted
       begin
 
-        // given an out of sequence cs, this will reset everything.
-        count = 0;
+        // this is a tx error. eg. we have a clock without cs asserted
+        // count = 0;
       end
 
   end
