@@ -128,41 +128,34 @@ module my_register_bank   #(parameter MSB=16)   (
 
 
   /*
-    remember - we don't get a clk edge at the end.  But we can test the count.
-  
-    we must avoid two drivers (ie always@ blocks) for all variables.  eg. the count variable.
+    remember
+      - we don't get another clk edge at the end of the spi sequence, to sample the cs.
+      - we must avoid two drivers (ie always@ blocks) for all variables.  eg. the count variable.
+      - so we count the clk, and take actions on the clock count values,
 
   */
 
   // clock value into dinput var
-  always @ (negedge clk /*or posedge cs */)
+  always @ (negedge clk )
   begin
-/*
-    if(cs)  // cs not asserted
-      begin
-        count = 0;
 
-        // dummy value
-        ret = 255 << 8;
-
-      end
-    else
-*/
     if( ! cs)  // cs asserted
       begin
 
-        // d into lsb, shift left toward msb
+        // shift data din into the dinput toward msb
         dinput = {dinput[MSB-2:0], din};
 
+        // anything to do at the start
         if(count == 0)
           begin
             ;
           end
 
-        // reading stuff.
+        // after we have read in the register of interest, we can setup the output value. for reads
         if(count == 7)
           begin
-              // ret = 4'b0101 << 7; test
+
+            // ret = 4'b0101 << 7; test
 
             case ( dinput[ 7:0]   )   // register to read
               // leds
@@ -173,21 +166,13 @@ module my_register_bank   #(parameter MSB=16)   (
 
           end
 
-
-        // return value
-
-        // TODO generates a warning....
-        // dout  = ret[MSB-2];
-        // dout  = 1 ;
-
-        // dout  = ret;
         dout  = ret[MSB-2];
 
         ret   = ret << 1; // this *is* zero fill operator.
 
-        if(count == 16 ) 
-            // we are done
-            // do the count reset here. to avoid having two drivers.
+        if(count == 16 )
+            // we are finished
+            // reset the count var. rather than in posedge cs, to avoid having two drivers for var.
           count = 0;
         else
           count = count + 1;
@@ -195,65 +180,46 @@ module my_register_bank   #(parameter MSB=16)   (
       end
   end
 
-  /*
-      is there something like a race condition between these two blocks.
-      - eg. both trigger on posedge cs.
-      -----------------
-      THINK we should remove the posedge cs from top clause.  and set count == 15. instead of count == 16
-      put count = 0
-      might need to adjust the temp register also.
-      ==============
-      - there's a race condition - with these two blocks -
-      eg. on cs  (test count)  (increment count).
-      ==============
-  */
+
   always @ (posedge cs)   // cs done.
-  begin
-    // we can assert a done flag here... and factor this code...
-    if(/*cs && !cs2 &&*/ /*count == 15 */ 1 )
-      begin
+    begin
 
-        //count = 0;      // reset
+      case (dinput[ MSB-1:8 ])   // register to write
+        // leds
+        7 :  reg_led          = update(reg_led, dinput);
 
-        case (dinput[ MSB-1:8 ])   // register to write
-          // leds
-          7 :  reg_led          = update(reg_led, dinput);
-
-          // 8 :  reg_mux          = (val == 0) ? 0 : (1 << val )   ; // update(reg_mux, val);
+        // 8 :  reg_mux          = (val == 0) ? 0 : (1 << val )   ; // update(reg_mux, val);
 
 
-          // 8 :  reg_mux          =  (1 << val ) >> 1;    // this screws up blinking...  because it overflows inito the led register flip-flops
-          // 8 :  reg_mux          =  (1 << val ) ;    // this is ok
-          8 :  reg_mux          =  setbit( reg_mux, dinput);
+        // 8 :  reg_mux          =  (1 << val ) >> 1;    // this screws up blinking...  because it overflows inito the led register flip-flops
+        // 8 :  reg_mux          =  (1 << val ) ;    // this is ok
+        8 :  reg_mux          =  setbit( reg_mux, dinput);
 
 
-          9 :  reg_dac          = update(reg_dac, dinput );
-          14 : reg_adc          = update(reg_adc, dinput );
+        9 :  reg_dac          = update(reg_dac, dinput );
+        14 : reg_adc          = update(reg_adc, dinput );
 
-          // soft reset
-          // should be the same as initial starting
-          11 :
-            begin
-              reg_led           = 0;
-              reg_mux           = 0;            // TODO. should leave. eg. don't change the muxing in the middle of spi
-              reg_dac           = 0;
-              reg_adc           = 0;
-            end
+        // soft reset
+        // should be the same as initial starting
+        11 :
+          begin
+            reg_led           = 0;
+            reg_mux           = 0;            // TODO. should leave. eg. don't change the muxing in the middle of spi
+            reg_dac           = 0;
+            reg_adc           = 0;
+          end
 
-          // powerup contingent upon checking rails
-          6 :
-            begin
-              reg_led           = 0;
-              // reg_mux        = 0;            // should just be 0b
-              // reg_dac        = 0;            // dac is already configured. before turning on rails, so don't touch again!!
-              reg_adc           = 0;
-            end
+        // powerup contingent upon checking rails
+        6 :
+          begin
+            reg_led           = 0;
+            // reg_mux        = 0;            // should just be 0b
+            // reg_dac        = 0;            // dac is already configured. before turning on rails, so don't touch again!!
+            reg_adc           = 0;
+          end
 
-
-
-        endcase
-      end
-  end
+      endcase
+    end
 endmodule
 
 
