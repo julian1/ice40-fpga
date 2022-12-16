@@ -148,11 +148,16 @@ module my_register_bank   #(parameter MSB=16)   (
           - not sure. because we *only* get clk edges during cs assertion. so we cannot detect cs transitions.
       ------
       OR - we just rely on device CRESET? or sample both cs,clk on another clock
+      -----
+      as written cs is just a filter for clk cycles.
+      -----------
+
+      see code here.  we needed an OR statement. 
 
   */
 
   // clock value into dinput var
-  always @ (negedge clk )
+  always @ (negedge clk or posedge cs)
   begin
                 // EXTR.  THIS IS the synchronization action. we only clock in when cs is asserted
     if( ! cs)  // cs asserted
@@ -196,6 +201,8 @@ module my_register_bank   #(parameter MSB=16)   (
 
       end
       // else  EXTR. doesn't work - because there is never a guarantee of a clkedge to sample deassertion of of cs.
+      else
+        count = 0;
 
   end
 
@@ -203,7 +210,7 @@ module my_register_bank   #(parameter MSB=16)   (
   always @ (posedge cs)   // cs done.
     begin
 
-      if(count == 0) // ie. sequence has correct number of clk cycles.
+      if(1 /*count == 0*/) // ie. sequence has correct number of clk cycles.
 
         case (dinput[ MSB-1:8 ])   // register to write
 
