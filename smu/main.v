@@ -139,13 +139,13 @@ module my_register_bank   #(parameter MSB=16)   (
 
       - if there is an underlength frame, then the next frame will overflow but also reset the clk count=0. and then the subsequent message will be ok.
       ----
-          no. it's not quite right.  because count is not held at 0. it
+          no. it's not quite right.  because count is not held at 0. it is reset.
           synchronization will happen, but be a slow wrap around.
       - completion is count==15.
       --------
       OK. TO BE robust against poor frames - we need the clock crossing MSEE like vector to be able to detect transitions of cs on the clk edge.
           even when we don't have the clk edge. 
-          - not sure. because we *only* get clk edges during cs assertion.
+          - not sure. because we *only* get clk edges during cs assertion. so we cannot detect cs transitions.
 
   */
 
