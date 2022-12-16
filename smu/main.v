@@ -157,7 +157,8 @@ module my_register_bank   #(parameter MSB=16)   (
         // reading stuff.
         if(count == 7)
           begin
-              ret = 16'b0101010101010101;
+              // ret = 16'b0101010101010101;
+              ret = 4'b0101 << 7;
 /*
             case ( dinput[ 7:0]   )   // register to read
               // leds
