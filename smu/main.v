@@ -128,10 +128,14 @@ module my_register_bank   #(parameter MSB=16)   (
 
 
   /*
-    remember
-      - we don't get another clk edge at the end of the spi sequence, to sample the cs.
-      - we must avoid two drivers (ie always@ blocks) for all variables.  eg. the count variable.
+    remember/rules
+      - we don't get another final clk edge at the end of the spi sequence, on which to sample the cs.
+      - and we must avoid two drivers (ie always@ blocks) for all variables.  eg. the count variable.
       - so we count the clk, and take actions on the clock count values,
+      - so it's effectively a state machine based on the clk.
+      ------
+      - Issue - does not abandon the sequence - if the cs is prematurely finished. 
+      - but we can use additional state var to communicate between the two drivers (always blocks).
 
   */
 
@@ -184,41 +188,43 @@ module my_register_bank   #(parameter MSB=16)   (
   always @ (posedge cs)   // cs done.
     begin
 
-      case (dinput[ MSB-1:8 ])   // register to write
-        // leds
-        7 :  reg_led          = update(reg_led, dinput);
+      if(count == 0) // ie. sequence correctly terminated
 
-        // 8 :  reg_mux          = (val == 0) ? 0 : (1 << val )   ; // update(reg_mux, val);
+        case (dinput[ MSB-1:8 ])   // register to write
+          // leds
+          7 :  reg_led          = update(reg_led, dinput);
 
-
-        // 8 :  reg_mux          =  (1 << val ) >> 1;    // this screws up blinking...  because it overflows inito the led register flip-flops
-        // 8 :  reg_mux          =  (1 << val ) ;    // this is ok
-        8 :  reg_mux          =  setbit( reg_mux, dinput);
+          // 8 :  reg_mux          = (val == 0) ? 0 : (1 << val )   ; // update(reg_mux, val);
 
 
-        9 :  reg_dac          = update(reg_dac, dinput );
-        14 : reg_adc          = update(reg_adc, dinput );
+          // 8 :  reg_mux          =  (1 << val ) >> 1;    // this screws up blinking...  because it overflows inito the led register flip-flops
+          // 8 :  reg_mux          =  (1 << val ) ;    // this is ok
+          8 :  reg_mux          =  setbit( reg_mux, dinput);
 
-        // soft reset
-        // should be the same as initial starting
-        11 :
-          begin
-            reg_led           = 0;
-            reg_mux           = 0;            // TODO. should leave. eg. don't change the muxing in the middle of spi
-            reg_dac           = 0;
-            reg_adc           = 0;
-          end
 
-        // powerup contingent upon checking rails
-        6 :
-          begin
-            reg_led           = 0;
-            // reg_mux        = 0;            // should just be 0b
-            // reg_dac        = 0;            // dac is already configured. before turning on rails, so don't touch again!!
-            reg_adc           = 0;
-          end
+          9 :  reg_dac          = update(reg_dac, dinput );
+          14 : reg_adc          = update(reg_adc, dinput );
 
-      endcase
+          // soft reset
+          // should be the same as initial starting
+          11 :
+            begin
+              reg_led           = 0;
+              reg_mux           = 0;            // TODO. should leave. eg. don't change the muxing in the middle of spi
+              reg_dac           = 0;
+              reg_adc           = 0;
+            end
+
+          // powerup contingent upon checking rails
+          6 :
+            begin
+              reg_led           = 0;
+              // reg_mux        = 0;            // should just be 0b
+              // reg_dac        = 0;            // dac is already configured. before turning on rails, so don't touch again!!
+              reg_adc           = 0;
+            end
+
+        endcase
     end
 endmodule
 
