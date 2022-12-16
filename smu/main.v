@@ -190,17 +190,18 @@ module my_register_bank   #(parameter MSB=16)   (
         dout  = ret[MSB-2];
 
         ret   = ret << 1; // this *is* zero fill operator.
-
+/*
         if(count == 15 )
             // we are finished
             // reset the count var. rather than in posedge cs, to avoid having two drivers for var.
             // think this also permits, regaining synchronization , on incorrectly timed cs edge.
           count = 0;
         else
+*/
           count = count + 1;
 
       end
-      // else  EXTR. doesn't work - because there is never a guarantee of a clkedge to sample deassertion of of cs.
+      // this works to reset, because posedge is in sensitivity list
       else
         count = 0;
 
@@ -210,7 +211,8 @@ module my_register_bank   #(parameter MSB=16)   (
   always @ (posedge cs)   // cs done.
     begin
 
-      if(1 /*count == 0*/) // ie. sequence has correct number of clk cycles.
+      // if(1 /*count == 0*/) // ie. sequence has correct number of clk cycles.
+      if(  1 ) // ie. sequence has correct number of clk cycles.
 
         case (dinput[ MSB-1:8 ])   // register to write
 
