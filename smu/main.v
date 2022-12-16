@@ -147,7 +147,7 @@ module my_register_bank   #(parameter MSB=16)   (
           even when we don't have the clk edge.
           - not sure. because we *only* get clk edges during cs assertion. so we cannot detect cs transitions.
       ------
-      OR - we just rely on device CRESET?
+      OR - we just rely on device CRESET? or sample both cs,clk on another clock
 
   */
 
