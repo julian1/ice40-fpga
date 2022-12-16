@@ -83,9 +83,6 @@ function [8-1:0] setbit(input [8-1:0] x, input [8-1:0]  val);
 endfunction
 
 
-
-
-
 /*
   rather than having register bank.
   have one 'cs2' mux register.
@@ -120,7 +117,7 @@ module my_register_bank   #(parameter MSB=16)   (
 
   reg [MSB-1:0] dinput;   // input value
   reg [MSB-1:0] ret  ;    // output value
-  reg [4-1:0]   count;    // number of bits so far, in spi
+  reg [4-1:0]   count;    // 1<<4==16. number of bits so far, in spi
 
 
 
@@ -137,7 +134,7 @@ module my_register_bank   #(parameter MSB=16)   (
       ---
         maybe need a finished var on posedge cs. then sample  in negedge clk.   and reset count .
         - no i think it's ok. eg if cs is premature, then the next message will get garbled, while clk counts to 16 then holds.
-        - but then the  subsequent message will be correct.
+        - No. it doesn't hold at 16, it resets.
 
   */
 
