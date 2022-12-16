@@ -135,7 +135,7 @@ module my_register_bank   #(parameter MSB=16)   (
       - but we can use additional state var to communicate between the two drivers (always blocks).
       ---
       TODO.
-        need a var - posedge cs. will reset.
+        need a finished var on posedge cs. then sample  in negedge clk.   and reset count .
 
   */
 
@@ -188,7 +188,7 @@ module my_register_bank   #(parameter MSB=16)   (
   always @ (posedge cs)   // cs done.
     begin
 
-      if(count == 0) // ie. sequence correctly terminated
+      if(count == 0) // ie. sequence has correct number of clk cycles.
 
         case (dinput[ MSB-1:8 ])   // register to write
 
