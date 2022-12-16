@@ -127,12 +127,6 @@ module my_register_bank   #(parameter MSB=16)   (
       - and we only want to latch value on valid cs deassert
       - so we count the clk, and take actions on the clock count values,
       - so it's effectively a state machine based on the clk.
-      - cs deasserting just latches values, provided it looks right.
-      ------
-
-      - The important synchronization action, is testing that cs is asserted on the clk edge.
-        while holding count=0, after sequence completion.
-        This guarantees that that new data begins getting clocking in correctly on a new assertion of cs.
   */
 
   always @ (negedge clk or posedge cs)
@@ -168,14 +162,14 @@ module my_register_bank   #(parameter MSB=16)   (
 
         dout  = ret[MSB-2];
 
-        ret   = ret << 1; // this *is* zero fill operator.
+        ret   = ret << 1; // also a zero fill operator.
 
         count = count + 1;
       end
 
     // cs deasserted
-    // EXTR.  THIS IS the synchronization action. we only clock in when cs is asserted. and reset clock if deasserted
-    // this works to reset, because posedge is in sensitivity list
+    // ok, because cs in sensitivity list
+    // EXTR.  THIS IS the synchronization action. we only clock in when cs is asserted. and hold clock in reset clock if deasserted
     else
       count = 0;
 
@@ -185,7 +179,7 @@ module my_register_bank   #(parameter MSB=16)   (
   always @ (posedge cs)   // cs done.
     begin
 
-      // but we lose access to count when cs is added to both sensitivity lists.
+      // but we lose access to count when cs is added to both (the clk) sensitivity lists.
       // if(1 /*count == 0*/) // ie. sequence has correct number of clk cycles.
       if(  1 ) // ie. sequence has correct number of clk cycles.
 
@@ -219,6 +213,7 @@ module my_register_bank   #(parameter MSB=16)   (
 
         endcase
     end
+
 endmodule
 
 
