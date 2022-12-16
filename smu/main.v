@@ -127,6 +127,12 @@ module my_register_bank   #(parameter MSB=16)   (
   //wire [8-1:0] val   = dinput;   // change name to input.
 
 
+  /*
+    remember - we don't get a clk edge at the end.  But we can test the count.
+  
+    we have two drivers (always blocks) for the count variable.
+
+  */
 
   // clock value into dinput var
   always @ (negedge clk /*or posedge cs */)
@@ -142,10 +148,8 @@ module my_register_bank   #(parameter MSB=16)   (
       end
     else
 */
-    if( ! cs)  // cs not asserted
-       // cs asserted
+    if( ! cs)  // cs asserted
       begin
-
 
         // d into lsb, shift left toward msb
         dinput = {dinput[MSB-2:0], din};
@@ -175,7 +179,12 @@ module my_register_bank   #(parameter MSB=16)   (
 
         ret   = ret << 1; // this *is* zero fill operator.
 
-        count = count + 1;
+        if(count == 16 ) 
+            // we are done
+            // do the count reset here. to avoid having two drivers.
+          count = 0;
+        else
+          count = count + 1;
 
       end
   end
@@ -198,7 +207,7 @@ module my_register_bank   #(parameter MSB=16)   (
     if(/*cs && !cs2 &&*/ /*count == 15 */ 1 )
       begin
 
-        count = 0;      // reset
+        //count = 0;      // reset
 
         case (dinput[ MSB-1:8 ])   // register to write
           // leds
