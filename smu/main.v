@@ -124,7 +124,7 @@ module my_register_bank   #(parameter MSB=16)   (
 
 
 
-  wire [8-1:0] val   = tmp;
+  //wire [8-1:0] val   = tmp;   // change name to input.
 
 
 
@@ -168,7 +168,7 @@ module my_register_bank   #(parameter MSB=16)   (
 
         ret   = ret << 1; // this *is* zero fill operator.
 
-        count <= count + 1;
+        count = count + 1;
 
       end
   end
@@ -192,18 +192,18 @@ module my_register_bank   #(parameter MSB=16)   (
       begin
         case (tmp[ MSB-1:8 ])   // register to write
           // leds
-          7 :  reg_led          = update(reg_led, val);
+          7 :  reg_led          = update(reg_led, tmp);
 
           // 8 :  reg_mux          = (val == 0) ? 0 : (1 << val )   ; // update(reg_mux, val);
 
 
           // 8 :  reg_mux          =  (1 << val ) >> 1;    // this screws up blinking...  because it overflows inito the led register flip-flops
           // 8 :  reg_mux          =  (1 << val ) ;    // this is ok
-          8 :  reg_mux          =  setbit( reg_mux, val );
+          8 :  reg_mux          =  setbit( reg_mux, tmp);
 
 
-          9 :  reg_dac          = update(reg_dac, val);
-          14 : reg_adc          = update(reg_adc, val);
+          9 :  reg_dac          = update(reg_dac, tmp );
+          14 : reg_adc          = update(reg_adc, tmp );
 
           // soft reset
           // should be the same as initial starting
