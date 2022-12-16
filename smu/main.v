@@ -118,9 +118,9 @@ module my_register_bank   #(parameter MSB=16)   (
 );
 
 
-  reg [MSB-1:0] dinput;      // input value
-  reg [MSB-1:0] ret  ;    // return/output value
-  reg [4-1:0]   count;    // number of bits, in spi
+  reg [MSB-1:0] dinput;   // input value
+  reg [MSB-1:0] ret  ;    // output value
+  reg [4-1:0]   count;    // number of bits so far, in spi
 
 
 
@@ -134,8 +134,11 @@ module my_register_bank   #(parameter MSB=16)   (
       - so we count the clk, and take actions on the clock count values,
       - so it's effectively a state machine based on the clk.
       ------
-      - Issue - does not abandon the sequence - if the cs is prematurely finished. 
+      - Issue - does not abandon the sequence - if the cs is prematurely finished.
       - but we can use additional state var to communicate between the two drivers (always blocks).
+      ---
+      TODO.
+        need a var - posedge cs. will reset.
 
   */
 
@@ -194,13 +197,7 @@ module my_register_bank   #(parameter MSB=16)   (
           // leds
           7 :  reg_led          = update(reg_led, dinput);
 
-          // 8 :  reg_mux          = (val == 0) ? 0 : (1 << val )   ; // update(reg_mux, val);
-
-
-          // 8 :  reg_mux          =  (1 << val ) >> 1;    // this screws up blinking...  because it overflows inito the led register flip-flops
-          // 8 :  reg_mux          =  (1 << val ) ;    // this is ok
           8 :  reg_mux          =  setbit( reg_mux, dinput);
-
 
           9 :  reg_dac          = update(reg_dac, dinput );
           14 : reg_adc          = update(reg_adc, dinput );
