@@ -71,7 +71,8 @@ endfunction
 //
 
 
-function [8-1:0] update (input [8-1:0] x, input [4-1:0] setbits, input [4-1:0] clearbits,);
+// function [8-1:0] update (input [8-1:0] x, input [4-1:0] setbits, input [4-1:0] clearbits,);
+function [4-1:0] update (input [4-1:0] x, input [4-1:0] setbits, input [4-1:0] clearbits,);
   begin
     if( clearbits & setbits  /*!= 0*/  ) // if both set and clear bits, then its a toggle
       update =  (clearbits & setbits )  ^ x ; // xor. to toggle.
@@ -123,7 +124,7 @@ module my_register_bank   #(parameter MSB=16)   (
   // latched val, rename
   output reg [4-1:0] reg_led,     // need to be very careful. only 4 bits. or else screws set/reset calculation ...
 
-  output reg [8-1:0] reg_spi_mux,       // change name reg_spi_mux
+  output reg [4-1:0] reg_spi_mux,       // change name reg_spi_mux
 
   output reg [4-1:0] reg_dac = 4'b1111,
   output reg [4-1:0] reg_rails,   /* reg_rails_initital */
@@ -163,33 +164,42 @@ module my_register_bank   #(parameter MSB=16)   (
             ;
           end
 
+
         // after we have read in the register of interest, we can setup the output value. for reads
         if(count == 7)
           begin
 
-            // ret = 4'b0101 << 7; test
+            // ret = 8'b00001111 << 7; /// test
+            // ret = 4'b1111 << 7; /// test - think jjjjjj
+            // ret = 4'b1010 << 7; /// test doesn't work
+            // ret = dinput[ 7:0] << 7; // return the register, to that was passed to read. works.
+            // ret = reg_led      << 7 ;   //  return reg_led
 
             case ( dinput[ 7:0]   )   // register to read
-              // leds
-              7 :  ret = reg_led << 7;
-              8 :  ret = reg_spi_mux << 7;      // this will only return the low bits unfortunatley.
-              9 :  ret = reg_dac << 7;
+              7 :  ret = reg_led      << 7;
+              8 :  ret = reg_spi_mux  << 7;
+              9 :  ret = reg_dac      << 7;
             endcase
-
           end
 
-        dout  = ret[MSB-2];
+          dout  = ret[MSB-2]; // eg. shift out the highest bit first
 
-        ret   = ret << 1; // also a zero fill operator.
+          ret   = ret << 1; // also a zero fill operator.
 
-        count = count + 1;
+          count = count + 1;
       end
 
     // cs deasserted
     // ok, because cs in sensitivity list
     // EXTR.  THIS IS the synchronization action. we only clock in when cs is asserted. and hold clock in reset clock if deasserted
     else
-      count = 0;
+      begin
+        count = 0;
+
+        dinput = 0;
+        ret = 0;
+
+      end
 
   end
 
@@ -204,11 +214,11 @@ module my_register_bank   #(parameter MSB=16)   (
         case (dinput[ MSB-1:8 ])   // register to write
 
 
-
           7 :  reg_led          = update(reg_led, dinput, dinput >> 4);
 
           // 8 :  reg_spi_mux      = setbit( dinput ); //    = setbit( update( reg_led, dinput) ); // Hmmmmm.....
-          8 :  reg_spi_mux      = setbit( update( reg_led, dinput, dinput >> 4) ); // Hmmmmm.....
+          // 8 :  reg_spi_mux      = setbit( update( reg_led, dinput, dinput >> 4) );
+          8 :  reg_spi_mux      = update( reg_led, dinput, dinput >> 4);
 
           9 :  reg_dac          = update(reg_dac, dinput, dinput >> 4 );
           14 : reg_adc          = update(reg_adc, dinput, dinput >> 4 );
@@ -239,9 +249,9 @@ endmodule
 
 
 module my_cs_mux    (
-  input wire [8-1:0] reg_spi_mux,
+  input wire [4-1:0] reg_spi_mux,
   input cs2,
-  output reg [8-1:0] cs_vec
+  output reg [4-1:0] cs_vec
 );
 
   always @ (cs2) // both edges...
@@ -256,10 +266,10 @@ endmodule
 
 
 module my_miso_mux    (
-  input wire [8-1:0] reg_spi_mux,
+  input wire [4-1:0] reg_spi_mux,
   input cs2,
   input dout,
-  input wire [8-1:0] miso_vec,
+  input wire [4-1:0] miso_vec,
   output reg miso
 );
 
