@@ -54,16 +54,34 @@ endfunction
 
 
 
-
-
+/*
 function [8-1:0] update (input [8-1:0] x, input [8-1:0]  val);
   begin
-    if( (val & 4'b1111) & (val >> 4) /*!= 0*/  ) // if both set and clear bits, then its a toggle
+    if( (val & 4'b1111) & (val >> 4)   ) // if both set and clear bits, then its a toggle
       update =  ((val & 4'b1111) & (val >> 4))  ^ x ; // xor. to toggle.
     else
       update = ~(~  (x | (val & 4'b1111)) | (val >> 4));
   end
 endfunction
+*/
+
+
+// (val & 4b1111)  == clearbits .
+// val >> 4        == set bits.
+//
+
+
+function [8-1:0] update (input [8-1:0] x, input [4-1:0] setbits, input [4-1:0] clearbits,);
+  begin
+    if( clearbits & setbits  /*!= 0*/  ) // if both set and clear bits, then its a toggle
+      update =  (clearbits & setbits )  ^ x ; // xor. to toggle.
+    else
+      update = ~(  ~(x | setbits ) | clearbits);
+  end
+endfunction
+
+
+
 
 /*
 
@@ -185,12 +203,15 @@ module my_register_bank   #(parameter MSB=16)   (
 
         case (dinput[ MSB-1:8 ])   // register to write
 
-          7 :  reg_led          = update(reg_led, dinput);
 
-          8 :  reg_spi_mux          = setbit( dinput);
 
-          9 :  reg_dac          = update(reg_dac, dinput );
-          14 : reg_adc          = update(reg_adc, dinput );
+          7 :  reg_led          = update(reg_led, dinput, dinput >> 4);
+
+          // 8 :  reg_spi_mux      = setbit( dinput ); //    = setbit( update( reg_led, dinput) ); // Hmmmmm.....
+          8 :  reg_spi_mux      = setbit( update( reg_led, dinput, dinput >> 4) ); // Hmmmmm.....
+
+          9 :  reg_dac          = update(reg_dac, dinput, dinput >> 4 );
+          14 : reg_adc          = update(reg_adc, dinput, dinput >> 4 );
 
           // soft reset
           // should be the same as initial starting
