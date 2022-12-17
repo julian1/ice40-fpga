@@ -161,6 +161,7 @@ module my_register_bank   #(parameter MSB=16)   (
       begin
 
         // shift data din into the dinput toward msb
+        // needs to be blocking, because of subsequent read dependence
         dinput = {dinput[MSB-2:0], din};
 
         // anything needed at the start of sequence
@@ -168,7 +169,6 @@ module my_register_bank   #(parameter MSB=16)   (
           begin
             ;
           end
-
 
         // after we have read in the register of interest, we can setup the output value. for reads
         if(count == 7)
@@ -181,17 +181,17 @@ module my_register_bank   #(parameter MSB=16)   (
             // ret = reg_led      << 7 ;   //  return reg_led
 
             case ( dinput[ 7:0]   )   // register to read
+              // MUST be blocking, because of dependence when 'ret' is shifted out.
+              // Alternatively change the count
               7 :  ret = reg_led      << 7;
               8 :  ret = reg_spi_mux  << 7;
               9 :  ret = reg_dac      << 7;
             endcase
           end
 
-          dout  = ret[MSB-2]; // eg. shift out the highest bit first
-
-          ret   = ret << 1; // also a zero fill operator.
-
-          count = count + 1; // lhs and rhs dependence
+          dout  <= ret[MSB-2];  // eg. shift data out, highest bit first
+          ret   <= ret << 1;    // also a zero fill operator.
+          count <= count + 1;
       end
 
     // cs deasserted
@@ -201,10 +201,9 @@ module my_register_bank   #(parameter MSB=16)   (
       begin
 
         // these should be able to be non blocking. because no dependence
-        count = 0;
-
-        dinput = 0;
-        ret = 0;
+        count   <= 0;
+        dinput  <= 0;
+        ret     <= 0;
 
       end
 
@@ -221,32 +220,32 @@ module my_register_bank   #(parameter MSB=16)   (
         case (dinput[ MSB-1:8 ])   // register to write
 
 
-          7 :  reg_led          = update(reg_led, dinput, dinput >> 4);
+          7 :  reg_led          <= update(reg_led, dinput, dinput >> 4);
 
           // 8 :  reg_spi_mux      = setbit( dinput ); //    = setbit( update( reg_led, dinput) ); // Hmmmmm.....
           // 8 :  reg_spi_mux      = setbit( update( reg_led, dinput, dinput >> 4) );
-          8 :  reg_spi_mux      = update( reg_led, dinput, dinput >> 4);
+          8 :  reg_spi_mux      <= update( reg_led, dinput, dinput >> 4);
 
-          9 :  reg_dac          = update(reg_dac, dinput, dinput >> 4 );
-          14 : reg_adc          = update(reg_adc, dinput, dinput >> 4 );
+          9 :  reg_dac          <= update(reg_dac, dinput, dinput >> 4 );
+          14 : reg_adc          <= update(reg_adc, dinput, dinput >> 4 );
 
           // soft reset
           // should be the same as initial starting
           11 :
             begin
-              reg_led           = 0;
-              reg_spi_mux           = 0;            // TODO. should leave. eg. don't change the muxing in the middle of spi
-              reg_dac           = 0;
-              reg_adc           = 0;
+              reg_led           <= 0;
+              reg_spi_mux       <= 0;            // TODO. should leave. eg. don't change the muxing in the middle of spi
+              reg_dac           <= 0;
+              reg_adc           <= 0;
             end
 
           // powerup contingent upon checking rails
           6 :
             begin
-              reg_led           = 0;
-              // reg_spi_mux        = 0;            // should just be 0b
-              // reg_dac        = 0;            // dac is already configured. before turning on rails, so don't touch again!!
-              reg_adc           = 0;
+              reg_led           <= 0;
+              // reg_spi_mux    <= 0;            // should just be 0b
+              // reg_dac        <= 0;            // dac is already configured. before turning on rails, so don't touch again!!
+              reg_adc           <= 0;
             end
 
         endcase
