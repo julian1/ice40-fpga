@@ -140,9 +140,6 @@ module my_register_bank   #(parameter MSB=16)   (
   reg [MSB-1:0] ret  ;    // output value
   reg [5-1:0]   count;    // 1<<4==16. 1<<5==32  number of bits so far, in spi
 
-  TODO remove me.
-  reg           complete;     // valid, avoid using clk
-
 
   /*
     remember/rules
