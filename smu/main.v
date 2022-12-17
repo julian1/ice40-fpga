@@ -21,6 +21,7 @@ module blinker    (
   reg [BITS+LOG2DELAY-1:0] counter = 0;
   reg [BITS-1:0] outcnt;
 
+  // sequential
   always@(posedge clk) begin
     counter <= counter + 1;
     outcnt <= counter >> LOG2DELAY;
@@ -29,6 +30,7 @@ module blinker    (
   // assign { led1, led2, LED3, LED4, LED5 } = outcnt ^ (outcnt >> 1);
   // assign {  led1, led2 } = outcnt ^ (outcnt >> 1);
 
+  // continuous. why?
   assign led_vec = outcnt ^ (outcnt >> 1);
 
 endmodule
@@ -138,7 +140,9 @@ module my_register_bank   #(parameter MSB=16)   (
   reg [MSB-1:0] ret  ;    // output value
   reg [5-1:0]   count;    // 1<<4==16. 1<<5==32  number of bits so far, in spi
 
+  TODO remove me.
   reg           complete;     // valid, avoid using clk
+
 
   /*
     remember/rules
@@ -146,8 +150,12 @@ module my_register_bank   #(parameter MSB=16)   (
       - and we only want to latch value on valid cs deassert
       - so we count the clk, and take actions on the clock count values,
       - so it's effectively a state machine based on the clk.
+      ---------
+
+      i think everything can be made non-blocking.  because all the read code is up top, and all the assignment is underneath.
   */
 
+  // sequential
   always @ (negedge clk or posedge cs)
   begin
 
@@ -186,7 +194,7 @@ module my_register_bank   #(parameter MSB=16)   (
 
           ret   = ret << 1; // also a zero fill operator.
 
-          count = count + 1;
+          count = count + 1; // lhs and rhs dependence
       end
 
     // cs deasserted
@@ -194,6 +202,8 @@ module my_register_bank   #(parameter MSB=16)   (
     // EXTR.  THIS IS the synchronization action. we only clock in when cs is asserted. and hold clock in reset clock if deasserted
     else
       begin
+
+        // these should be able to be non blocking. because no dependence
         count = 0;
 
         dinput = 0;
