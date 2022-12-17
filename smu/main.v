@@ -105,7 +105,7 @@ module my_register_bank   #(parameter MSB=16)   (
   // latched val, rename
   output reg [4-1:0] reg_led,     // need to be very careful. only 4 bits. or else screws set/reset calculation ...
 
-  output reg [8-1:0] reg_mux,       // change name reg_spi_mux
+  output reg [8-1:0] reg_spi_mux,       // change name reg_spi_mux
 
   output reg [4-1:0] reg_dac = 4'b1111,
   output reg [4-1:0] reg_rails,   /* reg_rails_initital */
@@ -154,7 +154,7 @@ module my_register_bank   #(parameter MSB=16)   (
             case ( dinput[ 7:0]   )   // register to read
               // leds
               7 :  ret = reg_led << 7;
-              8 :  ret = reg_mux << 7;      // this will only return the low bits unfortunatley.
+              8 :  ret = reg_spi_mux << 7;      // this will only return the low bits unfortunatley.
               9 :  ret = reg_dac << 7;
             endcase
 
@@ -187,7 +187,7 @@ module my_register_bank   #(parameter MSB=16)   (
 
           7 :  reg_led          = update(reg_led, dinput);
 
-          8 :  reg_mux          = setbit( dinput);
+          8 :  reg_spi_mux          = setbit( dinput);
 
           9 :  reg_dac          = update(reg_dac, dinput );
           14 : reg_adc          = update(reg_adc, dinput );
@@ -197,7 +197,7 @@ module my_register_bank   #(parameter MSB=16)   (
           11 :
             begin
               reg_led           = 0;
-              reg_mux           = 0;            // TODO. should leave. eg. don't change the muxing in the middle of spi
+              reg_spi_mux           = 0;            // TODO. should leave. eg. don't change the muxing in the middle of spi
               reg_dac           = 0;
               reg_adc           = 0;
             end
@@ -206,7 +206,7 @@ module my_register_bank   #(parameter MSB=16)   (
           6 :
             begin
               reg_led           = 0;
-              // reg_mux        = 0;            // should just be 0b
+              // reg_spi_mux        = 0;            // should just be 0b
               // reg_dac        = 0;            // dac is already configured. before turning on rails, so don't touch again!!
               reg_adc           = 0;
             end
@@ -218,7 +218,7 @@ endmodule
 
 
 module my_cs_mux    (
-  input wire [8-1:0] reg_mux,
+  input wire [8-1:0] reg_spi_mux,
   input cs2,
   output reg [8-1:0] cs_vec
 );
@@ -226,16 +226,16 @@ module my_cs_mux    (
   always @ (cs2) // both edges...
 
     if(cs2)   // cs2 = high = not asserted
-        cs_vec = ~( reg_mux & 8'b00000000 );  // turn off cs for all.
+        cs_vec = ~( reg_spi_mux & 8'b00000000 );  // turn off cs for all.
       else
-        cs_vec = ~( reg_mux & 8'b11111111 );  // turn on
+        cs_vec = ~( reg_spi_mux & 8'b11111111 );  // turn on
 endmodule
 
 
 
 
 module my_miso_mux    (
-  input wire [8-1:0] reg_mux,
+  input wire [8-1:0] reg_spi_mux,
   input cs2,
   input dout,
   input wire [8-1:0] miso_vec,
@@ -247,9 +247,9 @@ module my_miso_mux    (
     if(cs2)     // cs2 = high = not asserted
       miso = dout;
     else
-      miso = (reg_mux & miso_vec) != 0 ;   // hmmm seems ok.
+      miso = (reg_spi_mux & miso_vec) != 0 ;   // hmmm seems ok.
                                           // TODO should just be able to express without !=
-                                          // eg. (reg_mux & miso_vec)
+                                          // eg. (reg_spi_mux & miso_vec)
                                             // NOPE.
 endmodule
 
@@ -362,7 +362,7 @@ module top (
   ////////////////////////////////////////
   // spi muxing
 
-  wire [8-1:0] reg_mux ;// = 8'b00000001; // test
+  wire [8-1:0] reg_spi_mux ;// = 8'b00000001; // test
 
   wire [8-1:0] cs_vec ;
   assign { A_STROBE_CTL,  ADC02_CS,   FLASH_SS,   DAC_SPI_CS,  ADC03_CS } = cs_vec;
@@ -402,7 +402,7 @@ module top (
   my_miso_mux #( )
   my_miso_mux
   (
-    . reg_mux(reg_mux),
+    . reg_spi_mux(reg_spi_mux),
     . cs2(CS2),
     . dout(dout),
     . miso_vec(miso_vec),
@@ -413,7 +413,7 @@ module top (
   my_cs_mux #( )
   my_cs_mux
   (
-    . reg_mux(reg_mux),
+    . reg_spi_mux(reg_spi_mux),
     . cs2(CS2),
     . cs_vec(cs_vec)
   );
@@ -428,7 +428,7 @@ module top (
   wire [4-1:0] reg_led;
   assign { LED2, LED1, LED0 } = reg_led;
 
-  // reg_mux
+  // reg_spi_mux
 
   wire [4-1:0] reg_dac;
   assign {DAC_RST, DAC_UNI_BIP_B, DAC_UNI_BIP_A, DAC_LDAC } = reg_dac;
@@ -451,7 +451,7 @@ module top (
     . dout(dout),
 
     . reg_led(reg_led),
-    . reg_mux(reg_mux),
+    . reg_spi_mux(reg_spi_mux),
 
     . reg_dac(reg_dac),
     . reg_adc(reg_adc),
