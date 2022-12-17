@@ -76,7 +76,7 @@ endfunction
 */
 
 
-function [8-1:0] setbit(input [8-1:0] x, input [8-1:0]  val);
+function [8-1:0] setbit( input [8-1:0]  val);
   begin
     setbit = (1 << val ) >> 1;
   end
@@ -187,7 +187,7 @@ module my_register_bank   #(parameter MSB=16)   (
 
           7 :  reg_led          = update(reg_led, dinput);
 
-          8 :  reg_mux          = setbit( reg_mux, dinput);
+          8 :  reg_mux          = setbit( dinput);
 
           9 :  reg_dac          = update(reg_dac, dinput );
           14 : reg_adc          = update(reg_adc, dinput );
