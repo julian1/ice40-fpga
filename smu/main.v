@@ -253,9 +253,9 @@ endmodule
 
 
 module my_cs_mux    (
-  input wire [4-1:0] reg_spi_mux,
+  input wire [8-1:0] reg_spi_mux,
   input cs2,
-  output reg [4-1:0] cs_vec
+  output reg [8-1:0] cs_vec
 );
 
   always @ (cs2) // both edges...
@@ -270,10 +270,10 @@ endmodule
 
 
 module my_miso_mux    (
-  input wire [4-1:0] reg_spi_mux,
+  input wire [8-1:0] reg_spi_mux,
   input cs2,
   input dout,
-  input wire [4-1:0] miso_vec,
+  input wire [8-1:0] miso_vec,
   output reg miso
 );
 
