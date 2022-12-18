@@ -126,7 +126,7 @@ module my_register_bank   #(parameter MSB=16)   (
   // latched val, rename
   output reg [4-1:0] reg_led,     // need to be very careful. only 4 bits. or else screws set/reset calculation ...
 
-  output reg [4-1:0] reg_spi_mux,       // change name reg_spi_mux
+  output reg [8-1:0] reg_spi_mux,       // 8 bit register
 
   output reg [4-1:0] reg_dac = 4'b1111,
   output reg [4-1:0] reg_rails,   /* reg_rails_initital */
@@ -222,9 +222,7 @@ module my_register_bank   #(parameter MSB=16)   (
 
           7 :  reg_led          <= update(reg_led, dinput, dinput >> 4);
 
-          // 8 :  reg_spi_mux      = setbit( dinput ); //    = setbit( update( reg_led, dinput) ); // Hmmmmm.....
-          // 8 :  reg_spi_mux      = setbit( update( reg_led, dinput, dinput >> 4) );
-          8 :  reg_spi_mux      <= update( reg_led, dinput, dinput >> 4);
+          8 :  reg_spi_mux      <= setbit(  dinput & 4'b1111 );      // this should work.
 
           9 :  reg_dac          <= update(reg_dac, dinput, dinput >> 4 );
           14 : reg_adc          <= update(reg_adc, dinput, dinput >> 4 );
