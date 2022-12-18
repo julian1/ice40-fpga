@@ -80,6 +80,8 @@ module my_register_bank   #(parameter MSB=16)   (
 
   output reg [8-1:0] reg_spi_mux,       // 8 bit register
 
+  output reg [4-1:0] reg_4094,
+
   output reg [4-1:0] reg_dac = 4'b1111,
   output reg [4-1:0] reg_rails,   /* reg_rails_initital */
   output reg [4-1:0] reg_dac_ref_mux,
@@ -137,7 +139,9 @@ module my_register_bank   #(parameter MSB=16)   (
               // Alternatively change the count
               7 :  ret = reg_led      << 7;
               8 :  ret = reg_spi_mux  << 7;
-              9 :  ret = reg_dac      << 7;
+
+              // 9 :  ret = reg_dac      << 7;
+              9 :  ret = reg_4094     << 7;
             endcase
           end
 
@@ -172,30 +176,35 @@ module my_register_bank   #(parameter MSB=16)   (
         case (dinput[ MSB-1:8 ])   // register to write
 
 
-          7 :  reg_led          <= update(reg_led, dinput, dinput >> 4);
+          7 :  reg_led    <= update(reg_led, dinput, dinput >> 4);
 
-          8 :  reg_spi_mux      <= setbit(  dinput & 4'b1111 );      // this should work.
+          8 :  reg_spi_mux <= setbit(  dinput & 4'b1111 );
 
-          9 :  reg_dac          <= update(reg_dac, dinput, dinput >> 4 );
-          14 : reg_adc          <= update(reg_adc, dinput, dinput >> 4 );
+
+          // TODO fix reg_dac whihc is 9.
+          9 : reg_4094    <= update(reg_4094, dinput, dinput >> 4);
+
+
+          // 9 :  reg_dac          <= update(reg_dac, dinput, dinput >> 4 );
+          14 : reg_adc    <= update(reg_adc, dinput, dinput >> 4 );
 
           // soft reset
           // should be the same as initial starting
           11 :
             begin
-              reg_led           <= 0;
-              reg_spi_mux       <= 0;            // TODO. should leave. eg. don't change the muxing in the middle of spi
-              reg_dac           <= 0;
-              reg_adc           <= 0;
+              reg_led     <= 0;
+              reg_spi_mux <= 0;            // TODO. should leave. eg. don't change the muxing in the middle of spi
+              reg_dac     <= 0;
+              reg_adc     <= 0;
             end
 
           // powerup contingent upon checking rails
           6 :
             begin
-              reg_led           <= 0;
+              reg_led     <= 0;
               // reg_spi_mux    <= 0;            // should just be 0b
-              // reg_dac        <= 0;            // dac is already configured. before turning on rails, so don't touch again!!
-              reg_adc           <= 0;
+              // reg_dac  <= 0;            // dac is already configured. before turning on rails, so don't touch again!!
+              reg_adc     <= 0;
             end
 
         endcase
@@ -414,11 +423,17 @@ module top (
 
   // wire = no state preserved between clocks.
 
+  // TODO change prefix to w_
 
   wire [4-1:0] reg_led;
   assign { LED2, LED1, LED0 } = reg_led;
 
-  // reg_spi_mux
+  wire [4-1:0] reg_4094;
+  assign { GLB_4094_OE } = reg_4094;
+
+
+
+  // reg_spI_MUX
 
   wire [4-1:0] reg_dac;
   assign {DAC_RST, DAC_UNI_BIP_B, DAC_UNI_BIP_A, DAC_LDAC } = reg_dac;
@@ -443,6 +458,7 @@ module top (
     . reg_led(reg_led),
     . reg_spi_mux(reg_spi_mux),
 
+    . reg_4094(reg_4094 ),
     . reg_dac(reg_dac),
     . reg_adc(reg_adc),
 
