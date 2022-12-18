@@ -39,38 +39,12 @@ endmodule
 // should be completely combinatorial.
 
 
-/*
-function [7:0] sum (input [7:0] a, b);
-  begin
-   sum = a + b;
-  end
-endfunction
-*/
-
 function [7:0] sum (input [7:0] a, b);
   begin
    j = a;   // issue is if try to use?
    sum = j + b;
   end
 endfunction
-
-
-
-/*
-function [8-1:0] update (input [8-1:0] x, input [8-1:0]  val);
-  begin
-    if( (val & 4'b1111) & (val >> 4)   ) // if both set and clear bits, then its a toggle
-      update =  ((val & 4'b1111) & (val >> 4))  ^ x ; // xor. to toggle.
-    else
-      update = ~(~  (x | (val & 4'b1111)) | (val >> 4));
-  end
-endfunction
-*/
-
-
-// (val & 4b1111)  == clearbits .
-// val >> 4        == set bits.
-//
 
 
 // function [8-1:0] update (input [8-1:0] x, input [4-1:0] setbits, input [4-1:0] clearbits,);
@@ -86,17 +60,6 @@ endfunction
 
 
 
-/*
-
-function [8-1:0] update (input [8-1:0] x, input [8-1:0]  val);
-  begin
-    tmp = x | (val & 4'b1111);        // set
-    update = ~(~  (tmp) | (val >> 4));    // clear
-  end
-endfunction
-*/
-
-
 function [8-1:0] setbit( input [8-1:0]  val);
   begin
     setbit = (1 << val ) >> 1;
@@ -104,19 +67,8 @@ function [8-1:0] setbit( input [8-1:0]  val);
 endfunction
 
 
-/*
-  rather than having register bank.
-  have one 'cs2' mux register.
 
-  and then have the register bank be it's own spi peripheral.
-  that should make reading simpler.
-  eg. the cs2 only controls mux.
-*/
 
-/*
-  CS - must be in clk domain. because it can be de/asserted without spi clk. and
-  we want to do stuff in response.
-*/
 module my_register_bank   #(parameter MSB=16)   (
   input  clk,
   input  cs,
@@ -513,6 +465,65 @@ module top (
 
 
 endmodule
+
+
+
+
+/*
+function [7:0] sum (input [7:0] a, b);
+  begin
+   sum = a + b;
+  end
+endfunction
+*/
+
+
+
+/*
+function [8-1:0] update (input [8-1:0] x, input [8-1:0]  val);
+  begin
+    if( (val & 4'b1111) & (val >> 4)   ) // if both set and clear bits, then its a toggle
+      update =  ((val & 4'b1111) & (val >> 4))  ^ x ; // xor. to toggle.
+    else
+      update = ~(~  (x | (val & 4'b1111)) | (val >> 4));
+  end
+endfunction
+*/
+
+
+// (val & 4b1111)  == clearbits .
+// val >> 4        == set bits.
+//
+
+
+/*
+
+function [8-1:0] update (input [8-1:0] x, input [8-1:0]  val);
+  begin
+    tmp = x | (val & 4'b1111);        // set
+    update = ~(~  (tmp) | (val >> 4));    // clear
+  end
+endfunction
+*/
+
+
+/*
+  rather than having register bank.
+  have one 'cs2' mux register.
+
+  and then have the register bank be it's own spi peripheral.
+  that should make reading simpler.
+  eg. the cs2 only controls mux.
+*/
+
+/*
+  CS - must be in clk domain. because it can be de/asserted without spi clk. and
+  we want to do stuff in response.
+*/
+
+
+
+
 
 
   // relay
