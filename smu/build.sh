@@ -1,7 +1,3 @@
-
-
-
-
 ##!/bin/bash
 
 # see https://github.com/damdoy/ice40_ultraplus_mains/tree/master/leds
@@ -17,7 +13,7 @@ mkdir ./build
 
 yosys -p "synth_ice40  -top top  -json ./build/main.json" main.v  2>&1 | tee ./build/yosys.txt
 
-egrep 'Warning|Error' ./build/yosys.txt  > ./build/yosys-errors.txt
+egrep -i 'warning|error' ./build/yosys.txt  > ./build/yosys-errors.txt
 
 
 nextpnr-ice40 --hx1k  --package  tq144 --pcf  main.pcf --json ./build/main.json  --asc  ./build/main.asc 2>&1 | tee ./build/nextpnr.txt
