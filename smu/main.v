@@ -67,6 +67,10 @@ function [8-1:0] setbit( input [8-1:0]  val);
 endfunction
 
 
+`define REG_LED                 7
+`define REG_SPI_MUX             8
+`define REG_4094                9
+
 
 
 module my_register_bank   #(parameter MSB=16)   (
@@ -137,11 +141,12 @@ module my_register_bank   #(parameter MSB=16)   (
             case ( dinput[ 7:0]   )   // register to read
               // MUST be blocking, because of dependence when 'ret' is shifted out.
               // Alternatively change the count
-              7 :  ret = reg_led      << 7;
-              8 :  ret = reg_spi_mux  << 7;
+              `REG_LED :      ret = reg_led      << 7;
+              `REG_SPI_MUX :  ret = reg_spi_mux  << 7;
+
+              `REG_4094 :     ret = reg_4094     << 7;
 
               // 9 :  ret = reg_dac      << 7;
-              9 :  ret = reg_4094     << 7;
             endcase
           end
 
@@ -176,13 +181,13 @@ module my_register_bank   #(parameter MSB=16)   (
         case (dinput[ MSB-1:8 ])   // register to write
 
 
-          7 :  reg_led    <= update(reg_led, dinput, dinput >> 4);
+          `REG_LED :      reg_led     <= update(reg_led, dinput, dinput >> 4);
 
-          8 :  reg_spi_mux <= setbit(  dinput & 4'b1111 );
+          `REG_SPI_MUX :  reg_spi_mux <= setbit(  dinput & 4'b1111 );
 
 
           // TODO fix reg_dac whihc is 9.
-          9 : reg_4094    <= update(reg_4094, dinput, dinput >> 4);
+          `REG_4094 :     reg_4094    <= update(reg_4094, dinput, dinput >> 4);
 
 
           // 9 :  reg_dac          <= update(reg_dac, dinput, dinput >> 4 );
