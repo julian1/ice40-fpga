@@ -393,6 +393,9 @@ module top (
 
 );
 
+  wire C_A_STROBE_CTL;
+
+  assign A_STROBE_CTL =  ~ C_A_STROBE_CTL ;
 
   ////////////////////////////////////////
   // spi muxing
@@ -400,7 +403,7 @@ module top (
   wire [8-1:0] reg_spi_mux ;// = 8'b00000001; // test
 
   wire [8-1:0] cs_vec ;
-  assign { A_STROBE_CTL,  ADC02_CS,   FLASH_SS,   DAC_SPI_CS,  ADC03_CS } = cs_vec;
+  assign { C_A_STROBE_CTL,  ADC02_CS,   FLASH_SS,   DAC_SPI_CS,  ADC03_CS } = cs_vec;
   // HEADER_SS
 
   wire [8-1:0] miso_vec ;
