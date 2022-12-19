@@ -360,8 +360,13 @@ module top (
 );
 
   wire C_A_STROBE_CTL;
-
   assign A_STROBE_CTL =  ~ C_A_STROBE_CTL ;
+
+  wire C_U514_STROBE_CTL;
+  assign U514_STROBE_CTL = ~ C_U514_STROBE_CTL; 
+
+  wire C_U511_STROBE_CTL;
+  assign U511_STROBE_CTL = C_U511_STROBE_CTL;
 
   ////////////////////////////////////////
   // spi muxing
@@ -369,11 +374,12 @@ module top (
   wire [8-1:0] reg_spi_mux ;// = 8'b00000001; // test
 
   wire [8-1:0] cs_vec ;
-  assign { C_A_STROBE_CTL,  ADC02_CS,   FLASH_SS,   DAC_SPI_CS,  ADC03_CS } = cs_vec;
+  assign { C_U511_STROBE_CTL, C_U514_STROBE_CTL, C_A_STROBE_CTL, ADC02_CS,   FLASH_SS, DAC_SPI_CS,  ADC03_CS } = cs_vec;
   // HEADER_SS
 
   wire [8-1:0] miso_vec ;
-  assign { U706_MISO_CTL, ADC02_MISO, ICE_MISO,  DAC_SPI_SDO,  ADC03_MISO } = miso_vec;
+  assign { U706_MISO_CTL,     U514_MISO_CTL,     U706_MISO_CTL,  ADC02_MISO, ICE_MISO, DAC_SPI_SDO, ADC03_MISO } = miso_vec;
+
 
   // make sure ice40 programming flash is pulled hi. so that its not asserted.
   // no don't thiink this is issue.
