@@ -221,15 +221,24 @@ endmodule
 module my_cs_mux    (
   input wire [8-1:0] reg_spi_mux,
   input cs2,
-  output reg [8-1:0] cs_vec
+  output wire [8-1:0] cs_vec
 );
 
-  always @ (cs2) // both edges...
 
+/*
+
+  always @ (cs2) // both edges...
+  // always @ (*)
     if(cs2)   // cs2 = high = not asserted
         cs_vec = ~( reg_spi_mux & 8'b00000000 );  // turn off cs for all.
       else
         cs_vec = ~( reg_spi_mux & 8'b11111111 );  // turn on
+*/
+
+
+    assign cs_vec =  ~ ( reg_spi_mux & {8 {  ~cs2 } }  );
+
+
 endmodule
 
 
@@ -240,9 +249,10 @@ module my_miso_mux    (
   input cs2,
   input dout,
   input wire [8-1:0] miso_vec,
-  output reg miso
+  output wire miso
 );
 
+/*
  always @ (cs2)
 
     if(cs2)     // cs2 = high = not asserted
@@ -252,6 +262,21 @@ module my_miso_mux    (
                                           // TODO should just be able to express without !=
                                           // eg. (reg_spi_mux & miso_vec)
                                             // NOPE.
+*/
+
+/*
+  This code  is combinatory. But generates a warning.
+ always @ (*) // combinatory
+    if(cs2)     // cs2 = high = not asserted
+      miso = dout;
+    else
+      miso = (reg_spi_mux & miso_vec) != 0 ;   // hmmm seems ok.
+*/
+
+  // this code is combinatory but doesnt'
+
+  assign miso = cs2 ? dout : (reg_spi_mux & miso_vec) != 0 ;
+
 endmodule
 
 
