@@ -114,8 +114,20 @@ module my_register_bank   #(parameter MSB=16)   (
   always @ (negedge clk or posedge cs)
   begin
 
-    // cs asserted
-    if( ! cs)
+    if( cs)  // cs not asserted
+      begin
+        // ok, because cs in sensitivity list
+        // EXTR.  THIS IS the synchronization action after bad sequence/frame /clock count.
+
+        // clear on posedge of cs. and while cs is deasserted.
+        // these should be able to be non blocking. because no dependence
+        count   <= 0;
+        dinput  <= 0;
+        ret     <= 0;
+
+      end
+
+    else    // cs asserted
       begin
 
         // shift data din into the dinput toward msb
@@ -155,18 +167,6 @@ module my_register_bank   #(parameter MSB=16)   (
           count <= count + 1;
       end
 
-    // cs deasserted
-    // ok, because cs in sensitivity list
-    // EXTR.  THIS IS the synchronization action. we only clock in when cs is asserted. and hold clock in reset clock if deasserted
-    else
-      begin
-        // clear on posedge of cs. and while cs is deasserted.
-        // these should be able to be non blocking. because no dependence
-        count   <= 0;
-        dinput  <= 0;
-        ret     <= 0;
-
-      end
 
   end
 
@@ -363,7 +363,7 @@ module top (
   assign A_STROBE_CTL =  ~ C_A_STROBE_CTL ;
 
   wire C_U514_STROBE_CTL;
-  assign U514_STROBE_CTL = ~ C_U514_STROBE_CTL; 
+  assign U514_STROBE_CTL = ~ C_U514_STROBE_CTL;
 
   wire C_U511_STROBE_CTL;
   assign U511_STROBE_CTL = C_U511_STROBE_CTL;
