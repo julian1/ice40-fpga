@@ -160,7 +160,7 @@ module my_register_bank   #(parameter MSB=16)   (
     // EXTR.  THIS IS the synchronization action. we only clock in when cs is asserted. and hold clock in reset clock if deasserted
     else
       begin
-
+        // clear on posedge of cs. and while cs is deasserted.
         // these should be able to be non blocking. because no dependence
         count   <= 0;
         dinput  <= 0;
