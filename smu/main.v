@@ -16,68 +16,15 @@
 
 
 
-
-
-
-
-module blinker    (
-  input clk,
-
-  output reg [4-1:0] led_vec
-
-);
-
-  localparam BITS = 4;
-  // localparam LOG2DELAY = 21;
-  localparam LOG2DELAY = 20;
-
-  reg [BITS+LOG2DELAY-1:0] counter = 0;
-  reg [BITS-1:0] outcnt;
-
-  // sequential
-  always@(posedge clk) begin
-    counter <= counter + 1;
-    outcnt <= counter >> LOG2DELAY;
-  end
-
-  // assign { led1, led2, LED3, LED4, LED5 } = outcnt ^ (outcnt >> 1);
-  // assign {  led1, led2 } = outcnt ^ (outcnt >> 1);
-
-  // continuous. why?
-  assign led_vec = outcnt ^ (outcnt >> 1);
-
-endmodule
-
-
-// should be completely combinatorial.
-
-
-function [7:0] sum (input [7:0] a, b);
+function [4-1:0] update (input [4-1:0] x, input [4-1:0] set, input [4-1:0] clear,);
   begin
-   j = a;   // issue is if try to use?
-   sum = j + b;
-  end
-endfunction
-
-
-// function [8-1:0] update (input [8-1:0] x, input [4-1:0] setbits, input [4-1:0] clearbits,);
-function [4-1:0] update (input [4-1:0] x, input [4-1:0] setbits, input [4-1:0] clearbits,);
-  begin
-    if( clearbits & setbits  /*!= 0*/  ) // if both set and clear bits, then its a toggle
-      update =  (clearbits & setbits )  ^ x ; // xor. to toggle.
+    if( clear & set  /*!= 0*/  ) // if both set and clear bits, then its a toggle
+      update =  (clear & set )  ^ x ; // xor. to toggle.
     else
-      update = ~(  ~(x | setbits ) | clearbits);
+      update = ~(  ~(x | set ) | clear);
   end
 endfunction
 
-
-
-
-function [8-1:0] setbit( input [8-1:0]  val);
-  begin
-    setbit = (1 << val ) >> 1;
-  end
-endfunction
 
 
 `define REG_LED                 7
@@ -212,6 +159,27 @@ module my_register_bank   #(parameter MSB=16)   (
     end
 
 endmodule
+
+
+
+
+
+
+
+
+
+
+
+
+
+function [8-1:0] setbit( input [8-1:0]  val);
+  begin
+    setbit = (1 << val ) >> 1;
+  end
+endfunction
+
+
+
 
 
 module my_cs_mux    (
@@ -527,6 +495,21 @@ function [7:0] sum (input [7:0] a, b);
    sum = a + b;
   end
 endfunction
+
+
+
+// should be completely combinatorial.
+
+
+function [7:0] sum (input [7:0] a, b);
+  begin
+   j = a;   // issue is if try to use?
+   sum = j + b;
+  end
+endfunction
+
+
+
 */
 
 
