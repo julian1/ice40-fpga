@@ -226,6 +226,25 @@ module my_cs_mux    (
 );
 
 
+/*
+
+  always @ (cs2) // both edges...
+  // always @ (*)
+    if(cs2)   // cs2 = high = not asserted
+        cs_vec = ~( reg_spi_mux & 8'b00000000 );  // turn off cs for all.
+      else
+        cs_vec = ~( reg_spi_mux & 8'b11111111 );  // turn on
+*/
+
+
+
+    // we have 4 bits so can encode here.
+    // assign cs_vec =  ~ ( setbit( reg_spi_mux )  & {8 {  ~cs2 } }  );
+
+    // assign cs_vec =  ~ ( reg_spi_mux & {8 {  ~cs2 } }  );
+
+
+
     wire [8-1:0] active = setbit( reg_spi_mux )  & {8 {  ~cs2 } } ;   // cs is active lo.
 
     // inverting a signal according to a boolean vector - is the same as xor.
@@ -246,6 +265,27 @@ module my_miso_mux    (
   input wire [8-1:0] miso_vec,
   output wire miso
 );
+
+/*
+ always @ (cs2)
+
+    if(cs2)     // cs2 = high = not asserted
+      miso = dout;
+    else
+      miso = (reg_spi_mux & miso_vec) != 0 ;   // hmmm seems ok.
+                                          // TODO should just be able to express without !=
+                                          // eg. (reg_spi_mux & miso_vec)
+                                            // NOPE.
+*/
+
+/*
+  This code  is combinatory. But generates a warning.
+ always @ (*) // combinatory
+    if(cs2)     // cs2 = high = not asserted
+      miso = dout;
+    else
+      miso = (reg_spi_mux & miso_vec) != 0 ;   // hmmm seems ok.
+*/
 
   // this code is combinatory but doesnt'
 
