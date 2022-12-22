@@ -5,7 +5,20 @@
 // - instead of !cs or !cs2.  would be good if can write asserted(cs)  asserted(cs2)
 
 
+
+
 `default_nettype none
+
+
+`include "bank.v"
+
+
+
+
+
+
+
+
 
 module blinker    (
   input clk,
@@ -469,7 +482,20 @@ module top (
   wire [4-1:0] reg_adc;
   assign { ADC02_RST, ADC02_M2, ADC02_M1, ADC02_M0 } = reg_adc;
 
+/*
+  bank #( 16 )   // register bank
+  bank
+    (
+    . clk(CLK),
+    . cs(CS),
+    . din(MOSI),
+    . dout(dout),
 
+    . reg7(reg_led),
+    . reg8(reg_spi_mux),
+    . reg9(reg_4094 ),
+  );
+*/
 
 
 
@@ -489,8 +515,9 @@ module top (
     . reg_dac(reg_dac),
     . reg_adc(reg_adc),
 
-
   );
+
+
 
 
 /*
