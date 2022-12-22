@@ -232,17 +232,16 @@ module my_cs_mux    (
     // inverting a signal according to a boolean vector - is the same as xor.
     // xor to toggle according to fixed polarity bit. for active_lo.
 
-      // only one bit here is hi. - and we want it xored only if the polarity bit is set. 
+      // only one bit here is hi. - and we want it xored only if the polarity bit is set.
     // we don't want the lo bits flipped with polarity .
 
-    assign cs_vec = ~active ; // ^ polarity;
-
+    // assign cs_vec = ~active ; // works
     // assign cs_vec = active ^ polarity;
 
-    // assign cs_vec = (active & polarity ) /*| (active & ~ polarity ) */ ;
+    assign cs_vec = ~(active ^ polarity );    // works for active hi strobe 4094.   Think that it works for spi.
 
 
-    // assign cs_vec = ~ active ;
+    // assign cs_vec = ~ active ;  works for active lo.
 
 
 endmodule
@@ -369,7 +368,7 @@ module top (
 
 );
 
-
+/*
   wire C_A_STROBE_CTL;
   assign A_STROBE_CTL =  ~ C_A_STROBE_CTL ;
 
@@ -378,6 +377,7 @@ module top (
 
   wire C_U511_STROBE_CTL;
   assign U511_STROBE_CTL = C_U511_STROBE_CTL;
+*/
 
   ////////////////////////////////////////
   // spi muxing
@@ -389,7 +389,7 @@ module top (
   // rather than doing individual assignments. - should just pass in anoter vector whether it's active low.
 
   wire [8-1:0] cs_vec ;
-  assign { C_U511_STROBE_CTL, C_U514_STROBE_CTL, C_A_STROBE_CTL, ADC02_CS,   FLASH_SS, DAC_SPI_CS,  ADC03_CS } = cs_vec;
+  assign { U511_STROBE_CTL, U514_STROBE_CTL, A_STROBE_CTL, ADC02_CS,   FLASH_SS, DAC_SPI_CS,  ADC03_CS } = cs_vec;
   // HEADER_SS
 
   wire [8-1:0] miso_vec ;
