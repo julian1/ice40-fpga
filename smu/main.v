@@ -157,20 +157,12 @@ module my_register_bank   #(parameter MSB=16)   (
         if(count == 7)
           begin
 
-            // ret = 8'b00001111 << 7; /// test
-            // ret = 4'b1111 << 7; /// test - think jjjjjj
-            // ret = 4'b1010 << 7; /// test doesn't work
-            // ret = dinput[ 7:0] << 7; // return the register, to that was passed to read. works.
-            // ret = reg_led      << 7 ;   //  return reg_led
-
             case ( dinput[ 7:0]   )   // register to read
               // MUST be blocking, because of dependence when 'ret' is shifted out.
               // Alternatively change the count
               `REG_LED :      ret = reg_led      << 7;
               `REG_SPI_MUX :  ret = reg_spi_mux  << 7;
-
               `REG_4094 :     ret = reg_4094     << 7;
-
               // 9 :  ret = reg_dac      << 7;
             endcase
           end
@@ -187,46 +179,36 @@ module my_register_bank   #(parameter MSB=16)   (
   always @ (posedge cs)   // cs done.
     begin
 
-      // but we lose access to count when cs is added to both (the clk) sensitivity lists.
-      // if(1 /*count == 0*/) // ie. sequence has correct number of clk cycles.
-      if(  1 ) // ie. sequence has correct number of clk cycles.
+      case (dinput[ MSB-1:8 ])   // register to write
 
-        case (dinput[ MSB-1:8 ])   // register to write
+        `REG_LED :      reg_led     <= update(reg_led, dinput, dinput >> 4);
+        `REG_SPI_MUX :  reg_spi_mux <= dinput ;
+        `REG_4094 :     reg_4094    <= update(reg_4094, dinput, dinput >> 4);
 
+        // TODO fix reg_dac whihc is 9.
+        // 9 :  reg_dac          <= update(reg_dac, dinput, dinput >> 4 );
+        14 : reg_adc    <= update(reg_adc, dinput, dinput >> 4 );
 
-          `REG_LED :      reg_led     <= update(reg_led, dinput, dinput >> 4);
+        // soft reset
+        // should be the same as initial starting
+        11 :
+          begin
+            reg_led     <= 0;
+            reg_spi_mux <= 0;            // TODO. should leave. eg. don't change the muxing in the middle of spi
+            reg_dac     <= 0;
+            reg_adc     <= 0;
+          end
 
-          // `REG_SPI_MUX :  reg_spi_mux <= setbit(  dinput & 4'b1111 );
-          `REG_SPI_MUX :  reg_spi_mux <= dinput ;
+        // powerup contingent upon checking rails
+        6 :
+          begin
+            reg_led     <= 0;
+            // reg_spi_mux    <= 0;            // should just be 0b
+            // reg_dac  <= 0;            // dac is already configured. before turning on rails, so don't touch again!!
+            reg_adc     <= 0;
+          end
 
-
-          // TODO fix reg_dac whihc is 9.
-          `REG_4094 :     reg_4094    <= update(reg_4094, dinput, dinput >> 4);
-
-
-          // 9 :  reg_dac          <= update(reg_dac, dinput, dinput >> 4 );
-          14 : reg_adc    <= update(reg_adc, dinput, dinput >> 4 );
-
-          // soft reset
-          // should be the same as initial starting
-          11 :
-            begin
-              reg_led     <= 0;
-              reg_spi_mux <= 0;            // TODO. should leave. eg. don't change the muxing in the middle of spi
-              reg_dac     <= 0;
-              reg_adc     <= 0;
-            end
-
-          // powerup contingent upon checking rails
-          6 :
-            begin
-              reg_led     <= 0;
-              // reg_spi_mux    <= 0;            // should just be 0b
-              // reg_dac  <= 0;            // dac is already configured. before turning on rails, so don't touch again!!
-              reg_adc     <= 0;
-            end
-
-        endcase
+      endcase
     end
 
 endmodule
