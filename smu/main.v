@@ -41,11 +41,8 @@ module my_register_bank   #(parameter MSB=16)   (
 
   // latched val, rename
   output reg [4-1:0] reg_led,     // need to be very careful. only 4 bits. or else screws set/reset calculation ...
-
   output reg [8-1:0] reg_spi_mux,       // 8 bit register
-
   output reg [4-1:0] reg_4094,
-
   output reg [4-1:0] reg_dac = 4'b1111,
   output reg [4-1:0] reg_rails,   /* reg_rails_initital */
   output reg [4-1:0] reg_dac_ref_mux,
@@ -59,16 +56,6 @@ module my_register_bank   #(parameter MSB=16)   (
   reg [5-1:0]   count;    // 1<<4==16. 1<<5==32  number of bits so far, in spi
 
 
-  /*
-    remember/rules
-      - and we must avoid two drivers (ie always@ blocks) for all variables.  eg. the count variable.
-      - and we only want to latch value on valid cs deassert
-      - so we count the clk, and take actions on the clock count values,
-      - so it's effectively a state machine based on the clk.
-      ---------
-
-      i think everything can be made non-blocking.  because all the read code is up top, and all the assignment is underneath.
-  */
 
   // sequential
   always @ (negedge clk or posedge cs)
@@ -76,17 +63,12 @@ module my_register_bank   #(parameter MSB=16)   (
 
     if( cs)  // cs not asserted
       begin
-        // ok, because cs in sensitivity list
-        // EXTR.  THIS IS the synchronization action after bad sequence/frame /clock count.
 
         // clear on posedge of cs. and while cs is deasserted.
-        // these should be able to be non blocking. because no dependence
         count   <= 0;
         dinput  <= 0;
         ret     <= 0;
-
       end
-
     else    // cs asserted
       begin
 
@@ -118,8 +100,6 @@ module my_register_bank   #(parameter MSB=16)   (
           ret   <= ret << 1;    // also a zero fill operator.
           count <= count + 1;
       end
-
-
   end
 
 
