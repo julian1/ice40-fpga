@@ -222,6 +222,7 @@ endmodule
 module my_cs_mux    (
   input wire [8-1:0] reg_spi_mux,
   input cs2,
+  input wire [8-1:0] polarity,
   output wire [8-1:0] cs_vec
 );
 
@@ -230,8 +231,18 @@ module my_cs_mux    (
 
     // inverting a signal according to a boolean vector - is the same as xor.
     // xor to toggle according to fixed polarity bit. for active_lo.
+
+      // only one bit here is hi. - and we want it xored only if the polarity bit is set. 
+    // we don't want the lo bits flipped with polarity .
+
+    assign cs_vec = ~active ; // ^ polarity;
+
     // assign cs_vec = active ^ polarity;
-    assign cs_vec = ~ active ;
+
+    // assign cs_vec = (active & polarity ) /*| (active & ~ polarity ) */ ;
+
+
+    // assign cs_vec = ~ active ;
 
 
 endmodule
@@ -358,6 +369,7 @@ module top (
 
 );
 
+
   wire C_A_STROBE_CTL;
   assign A_STROBE_CTL =  ~ C_A_STROBE_CTL ;
 
@@ -428,6 +440,7 @@ module top (
   (
     . reg_spi_mux(reg_spi_mux),
     . cs2(CS2),
+    . polarity( 8'b01110000  ),
     . cs_vec(cs_vec)
   );
 
