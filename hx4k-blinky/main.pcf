@@ -1,0 +1,12 @@
+
+# example.pcf
+
+#set_io clk 21
+
+# this is bankA , that is missing a 3.3V. power pin.
+set_io clk  129
+
+
+set_io LED1 87
+set_io LED2 81
+
