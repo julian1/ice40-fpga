@@ -174,26 +174,19 @@ module my_mux_spi_output    (
 );
 
 
+    // should be assign?
     wire [8-1:0] cs_active = setbit( reg_spi_mux )  & {8 {  ~cs2 } } ;   // cs is active lo.
 
-    wire [8-1:0] clk_active = setbit( reg_spi_mux )  & {8 {  ~clk } } ;   // cs is active lo.
-    wire [8-1:0] mosi_active = setbit( reg_spi_mux )  & {8 {  ~mosi } } ;   // cs is active lo.
-
-    // inverting a signal according to a boolean vector - is the same as xor.
-    // xor to toggle according to fixed polarity bit. for active_lo.
-
-      // only one bit here is hi. - and we want it xored only if the polarity bit is set.
-    // we don't want the lo bits flipped with polarity .
-
-    // assign vec_cs = ~active ; // works
-    // assign vec_cs = active ^ polarity;
-
     assign vec_cs  = ~(cs_active ^ cs_polarity );    // works for active hi strobe 4094.   Think that it works for spi.
-    assign vec_clk = clk_active ;
-    assign vec_mosi = mosi_active ;
 
 
-    // assign vec_cs = ~ active ;  works for active lo.
+
+    assign vec_clk  = setbit( reg_spi_mux )  & {8 {  ~clk } } ;   // cs is active lo.
+
+    assign vec_mosi = setbit( reg_spi_mux )  & {8 {  ~mosi } } ;   // cs is active lo.
+
+
+    // assign vec_cs = ~ active ;  simpler approach, works for active lo.
 
 
 endmodule
