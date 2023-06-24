@@ -167,7 +167,7 @@ module my_mux_spi_output    (
   input cs2,
   input clk,
   input mosi,
-  input wire [8-1:0] polarity,    // change name to cs polarity
+  input wire [8-1:0]  cs_polarity,
   output wire [8-1:0] vec_cs,
   output wire [8-1:0] vec_clk,
   output wire [8-1:0] vec_mosi
@@ -175,7 +175,7 @@ module my_mux_spi_output    (
 
 
     wire [8-1:0] cs_active = setbit( reg_spi_mux )  & {8 {  ~cs2 } } ;   // cs is active lo.
-    
+
     wire [8-1:0] clk_active = setbit( reg_spi_mux )  & {8 {  ~clk } } ;   // cs is active lo.
     wire [8-1:0] mosi_active = setbit( reg_spi_mux )  & {8 {  ~mosi } } ;   // cs is active lo.
 
@@ -188,9 +188,9 @@ module my_mux_spi_output    (
     // assign vec_cs = ~active ; // works
     // assign vec_cs = active ^ polarity;
 
-    assign vec_cs  = ~(cs_active ^ polarity );    // works for active hi strobe 4094.   Think that it works for spi.
-    assign vec_clk = clk_active ;    
-    assign vec_mosi = mosi_active ;    
+    assign vec_cs  = ~(cs_active ^ cs_polarity );    // works for active hi strobe 4094.   Think that it works for spi.
+    assign vec_clk = clk_active ;
+    assign vec_mosi = mosi_active ;
 
 
     // assign vec_cs = ~ active ;  works for active lo.
@@ -361,7 +361,8 @@ module top (
     . cs2(CS2),
     . clk(SPI_CLK),
     . mosi(MOSI ),
-    . polarity( 8'b01110000  ),
+    // . cs_polarity( 8'b01110000  ),
+    . cs_polarity( 8'b00000001  ),  // 4094 strobe should go hi, for output
     . vec_cs(vec_cs),
     . vec_clk(vec_clk),
     . vec_mosi(vec_mosi)
