@@ -292,6 +292,8 @@ module top (
 
   // EXTR.  We should use an 8bit mux with 16bit toggle. rather than this complication.
 
+  // CHANGE name vec_cs ,  vec_miso etc.
+
   wire [8-1:0] cs_vec ;
   assign {  GLB_4094_STROBE_CTL  } = cs_vec;
   // HEADER_SS
@@ -307,9 +309,9 @@ module top (
    ////////////////////////////////////////
   // spi pass through
 
-  // could mux these also, if we want
+  // could mux these also, if we want.   avoid clk going every where.
   // syntax. {a,b,c,d,e} = {5{value}};
-  assign { GLB_4094_CLK } = { 5{CLK }} ;
+  assign { GLB_4094_CLK } = { 5{ SPI_CLK }} ;
 
   assign { GLB_4094_DATA } = { 5{MOSI}} ;
 
