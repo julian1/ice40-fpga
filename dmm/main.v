@@ -181,9 +181,9 @@ module my_mux_spi_output    (
 
 
 
-    assign vec_clk  = setbit( reg_spi_mux )  & {8 {  ~clk } } ;   // cs is active lo.
+    assign vec_clk  = setbit( reg_spi_mux )  & {8 {  clk } } ;   // cs is active lo.
 
-    assign vec_mosi = setbit( reg_spi_mux )  & {8 {  ~mosi } } ;   // cs is active lo.
+    assign vec_mosi = setbit( reg_spi_mux )  & {8 {  mosi } } ;   // cs is active lo.
 
 
     // assign vec_cs = ~ active ;  simpler approach, works for active lo.
@@ -291,7 +291,7 @@ module top (
   assign {  GLB_4094_STROBE_CTL  } = vec_cs;
 
   wire [8-1:0] vec_clk;
-  assign { GLB_4094_CLK } = vec_clk ;
+  assign { GLB_4094_CLK } = vec_clk ;   // have we changed the clock polarity.
 
   wire [8-1:0] vec_mosi;
   assign { GLB_4094_DATA } = vec_mosi;
