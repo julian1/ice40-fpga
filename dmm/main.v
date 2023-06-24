@@ -180,10 +180,13 @@ module my_mux_spi_output    (
     assign vec_cs  = ~(cs_active ^ cs_polarity );    // works for active hi strobe 4094.   Think that it works for spi.
 
 
-
     assign vec_clk  = setbit( reg_spi_mux )  & {8 {  clk } } ;   // cs is active lo.
-
     assign vec_mosi = setbit( reg_spi_mux )  & {8 {  mosi } } ;   // cs is active lo.
+
+
+    // assign vec_clk  =  {8 {  clk } } ;   // cs is active lo.
+    // assign vec_mosi =  {8 {  mosi } } ;   // cs is active lo.
+
 
 
     // assign vec_cs = ~ active ;  simpler approach, works for active lo.
@@ -269,12 +272,11 @@ module top (
 
 
   // Put the strobe as first.
-  // monitor isolator/spi,                                                  D4    D3     D2    D1      D0
+  // monitor isolator/spi,                                                  D4          D3       D2       D1        D0
   // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  SPI_MISO, SPI_MOSI, SPI_CLK,  SPI_CS  /* RAW-CLK */} ;
 
-  // monitor the 4094 spi
-  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  GLB_4094_MISO_CTL, GLB_4094_DATA, GLB_4094_CLK, GLB_4094_STROBE_CTL  /* RAW-CLK */} ;
-  assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  GLB_4094_MISO_CTL, GLB_4094_DATA, GLB_4094_CLK, GLB_4094_STROBE_CTL  /* RAW-CLK */} ;
+  // monitor the 4094 spi                                                 D6       D5             D4            D3              D2              D1                 D0
+  assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  SPI_CLK, SPI_CS2, GLB_4094_MISO_CTL, GLB_4094_DATA, GLB_4094_CLK, GLB_4094_STROBE_CTL  /* RAW-CLK */} ;
 
 
   ////////////////////////////////////////
