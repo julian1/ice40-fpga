@@ -308,29 +308,13 @@ module top (
 
   wire [8-1:0] vec_cs ;
   assign {  GLB_4094_STROBE_CTL  } = vec_cs;
-  // HEADER_SS
 
   wire [8-1:0] vec_miso ;
   assign { GLB_4094_MISO_CTL } = vec_miso;
 
 
-  // make sure ice40 programming flash is pulled hi. so that its not asserted.
-  // no don't thiink this is issue.
-  // assign ICE_SS = 1;
-
-   ////////////////////////////////////////
-  // spi pass through
-
-  // could mux these also, if we want.   avoid clk going every where.
-  // YES. will make it much easier - to check on the MSO.
-
-  // syntax. {a,b,c,d,e} = {5{value}};
-  // assign { GLB_4094_CLK } = { 5{ SPI_CLK }} ;
-
   wire [8-1:0] vec_clk;
   assign { GLB_4094_CLK } = vec_clk ;
-
-  // assign { GLB_4094_DATA } = { 5{MOSI}} ;
 
   wire [8-1:0] vec_mosi;
   assign { GLB_4094_DATA } = vec_mosi;
