@@ -276,9 +276,12 @@ module top (
 */
 
   // Put the strobe as first.
-  //                                                                    D4    D3     D2    D1      D0
-  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  MOSI, CS, SPI_CLK, CLK /* RAW-CLK */} ;
-  assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  MISO, MOSI, SPI_CLK,  CS  /* RAW-CLK */} ;
+  // monitor isolator/spi,                                                  D4    D3     D2    D1      D0
+  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  MISO, MOSI, SPI_CLK,  CS  /* RAW-CLK */} ;
+
+  // monitor the 4094 spi
+  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  GLB_4094_MISO_CTL, GLB_4094_DATA, GLB_4094_CLK, GLB_4094_STROBE_CTL  /* RAW-CLK */} ;
+  assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  GLB_4094_MISO_CTL, GLB_4094_DATA, GLB_4094_CLK, GLB_4094_STROBE_CTL  /* RAW-CLK */} ;
 
 
   ////////////////////////////////////////
@@ -310,6 +313,8 @@ module top (
   // spi pass through
 
   // could mux these also, if we want.   avoid clk going every where.
+  // YES. will make it much easier - to check on the MSO.
+
   // syntax. {a,b,c,d,e} = {5{value}};
   assign { GLB_4094_CLK } = { 5{ SPI_CLK }} ;
 
