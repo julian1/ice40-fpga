@@ -266,16 +266,7 @@ module top (
 
 );
 
-/*
-  wire C_A_STROBE_CTL;
-  assign A_STROBE_CTL =  ~ C_A_STROBE_CTL ;
 
-  wire C_U514_STROBE_CTL;
-  assign U514_STROBE_CTL = ~ C_U514_STROBE_CTL;
-
-  wire C_U511_STROBE_CTL;
-  assign U511_STROBE_CTL = C_U511_STROBE_CTL;
-*/
 
   // Put the strobe as first.
   // monitor isolator/spi,                                                  D4    D3     D2    D1      D0
@@ -291,20 +282,13 @@ module top (
 
   wire [8-1:0] reg_spi_mux ;// = 8'b00000001; // test
 
-  // TODO rename vec_cs with vec_cs .. likewise vec_miso
 
   // rather than doing individual assignments. - should just pass in anoter vector whether it's active low.
-
   // EXTR.  We should use an 8bit mux with 16bit toggle. rather than this complication.
 
-  // CHANGE name vec_cs ,  vec_miso etc.
 
   wire [8-1:0] vec_cs ;
   assign {  GLB_4094_STROBE_CTL  } = vec_cs;
-
-  wire [8-1:0] vec_miso ;
-  assign { GLB_4094_MISO_CTL } = vec_miso;
-
 
   wire [8-1:0] vec_clk;
   assign { GLB_4094_CLK } = vec_clk ;
@@ -312,6 +296,8 @@ module top (
   wire [8-1:0] vec_mosi;
   assign { GLB_4094_DATA } = vec_mosi;
 
+  wire [8-1:0] vec_miso ;
+  assign { GLB_4094_MISO_CTL } = vec_miso;
 
 
 
