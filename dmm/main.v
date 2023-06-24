@@ -162,15 +162,22 @@ endfunction
 
 
 
-module my_cs_mux    (
+module my_mux_spi_output    (
   input wire [8-1:0] reg_spi_mux,
   input cs2,
-  input wire [8-1:0] polarity,
-  output wire [8-1:0] cs_vec
+  input clk,
+  input mosi,
+  input wire [8-1:0] polarity,    // change name to cs polarity
+  output wire [8-1:0] vec_cs,
+  output wire [8-1:0] vec_clk,
+  output wire [8-1:0] vec_mosi
 );
 
 
-    wire [8-1:0] active = setbit( reg_spi_mux )  & {8 {  ~cs2 } } ;   // cs is active lo.
+    wire [8-1:0] cs_active = setbit( reg_spi_mux )  & {8 {  ~cs2 } } ;   // cs is active lo.
+    
+    wire [8-1:0] clk_active = setbit( reg_spi_mux )  & {8 {  ~clk } } ;   // cs is active lo.
+    wire [8-1:0] mosi_active = setbit( reg_spi_mux )  & {8 {  ~mosi } } ;   // cs is active lo.
 
     // inverting a signal according to a boolean vector - is the same as xor.
     // xor to toggle according to fixed polarity bit. for active_lo.
@@ -178,13 +185,15 @@ module my_cs_mux    (
       // only one bit here is hi. - and we want it xored only if the polarity bit is set.
     // we don't want the lo bits flipped with polarity .
 
-    // assign cs_vec = ~active ; // works
-    // assign cs_vec = active ^ polarity;
+    // assign vec_cs = ~active ; // works
+    // assign vec_cs = active ^ polarity;
 
-    assign cs_vec = ~(active ^ polarity );    // works for active hi strobe 4094.   Think that it works for spi.
+    assign vec_cs  = ~(cs_active ^ polarity );    // works for active hi strobe 4094.   Think that it works for spi.
+    assign vec_clk = clk_active ;    
+    assign vec_mosi = mosi_active ;    
 
 
-    // assign cs_vec = ~ active ;  works for active lo.
+    // assign vec_cs = ~ active ;  works for active lo.
 
 
 endmodule
@@ -192,17 +201,17 @@ endmodule
 
 
 
-module my_miso_mux    (
+module my_mux_spi_input    (
   input wire [8-1:0] reg_spi_mux,
   input cs2,
   input dout,
-  input wire [8-1:0] miso_vec,
+  input wire [8-1:0] vec_miso,
   output wire miso
 );
 
   // this code is combinatory but doesnt'
 
-  assign miso = cs2 ? dout : (reg_spi_mux & miso_vec) != 0 ;
+  assign miso = cs2 ? dout : (reg_spi_mux & vec_miso) != 0 ;
 
 endmodule
 
@@ -289,7 +298,7 @@ module top (
 
   wire [8-1:0] reg_spi_mux ;// = 8'b00000001; // test
 
-  // TODO rename cs_vec with vec_cs .. likewise miso_vec
+  // TODO rename vec_cs with vec_cs .. likewise vec_miso
 
   // rather than doing individual assignments. - should just pass in anoter vector whether it's active low.
 
@@ -297,12 +306,12 @@ module top (
 
   // CHANGE name vec_cs ,  vec_miso etc.
 
-  wire [8-1:0] cs_vec ;
-  assign {  GLB_4094_STROBE_CTL  } = cs_vec;
+  wire [8-1:0] vec_cs ;
+  assign {  GLB_4094_STROBE_CTL  } = vec_cs;
   // HEADER_SS
 
-  wire [8-1:0] miso_vec ;
-  assign { GLB_4094_MISO_CTL } = miso_vec;
+  wire [8-1:0] vec_miso ;
+  assign { GLB_4094_MISO_CTL } = vec_miso;
 
 
   // make sure ice40 programming flash is pulled hi. so that its not asserted.
@@ -316,9 +325,16 @@ module top (
   // YES. will make it much easier - to check on the MSO.
 
   // syntax. {a,b,c,d,e} = {5{value}};
-  assign { GLB_4094_CLK } = { 5{ SPI_CLK }} ;
+  // assign { GLB_4094_CLK } = { 5{ SPI_CLK }} ;
 
-  assign { GLB_4094_DATA } = { 5{MOSI}} ;
+  wire [8-1:0] vec_clk;
+  assign { GLB_4094_CLK } = vec_clk ;
+
+  // assign { GLB_4094_DATA } = { 5{MOSI}} ;
+
+  wire [8-1:0] vec_mosi;
+  assign { GLB_4094_DATA } = vec_mosi;
+
 
 
 
@@ -327,24 +343,28 @@ module top (
   reg dout ;
 
 
-  my_miso_mux #( )
-  my_miso_mux
+  my_mux_spi_input #( )
+  my_mux_spi_input
   (
     . reg_spi_mux(reg_spi_mux),
     . cs2(CS2),
     . dout(dout),
-    . miso_vec(miso_vec),
+    . vec_miso(vec_miso),
     . miso(MISO)
   );
 
 
-  my_cs_mux #( )
-  my_cs_mux
+  my_mux_spi_output #( )
+  my_mux_spi_output
   (
     . reg_spi_mux(reg_spi_mux),
     . cs2(CS2),
+    . clk(SPI_CLK),
+    . mosi(MOSI ),
     . polarity( 8'b01110000  ),
-    . cs_vec(cs_vec)
+    . vec_cs(vec_cs),
+    . vec_clk(vec_clk),
+    . vec_mosi(vec_mosi)
   );
 
 
