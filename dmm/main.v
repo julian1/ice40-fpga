@@ -250,13 +250,13 @@ module top (
 
   // spi
   input  SPI_CLK,
-  input  CS,
-  input  MOSI,
-  input  CS2,
-  output MISO,
+  input  SPI_CS,
+  input  SPI_MOSI,
+  input  SPI_CS2,
+  output SPI_MISO,
   // output b
 
-  output INTERUPT_OUT,
+  output SPI_INTERUPT_OUT,
 
 
 
@@ -286,7 +286,7 @@ module top (
 
   // Put the strobe as first.
   // monitor isolator/spi,                                                  D4    D3     D2    D1      D0
-  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  MISO, MOSI, SPI_CLK,  CS  /* RAW-CLK */} ;
+  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  SPI_MISO, SPI_MOSI, SPI_CLK,  SPI_CS  /* RAW-CLK */} ;
 
   // monitor the 4094 spi
   // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  GLB_4094_MISO_CTL, GLB_4094_DATA, GLB_4094_CLK, GLB_4094_STROBE_CTL  /* RAW-CLK */} ;
@@ -331,10 +331,10 @@ module top (
   my_mux_spi_input
   (
     . reg_spi_mux(reg_spi_mux),
-    . cs2(CS2),
+    . cs2(SPI_CS2),
     . dout(dout),
     . vec_miso(vec_miso),
-    . miso(MISO)
+    . miso(SPI_MISO)
   );
 
 
@@ -342,9 +342,9 @@ module top (
   my_mux_spi_output
   (
     . reg_spi_mux(reg_spi_mux),
-    . cs2(CS2),
+    . cs2(SPI_CS2),
     . clk(SPI_CLK),
-    . mosi(MOSI ),
+    . mosi(SPI_MOSI ),
     // . cs_polarity( 8'b01110000  ),
     . cs_polarity( 8'b00000001  ),  // 4094 strobe should go hi, for output
     . vec_cs(vec_cs),
@@ -374,8 +374,8 @@ module top (
   my_register_bank
     (
     . clk(SPI_CLK),
-    . cs(CS),
-    . din(MOSI),
+    . cs(SPI_CS),
+    . din(SPI_MOSI),
     . dout(dout),
 
     . reg_led(reg_led),
