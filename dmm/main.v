@@ -6,11 +6,11 @@
 
 
 
+`include "my_register_bank02.v"
 
 `default_nettype none
 
 
-// `include "bank.v"
 
 
 
@@ -18,127 +18,13 @@
 
 function [4-1:0] update (input [4-1:0] x, input [4-1:0] set, input [4-1:0] clear,);
   begin
-    if( clear & set  /*!= 0*/  ) // if both set and clear bits, then its a toggle
+    if( clear & set  /*!= 0*/  ) // if both a bit of both set and clear are set, then treat as toggle
       update =  (clear & set )  ^ x ; // xor. to toggle.
     else
-      update = ~(  ~(x | set ) | clear);
+      update = ~(  ~(x | set ) | clear);    // clear in priority
   end
 endfunction
 
-
-
-`define REG_LED                 7
-`define REG_SPI_MUX             8
-`define REG_4094                9
-
-
-
-module my_register_bank   #(parameter MSB=16)   (
-  input  clk,
-  input  cs,
-  input  din,       // sdi
-  output reg dout,   // sdo
-
-  // latched val, rename
-  output reg [4-1:0] reg_led  = 4'b0001,     // need to be very careful. only 4 bits. or else screws set/reset calculation ...
-  output reg [8-1:0] reg_spi_mux,       // 8 bit register
-  output reg [4-1:0] reg_4094,
-  output reg [4-1:0] reg_dac = 4'b1111,
-  output reg [4-1:0] reg_rails,   /* reg_rails_initital */
-  output reg [4-1:0] reg_dac_ref_mux,
-  output reg [4-1:0] reg_adc
-
-);
-
-
-  reg [MSB-1:0] dinput;   // input value
-  reg [MSB-1:0] ret  ;    // output value
-  reg [5-1:0]   count;    // 1<<4==16. 1<<5==32  number of bits so far, in spi
-
-
-
-  // sequential
-  always @ (negedge clk or posedge cs)
-  begin
-
-    if( cs)  // cs not asserted
-      begin
-
-        // clear on posedge of cs. and while cs is deasserted.
-        count   <= 0;
-        dinput  <= 0;
-        ret     <= 0;
-      end
-    else    // cs asserted
-      begin
-
-        // shift data din into the dinput toward msb
-        // needs to be blocking, because of subsequent read dependence
-        dinput = {dinput[MSB-2:0], din};
-
-        // anything needed at the start of sequence
-        if(count == 0)
-          begin
-            ;
-          end
-
-        // after we have read in the register of interest, we can setup the output value. for reads
-        if(count == 7)
-          begin
-
-            case ( dinput[ 7:0]   )   // register to read
-              // MUST be blocking, because of dependence when 'ret' is shifted out.
-              // Alternatively change the count
-              `REG_LED :      ret = reg_led      << 7;
-              `REG_SPI_MUX :  ret = reg_spi_mux  << 7;
-              `REG_4094 :     ret = reg_4094     << 7;
-              // 9 :  ret = reg_dac      << 7;
-            endcase
-          end
-
-          dout  <= ret[MSB-2];  // eg. shift data out, highest bit first
-          ret   <= ret << 1;    // also a zero fill operator.
-          count <= count + 1;
-      end
-  end
-
-
-  always @ (posedge cs)   // cs done.
-    begin
-
-      case (dinput[ MSB-1:8 ])   // register to write
-
-        `REG_LED :      reg_led     <= update(reg_led, dinput, dinput >> 4);
-        `REG_SPI_MUX :  reg_spi_mux <= dinput ;
-        `REG_4094 :     reg_4094    <= update(reg_4094, dinput, dinput >> 4);
-
-        // TODO fix reg_dac whihc is 9.
-        // 9 :  reg_dac          <= update(reg_dac, dinput, dinput >> 4 );
-        14 : reg_adc    <= update(reg_adc, dinput, dinput >> 4 );
-
-        // soft reset
-        // should be the same as initial starting
-        11 :
-          begin
-            reg_led     <= 0;
-            reg_spi_mux <= 0;            // TODO. should leave. eg. don't change the muxing in the middle of spi
-            reg_dac     <= 0;
-            reg_adc     <= 0;
-          end
-
-        // powerup contingent upon checking rails
-        6 :
-          begin
-            reg_led     <= 0;
-            // reg_spi_mux    <= 0;            // should just be 0b
-            // reg_dac  <= 0;            // dac is already configured. before turning on rails, so don't touch again!!
-            reg_adc     <= 0;
-          end
-
-      endcase
-    end
-
-endmodule
 
 
 
@@ -198,6 +84,9 @@ endmodule
 
 
 module my_mux_spi_input    (
+
+  // bloody hell. this has to drive MISO using cs also.
+
   input wire [8-1:0] reg_spi_mux,
   input cs2,
   input dout,
@@ -207,6 +96,7 @@ module my_mux_spi_input    (
 
   // this code is combinatory but doesnt'
 
+  // cs2 not asserted, the just use dout. else whatever is asserted....
   assign miso = cs2 ? dout : (reg_spi_mux & vec_miso) != 0 ;
 
 endmodule
@@ -275,9 +165,20 @@ module top (
   // monitor isolator/spi,                                                  D4          D3       D2       D1        D0
   // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  SPI_MISO, SPI_MOSI, SPI_CLK,  SPI_CS  /* RAW-CLK */} ;
 
-  // monitor the 4094 spi                                                 D6       D5             D4            D3              D2              D1                 D0
-  assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  SPI_CLK, SPI_CS2, GLB_4094_MISO_CTL, GLB_4094_DATA, GLB_4094_CLK, GLB_4094_STROBE_CTL  /* RAW-CLK */} ;
+  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  GLB_4094_OE  /* RAW-CLK */} ;
 
+  // monitor the 4094 spi                                                 D6       D5             D4            D3              D2              D1                 D0
+  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  SPI_CLK, SPI_CS2, GLB_4094_MISO_CTL, GLB_4094_DATA, GLB_4094_CLK, GLB_4094_STROBE_CTL  /* RAW-CLK */} ;
+
+
+  // monitor the 4094 spi                                               D4            D3              D2              D1                 D0
+  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  GLB_4094_OE, GLB_4094_DATA, GLB_4094_CLK, GLB_4094_STROBE_CTL  /* RAW-CLK */} ;
+
+  //                                                                       D5           D4        D3        D2       D1        D0
+  assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = { GLB_4094_OE,   SPI_MISO, SPI_MOSI, SPI_CLK,  SPI_CS  /* RAW-CLK */} ;
+
+  // ok. this does work.
+  // assign SPI_MISO = 1;
 
   ////////////////////////////////////////
   // spi muxing
@@ -305,21 +206,26 @@ module top (
 
   // dout for fpga spi.
   // need to rename. it's an internal dout... that can be muxed out.
-  reg dout ;
+  wire my_dout ;
+
+  /*
+    we must pass cs as well.j
+  */
 
 
+  // miso muxer.
   my_mux_spi_input #( )
   my_mux_spi_input
   (
     . reg_spi_mux(reg_spi_mux),
     . cs2(SPI_CS2),
-    . dout(dout),
+    . dout(my_dout),                             // dout is shared betwen this and the register bank.
     . vec_miso(vec_miso),
-    . miso(SPI_MISO)
+    . miso(SPI_MISO)                          // WE drive SPI_MISO here.
   );
 
 
-  my_mux_spi_output #( )
+  my_mux_spi_output #( )      // output from POV of the mcu. ie. fpga as slave.
   my_mux_spi_output
   (
     . reg_spi_mux(reg_spi_mux),
@@ -332,7 +238,6 @@ module top (
     . vec_clk(vec_clk),
     . vec_mosi(vec_mosi)
   );
-
 
   ////////////////////////////////////////
   // register
@@ -349,23 +254,22 @@ module top (
 
 
 
+  reg [ 12 - 1: 0 ] reg_array[ 32 - 1 : 0 ] ;    // 12x   32 bit registers
 
-  // ok.
-  my_register_bank #( 16 )   // register bank
-  my_register_bank
+  my_register_bank02 // #( 32 )   // register bank  . change name 'registers'
+  my_register_bank02
     (
     . clk(SPI_CLK),
     . cs(SPI_CS),
     . din(SPI_MOSI),
-    . dout(dout),
+    . dout( my_dout ),
 
     . reg_led(reg_led),
     . reg_spi_mux(reg_spi_mux),
+    . reg_4094(reg_4094 )// ,
 
-    . reg_4094(reg_4094 )
-
+    // . reg_array( reg_array )
   );
-
 
 
 
@@ -387,129 +291,4 @@ endmodule
 
 
 
-
-/*
-function [7:0] sum (input [7:0] a, b);
-  begin
-   sum = a + b;
-  end
-endfunction
-
-
-
-// should be completely combinatorial.
-
-
-function [7:0] sum (input [7:0] a, b);
-  begin
-   j = a;   // issue is if try to use?
-   sum = j + b;
-  end
-endfunction
-
-
-
-*/
-
-
-
-/*
-function [8-1:0] update (input [8-1:0] x, input [8-1:0]  val);
-  begin
-    if( (val & 4'b1111) & (val >> 4)   ) // if both set and clear bits, then its a toggle
-      update =  ((val & 4'b1111) & (val >> 4))  ^ x ; // xor. to toggle.
-    else
-      update = ~(~  (x | (val & 4'b1111)) | (val >> 4));
-  end
-endfunction
-*/
-
-
-// (val & 4b1111)  == clearbits .
-// val >> 4        == set bits.
-//
-
-
-/*
-
-function [8-1:0] update (input [8-1:0] x, input [8-1:0]  val);
-  begin
-    tmp = x | (val & 4'b1111);        // set
-    update = ~(~  (tmp) | (val >> 4));    // clear
-  end
-endfunction
-*/
-
-
-/*
-  rather than having register bank.
-  have one 'cs2' mux register.
-
-  and then have the register bank be it's own spi peripheral.
-  that should make reading simpler.
-  eg. the cs2 only controls mux.
-*/
-
-/*
-  CS - must be in clk domain. because it can be de/asserted without spi clk. and
-  we want to do stuff in response.
-*/
-
-
-
-
-
-
-  // relay
-  // output RELAY_VRANGE,
-  // output RELAY_OUTCOM,
-  // output RELAY_SENSE,
-
-  // irange sense
-  // output IRANGE_SENSE1,
-  // output IRANGE_SENSE2,
-  // output IRANGE_SENSE3,
-  // output IRANGE_SENSE4,
-
-  // gain fb
-  // output GAIN_VFB_OP1,
-  // output GAIN_VFB_OP2,
-  // output GAIN_IFB_OP1,
-  // output GAIN_IFB_OP2,
-
-  // irangex 58
-  // deprecate
-
-  // reg_ina_diff_sw
-  // output INA_DIFF_SW1_CTL,
-  // output INA_DIFF_SW2_CTL,
-
-  // reg_isense_sw
-  // output ISENSE_SW1_CTL,
-  // output ISENSE_SW2_CTL,
-  // output ISENSE_SW3_CTL,
-
-
-
-  // wire [4-1:0] reg_relay;
-  // assign { RELAY_SENSE, /*RELAY_OUTCOM, */ RELAY_VRANGE } = reg_relay;
-
-//  wire [4-1:0] reg_irange_sense;
-//  assign { IRANGE_SENSE4, IRANGE_SENSE3, IRANGE_SENSE2, IRANGE_SENSE1 } = reg_irange_sense;
-
-  // wire [4-1:0] reg_ifb_gain;
-  // assign { GAIN_IFB_OP2, GAIN_IFB_OP1 } = reg_ifb_gain;
-
-
-  // wire [4-1:0] reg_irangex58_sw;
-  // assign { IRANGEX_SW8, IRANGEX_SW7, IRANGEX_SW6, IRANGEX_SW5 } = reg_irangex58_sw;
-
-
-  // wire [4-1:0] reg_vfb_gain;
-  // assign { GAIN_VFB_OP2, GAIN_VFB_OP1  } = reg_vfb_gain;
-  // wire [4-1:0] reg_ina_diff_sw;
-  // assign { INA_DIFF_SW2_CTL, INA_DIFF_SW1_CTL } = reg_ina_diff_sw;
-
-  // wire [4-1:0] reg_isense_sw;
-  // assign { ISENSE_SW3_CTL,  ISENSE_SW2_CTL, ISENSE_SW1_CTL } = reg_isense_sw;
 
