@@ -32,6 +32,21 @@ endfunction
 `define REG_4094                9
 
 
+// could also 
+`define REG_WHOOT               9
+
+
+/* 
+  We could  have two register banks. 
+  IF we could manage muxing the dout.
+  ----
+  
+  We just pass in separate dout wires.. 
+
+  And then have a flag.
+
+*/
+
 
 module my_register_bank   #(parameter MSB=16)   (
   input  clk,
@@ -44,16 +59,11 @@ module my_register_bank   #(parameter MSB=16)   (
   output reg [8-1:0] reg_spi_mux,       // 8 bit register
   output reg [4-1:0] reg_4094,
 
-
-
 );
-
 
   reg [MSB-1:0] dinput;   // input value
   reg [MSB-1:0] ret  ;    // output value
   reg [5-1:0]   count;    // 1<<4==16. 1<<5==32  number of bits so far, in spi
-
-
 
   // sequential
   always @ (negedge clk or posedge cs)
@@ -73,12 +83,6 @@ module my_register_bank   #(parameter MSB=16)   (
         // shift data din into the dinput toward msb
         // needs to be blocking, because of subsequent read dependence
         dinput = {dinput[MSB-2:0], din};
-
-        // anything needed at the start of sequence
-        if(count == 0)
-          begin
-            ;
-          end
 
         // after we have read in the register of interest, we can setup the output value. for reads
         if(count == 7)
@@ -101,7 +105,7 @@ module my_register_bank   #(parameter MSB=16)   (
   end
 
 
-  always @ (posedge cs)   // cs done.
+  always @ (posedge cs)   // cs done.  async
     begin
 
       case (dinput[ MSB-1:8 ])   // register to write
@@ -109,22 +113,6 @@ module my_register_bank   #(parameter MSB=16)   (
         `REG_LED :      reg_led     <= update(reg_led, dinput, dinput >> 4);
         `REG_SPI_MUX :  reg_spi_mux <= dinput ;
         `REG_4094 :     reg_4094    <= update(reg_4094, dinput, dinput >> 4);
-
-
-        // soft reset
-        // should be the same as initial starting
-        11 :
-          begin
-            reg_led     <= 0;
-            reg_spi_mux <= 0;            // TODO. should leave. eg. don't change the muxing in the middle of spi
-          end
-
-        // powerup contingent upon checking rails
-        6 :
-          begin
-            reg_led     <= 0;
-            // reg_spi_mux    <= 0;            // should just be 0b
-          end
 
       endcase
     end
@@ -363,9 +351,7 @@ module top (
 
     . reg_led(reg_led),
     . reg_spi_mux(reg_spi_mux),
-
     . reg_4094(reg_4094 )
-
   );
 
 
