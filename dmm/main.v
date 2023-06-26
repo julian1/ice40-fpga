@@ -18,10 +18,10 @@
 
 function [4-1:0] update (input [4-1:0] x, input [4-1:0] set, input [4-1:0] clear,);
   begin
-    if( clear & set  /*!= 0*/  ) // if both set and clear bits, then its a toggle
+    if( clear & set  /*!= 0*/  ) // if both a bit of both set and clear are set, then treat as toggle
       update =  (clear & set )  ^ x ; // xor. to toggle.
     else
-      update = ~(  ~(x | set ) | clear);
+      update = ~(  ~(x | set ) | clear);    // clear in priority
   end
 endfunction
 
@@ -43,10 +43,8 @@ module my_register_bank   #(parameter MSB=16)   (
   output reg [4-1:0] reg_led  = 4'b0001,     // need to be very careful. only 4 bits. or else screws set/reset calculation ...
   output reg [8-1:0] reg_spi_mux,       // 8 bit register
   output reg [4-1:0] reg_4094,
-  output reg [4-1:0] reg_dac = 4'b1111,
-  output reg [4-1:0] reg_rails,   /* reg_rails_initital */
-  output reg [4-1:0] reg_dac_ref_mux,
-  output reg [4-1:0] reg_adc
+
+
 
 );
 
@@ -92,7 +90,7 @@ module my_register_bank   #(parameter MSB=16)   (
               `REG_LED :      ret = reg_led      << 7;
               `REG_SPI_MUX :  ret = reg_spi_mux  << 7;
               `REG_4094 :     ret = reg_4094     << 7;
-              // 9 :  ret = reg_dac      << 7;
+
             endcase
           end
 
@@ -112,9 +110,6 @@ module my_register_bank   #(parameter MSB=16)   (
         `REG_SPI_MUX :  reg_spi_mux <= dinput ;
         `REG_4094 :     reg_4094    <= update(reg_4094, dinput, dinput >> 4);
 
-        // TODO fix reg_dac whihc is 9.
-        // 9 :  reg_dac          <= update(reg_dac, dinput, dinput >> 4 );
-        14 : reg_adc    <= update(reg_adc, dinput, dinput >> 4 );
 
         // soft reset
         // should be the same as initial starting
@@ -122,8 +117,6 @@ module my_register_bank   #(parameter MSB=16)   (
           begin
             reg_led     <= 0;
             reg_spi_mux <= 0;            // TODO. should leave. eg. don't change the muxing in the middle of spi
-            reg_dac     <= 0;
-            reg_adc     <= 0;
           end
 
         // powerup contingent upon checking rails
@@ -131,8 +124,6 @@ module my_register_bank   #(parameter MSB=16)   (
           begin
             reg_led     <= 0;
             // reg_spi_mux    <= 0;            // should just be 0b
-            // reg_dac  <= 0;            // dac is already configured. before turning on rails, so don't touch again!!
-            reg_adc     <= 0;
           end
 
       endcase
@@ -284,9 +275,6 @@ module top (
   // monitor the 4094 spi                                               D4            D3              D2              D1                 D0
   // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  GLB_4094_OE, GLB_4094_DATA, GLB_4094_CLK, GLB_4094_STROBE_CTL  /* RAW-CLK */} ;
 
-
-  // LED0,
-  // for somereason this chews through power????
   //                                                                       D5           D4        D3        D2       D1        D0
   assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = { GLB_4094_OE,   SPI_MISO, SPI_MOSI, SPI_CLK,  SPI_CS  /* RAW-CLK */} ;
 
