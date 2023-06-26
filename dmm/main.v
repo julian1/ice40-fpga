@@ -106,6 +106,8 @@ module my_register_bank   #(parameter MSB=16)   (
 
 
   always @ (posedge cs)   // cs done.  async
+    
+    if(count == 23)
     begin
 
       case (dinput[ MSB-1:8 ])   // register to write
