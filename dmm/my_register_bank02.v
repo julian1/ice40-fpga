@@ -104,7 +104,7 @@ module my_register_bank02   #(parameter MSB=40)   (
   wire [  (1<<6) -1 : 0 ] addr = in[ MSB-2: MSB-8 ];  // single byte for reg/address,
 
   // change to increase bits.
-  wire [24-1 :0] val24   = in[ MSB-8- 1  : 0 ] ;              // lo 24 bits/
+  wire [24-1 :0] val24   = in[ MSB-8- 1  : 0 ] ;              // lo 24 bits/ ... FIXME. indexing not quite correct.
   // wire [32-1 :0] val32   = in[ MSB-8- 1  : 0 ] ;              // lo 24 bits/
   wire flag = in[ MSB- 1   ] ;              // lo 24 bits/
 
