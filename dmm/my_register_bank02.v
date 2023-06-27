@@ -110,7 +110,6 @@ module my_register_bank02   #(parameter MSB=40)   (
 
 
 
-
   // set/write
   always @ (posedge cs)   // cs done.
   begin
@@ -118,15 +117,21 @@ module my_register_bank02   #(parameter MSB=40)   (
       begin
 
         if ( flag == 0  )  // 0 means write.
-
           case (addr)
 
             `REG_LED:   reg_led <= val24;
 
           endcase
+      end
+
+    // we could handle bit set/clear/toggle updates here, if we wanted, for 8 bit registers.
+    else if( count == 32 ) 
+      begin
 
       end
   end
+
+
 endmodule
 
 
