@@ -37,7 +37,7 @@ module my_register_bank02   #(parameter MSB=40)   (
   // use ' inout',  must be inout to write
   inout wire [24-1:0] reg_led ,    // need to be very careful. only 4 bits. or else screws set/reset calculation ...
 
- output reg [24-1:0] reg_spi_mux,       // 8 bit registerrr
+  output reg [24-1:0] reg_spi_mux,       // 8 bit registerrr
   output reg [24-1:0] reg_4094,
 
 
@@ -59,13 +59,6 @@ module my_register_bank02   #(parameter MSB=40)   (
   end
 
 
-
-  // wire [8-1:0] addr  = in[ MSB-1: MSB-8 ];  // single byte for reg/address,
-  // wire [MSB-8-1:0] val   = in;              // lo 24 bits/
-
-
-  // reg [8-1:0]   idx;
-
   // read
   // clock value into into out var
   always @ (negedge clk or posedge cs)
@@ -76,8 +69,6 @@ module my_register_bank02   #(parameter MSB=40)   (
         count   <= 0;
         in      <= 0;
         out     <= 0;
-
-        // idx <= 0;
       end
     else
       // cs asserted, clock data in and out
@@ -95,19 +86,16 @@ module my_register_bank02   #(parameter MSB=40)   (
 
         /*
         // we MUST read 8 bits here, to have the lsb bits of the register address.
-            but this creates issue for how quickly we can stuff data into dout, so that the value can be read
+            but this creates issue for how quickly we can stuff data into dout, so value can be read in xfer
             one option is to change to non blocking.
-            but simpler - is to just padd an extra byte an use a couple of bits.
+            but simpler - is to just pad an extra byte, and accept loss of some of the higher bits
         */
-        // if(count == 8)
-        if(count == 8)  // we have read enough of the register, to be able to load the output value
-                          // have to be early to use non blocking.
-
+        if(count == 8)  
           begin
             case (in[8 - 1 - 1: 0 ] )
 
 
-              `REG_LED:        out <= reg_led  << 9;
+              `REG_LED:       out <= reg_led  << 9;
 
               default:        out <= 12345; 
 
@@ -123,9 +111,10 @@ module my_register_bank02   #(parameter MSB=40)   (
 
   wire [  (1<<6) -1 : 0 ] addr = in[ MSB-2: MSB-8 ];  // single byte for reg/address,
 
-  wire [24-1 :0] val   = in[ MSB-8- 1  : 0 ] ;              // lo 24 bits/
+  // change to increase bits.
+  wire [24-1 :0] val24   = in[ MSB-8- 1  : 0 ] ;              // lo 24 bits/
+  // wire [32-1 :0] val32   = in[ MSB-8- 1  : 0 ] ;              // lo 24 bits/
   wire flag = in[ MSB- 1   ] ;              // lo 24 bits/
-  wire flag1 = in[ MSB- 2   ] ;              // lo 24 bits/
 
 
 
@@ -146,7 +135,7 @@ module my_register_bank02   #(parameter MSB=40)   (
 
           case (addr)
 
-            `REG_LED:                 reg_led <= val;
+            `REG_LED:   reg_led <= val24;
 
           endcase
 
