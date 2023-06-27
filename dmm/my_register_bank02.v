@@ -18,10 +18,6 @@
 
 
 
-/*
-
-  https://stackoverflow.com/questions/16369698/how-to-pass-array-structure-between-two-verilog-modules
-*/
 
 module my_register_bank02   #(parameter MSB=40)   (
 
@@ -31,13 +27,12 @@ module my_register_bank02   #(parameter MSB=40)   (
   input  din,       // sdi
   output dout,       // sdo
 
-  // input == input wire
 
   // control read/write control vars
   // use ' inout',  must be inout to write
-  inout wire [24-1:0] reg_led ,    // need to be very careful. only 4 bits. or else screws set/reset calculation ...
+  inout wire [24-1:0] reg_led ,
 
-  output reg [24-1:0] reg_spi_mux,       // 8 bit registerrr
+  output reg [24-1:0] reg_spi_mux,
   output reg [24-1:0] reg_4094,
 
 
@@ -90,23 +85,20 @@ module my_register_bank02   #(parameter MSB=40)   (
             one option is to change to non blocking.
             but simpler - is to just pad an extra byte, and accept loss of some of the higher bits
         */
-        if(count == 8)  
+        if(count == 8)
           begin
             case (in[8 - 1 - 1: 0 ] )
 
 
               `REG_LED:       out <= reg_led  << 9;
 
-              default:        out <= 12345; 
+              default:        out <= 12345;
 
             endcase
           end
 
       end
   end
-
-  // The setting of the hi bit - and it's use in indexing the mem/bitarray is perhaps what caused previous problems.
-  // if use mem/bit array, then we would have to explicitly test.
 
 
   wire [  (1<<6) -1 : 0 ] addr = in[ MSB-2: MSB-8 ];  // single byte for reg/address,
@@ -124,12 +116,6 @@ module my_register_bank02   #(parameter MSB=40)   (
   begin
     if(count == MSB ) // MSB
       begin
-
-          // maybe we are just accidently always overwriting the value... and the address construction is fine.
-
-        // OR the issue -
-        // IS THAT in is being written - on the new cycle. without blocking.
-        // which kills our value.
 
         if ( flag == 0  )  // 0 means write.
 
