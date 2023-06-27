@@ -6,11 +6,11 @@
 
 
 
+`include "my_register_bank02.v"
 
 `default_nettype none
 
 
-// `include "bank.v"
 
 
 
@@ -25,101 +25,6 @@ function [4-1:0] update (input [4-1:0] x, input [4-1:0] set, input [4-1:0] clear
   end
 endfunction
 
-
-
-`define REG_LED                 7
-`define REG_SPI_MUX             8
-`define REG_4094                9
-
-
-// could also 
-`define REG_WHOOT               9
-
-
-/* 
-  We could  have two register banks. 
-  IF we could manage muxing the dout.
-  ----
-  
-  We just pass in separate dout wires.. 
-
-  And then have a flag.
-
-*/
-
-
-module my_register_bank   #(parameter MSB=16)   (
-  input  clk,
-  input  cs,
-  input  din,       // sdi
-  output reg dout,   // sdo
-
-  // latched val, rename
-  output reg [4-1:0] reg_led  = 4'b0001,     // need to be very careful. only 4 bits. or else screws set/reset calculation ...
-  output reg [8-1:0] reg_spi_mux,       // 8 bit register
-  output reg [4-1:0] reg_4094,
-
-);
-
-  reg [MSB-1:0] dinput;   // input value
-  reg [MSB-1:0] ret  ;    // output value
-  reg [5-1:0]   count;    // 1<<4==16. 1<<5==32  number of bits so far, in spi
-
-  // sequential
-  always @ (negedge clk or posedge cs)
-  begin
-
-    if( cs)  // cs not asserted
-      begin
-
-        // clear on posedge of cs. and while cs is deasserted.
-        count   <= 0;
-        dinput  <= 0;
-        ret     <= 0;
-      end
-    else    // cs asserted
-      begin
-
-        // shift data din into the dinput toward msb
-        // needs to be blocking, because of subsequent read dependence
-        dinput = {dinput[MSB-2:0], din};
-
-        // after we have read in the register of interest, we can setup the output value. for reads
-        if(count == 7)
-          begin
-
-            case ( dinput[ 7:0]   )   // register to read
-              // MUST be blocking, because of dependence when 'ret' is shifted out.
-              // Alternatively change the count
-              `REG_LED :      ret = reg_led      << 7;
-              `REG_SPI_MUX :  ret = reg_spi_mux  << 7;
-              `REG_4094 :     ret = reg_4094     << 7;
-
-            endcase
-          end
-
-          dout  <= ret[MSB-2];  // eg. shift data out, highest bit first
-          ret   <= ret << 1;    // also a zero fill operator.
-          count <= count + 1;
-      end
-  end
-
-
-  always @ (posedge cs)   // cs done.  async
-    
-    if(count == 23)
-    begin
-
-      case (dinput[ MSB-1:8 ])   // register to write
-
-        `REG_LED :      reg_led     <= update(reg_led, dinput, dinput >> 4);
-        `REG_SPI_MUX :  reg_spi_mux <= dinput ;
-        `REG_4094 :     reg_4094    <= update(reg_4094, dinput, dinput >> 4);
-
-      endcase
-    end
-
-endmodule
 
 
 
@@ -179,6 +84,9 @@ endmodule
 
 
 module my_mux_spi_input    (
+
+  // bloody hell. this has to drive MISO using cs also.
+
   input wire [8-1:0] reg_spi_mux,
   input cs2,
   input dout,
@@ -188,6 +96,7 @@ module my_mux_spi_input    (
 
   // this code is combinatory but doesnt'
 
+  // cs2 not asserted, the just use dout. else whatever is asserted....
   assign miso = cs2 ? dout : (reg_spi_mux & vec_miso) != 0 ;
 
 endmodule
@@ -268,8 +177,8 @@ module top (
   //                                                                       D5           D4        D3        D2       D1        D0
   assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = { GLB_4094_OE,   SPI_MISO, SPI_MOSI, SPI_CLK,  SPI_CS  /* RAW-CLK */} ;
 
-
-
+  // ok. this does work.
+  // assign SPI_MISO = 1;
 
   ////////////////////////////////////////
   // spi muxing
@@ -297,21 +206,26 @@ module top (
 
   // dout for fpga spi.
   // need to rename. it's an internal dout... that can be muxed out.
-  reg dout ;
+  wire my_dout ;
+
+  /*
+    we must pass cs as well.j
+  */
 
 
+  // miso muxer.
   my_mux_spi_input #( )
   my_mux_spi_input
   (
     . reg_spi_mux(reg_spi_mux),
     . cs2(SPI_CS2),
-    . dout(dout),
+    . dout(my_dout),                             // dout is shared betwen this and the register bank.
     . vec_miso(vec_miso),
-    . miso(SPI_MISO)
+    . miso(SPI_MISO)                          // WE drive SPI_MISO here.
   );
 
 
-  my_mux_spi_output #( )
+  my_mux_spi_output #( )      // output from POV of the mcu. ie. fpga as slave.
   my_mux_spi_output
   (
     . reg_spi_mux(reg_spi_mux),
@@ -324,7 +238,6 @@ module top (
     . vec_clk(vec_clk),
     . vec_mosi(vec_mosi)
   );
-
 
   ////////////////////////////////////////
   // register
@@ -341,21 +254,22 @@ module top (
 
 
 
+  reg [ 12 - 1: 0 ] reg_array[ 32 - 1 : 0 ] ;    // 12x   32 bit registers
 
-  // ok.
-  my_register_bank #( 16 )   // register bank
-  my_register_bank
+  my_register_bank02 // #( 32 )   // register bank  . change name 'registers'
+  my_register_bank02
     (
     . clk(SPI_CLK),
     . cs(SPI_CS),
     . din(SPI_MOSI),
-    . dout(dout),
+    . dout( my_dout ),
 
     . reg_led(reg_led),
     . reg_spi_mux(reg_spi_mux),
-    . reg_4094(reg_4094 )
-  );
+    . reg_4094(reg_4094 )// ,
 
+    // . reg_array( reg_array )
+  );
 
 
 
