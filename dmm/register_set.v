@@ -51,7 +51,7 @@ module register_set #(parameter MSB=40)   (
   // todo. consider adding bitwidth in name.
   // need to be regs, because assign in sequential code/ always block.
 
-  output reg [24-1:0] reg_led ,       
+  output reg [24-1:0] reg_led ,
   output reg [24-1:0] reg_spi_mux,
   output reg [24-1:0] reg_4094,     // TODO change name it's a state register for OE. status .  or SR. reg_4094_.   or SR_4094,   sr_4094.
                                                 // no it's a state register. not status.
@@ -120,12 +120,12 @@ module register_set #(parameter MSB=40)   (
       end
   end
 
-  // TODO fixme, should be 7 bits, address space, without the write bit set.
-  wire [  (1<<6) -1 : 0 ] addr = in[ MSB-2: MSB-8 ];  // single byte for reg/address,
+  // TODO 7 bits, address space, without the write bit set.
+  wire [  7 -1 : 0 ] addr = in[ MSB-2: MSB-8 ];  // single byte for reg/address,
 
   // change to increase bits.
   wire [24-1 :0] val24   = in[ MSB-8- 1  : 0 ] ;              // lo 24 bits/ ... FIXME. indexing not quite correct.
-  // wire [32-1 :0] val32   = in[ MSB-8- 1  : 0 ] ;              // lo 24 bits/
+  // wire [32-1 :0] val32   = in[ MSB-8- 1  : 0 ] ;
   wire flag = in[ MSB- 1   ] ;              // lo 24 bits/
 
 
