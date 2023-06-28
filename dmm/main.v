@@ -8,6 +8,7 @@
 
 `include "register_set.v"
 `include "mux_spi.v"
+`include "blinker.v"
 
 `default_nettype none
 
@@ -163,28 +164,24 @@ module top (
     . clk(SPI_CLK),
     . cs(SPI_CS),
     . din(SPI_MOSI),
-    . dout( my_dout ),      // writes to my_dout
+    . dout( my_dout ),      // miso from register bank for reading 
 
+    // registers
     . reg_led(reg_led),
     . reg_spi_mux(reg_spi_mux),
     . reg_4094(reg_4094 )// ,
 
-    // . reg_array( reg_array )
   );
 
 
 
-/*
 
   blinker #(  )
   blinker
     (
-    .clk(XTALCLK),
-    .reg_vec( reg_led )
-
+    .clk( CLK ),
+    // .led2 ( LED0 )    // module outputs can be safely ignored,
   );
-
-*/
 
 
 

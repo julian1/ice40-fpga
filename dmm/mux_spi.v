@@ -1,5 +1,73 @@
 
 
+`default_nettype none
+
+
+
+module mux_spi    (
+  input wire [8-1:0] reg_spi_mux,     // change name vec_active_device
+  input cs2,
+  input clk,
+  input mosi,
+
+
+  input wire [8-1:0]  cs_polarity,
+  output wire [8-1:0] vec_cs,
+  output wire [8-1:0] vec_clk,
+  output wire [8-1:0] vec_mosi,
+
+  ///////
+  input dout,                         // use when cs active.  or at least c2 not active
+  input wire [8-1:0] vec_miso,        // use when cs2 active
+  output wire miso                    // output pin
+
+);
+
+  // input
+  // should be assign?
+  wire [8-1:0] cs_active =  reg_spi_mux & {8 {  ~cs2 } } ;   // cs is active lo.
+
+  assign vec_cs  = ~(cs_active ^ cs_polarity );    // works for active hi strobe 4094.   Think that it works for spi.
+
+
+  assign vec_clk  = reg_spi_mux & {8 {  clk } } ;   // cs is active lo.
+  assign vec_mosi = reg_spi_mux & {8 {  mosi } } ;   // cs is active lo.
+
+  ///////////////
+  // output
+
+  // cs2 is active lo
+  assign miso = cs2 ? dout : (reg_spi_mux & vec_miso) != 0 ;
+
+
+
+endmodule
+
+
+
+
+
+
+  // setbit() is slow. should remove it.
+
+/*
+  // should be assign?
+  wire [8-1:0] cs_active = setbit( reg_spi_mux )  & {8 {  ~cs2 } } ;   // cs is active lo.
+
+  assign vec_cs  = ~(cs_active ^ cs_polarity );    // works for active hi strobe 4094.   Think that it works for spi.
+
+
+  assign vec_clk  = setbit( reg_spi_mux )  & {8 {  clk } } ;   // cs is active lo.
+  assign vec_mosi = setbit( reg_spi_mux )  & {8 {  mosi } } ;   // cs is active lo.
+
+  ///////////////
+
+  // cs2 is active lo
+  assign miso = cs2 ? dout : (reg_spi_mux & vec_miso) != 0 ;
+*/
+
+
+
 
 
 /*
@@ -38,60 +106,7 @@ endfunction
 
 */
 
-module mux_spi    (
-  input wire [8-1:0] reg_spi_mux,     // change name vec_active_device
-  input cs2,
-  input clk,
-  input mosi,
 
-
-  input wire [8-1:0]  cs_polarity,
-  output wire [8-1:0] vec_cs,
-  output wire [8-1:0] vec_clk,
-  output wire [8-1:0] vec_mosi,
-
-  ///////
-  input dout,                         // use when cs active.  or at least c2 not active
-  input wire [8-1:0] vec_miso,        // use when cs2 active
-  output wire miso                    // output pin
-
-);
-
-  // setbit() is slow. should remove it.
-
-/*
-  // should be assign?
-  wire [8-1:0] cs_active = setbit( reg_spi_mux )  & {8 {  ~cs2 } } ;   // cs is active lo.
-
-  assign vec_cs  = ~(cs_active ^ cs_polarity );    // works for active hi strobe 4094.   Think that it works for spi.
-
-
-  assign vec_clk  = setbit( reg_spi_mux )  & {8 {  clk } } ;   // cs is active lo.
-  assign vec_mosi = setbit( reg_spi_mux )  & {8 {  mosi } } ;   // cs is active lo.
-
-  ///////////////
-
-  // cs2 is active lo
-  assign miso = cs2 ? dout : (reg_spi_mux & vec_miso) != 0 ;
-*/
-
-  // should be assign?
-  wire [8-1:0] cs_active =  reg_spi_mux & {8 {  ~cs2 } } ;   // cs is active lo.
-
-  assign vec_cs  = ~(cs_active ^ cs_polarity );    // works for active hi strobe 4094.   Think that it works for spi.
-
-
-  assign vec_clk  = reg_spi_mux & {8 {  clk } } ;   // cs is active lo.
-  assign vec_mosi = reg_spi_mux & {8 {  mosi } } ;   // cs is active lo.
-
-  ///////////////
-
-  // cs2 is active lo
-  assign miso = cs2 ? dout : (reg_spi_mux & vec_miso) != 0 ;
-
-
-
-endmodule
 
 
 /*

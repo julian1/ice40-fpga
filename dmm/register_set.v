@@ -1,4 +1,5 @@
 
+`default_nettype none
 
 /*
 // we MUST read 8 bits here, to have the lsb bits of the register address.
