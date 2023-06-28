@@ -5,23 +5,23 @@
 
 
 module mux_spi    (
-  input wire [8-1:0] reg_spi_mux,     // change name vec_active_device
+  input [8-1:0] reg_spi_mux,     // change name vec_active_device
   input cs2,
   input clk,
   input mosi,
 
   ////////
   // outputs
-  input wire [8-1:0]  cs_polarity,
-  output wire [8-1:0] vec_cs,
-  output wire [8-1:0] vec_clk,
-  output wire [8-1:0] vec_mosi,
+  input [8-1:0]  cs_polarity,
+  output [8-1:0] vec_cs,
+  output [8-1:0] vec_clk,
+  output [8-1:0] vec_mosi,
 
   ///////
   // inputs
   input dout,                         // use when cs active.  or at least c2 not active
-  input wire [8-1:0] vec_miso,        // use when cs2 active
-  output wire miso                    // output pin
+  input [8-1:0] vec_miso,        // use when cs2 active
+  output miso                    // output pin
 
 );
 
@@ -117,9 +117,9 @@ module my_mux_spi_input    (
 
   // bloody hell. this has to drive MISO using cs also.
 
-  input wire [8-1:0] reg_spi_mux,
+  input [8-1:0] reg_spi_mux,
   input cs2,
-  output wire miso
+  output miso
 );
 
   // this code is combinatory but doesnt'

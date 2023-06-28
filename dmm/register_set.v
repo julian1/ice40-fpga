@@ -36,10 +36,6 @@ endfunction
 
 
 
-// change name spi_register_set 
-// or register_set 
-
-
 
 module register_set #(parameter MSB=40)   (
 
@@ -47,24 +43,21 @@ module register_set #(parameter MSB=40)   (
   input  clk,
   input  cs,
   input  din,       // sdi
-  output dout,       // sdo
+  output dout,      // sdo
 
 
-  // control read/write control vars
-  // use ' inout',  must be inout to write
-
+  ////////////
+  // regs
   // todo. consider adding bitwidth in name.
-  // inout wire [24-1:0] reg_led ,   // TODO should be a register?
-  output reg [24-1:0] reg_led ,   // TODO should be a register?
+  // need to be regs, because assign in sequential code/ always block.
 
+  output reg [24-1:0] reg_led ,       
   output reg [24-1:0] reg_spi_mux,
   output reg [24-1:0] reg_4094,     // TODO change name it's a state register for OE. status .  or SR. reg_4094_.   or SR_4094,   sr_4094.
-
-
+                                                // no it's a state register. not status.
 );
 
-  // TODO rename these...
-  // MSB is not correct here...
+
   reg [MSB-1:0] in;      // could be MSB-8-1 i think.
   reg [MSB-1:0] out  ;    // register for output.  should be size of MSB due to high bits
   reg [8-1:0]   count;
