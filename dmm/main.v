@@ -1,4 +1,6 @@
 
+// change name top.v
+
 // - can have heartbeat timer. over spi.
 // - if have more than one dac. then just create another register. very clean.
 // - we can actually handle a toggle. if both set and clear bit are hi then toggle
@@ -11,8 +13,6 @@
 `include "blinker.v"
 
 `default_nettype none
-
-
 
 
 
@@ -128,6 +128,7 @@ module top (
     . mosi(SPI_MOSI ),
     // . cs_polarity( 8'b01110000  ),
 
+    //////
     . cs_polarity( 8'b00000001  ),  // 4094 strobe should go hi, for output
     . vec_cs(vec_cs),
     . vec_clk(vec_clk),

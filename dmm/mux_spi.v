@@ -10,13 +10,15 @@ module mux_spi    (
   input clk,
   input mosi,
 
-
+  ////////
+  // outputs
   input wire [8-1:0]  cs_polarity,
   output wire [8-1:0] vec_cs,
   output wire [8-1:0] vec_clk,
   output wire [8-1:0] vec_mosi,
 
   ///////
+  // inputs
   input dout,                         // use when cs active.  or at least c2 not active
   input wire [8-1:0] vec_miso,        // use when cs2 active
   output wire miso                    // output pin

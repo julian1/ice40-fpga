@@ -146,9 +146,9 @@ module register_set #(parameter MSB=40)   (
         if ( flag == 0  )  // 0 means write.
           case (addr)
 
-            `REG_LED:       reg_led <= val24;
+            `REG_LED:       reg_led     <= val24;
             `REG_SPI_MUX:   reg_spi_mux <= val24;
-            `REG_4094:      reg_4094 <= val24;
+            `REG_4094:      reg_4094    <= val24;
 
           endcase
       end
