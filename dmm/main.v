@@ -17,21 +17,6 @@
 
 
 
-function [4-1:0] update (input [4-1:0] x, input [4-1:0] set, input [4-1:0] clear,);
-  begin
-    if( clear & set  /*!= 0*/  ) // if both a bit of both set and clear are set, then treat as toggle
-      update =  (clear & set )  ^ x ; // xor. to toggle.
-    else
-      update = ~(  ~(x | set ) | clear);    // clear in priority
-  end
-endfunction
-
-
-
-
-
-
-
 /*
   TODO
   module myreset a soft reset module...

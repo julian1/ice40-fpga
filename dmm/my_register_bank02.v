@@ -23,6 +23,21 @@
 
 
 
+function [4-1:0] update (input [4-1:0] x, input [4-1:0] set, input [4-1:0] clear,);
+  begin
+    if( clear & set  /*!= 0*/  ) // if both a bit of both set and clear are set, then treat as toggle
+      update =  (clear & set )  ^ x ; // xor. to toggle.
+    else
+      update = ~(  ~(x | set ) | clear);    // clear in priority
+  end
+endfunction
+
+
+
+
+
+
+
 module my_register_bank02   #(parameter MSB=40)   (
 
   // spi
@@ -36,10 +51,11 @@ module my_register_bank02   #(parameter MSB=40)   (
   // use ' inout',  must be inout to write
 
   // todo. consider adding bitwidth in name.
-  inout wire [24-1:0] reg_led ,
+  // inout wire [24-1:0] reg_led ,   // TODO should be a register?
+  output reg [24-1:0] reg_led ,   // TODO should be a register?
 
   output reg [24-1:0] reg_spi_mux,
-  output reg [24-1:0] reg_4094,     // TODO change name status .  or SR. reg_4094_.   or SR_4094,   sr_4094.
+  output reg [24-1:0] reg_4094,     // TODO change name it's a state register for OE. status .  or SR. reg_4094_.   or SR_4094,   sr_4094.
 
 
 );
