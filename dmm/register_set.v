@@ -67,7 +67,7 @@ module register_set #(parameter MSB=40)   (
 
   // To use in an inout. the initial block is a driver. so must be placed here.
   initial begin
-    reg_led       = 5'b10101;   // 24'b10101 ? should specify bitwidth
+    reg_led       = 24'b101010101010101010101010; // magic, keep. useful test vector
     reg_spi_mux   = 0;          // no spi device active
     reg_4094      = 0;
 
@@ -120,7 +120,7 @@ module register_set #(parameter MSB=40)   (
       end
   end
 
-
+  // TODO fixme, should be 7 bits, address space, without the write bit set.
   wire [  (1<<6) -1 : 0 ] addr = in[ MSB-2: MSB-8 ];  // single byte for reg/address,
 
   // change to increase bits.
