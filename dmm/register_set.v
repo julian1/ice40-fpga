@@ -35,10 +35,12 @@ endfunction
 
 
 
+// change name spi_register_set 
+// or register_set 
 
 
 
-module my_register_bank02   #(parameter MSB=40)   (
+module register_set #(parameter MSB=40)   (
 
   // spi
   input  clk,

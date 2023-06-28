@@ -6,7 +6,7 @@
 
 
 
-`include "my_register_bank02.v"
+`include "register_set.v"
 `include "mux_spi.v"
 
 `default_nettype none
@@ -157,8 +157,8 @@ module top (
 
   reg [ 12 - 1: 0 ] reg_array[ 32 - 1 : 0 ] ;    // 12x   32 bit registers
 
-  my_register_bank02 // #( 32 )   // register bank  . change name 'registers'
-  my_register_bank02
+  register_set // #( 32 )   // register bank  . change name 'registers'
+  register_set
     (
     . clk(SPI_CLK),
     . cs(SPI_CS),
