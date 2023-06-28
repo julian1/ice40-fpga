@@ -135,7 +135,7 @@ module my_register_bank02   #(parameter MSB=40)   (
       end
 
     // we could handle bit set/clear/toggle updates here, if we wanted, for 8 bit registers.
-    else if( count == 32 )
+    else if( count ==  8 + 8 + 8 )
       begin
 
       end

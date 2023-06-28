@@ -45,43 +45,73 @@ function [8-1:0] setbit( input [8-1:0]  val);
 endfunction
 
 
+/*
 
+  my_mux_spi_output #( )      // output from POV of the mcu. ie. fpga as slave.
+  my_mux_spi_output
+  (
+    . reg_spi_mux(reg_spi_mux),
+    . cs2(SPI_CS2),
+    . clk(SPI_CLK),
+    . mosi(SPI_MOSI ),
+    // . miso(SPI_MISO)                          // WE drive SPI_MISO here.
+    . dout(my_dout),                             // default. dout when no spi selected. (eg. register bank.
+    // . cs_polarity( 8'b01110000  ),
 
+    . cs_polarity( 8'b00000001  ),  // 4094 strobe should go hi, for output
+    . vec_cs(vec_cs),
+    . vec_clk(vec_clk),
+    . vec_mosi(vec_mosi)
+    . vec_miso(vec_miso),
+  );
+
+    . dout(my_dout),                              // use when cs active
+    . vec_miso(vec_miso),                         // use when cs2 active
+    . miso(SPI_MISO)                              // output pin
+
+*/
 
 module my_mux_spi_output    (
   input wire [8-1:0] reg_spi_mux,
   input cs2,
   input clk,
   input mosi,
+
+
   input wire [8-1:0]  cs_polarity,
   output wire [8-1:0] vec_cs,
   output wire [8-1:0] vec_clk,
-  output wire [8-1:0] vec_mosi
+  output wire [8-1:0] vec_mosi,
+
+  ///////
+  input dout,                         // use when cs active.  or at least c2 not active
+  input wire [8-1:0] vec_miso,        // use when cs2 active
+  output wire miso                    // output pin
+
 );
 
-
-    // should be assign?
-    wire [8-1:0] cs_active = setbit( reg_spi_mux )  & {8 {  ~cs2 } } ;   // cs is active lo.
-
-    assign vec_cs  = ~(cs_active ^ cs_polarity );    // works for active hi strobe 4094.   Think that it works for spi.
+  // setbit() is slow. should remove it.
 
 
-    assign vec_clk  = setbit( reg_spi_mux )  & {8 {  clk } } ;   // cs is active lo.
-    assign vec_mosi = setbit( reg_spi_mux )  & {8 {  mosi } } ;   // cs is active lo.
+  // should be assign?
+  wire [8-1:0] cs_active = setbit( reg_spi_mux )  & {8 {  ~cs2 } } ;   // cs is active lo.
+
+  assign vec_cs  = ~(cs_active ^ cs_polarity );    // works for active hi strobe 4094.   Think that it works for spi.
 
 
-    // assign vec_clk  =  {8 {  clk } } ;   // cs is active lo.
-    // assign vec_mosi =  {8 {  mosi } } ;   // cs is active lo.
+  assign vec_clk  = setbit( reg_spi_mux )  & {8 {  clk } } ;   // cs is active lo.
+  assign vec_mosi = setbit( reg_spi_mux )  & {8 {  mosi } } ;   // cs is active lo.
 
+  ///////////////
 
-
-    // assign vec_cs = ~ active ;  simpler approach, works for active lo.
+  // cs2 is active lo
+  assign miso = cs2 ? dout : (reg_spi_mux & vec_miso) != 0 ;
 
 
 endmodule
 
 
-
+/*
 
 module my_mux_spi_input    (
 
@@ -89,8 +119,6 @@ module my_mux_spi_input    (
 
   input wire [8-1:0] reg_spi_mux,
   input cs2,
-  input dout,
-  input wire [8-1:0] vec_miso,
   output wire miso
 );
 
@@ -100,7 +128,7 @@ module my_mux_spi_input    (
   assign miso = cs2 ? dout : (reg_spi_mux & vec_miso) != 0 ;
 
 endmodule
-
+*/
 
 /*
   Hmmm. with separate cs lines.
@@ -212,18 +240,17 @@ module top (
     we must pass cs as well.j
   */
 
-
+/*
   // miso muxer.
   my_mux_spi_input #( )
   my_mux_spi_input
   (
     . reg_spi_mux(reg_spi_mux),
     . cs2(SPI_CS2),
-    . dout(my_dout),                             // dout is shared betwen this and the register bank.
-    . vec_miso(vec_miso),
-    . miso(SPI_MISO)                          // WE drive SPI_MISO here.
   );
+*/
 
+  // when device is 0.
 
   my_mux_spi_output #( )      // output from POV of the mcu. ie. fpga as slave.
   my_mux_spi_output
@@ -233,11 +260,40 @@ module top (
     . clk(SPI_CLK),
     . mosi(SPI_MOSI ),
     // . cs_polarity( 8'b01110000  ),
+
     . cs_polarity( 8'b00000001  ),  // 4094 strobe should go hi, for output
     . vec_cs(vec_cs),
     . vec_clk(vec_clk),
-    . vec_mosi(vec_mosi)
+    . vec_mosi(vec_mosi),
+
+    ////////////////
+
+    . dout(my_dout),                              // use when cs active
+    . vec_miso(vec_miso),                         // use when cs2 active
+    . miso(SPI_MISO)                              // output pin
   );
+
+/*
+  input wire [8-1:0] reg_spi_mux,
+  input cs2,
+  input clk,
+  input mosi,
+
+
+  input wire [8-1:0]  cs_polarity,
+  output wire [8-1:0] vec_cs,
+  output wire [8-1:0] vec_clk,
+  output wire [8-1:0] vec_mosi,
+
+  // input wire [8-1:0] vec_miso
+  // output wire [8-1:0] vec_miso
+
+  ///////
+  input dout,
+  input wire [8-1:0] vec_miso,
+  output wire miso
+*/
+
 
   ////////////////////////////////////////
   // register
@@ -262,7 +318,7 @@ module top (
     . clk(SPI_CLK),
     . cs(SPI_CS),
     . din(SPI_MOSI),
-    . dout( my_dout ),
+    . dout( my_dout ),      // writes to my_dout
 
     . reg_led(reg_led),
     . reg_spi_mux(reg_spi_mux),
