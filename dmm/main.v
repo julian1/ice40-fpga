@@ -11,6 +11,7 @@
 `include "register_set.v"
 `include "mux_spi.v"
 `include "blinker.v"
+`include "modulation_mux.v"
 
 `default_nettype none
 
@@ -29,6 +30,7 @@
 
 module top (
   input  CLK,
+
 
   output MON1,
   output MON2,
@@ -62,17 +64,27 @@ module top (
   output GLB_4094_CLK,
   output GLB_4094_DATA,
   output GLB_4094_STROBE_CTL,
-  output GLB_4094_MISO_CTL,
+  input GLB_4094_MISO_CTL,   // this is unused. but it's an input
 
 
 
 );
 
+  // DOING THIS MEANS IT ALWAYS returns the wrong value SCREWS UP?????
+  // reg [7-1:0]   v;
+  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = v;//7'b0000000;
+
+
+  reg [7-1:0]   v;
+  // assign v = {  /*SPI_MISO,*/ SPI_MOSI, SPI_CLK,  SPI_CS  /* RAW-CLK */} ;    // always fails.
+  // assign {  /*SPI_MISO,*/ SPI_MOSI, SPI_CLK,  SPI_CS  /* RAW-CLK */} = v;  // always fails.
 
 
   // Put the strobe as first.
   // monitor isolator/spi,                                                  D4          D3       D2       D1        D0
-  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  SPI_MISO, SPI_MOSI, SPI_CLK,  SPI_CS  /* RAW-CLK */} ;
+  assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  SPI_MISO, SPI_MOSI, SPI_CLK,  SPI_CS  /* RAW-CLK */} ;
+
+//  assign { MON7, MON6, /*MON5,*/ MON4, MON3 , MON2, MON1 /* MON0 */ } = {  SPI_MISO, SPI_MOSI, SPI_CLK,  SPI_CS  /* RAW-CLK */} ;
 
   // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  GLB_4094_OE  /* RAW-CLK */} ;
 
@@ -84,7 +96,8 @@ module top (
   // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  GLB_4094_OE, GLB_4094_DATA, GLB_4094_CLK, GLB_4094_STROBE_CTL  /* RAW-CLK */} ;
 
   //                                                                       D5           D4        D3        D2       D1        D0
-  assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = { GLB_4094_OE,   SPI_MISO, SPI_MOSI, SPI_CLK,  SPI_CS  /* RAW-CLK */} ;
+  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = { GLB_4094_OE,   SPI_MISO, SPI_MOSI, SPI_CLK,  SPI_CS  /* RAW-CLK */} ;
+  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = 0  ;
 
   // ok. this does work.
   // assign SPI_MISO = 1;
@@ -92,7 +105,7 @@ module top (
   ////////////////////////////////////////
   // spi muxing
 
-  wire [8-1:0] reg_spi_mux ;// = 8'b00000001; // test
+  wire [24-1:0] reg_spi_mux ;// = 8'b00000001; // test
 
 
   // rather than doing individual assignments. - should just pass in anoter vector whether it's active low.
@@ -109,15 +122,17 @@ module top (
   assign { GLB_4094_DATA } = vec_mosi;
 
   wire [8-1:0] vec_miso ;
-  assign { GLB_4094_MISO_CTL } = vec_miso;
+  assign { GLB_4094_MISO_CTL } = vec_miso;    // this isn't right ... it is spi_miso?//
 
 
+  // jeezus.
 
   // dout for fpga spi.
   // need to rename. it's an internal dout... that can be muxed out.
-  wire my_dout ;
+ //  wire my_dout ;
+  reg my_dout ; // should be a register, since it's written to.
 
-
+/*
 
   mux_spi #( )      // output from POV of the mcu. ie. fpga as slave.
   mux_spi
@@ -140,7 +155,7 @@ module top (
     . vec_miso(vec_miso),                         // use when cs2 active
     . miso(SPI_MISO)                              // output pin
   );
-
+*/
 
   ////////////////////////////////////////
   // register
@@ -149,10 +164,10 @@ module top (
 
   // TODO change prefix to w_
 
-  wire [4-1:0] reg_led;
+  wire [24-1:0] reg_led;
   assign {  LED0 } = reg_led;
 
-  wire [4-1:0] reg_4094;
+  wire [24-1:0] reg_4094;
   assign { GLB_4094_OE } = reg_4094;
 
 
@@ -165,7 +180,8 @@ module top (
     . clk(SPI_CLK),
     . cs(SPI_CS),
     . din(SPI_MOSI),
-    . dout( my_dout ),      // miso from register bank for reading 
+    // . dout( my_dout ),      // miso from register bank for reading 
+    . dout( SPI_MISO ),      // miso from register bank for reading 
 
     // registers
     . reg_led(reg_led),
@@ -174,8 +190,21 @@ module top (
 
   );
 
+  // actually blinking is sometime fails....
+  // adding this code hangs???? why
 
+/*
+ 
+  modulation_mux
+  modulation_mux
+    (
+    .clk( CLK),
+    .reset( 0),
 
+    . mon1( MON5 )
+    // .vec_monitor( vec_monitor ) 
+  );
+*/
 
   blinker #(  )
   blinker

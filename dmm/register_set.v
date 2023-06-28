@@ -43,7 +43,7 @@ module register_set #(parameter MSB=40)   (
   input  clk,
   input  cs,
   input  din,       // sdi
-  output dout,      // sdo
+  output dout,      // sdo - NO. we assign it to last bit of the output.
 
 
   ////////////
@@ -62,7 +62,7 @@ module register_set #(parameter MSB=40)   (
   reg [MSB-1:0] out  ;    // register for output.  should be size of MSB due to high bits
   reg [8-1:0]   count;
 
-  wire dout = out[MSB- 1];
+  wire dout = out[MSB- 1 -1 ];
 
 
   // To use in an inout. the initial block is a driver. so must be placed here.
@@ -76,7 +76,9 @@ module register_set #(parameter MSB=40)   (
 
   // read
   // clock value into into out var
+  // USING A NEG EDGE CLOCK.
   always @ (negedge clk or posedge cs)
+  // always @ (posedge clk or posedge cs)
   begin
     if(cs)
       // cs not asserted (active lo), so reset regs
@@ -92,6 +94,7 @@ module register_set #(parameter MSB=40)   (
           whoot. now  non-blocking.
         */
         // shift din into in register
+        // in <= {in[MSB-2:0], din};
         in <= {in[MSB-2:0], din};
 
         // shift data from out register
@@ -107,12 +110,24 @@ module register_set #(parameter MSB=40)   (
         */
         if(count == 8)
           begin
-            case (in[8 - 1 - 1: 0 ] )
+            // case (`REG_LED  ) //  correct.
+            // case (in[8 - 2  : 0 ] ) // always misses. because of high bit perhaps.
+            case (in[8 - 2  : 0 ] ) // alternates . so strange.
+                                    // we need to know what bit is wrong.
 
-              `REG_LED:       out <= reg_led  << 9;
-              `REG_SPI_MUX:   out <= reg_spi_mux << 9;
-              `REG_4094:      out <= reg_4094 << 9;
-              default:        out <= 12345;
+              // `REG_SPI_MUX:   out <= reg_spi_mux << 8;
+              // `REG_4084:      out <= reg_4084 << 8;
+
+              // test vectors
+              // default:        out <=  24'b000011110000111100001111 << 8;
+              // default          out <=  24'b101010101010101010101010 << 8;
+              // default:        out <=  in[8 - 2  : 0] << 8;
+              // default:        out <=  in[8 - 1  : 0] << 8 ;     // return passed address
+
+
+              `REG_LED:         out <= reg_led << 8;
+
+              default:        out <=  24'b000011110000111100001111 << 8;
 
             endcase
           end
@@ -125,6 +140,10 @@ module register_set #(parameter MSB=40)   (
 
   // change to increase bits.
   wire [24-1 :0] val24   = in[ MSB-8- 1  : 0 ] ;              // lo 24 bits/ ... FIXME. indexing not quite correct.
+
+
+  // wire [8-1 :0] val8      = in[ 8 - 1  : 0 ] ;              // lo 24 bits/ ... FIXME. indexing not quite correct.
+
   // wire [32-1 :0] val32   = in[ MSB-8- 1  : 0 ] ;
   wire flag = in[ MSB- 1   ] ;              // lo 24 bits/
 
