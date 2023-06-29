@@ -1,6 +1,6 @@
 
 
-// should be able to be used to toggle the monitor pins also if want.
+// useful test pattern generator
 
 `default_nettype none
 
@@ -10,11 +10,7 @@ module blinker    (
   input clk,
 
   // module outputs can be safely ignored,
-  output led0,
-  output led1,
-  output led2,
-  output led3,
-  output led4
+  output reg [8-1: 0] vec_leds 
 );
 
   localparam BITS = 5;
@@ -25,11 +21,12 @@ module blinker    (
   reg [BITS-1:0] outcnt;
 
   always@(posedge clk) begin
-    counter <= counter + 1;
-    outcnt <= counter >> LOG2DELAY;
+    counter   <= counter + 1;
+    outcnt    <= counter >> LOG2DELAY;
+
+    vec_leds  <= outcnt ^ (outcnt >> 1);
   end
 
-  assign { led4,led3, led2, led1, led0  } = outcnt ^ (outcnt >> 1);
 endmodule
 
 

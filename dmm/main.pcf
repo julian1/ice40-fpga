@@ -16,22 +16,17 @@ set_io MON7   34
 
 
 
-# should prefix these
-# use SPI_
 
-set_io SPI_CLK      56
-#set_io CS           58    # ISSUE
+set_io SPI_CLK          56
+#set_io CS              58    # ISSUE .   trace to pin is cut.
 set_io SPI_MOSI         60
 set_io SPI_CS2          61
 set_io SPI_MISO         62
 set_io SPI_INTERUPT_OUT 63    # // prefix me!
-
 set_io SPI_CS           64    # ISSUE
 
 
-# FIX.WRONG name. not GLB
-set_io GLB_4094_OE        76
-
+set_io _4094_OE_CTL        76
 set_io GLB_4094_CLK       73
 set_io GLB_4094_STROBE_CTL 74
 set_io GLB_4094_DATA      75

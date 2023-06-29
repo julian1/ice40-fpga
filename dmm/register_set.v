@@ -10,7 +10,7 @@
 
 
 /*
-  if we add back the bitwise set,clear,toggle, for a 8 bit reg, then could aggrevate registers if we wanted.
+    could add back the bitwise set,clear,toggle, for a 8 bit reg, then could aggrevate registers if we wanted.
     error flags etc.
 
 */
@@ -55,6 +55,9 @@ module register_set #(parameter MSB=40)   (
   output reg [24-1:0] reg_spi_mux,
   output reg [24-1:0] reg_4094,     // TODO change name it's a state register for OE. status .  or SR. reg_4094_.   or SR_4094,   sr_4094.
                                                 // no it's a state register. not status.
+
+  // passing a monitor in here, is useful, for monitoring internal. eg. the
+  output reg [7-1:0]   vec_monitor,
 );
 
 
@@ -111,12 +114,7 @@ module register_set #(parameter MSB=40)   (
         if(count == 8)
           begin
             // case (`REG_LED  ) //  correct.
-            // case (in[8 - 2  : 0 ] ) // always misses. because of high bit perhaps.
-            case (in[8 - 2  : 0 ] ) // alternates . so strange.
-                                    // we need to know what bit is wrong.
-
-              // `REG_SPI_MUX:   out <= reg_spi_mux << 8;
-              // `REG_4084:      out <= reg_4084 << 8;
+            case (in[8 - 2  : 0 ] )
 
               // test vectors
               // default:        out <=  24'b000011110000111100001111 << 8;
@@ -125,7 +123,9 @@ module register_set #(parameter MSB=40)   (
               // default:        out <=  in[8 - 1  : 0] << 8 ;     // return passed address
 
 
-              `REG_LED:         out <= reg_led << 8;
+              `REG_LED:       out <= reg_led << 8;
+              `REG_SPI_MUX:   out <= reg_spi_mux << 8;
+              `REG_4094:      out <= reg_4094 << 8;
 
               default:        out <=  24'b000011110000111100001111 << 8;
 
@@ -145,7 +145,9 @@ module register_set #(parameter MSB=40)   (
   // wire [8-1 :0] val8      = in[ 8 - 1  : 0 ] ;              // lo 24 bits/ ... FIXME. indexing not quite correct.
 
   // wire [32-1 :0] val32   = in[ MSB-8- 1  : 0 ] ;
-  wire flag = in[ MSB- 1   ] ;              // lo 24 bits/
+
+  // FIXME/REVIEW - does not look right - indexing outside array?
+  wire flag = in[ MSB- 1   ] ;
 
 
 

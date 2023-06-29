@@ -59,7 +59,7 @@ module top (
 
   //////////////////////////
   // 4094
-  output GLB_4094_OE,
+  output _4094_OE_CTL,
 
   output GLB_4094_CLK,
   output GLB_4094_DATA,
@@ -69,24 +69,24 @@ module top (
 );
 
   reg dummy;
- 
+
   // Put the strobe as first.
   // monitor isolator/spi,                                                  D4          D3       D2       D1        D0
   // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  SPI_MISO, SPI_MOSI, SPI_CLK,  SPI_CS  /* RAW-CLK */} ;
 
 //  assign { MON7, MON6, /*MON5,*/ MON4, MON3 , MON2, MON1 /* MON0 */ } = {  SPI_MISO, SPI_MOSI, SPI_CLK,  SPI_CS  /* RAW-CLK */} ;
 
-  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  GLB_4094_OE  /* RAW-CLK */} ;
+  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  _4094_OE_CTL  /* RAW-CLK */} ;
 
   // monitor the 4094 spi                                                 D6       D5             D4            D3              D2              D1                 D0
   // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  SPI_CLK, SPI_CS2, GLB_4094_MISO_CTL, GLB_4094_DATA, GLB_4094_CLK, GLB_4094_STROBE_CTL  /* RAW-CLK */} ;
 
 
   // monitor the 4094 spi                                               D4            D3              D2              D1                 D0
-  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  GLB_4094_OE, GLB_4094_DATA, GLB_4094_CLK, GLB_4094_STROBE_CTL  /* RAW-CLK */} ;
+  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  _4094_OE_CTL, GLB_4094_DATA, GLB_4094_CLK, GLB_4094_STROBE_CTL  /* RAW-CLK */} ;
 
   //                                                                       D5           D4        D3        D2       D1        D0
-  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = { GLB_4094_OE,   SPI_MISO, SPI_MOSI, SPI_CLK,  SPI_CS  /* RAW-CLK */} ;
+  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = { _4094_OE_CTL,   SPI_MISO, SPI_MOSI, SPI_CLK,  SPI_CS  /* RAW-CLK */} ;
   // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = 0  ;
 
   // ok. this does work.
@@ -158,11 +158,12 @@ module top (
   assign {  LED0 } = reg_led;
 
   wire [24-1:0] reg_4094;
-  assign { GLB_4094_OE } = reg_4094;
+  assign { _4094_OE_CTL } = reg_4094;
 
 
 
-  reg [ 12 - 1: 0 ] reg_array[ 32 - 1 : 0 ] ;    // 12x   32 bit registers
+  // reg [ 12 - 1: 0 ] reg_array[ 32 - 1 : 0 ] ;    // 12x   32 bit registers
+
 
   register_set // #( 32 )   // register bank  . change name 'registers'
   register_set
@@ -181,20 +182,20 @@ module top (
   );
 
 
- 
+
   modulation_mux
   modulation_mux
     (
     .clk( CLK),
     .reset( 0),
-    .vec_monitor( { MON7, MON6, MON5, MON4, MON3 , MON2, MON1, dummy  } )      
+    .vec_monitor( { MON7, MON6, MON5, MON4, MON3 , MON2, MON1, dummy  } )
   );
 
   blinker #(  )
   blinker
     (
     .clk( CLK ),
-    // .led2 ( LED0 )    // module outputs can be safely ignored,
+    // .vec_leds( { MON7, MON6, MON5, MON4, MON3 , MON2, MON1, dummy  } )
   );
 
 
