@@ -41,10 +41,10 @@ module modulation_mux (
 
 
 
-  // output reg [7-1:0]   vec_monitor,
+  output reg [7-1:0]   vec_monitor,
 
   // output reg mon1// , mon2, mon3, mon4, mon5, mon6, mon7,
-  output reg mon1
+  // output reg mon1
 
 );
 
@@ -58,6 +58,10 @@ module modulation_mux (
   // input [24-1:0]  clk_count_reset_n,
   reg [24-1:0]  clk_count_reset_n = 10;
   reg [24-1:0]  clk_count_settle_n = 30;
+
+  reg dummy;
+  wire mon1, mon2 ;
+  assign { mon2, mon1 ,  dummy } = vec_monitor ;
 
 
   always @(posedge clk  or posedge reset )
@@ -84,7 +88,8 @@ module modulation_mux (
           begin
             state           <= `STATE_RESET;
             clk_count_down  <= clk_count_reset_n;
-            mon1            <= 1 ;
+            mon1            <= 1;
+            mon2            <= 0;
           end
 
         `STATE_RESET:
@@ -98,6 +103,7 @@ module modulation_mux (
             state           <= `STATE_SIG_SETTLE;
             clk_count_down  <= clk_count_settle_n;
             mon1            <= 0;
+            mon2            <= 1;
           end
 
 
