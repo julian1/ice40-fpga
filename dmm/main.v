@@ -66,6 +66,14 @@ module top (
   output GLB_4094_STROBE_CTL,
   input GLB_4094_MISO_CTL,   // this is unused. but it's an input
 
+
+  output SIG_PC_SW_CTL,
+
+  output U413_A0_CTL,
+  output U413_A1_CTL,
+  output U413_A2_CTL,
+
+
 );
 
   reg dummy;
@@ -158,11 +166,16 @@ module top (
   assign {  LED0 } = reg_led;
 
   wire [24-1:0] reg_4094;
-  assign { _4094_OE_CTL } = reg_4094;
+  // assign { _4094_OE_CTL } = reg_4094;
 
 
+  /////////////////////
+  assign { _4094_OE_CTL } = 1;    //  on for test.
 
-  // reg [ 12 - 1: 0 ] reg_array[ 32 - 1 : 0 ] ;    // 12x   32 bit registers
+
+  assign { U413_A2_CTL, U413_A1_CTL, U413_A0_CTL } = 3'b110;    //  turn on DCV. 7 - 1?   on for test.  nice. measures 125R.
+                                                                // what is the assignment.  i think it must be shifted.
+
 
 
   register_set // #( 32 )   // register bank  . change name 'registers'
@@ -188,8 +201,12 @@ module top (
     (
     .clk( CLK),
     .reset( 0),
+    .sig_pc_sw_ctl( SIG_PC_SW_CTL),
+
     .vec_monitor( { MON7, MON6, MON5, MON4, MON3 , MON2, MON1, dummy  } )
   );
+
+
 
   blinker #(  )
   blinker

@@ -39,7 +39,7 @@ module modulation_mux (
 
   input   reset,                    // async
 
-
+  output  sig_pc_sw_ctl,
 
   output reg [7-1:0]   vec_monitor,
 
@@ -88,8 +88,10 @@ module modulation_mux (
           begin
             state           <= `STATE_RESET;
             clk_count_down  <= clk_count_reset_n;
+
+            sig_pc_sw_ctl   <= 1;
             mon1            <= 1;
-            mon2            <= 0;
+            // mon2            <= 0;
           end
 
         `STATE_RESET:
@@ -102,8 +104,10 @@ module modulation_mux (
           begin
             state           <= `STATE_SIG_SETTLE;
             clk_count_down  <= clk_count_settle_n;
+
+            sig_pc_sw_ctl   <= 0;
             mon1            <= 0;
-            mon2            <= 1;
+            // mon2            <= 1;
           end
 
 

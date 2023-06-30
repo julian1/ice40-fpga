@@ -35,6 +35,7 @@ endfunction
 
 
 
+// reg [ 12 - 1: 0 ] reg_array[ 32 - 1 : 0 ] ;    // 12x   32 bit registers
 
 
 module register_set #(parameter MSB=40)   (
