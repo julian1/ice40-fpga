@@ -163,7 +163,7 @@ module top (
   // TODO change prefix to w_
 
   wire [24-1:0] reg_led;
-  assign {  LED0 } = reg_led;
+  // assign {  LED0 } = reg_led;
 
   wire [24-1:0] reg_4094;
   // assign { _4094_OE_CTL } = reg_4094;
@@ -207,12 +207,14 @@ module top (
   );
 
 
+  reg [3:0] vec_dummy;
 
   blinker #(  )
   blinker
     (
     .clk( CLK ),
     // .vec_leds( { MON7, MON6, MON5, MON4, MON3 , MON2, MON1, dummy  } )
+    .vec_leds( { LED0, vec_dummy } )
   );
 
 

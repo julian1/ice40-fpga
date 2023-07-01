@@ -56,8 +56,8 @@ module modulation_mux (
   reg [31:0]  clk_count_down;           // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
 
   // input [24-1:0]  clk_count_reset_n,
-  reg [24-1:0]  clk_count_reset_n = 10;
-  reg [24-1:0]  clk_count_settle_n = 30;
+  reg [24-1:0]  clk_count_reset_n  = 20000000 / 1000;   // 1kHz. == 500Hz.
+  reg [24-1:0]  clk_count_settle_n = 20000000 / 1000;   // 1kHz.
 
   reg dummy;
   wire mon1, mon2 ;
