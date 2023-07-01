@@ -39,6 +39,19 @@ set_io U413_A0_CTL      113
 set_io U413_A1_CTL      114
 set_io U413_A2_CTL      115
 
+
+set_io U402_A0_CTL      119
+set_io U402_A1_CTL      120
+set_io U402_A2_CTL      121
+
+set_io U414_A0_CTL      116
+set_io U414_A1_CTL      117
+set_io U414_A2_CTL      118
+
+
+
+
+
 ########################
 
 
