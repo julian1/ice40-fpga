@@ -25,12 +25,18 @@
 `define SW_PC_BOOT      0
 
 
+
+`define AZ_MODE_AZ_NORMAL   1
+`define AZ_MODE_SIGNAL_HI   2
+`define AZ_MODE_LO          3
+
+
 module modulation_az (
 
   input   clk,
   input   reset,                    // async
 
-  input   active,
+  input   [7-1: 0 ] mode,
 
   // input   use_precharge,         // for comparison
 
@@ -54,9 +60,9 @@ module modulation_az (
 
   reg [31:0]    clk_count_down;           // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
 
-  reg [24-1:0]  clk_count_sample_n  = `CLK_FREQ / 100;   // 100nplc  10ms.
+  reg [24-1:0]  clk_count_sample_n    = `CLK_FREQ / 100;   // 100nplc  10ms.
 
-  reg [24-1:0]  clk_count_precharge_n  = `CLK_FREQ / 1000;   // 1ms
+  reg [24-1:0]  clk_count_precharge_n = `CLK_FREQ / 1000;   // 1ms
 
 
   reg dummy ;
@@ -107,7 +113,7 @@ module modulation_az (
             state           <= 15;
             clk_count_down  <= clk_count_precharge_n;
             sw_pc_ctl       <= `SW_PC_BOOT;
-            // mux_az          <= `MUX_ZERO;        // doesn't matter.
+            //mux_az          <= `MUX_ZERO;        // doesn't matter. but leave defined.
           end
         15:
           if(clk_count_down == 0)
@@ -117,17 +123,31 @@ module modulation_az (
         // loop. precharge_start
         // switch az mux to signal/pc output (signal is protected by pc)  - the 'precharge phase' or settle phase
         2:
-          if(active)              //   mode==AZ_NORMA, AZ_HOLD,
-            begin
-              state           <= 25;
-              clk_count_down  <= clk_count_precharge_n;
-              mux_az          <= `MUX_AZ_PC_OUT;          // select signa.l
-            end
-          else
-            begin
-              mux_az          <= `MUX_AZ_PC_OUT;    // change follow whatever the mux_az,  register is .
+          case (mode)
+            `AZ_MODE_AZ_NORMAL:  //   normal AZ/precharge mode cycle
+              begin
+                state           <= 25;
+                clk_count_down  <= clk_count_precharge_n;
+                mux_az          <= `MUX_AZ_PC_OUT;          // select signal
+              end
 
-            end
+            `AZ_MODE_SIGNAL_HI:        // hold and follow the output from the himux
+              begin
+                sw_pc_ctl       <= `SW_PC_SIGNAL;
+                mux_az          <= `MUX_AZ_PC_OUT;
+              end
+
+            `AZ_MODE_LO:       // hold lo, which lo should be read from the register.
+              begin
+                sw_pc_ctl       <= `SW_PC_BOOT;   // park at boot. doesn't really matter.
+                mux_az          <= `MUX_AZ_ZERO;
+              end
+
+            default:  // should be error condition .
+              mux_az          <= `MUX_AZ_PC_OUT;    
+              // this is
+
+          endcase
 
         25:
           if(clk_count_down == 0)
