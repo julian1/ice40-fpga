@@ -11,9 +11,7 @@
 `include "register_set.v"
 `include "mux_spi.v"
 `include "blinker.v"
-`include "modulation_mux.v"
-
-`default_nettype none
+`include "modulation_az.v"
 
 
 
@@ -26,6 +24,24 @@
 
   need to think how to handle peripheral reset.
 */
+
+
+
+// `define MUX_HI_2_NC = ;
+
+`define MUX_HI2_NC      (3-1)   // s3 == NC
+`define MUX_HI2_TEMP1   (1-1)   // s2 == TEMP1
+
+
+`define MUX_HI1_DCV     (7-1)   // s7 == DCV-IN
+`define MUX_HI_DCV_IN   ( `MUX_HI2_NC << 3  |  `MUX_HI1_DCV)
+
+
+
+
+
+
+`default_nettype none
 
 
 module top (
@@ -211,32 +227,26 @@ module top (
   assign { _4094_OE_CTL } = 1;    //  on for test.
 
 
-  // define U413_DCV_IN  3'b110
 
-  // mux hi
-  reg [3-1: 0] u413 = 3'b110; // s7 == DCV-IN
-  assign { U413_A2_CTL, U413_A1_CTL, U413_A0_CTL } = u413;    //  turn on DCV. 7 - 1?   on for test.  nice. measures 125R.
-
-  // mux hi 2.
-  reg [3-1: 0] u402 = 3 - 1 ; // s3 == unconnected/ hi-z input == off.
-  assign { U402_A2_CTL, U402_A1_CTL, U402_A0_CTL } = u402;
+  // mux_hi  does not need to gokkkkkkkkkkkk
+  reg [6-1:0 ] mux_hi = `MUX_HI_DCV_IN;
+  assign  {   U402_A2_CTL, U402_A1_CTL, U402_A0_CTL, U413_A2_CTL, U413_A1_CTL, U413_A0_CTL } = mux_hi;
 
 
-  // AZ
-  reg [3-1: 0] u414 = 3'b000; // s1 == PC-OUT
-  assign { U414_A2_CTL, U414_A1_CTL, U414_A0_CTL } = u414;
+  // az
+  wire [3-1: 0] mux_az ;
+  assign { U414_A2_CTL, U414_A1_CTL, U414_A0_CTL } = mux_az;
 
 
-  // 1==sig, 0==boot
-  // assign SIG_PC_SW_CTL = 1;
-
-
-  modulation_mux
-  modulation_mux
+  // az mux does not need ot know about mux_hi
+  modulation_az
+  modulation_az
     (
     .clk( CLK),
     .reset( 0),
+
     .sig_pc_sw_ctl( SIG_PC_SW_CTL),
+    .mux_az (mux_az),
 
     .vec_monitor( { MON7, MON6, MON5, MON4, MON3 , MON2, MON1, dummy  } )
   );
@@ -247,5 +257,16 @@ module top (
 endmodule
 
 
+
+
+/*
+  // mux hi
+  reg [3-1: 0] u413 = 3'b110; // s7 == DCV-IN
+  assign { U413_A2_CTL, U413_A1_CTL, U413_A0_CTL } = u413;    //  turn on DCV. 7 - 1?   on for test.  nice. measures 125R.
+
+  // mux hi 2.
+  reg [3-1: 0] u402 = 3 - 1 ; // s3 == unconnected/ hi-z input == off.
+  assign { U402_A2_CTL, U402_A1_CTL, U402_A0_CTL } = u402;
+*/
 
 

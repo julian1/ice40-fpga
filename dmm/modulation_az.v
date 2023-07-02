@@ -20,6 +20,11 @@
 
 */
 
+
+// implicit identifiers are only caught when modules have been instantiated
+`default_nettype none
+
+
 `define STATE_RESET_START    0    // initial state
 `define STATE_RESET          1
 `define STATE_SIG_SETTLE_START 3
@@ -27,19 +32,20 @@
 `define STATE_SIG_START     5
 
 
-// implicit identifiers are only caught when modules have been instantiated
-`default_nettype none
+
+`define MUX_AZ_PC_OUT   (0 )  // s1 == PC-OUT
+`define MUX_AZ_ZERO     (8 - 1)  // s8 == 4.7k to star-ground
 
 
 
-module modulation_mux (
+module modulation_az (
 
   input   clk,
-
-
   input   reset,                    // async
 
-  output  sig_pc_sw_ctl,
+  output reg  sig_pc_sw_ctl,
+  output reg [  3-1 : 0 ] mux_az ,       // going to be driven -  so should  be a register
+
 
   output reg [7-1:0]   vec_monitor,
 
@@ -89,9 +95,11 @@ module modulation_mux (
             state           <= `STATE_RESET;
             clk_count_down  <= clk_count_reset_n;
 
-            sig_pc_sw_ctl   <= 1;
+            sig_pc_sw_ctl   <= 1;   // signal.
+
+            mux_az          <= `MUX_AZ_PC_OUT;        // signal 
+
             mon1            <= 1;
-            // mon2            <= 0;
           end
 
         `STATE_RESET:
@@ -106,6 +114,8 @@ module modulation_mux (
             clk_count_down  <= clk_count_settle_n;
 
             sig_pc_sw_ctl   <= 0;
+            mux_az          <= `MUX_AZ_ZERO;        // zero
+
             mon1            <= 0;
             // mon2            <= 1;
           end

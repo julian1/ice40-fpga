@@ -1,6 +1,4 @@
 
-`default_nettype none
-
 /*
 // we MUST read 8 bits here, to have the lsb bits of the register address.
     but this creates issue for how quickly we can stuff data into dout, so that the value can be read
@@ -14,6 +12,9 @@
     error flags etc.
 
 */
+
+`default_nettype none
+
 
 `define REG_LED                 7
 `define REG_SPI_MUX             8
