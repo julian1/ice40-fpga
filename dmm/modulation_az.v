@@ -5,6 +5,10 @@
 
   TODO - change name 'zero' -> 'lo'.  not sure.
 
+  TODO - change 'active'   to 'mode'
+
+          eg. normal AZ. where we switch between SIG/ZERO
+
 */
 
 
@@ -25,6 +29,8 @@ module modulation_az (
 
   input   clk,
   input   reset,                    // async
+
+  input   active,
 
   // input   use_precharge,         // for comparison
 
@@ -92,6 +98,7 @@ module modulation_az (
         // sample period needs to be equal for both.
 
         0:
+          // having a state like, this may be useful for debuggin, because can put a pulse on the monitor.
           state <= 1;
 
         // switch pc to boot to protect signal
@@ -110,11 +117,18 @@ module modulation_az (
         // loop. precharge_start
         // switch az mux to signal/pc output (signal is protected by pc)  - the 'precharge phase' or settle phase
         2:
-          begin
-            state           <= 25;
-            clk_count_down  <= clk_count_precharge_n; // 1ms clk_count_sample_n;
-            mux_az          <= `MUX_AZ_PC_OUT;
-          end
+          if(active)              //   mode==AZ_NORMA, AZ_HOLD,
+            begin
+              state           <= 25;
+              clk_count_down  <= clk_count_precharge_n;
+              mux_az          <= `MUX_AZ_PC_OUT;          // select signa.l
+            end
+          else
+            begin
+              mux_az          <= `MUX_AZ_PC_OUT;    // change follow whatever the mux_az,  register is .
+
+            end
+
         25:
           if(clk_count_down == 0)
             state <= 3;

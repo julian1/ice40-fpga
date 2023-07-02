@@ -245,6 +245,8 @@ module top (
     .clk( CLK),
     .reset( 0),
 
+    .active( 1),      // turn off and it follows.      
+
     .sw_pc_ctl( SIG_PC_SW_CTL),
     .mux_az (mux_az),
 
