@@ -245,7 +245,7 @@ module top (
     .clk( CLK),
     .reset( 0),
 
-    .sig_pc_sw_ctl( SIG_PC_SW_CTL),
+    .sw_pc_ctl( SIG_PC_SW_CTL),
     .mux_az (mux_az),
 
     .vec_monitor( { MON7, MON6, MON5, MON4, MON3 , MON2, MON1, dummy  } )

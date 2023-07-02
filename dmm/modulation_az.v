@@ -25,17 +25,33 @@
 `default_nettype none
 
 
+/*
 `define STATE_RESET_START    0    // initial state
 `define STATE_RESET          1
 `define STATE_SIG_SETTLE_START 3
 `define STATE_SIG_SETTLE    4
 `define STATE_SIG_START     5
 
+// we have to have start
+`define STATE_AZ_SIGNAL           6
+`define STATE_AZ_SIGNAL_START     7
+`define STATE_AZ_ZERO             8
+`define STATE_AZ_ZERO_START       7
+`define STATE_PC_BOOT             8
+`define STATE_PC_BOOT_START       9
+`define STATE_PC_SIGNAL           10
+`define STATE_PC_SIGNAL_START     11
+
+*/
+        // state_AZ_signal. state_AZ_zero
+        // state_precharge_boot, state_precharge_signal.
 
 
 `define MUX_AZ_PC_OUT   (0 )  // s1 == PC-OUT
 `define MUX_AZ_ZERO     (8 - 1)  // s8 == 4.7k to star-ground
 
+`define SW_PC_SIGNAL    1
+`define SW_PC_BOOT      0
 
 
 module modulation_az (
@@ -43,7 +59,9 @@ module modulation_az (
   input   clk,
   input   reset,                    // async
 
-  output reg  sig_pc_sw_ctl,
+  // input   use_precharge,         // for comparison
+
+  output reg  sw_pc_ctl,
   output reg [  3-1 : 0 ] mux_az ,       // going to be driven -  so should  be a register
 
 
@@ -54,20 +72,22 @@ module modulation_az (
 
 );
 
+  // localparam x = 1;
+
+
   // pack and unpack monitor header. should be register.
 
-  reg [5-1:0]   state = `STATE_RESET_START;     // expose - not sure.
+  reg [7-1:0]   state = 0 ;     // expose - not sure.
 
-  // reg [31:0]  clk_count;           // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
   reg [31:0]  clk_count_down;           // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
 
-  // input [24-1:0]  clk_count_reset_n,
-  reg [24-1:0]  clk_count_reset_n  = 20000000 / 1000;   // 1kHz. == 500Hz.
-  reg [24-1:0]  clk_count_settle_n = 20000000 / 1000;   // 1kHz.
+  reg [24-1:0]  clk_count_sample_n  = 20000000 / 100;   // 100nplc  10ms.
 
-  reg dummy;
-  wire mon1, mon2 ;
-  assign { mon2, mon1 ,  dummy } = vec_monitor ;
+  reg [24-1:0]  clk_count_precharge_n  = 20000000 / 1000;   // 1ms
+
+
+  reg dummy ;
+  assign vec_monitor = { mux_az , sw_pc_ctl, dummy} ; // nice
 
 
   always @(posedge clk  or posedge reset )
@@ -75,7 +95,7 @@ module modulation_az (
    if(reset)
     begin
       // set up next state, for when reset goes hi.
-      state           <= `STATE_RESET_START;
+      state           <= 0;
     end
     else
 
@@ -87,43 +107,84 @@ module modulation_az (
 
       case (state)
 
-        // IMPORTANT. might can improved performance by reducing the reset and sig-settle times
-        // reset time is also used for settle time.
+        // precharge switch - protects the signal. from the charge-injection of the AZ switch.
+        //////////////////
+        // 1. switch precharge to boot voltage. // == first.
+        //
+        // 2. switch AZ mux to signal.  (signal is protected by precharge).  AZ=SIG, PC=
+        // 3. switch precharge  to signal.  and take sample.
+        // 4. switch precharge to boot.
+        // 5. switch AZ mux to zero - take sample.
+        // 6  goto 2.
 
-        `STATE_RESET_START:
+        // state vars are needed - because the actual zero used - will be encoded in a register.
+
+        // sample period needs to be equal for both.
+
+        0:
+          state <= 1;
+
+        // switch pc to boot to protect signal
+        1:
           begin
-            state           <= `STATE_RESET;
-            clk_count_down  <= clk_count_reset_n;
-
-            sig_pc_sw_ctl   <= 1;   // signal.
-
-            mux_az          <= `MUX_AZ_PC_OUT;        // signal 
-
-            mon1            <= 1;
+            state           <= 15;
+            clk_count_down  <= 20000000 / 1000;
+            sw_pc_ctl       <= `SW_PC_BOOT;
+            // mux_az          <= `MUX_ZERO;        // doesn't matter.
           end
-
-        `STATE_RESET:
+        15:
           if(clk_count_down == 0)
-            state <= `STATE_SIG_SETTLE_START;
+            state <= 2;
 
-
-
-        `STATE_SIG_SETTLE_START:
+        ////////////////////////////
+        // loop.
+        // switch az mux to signal/pc output (signal is protected by pc)  - the 'precharge phase' or settle phase
+        2:
           begin
-            state           <= `STATE_SIG_SETTLE;
-            clk_count_down  <= clk_count_settle_n;
-
-            sig_pc_sw_ctl   <= 0;
-            mux_az          <= `MUX_AZ_ZERO;        // zero
-
-            mon1            <= 0;
-            // mon2            <= 1;
+            state           <= 25;
+            clk_count_down  <= clk_count_precharge_n; // 1ms clk_count_sample_n;
+            mux_az          <= `MUX_AZ_PC_OUT;
           end
-
-
-        `STATE_SIG_SETTLE:
+        25:
           if(clk_count_down == 0)
-            state <= `STATE_RESET_START;
+            state <= 3;
+
+        /////////////////////////
+        // switch pc to signal - take signal sample
+        3:
+          begin
+            state           <= 35;
+            clk_count_down  <= clk_count_sample_n;
+            sw_pc_ctl       <= `SW_PC_SIGNAL;
+          end
+        35:
+          if(clk_count_down == 0)
+            state <= 4;
+
+        // switch pc to boot - to re-protect signal
+        4:
+          begin
+            state           <= 45;
+            clk_count_down  <= clk_count_precharge_n; // time less important here
+            sw_pc_ctl       <= `SW_PC_BOOT;
+          end
+        45:
+          if(clk_count_down == 0)
+            state <= 5;
+
+        /////////////////////////
+        // switch mux to zero (signal is protected by pc) - take zero sample - zero psample phase. (do we want a pause here?)
+        5:
+          begin
+            state           <= 55;
+            clk_count_down  <= clk_count_sample_n;
+            mux_az          <= `MUX_AZ_ZERO;
+          end
+        55:
+          if(clk_count_down == 0)
+            state <= 2;
+
+
 
       endcase
 

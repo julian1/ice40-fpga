@@ -18,7 +18,7 @@ set_io MON7   34
 
 
 set_io SPI_CLK          56
-#set_io CS              58    # ISSUE .   trace to pin is cut.
+#set_io CS              58    # ISSUE .   trace to pin is cut. not present on 4k.
 set_io SPI_MOSI         60
 set_io SPI_CS2          61
 set_io SPI_MISO         62
@@ -33,6 +33,7 @@ set_io GLB_4094_DATA      75
 set_io GLB_4094_MISO_CTL  98   # via level shift.
 
 
+    #  .sw_pc_ctl( SIG_PC_SW_CTL),  perhaps renmae
 set_io SIG_PC_SW_CTL    112
 
 set_io U413_A0_CTL      113
