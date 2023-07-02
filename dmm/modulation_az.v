@@ -1,22 +1,9 @@
-
 /*
-  - remove the double clk count state switching that we have. with start labels.
-  - if a state is reached from more than one other state
-        - then use a function. to avoid repeating set setting of the conditions.
 
-    - it is clearer, in reducing the number of state elements.
-  ----------
+  we have the two clk transitions. but it makes it clearer to read.
 
-  alternatively do a test of the clk count.
-  if clk_count == 0
-    thne do state initialization.
-    No. - because this creates a two-clock transition
 
-  -----------------------
-
-  if implemented a count-down clock, instead of count-up.  then we can test against 0 which is quite a bit clearer.
-      don't have the target phase time - in the setup for the state.
-
+  TODO - change name 'zero' -> 'lo'.  not sure.
 
 */
 
@@ -25,30 +12,10 @@
 `default_nettype none
 
 
-/*
-`define STATE_RESET_START    0    // initial state
-`define STATE_RESET          1
-`define STATE_SIG_SETTLE_START 3
-`define STATE_SIG_SETTLE    4
-`define STATE_SIG_START     5
+`define CLK_FREQ        20000000
 
-// we have to have start
-`define STATE_AZ_SIGNAL           6
-`define STATE_AZ_SIGNAL_START     7
-`define STATE_AZ_ZERO             8
-`define STATE_AZ_ZERO_START       7
-`define STATE_PC_BOOT             8
-`define STATE_PC_BOOT_START       9
-`define STATE_PC_SIGNAL           10
-`define STATE_PC_SIGNAL_START     11
-
-*/
-        // state_AZ_signal. state_AZ_zero
-        // state_precharge_boot, state_precharge_signal.
-
-
-`define MUX_AZ_PC_OUT   (0 )  // s1 == PC-OUT
-`define MUX_AZ_ZERO     (8 - 1)  // s8 == 4.7k to star-ground
+`define MUX_AZ_PC_OUT   (0 )      // mux precharge output, or a zero.   s1 == PC-OUT == SIGNAL
+`define MUX_AZ_ZERO     (8 - 1)   // s8 == 4.7k to star-ground.  change to value in a register .   all the LO they are all ZEROcall it ZER
 
 `define SW_PC_SIGNAL    1
 `define SW_PC_BOOT      0
@@ -77,20 +44,23 @@ module modulation_az (
 
   // pack and unpack monitor header. should be register.
 
-  reg [7-1:0]   state = 0 ;     // expose - not sure.
+  reg [7-1:0]   state = 0 ;     // should expose in module, not sure.
 
-  reg [31:0]  clk_count_down;           // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
+  reg [31:0]    clk_count_down;           // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
 
-  reg [24-1:0]  clk_count_sample_n  = 20000000 / 100;   // 100nplc  10ms.
+  reg [24-1:0]  clk_count_sample_n  = `CLK_FREQ / 100;   // 100nplc  10ms.
 
-  reg [24-1:0]  clk_count_precharge_n  = 20000000 / 1000;   // 1ms
+  reg [24-1:0]  clk_count_precharge_n  = `CLK_FREQ / 1000;   // 1ms
 
 
   reg dummy ;
   assign vec_monitor = { mux_az , sw_pc_ctl, dummy} ; // nice
 
+  // this would be an async signal???
+  wire run = 1;
 
   always @(posedge clk  or posedge reset )
+
 
    if(reset)
     begin
@@ -109,11 +79,11 @@ module modulation_az (
 
         // precharge switch - protects the signal. from the charge-injection of the AZ switch.
         //////////////////
-        // 1. switch precharge to boot voltage. // == first.
+        // 1. switch precharge to boot voltage. (to protect signal)
         //
         // 2. switch AZ mux to signal.  (signal is protected by precharge).  AZ=SIG, PC=
         // 3. switch precharge  to signal.  and take sample.
-        // 4. switch precharge to boot.
+        // 4. switch precharge to boot (to protect signal).
         // 5. switch AZ mux to zero - take sample.
         // 6  goto 2.
 
@@ -128,7 +98,7 @@ module modulation_az (
         1:
           begin
             state           <= 15;
-            clk_count_down  <= 20000000 / 1000;
+            clk_count_down  <= clk_count_precharge_n;
             sw_pc_ctl       <= `SW_PC_BOOT;
             // mux_az          <= `MUX_ZERO;        // doesn't matter.
           end
@@ -137,7 +107,7 @@ module modulation_az (
             state <= 2;
 
         ////////////////////////////
-        // loop.
+        // loop. precharge_start
         // switch az mux to signal/pc output (signal is protected by pc)  - the 'precharge phase' or settle phase
         2:
           begin
@@ -150,7 +120,7 @@ module modulation_az (
             state <= 3;
 
         /////////////////////////
-        // switch pc to signal - take signal sample
+        // switch pc to signal - take signal sample .   sample_phase_start.
         3:
           begin
             state           <= 35;
@@ -182,8 +152,12 @@ module modulation_az (
           end
         55:
           if(clk_count_down == 0)
-            state <= 2;
+            state <= 6;
 
+
+        6:
+          if(run )        // place at end.
+            state <= 2;
 
 
       endcase
