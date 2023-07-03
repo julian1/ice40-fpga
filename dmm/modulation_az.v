@@ -31,6 +31,66 @@
 `define AZ_MODE_LO          3
 
 
+
+module modulation_az_tester (
+
+  input   clk,
+  input   reset,                    // async
+  output [7-1: 0 ] mode,      // will be a register.
+);
+
+  reg [31:0]    clk_count = 0;           // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
+
+  always @(posedge clk  or posedge reset )
+   if(reset)
+    begin
+      clk_count <= 0;
+    end
+    else
+    begin
+
+      clk_count <= clk_count - 1;
+
+      // we can trigger on these if we want
+      case (clk_count)
+
+        0:                  // start turn on both dcv, and cap.  and charge/reset cap voltage to 0V.
+          begin
+            mode <= AZ_MODE_SIGNAL_HI;
+            // mux_hi <= DCV.
+          end
+
+        CLK_FREQ * 1:       // at 1 sec.  stop charging, and turn off dcv input, and switch to AZ switchiing, to build charge on cap.
+          begin
+            mode <= AZ_MODE_AZ_NORMAL;
+            // mux_hi <= OFF.
+          end
+
+        CLK_FREQ * 5:       // at 5 secs.  stop az switching, and allow sample measure of the charge on the cap.
+          mode <= AZ_MODE_SIGNAL_HI;
+
+        CLK_FREQ * 10:      // after 10secs.  reset the cycle
+            clk_count <= 0; 
+
+
+      endcase
+    end
+
+
+endmodule
+
+
+
+
+
+
+
+
+
+
+
+
+
 module modulation_az (
 
   input   clk,
@@ -72,15 +132,12 @@ module modulation_az (
   wire run = 1;
 
   always @(posedge clk  or posedge reset )
-
-
    if(reset)
     begin
       // set up next state, for when reset goes hi.
       state           <= 0;
     end
     else
-
     begin
 
       // always decrement clk for the current phase
@@ -144,7 +201,7 @@ module modulation_az (
               end
 
             default:  // should be error condition .
-              mux_az          <= `MUX_AZ_PC_OUT;    
+              mux_az          <= `MUX_AZ_PC_OUT;
               // this is
 
           endcase
@@ -195,11 +252,7 @@ module modulation_az (
 
 
       endcase
-
-
     end
-
-
 endmodule
 
 
