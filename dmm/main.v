@@ -27,15 +27,6 @@
 
 
 
-// `define MUX_HI_2_NC = ;
-
-`define MUX_HI2_NC      (3-1)   // s3 == NC
-`define MUX_HI2_TEMP1   (1-1)   // s2 == TEMP1
-
-
-`define MUX_HI1_DCV     (7-1)   // s7 == DCV-IN
-`define MUX_HI_DCV_IN   ( `MUX_HI2_NC << 3  |  `MUX_HI1_DCV)
-
 
 
 
@@ -229,13 +220,21 @@ module top (
 
 
   // mux_hi  does not need to gokkkkkkkkkkkk
-  reg [6-1:0 ] mux_hi = `MUX_HI_DCV_IN;
+  reg [6-1:0 ] mux_hi /*= `MUX_HI_DCV_IN */;
   assign  {   U402_A2_CTL, U402_A1_CTL, U402_A0_CTL, U413_A2_CTL, U413_A1_CTL, U413_A0_CTL } = mux_hi;
+
+  // need some defines for
 
 
   // az
   wire [3-1: 0] mux_az ;
   assign { U414_A2_CTL, U414_A1_CTL, U414_A0_CTL } = mux_az;
+
+
+
+  /////////
+
+  reg [7-1:0] mode;
 
 
   // az mux does not need ot know about mux_hi
@@ -244,15 +243,22 @@ module top (
     (
     .clk( CLK),
     .reset( 0),
-
-    .mode( 1),      // turn off and it follows.      
-
+    // .mode( 1),
+    .mode( mode ),
     .sw_pc_ctl( SIG_PC_SW_CTL),
     .mux_az (mux_az),
-
     .vec_monitor( { MON7, MON6, MON5, MON4, MON3 , MON2, MON1, dummy  } )
   );
 
+
+  modulation_az_tester
+  modulation_az_tester (
+    .clk(CLK),
+    .reset( 0),
+    .mux_hi(mux_hi),
+    .mode(mode)
+    // want to pass in some stuff here. i think.
+  );
 
 
 

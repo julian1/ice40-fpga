@@ -18,6 +18,24 @@
 
 `define CLK_FREQ        20000000
 
+
+// `define MUX_HI_2_NC = ;
+
+`define MUX_HI1_NC      (5-1)   // s5 == NC
+`define MUX_HI1_DCV     (7-1)   // s7 == DCV-IN
+
+
+// `define MUX_HI2_SHIFT   3
+`define MUX_HI2_NC      (3-1)   // s3 == NC
+`define MUX_HI2_TEMP1   (2-1)   // s2 == TEMP1  use for charge cap.
+
+
+`define MUX_HI_DCV_IN   ( `MUX_HI1_DCV | `MUX_HI2_NC << 3)
+
+
+////////////////////
+
+
 `define MUX_AZ_PC_OUT   (0 )      // mux precharge output, or a zero.   s1 == PC-OUT == SIGNAL
 `define MUX_AZ_ZERO     (8 - 1)   // s8 == 4.7k to star-ground.  change to value in a register .   all the LO they are all ZEROcall it ZER
 
@@ -32,11 +50,17 @@
 
 
 
+
+
+
+
 module modulation_az_tester (
 
   input   clk,
   input   reset,                    // async
-  output [7-1: 0 ] mode,      // will be a register.
+
+  output reg [6-1:0 ] mux_hi,
+  output reg [7-1: 0 ] mode,      // will be a register.
 );
 
   reg [31:0]    clk_count = 0;           // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
@@ -54,28 +78,26 @@ module modulation_az_tester (
       // we can trigger on these if we want
       case (clk_count)
 
-        0:                  // start turn on both dcv, and cap.  and charge/reset cap voltage to 0V.
+        0:                  // start.  turn on both dcv, and cap.  to reset cap voltage to the input voltage value - eg. 0,10,-10 V.
           begin
-            mode <= AZ_MODE_SIGNAL_HI;
-            // mux_hi <= DCV.
+            mux_hi  <= `MUX_HI1_DCV | (`MUX_HI2_TEMP1 << 3);
+            mode    <= `AZ_MODE_SIGNAL_HI;
           end
 
-        CLK_FREQ * 1:       // at 1 sec.  stop charging, and turn off dcv input, and switch to AZ switchiing, to build charge on cap.
+        `CLK_FREQ * 1:       // at 1 sec.  stop cap charge by switching off DCV in, and change mode to AZ switchiing, to build charge on cap.
           begin
-            mode <= AZ_MODE_AZ_NORMAL;
-            // mux_hi <= OFF.
+            mux_hi  <= `MUX_HI2_TEMP1 << 3;
+            mode    <= `AZ_MODE_AZ_NORMAL;
           end
 
-        CLK_FREQ * 5:       // at 5 secs.  stop az switching, and allow sample measure of the charge on the cap.
-          mode <= AZ_MODE_SIGNAL_HI;
+        `CLK_FREQ * 5:       // at 5 secs.  stop az switching, and allow sample measure of the charge on the cap.
+          mode      <= `AZ_MODE_SIGNAL_HI;
 
-        CLK_FREQ * 10:      // after 10secs.  reset the cycle
-            clk_count <= 0; 
-
+        `CLK_FREQ * 10:      // after 10secs.  reset the cycle
+          clk_count <= 0;
 
       endcase
     end
-
 
 endmodule
 
