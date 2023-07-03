@@ -47,11 +47,13 @@
 `define AZ_MODE_AZ_NORMAL   1
 `define AZ_MODE_SIGNAL_HI   2
 `define AZ_MODE_LO          3
+`define AZ_MODE_AZ_NO_PC    4     // use for testing,  charge injection will be the AZ switch.
 
 
 
 
-
+// IMPORTANT - rather than inject an additional conditional, for whether precharge is used,
+// just have an additional modulation mode
 
 
 module modulation_az_tester (
