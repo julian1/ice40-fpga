@@ -51,18 +51,26 @@
 
 
 
+/*
+  IMPORTANT - rather than inject an additional conditional into the az_muxer, to control whether precharge is used,
+  instead just add an additional modulation mode
 
-// IMPORTANT - rather than inject an additional conditional, for whether precharge is used,
-// just have an additional modulation mode
+  only issue with all this - is that it's always active.
+  perhaps - need o
+  ---
 
+  change name az_test_controller ?
+
+*/
 
 module modulation_az_tester (
 
   input   clk,
   input   reset,                    // async
 
+  // outputs are registers.
   output reg [6-1:0 ] mux_hi,
-  output reg [7-1: 0 ] mode,      // will be a register.
+  output reg [7-1: 0 ] mode,
 );
 
   reg [31:0]    clk_count = 0;           // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
