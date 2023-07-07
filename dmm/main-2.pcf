@@ -1,0 +1,83 @@
+
+
+# jul 7, 2023.
+
+set_io MON0             25
+set_io MON1             26
+set_io MON2             28
+set_io MON3             29
+set_io MON4             31
+set_io MON5             32
+set_io MON6             33
+set_io MON7             34
+
+###############################
+
+set_io GLB_4094_CLK     73
+set_io GLB_4094_STROBE_CTL 74
+set_io GLB_4094_DATA    75
+set_io _4094_OE_CTL     76
+
+set_io SIG_PC_SW_CTL    90 
+set_io U413_A0_CTL      91
+set_io U413_A1_CTL      93
+set_io U413_A2_CTL      94
+set_io U413_EN_CTL      95
+
+set_io U414_A0_CTL      96
+set_io U414_A1_CTL      97
+set_io U414_A2_CTL      98
+
+set_io U402_A0_CTL      101
+set_io U402_A1_CTL      102
+set_io U402_A2_CTL      104
+set_io U402_EN_CTL      105
+
+
+
+###############################
+
+set_io LED0             37
+set_io TRIGGER_EXT_OUT  38 
+set_io TRIGGER_INT_OUT  39 
+set_io ISO_UNUSED_OUT   41
+set_io MEAS_COMPLETE_CTL 42
+set_io ISO_UNUSED_CTL   43
+
+
+set_io SPI_CLK          56
+set_io SPI_MOSI         60 
+set_io SPI_CS2          61
+set_io SPI_MISO         62
+#set_io SPI_INT          63         # TODO RENAME in code
+set_io SPI_INTERUPT_OUT   63
+set_io SPI_CS           64
+
+
+###############################
+
+# set_io U1004_4094_DATA  112
+set_io GLB_4094_MISO_CTL 112
+
+
+set_io LINE_SENSE_OUT   113
+set_io SWITCH_SESE_OUT  114
+set_io DCV_OVP_OUT      115
+set_io OHS_OVP_OUT      116
+set_io _5V_1            117
+set_io _5V_2            118
+set_io _5V_3            119
+
+# set_io ICE_CLK          129   # TODO RENAME in code.
+set_io CLK              129
+
+
+set_io CMPR_LATCH_CTL   137
+set_io CMPR_P_OUT       138 
+set_io CMPR_N_OUT       139 
+set_io U902_SW0_CTL     141
+set_io U902_SW1_CTL     142
+set_io U902_SW2_CTL     143
+set_io U902_SW3_CTL     144
+
+
