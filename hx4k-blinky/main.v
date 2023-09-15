@@ -1,4 +1,8 @@
 
+/*
+  blink led, and blink some other test signals.
+
+*/
 
 module top (
   input  CLK,
@@ -14,6 +18,8 @@ module top (
   output MON5,
   output MON6,
   output MON7,
+
+  output SIG_PC_SW_CTL,
 
   output U413_EN_CTL,
   output U413_A0_CTL,
@@ -40,20 +46,21 @@ module top (
 
   // assign { LED0, LED2} = outcnt ^ (outcnt >> 1);
   // assign { LED2, LED0} = outcnt ^ (outcnt >> 1);
-  assign {  LED0} = outcnt ^ (outcnt >> 1);
+  assign {  LED0 } = outcnt ^ (outcnt >> 1);
 
 
 
-  assign { U902_SW3_CTL, U902_SW2_CTL, U902_SW1_CTL , U902_SW0_CTL } = outcnt ^ (outcnt >> 1);
-
+  assign {  SIG_PC_SW_CTL } = outcnt ^ (outcnt >> 1);
 
   assign { U413_A2_CTL, U413_A1_CTL, U413_A0_CTL, U413_EN_CTL } = outcnt ^ (outcnt >> 1);
+
+  assign { U902_SW3_CTL, U902_SW2_CTL, U902_SW1_CTL , U902_SW0_CTL } = outcnt ^ (outcnt >> 1);
 
 
 
   assign MON0 = CLK ;   // note the slight skew. from input clock due popagation delay.
 
-  assign { MON4, MON3, MON2 } = counter;
+  assign { MON4, MON3, MON2, MON1 } = counter;
 
 
 
