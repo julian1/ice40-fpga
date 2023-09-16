@@ -3,7 +3,7 @@
 # jul 7, 2023.
 
 
-# better name HW-FLAGS
+# better name HW_FLAGS
 set_io HW0              19
 set_io HW1              20
 set_io HW2              21
@@ -24,16 +24,16 @@ set_io GLB_4094_STROBE_CTL 74
 set_io GLB_4094_DATA    75
 set_io _4094_OE_CTL     76
 
-set_io UNUSED-1         78
+set_io UNUSED_1         78
 
 
-set_io U1004-4094-DATA  79
+set_io U1004_4094_DATA  79
 set_io LINE_SENSE_OUT   80
 set_io SWITCH_SENSE_OUT  81
 set_io DCV_OVP_OUT      87
 set_io OHMS_OVP_OUT     88
-set_io SUPPLY-SENSE-OUT 90
-set_io UNUSED-2         91
+set_io SUPPLY_SENSE_OUT 90
+set_io UNUSED_2         91
 
 
 set_io SIG_PC_SW_CTL    93
