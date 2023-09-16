@@ -71,7 +71,7 @@ module top (
   output GLB_4094_CLK,
   output GLB_4094_DATA,
   output GLB_4094_STROBE_CTL,
-  input GLB_4094_MISO_CTL,   // this is unused. but it's an input
+  input U1004_4094_DATA,   // this is unused. but it's an input
 
 
   output SIG_PC_SW_CTL,
@@ -102,7 +102,7 @@ module top (
   // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  _4094_OE_CTL  /* RAW-CLK */} ;
 
   // monitor the 4094 spi                                                 D6       D5             D4            D3              D2              D1                 D0
-  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  SPI_CLK, SPI_CS2, GLB_4094_MISO_CTL, GLB_4094_DATA, GLB_4094_CLK, GLB_4094_STROBE_CTL  /* RAW-CLK */} ;
+  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  SPI_CLK, SPI_CS2, U1004_4094_DATA, GLB_4094_DATA, GLB_4094_CLK, GLB_4094_STROBE_CTL  /* RAW-CLK */} ;
 
 
   // monitor the 4094 spi                                               D4            D3              D2              D1                 D0
@@ -135,7 +135,7 @@ module top (
   assign { GLB_4094_DATA } = vec_mosi;
 
   wire [8-1:0] vec_miso ;
-  assign { GLB_4094_MISO_CTL } = vec_miso;    // this isn't right ... it is spi_miso?//
+  assign { U1004_4094_DATA } = vec_miso;    // this isn't right ... it is spi_miso?//
 
 
   // jeezus.
@@ -178,7 +178,7 @@ module top (
   // TODO change prefix to w_
 
   wire [24-1:0] reg_led;
-  // assign {  LED0 } = reg_led;
+  assign {  LED0 } = reg_led;
 
   wire [24-1:0] reg_4094;
   // assign { _4094_OE_CTL } = reg_4094;
@@ -204,6 +204,7 @@ module top (
 
   reg [3:0] vec_dummy;
 
+/*
   blinker #(  )
   blinker
     (
@@ -211,7 +212,7 @@ module top (
     // .vec_leds( { MON7, MON6, MON5, MON4, MON3 , MON2, MON1, dummy  } )
     .vec_leds( { LED0, vec_dummy } )
   );
-
+*/
 
 
   /////////////////////
