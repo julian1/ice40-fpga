@@ -35,10 +35,34 @@
 `default_nettype none
 
 
+// set by 4094. set by blinker.  set by test modulation.
+
+// mux choice.
+// eg. https://www.chipverify.com/verilog/verilog-4to1-mux
+
+module mux_4to1_assign #(parameter MSB=12-1)   (
+   input [MSB:0] a,
+   input [MSB:0] b,
+   input [MSB:0] c,
+   input [MSB:0] d,
+
+   input [1:0] sel,               // input sel used to select between a,b,c,d
+   output [MSB:0] out);
+
+   // When sel[1] is 0, (sel[0]? b:a) is selected and when sel[1] is 1, (sel[0] ? d:c) is taken
+   // When sel[0] is 0, a is sent to output, else b and when sel[0] is 0, c is sent to output, else d
+   assign out = sel[1] ? (sel[0] ? d : c) : (sel[0] ? b : a);
+
+endmodule
+
+
+
+
 module top (
   input  CLK,
 
 
+  output MON0,
   output MON1,
   output MON2,
   output MON3,
@@ -76,17 +100,26 @@ module top (
 
   output SIG_PC_SW_CTL,
 
+
+
+
+  // himux
   output U413_A0_CTL,
   output U413_A1_CTL,
   output U413_A2_CTL,
+  output U413_EN_CTL,
 
+  // himux 2.
   output U402_A0_CTL,
   output U402_A1_CTL,
   output U402_A2_CTL,
+  output U402_EN_CTL,
 
+  // azmux
   output U414_A0_CTL,
   output U414_A1_CTL,
   output U414_A2_CTL,
+  output U414_EN_CTL,
 
 );
 
@@ -180,7 +213,7 @@ module top (
   wire [24-1:0] reg_led;
   assign {  LED0 } = reg_led;
 
-  wire [24-1:0] reg_4094;
+  wire [24-1:0] reg_4094;   // TODO remove
   // assign { _4094_OE_CTL } = reg_4094;
 
 
@@ -220,8 +253,99 @@ module top (
 
 
 
+
+
+
+  reg [12-1:0 ] mux_out ;
+  assign  {
+      U402_A0_CTL, U402_A1_CTL, U402_A2_CTL, U402_EN_CTL,   // himux 2
+      U413_A0_CTL, U413_A1_CTL, U413_A2_CTL, U413_EN_CTL,   // himux
+      U414_A0_CTL, U414_A1_CTL, U414_A2_CTL, U414_EN_CTL    // az mux
+    } = mux_out;
+
+
+  /*
+    we probably want to add the led to this. and the pre-charge switch.
+    and the monitor.
+    for the monitor.   eg. monitor could just be assigned at top level. rather than be mode specific
+    OR. just use another mux_4to1. for the monitor.
+  */
+/*
+  reg [12-1:0] vec_blinky = 0;
+  reg [12-1:0] vec_dummy12 = 0;
+
+  mux_4to1_assign #( 8-1 )
+  mux_4to1_assign_1  (
+   .a( vec_dummy12),
+   .b( vec_dummy12),
+   .c( vec_blinky),
+   .d( vec_dummy12),
+
+   .sel( 2'b10 ),
+   .out( mux_out )      // driver.
+  );
+
+*/
+  counter  #( 12 )    // MSB is number of bits
+  counter0
+  (
+    .clk(CLK),
+    .out( mux_out )
+  );
+
+
+  // U402 isn't working???
+  // now working. except U402 A0. pin. top left pin.
+
+  //  Resizing cell port top.blinker.vec_leds from 12 bits to 8 bits.
+/*
+  blinker #(  )
+  blinker
+    (
+    .clk( CLK ),
+    .vec_leds( vec_blinky  )      // what happens to the high-bits????
+  );
+*/
+
+  /////////////////////////////////////////////
+
+  reg [8-1: 0] mon_out ;
+  assign  {
+       MON7, MON6, MON5,MON4, MON3, MON2, MON1, MON0
+    } = mon_out;
+
+
+  reg [8-1:0] vec_dummy8 = 0;   // mode0_mux_out
+  reg [8-1:0] vec_mon;      // mode0_mux_out
+
+  mux_4to1_assign  #( 8-1 )
+  mux_4to1_assign_2 (
+
+   .a( vec_dummy8),
+   .b( vec_dummy8),
+   .c( vec_mon),      // mode.
+   .d( vec_dummy8),
+
+   .sel( 2'b10 ),
+   .out( mon_out )      // driver.
+  );
+
+
+  // change name counter_mon.
+  counter  counter1(
+    .clk(CLK),
+    .out( mon_out)
+  );
+
+
+
+
+
+
+/*
+
   // mux_hi  does not need to gokkkkkkkkkkkk
-  reg [6-1:0 ] mux_hi /*= `MUX_HI_DCV_IN */;
+  reg [6-1:0 ] mux_hi ;
   assign  {   U402_A2_CTL, U402_A1_CTL, U402_A0_CTL, U413_A2_CTL, U413_A1_CTL, U413_A0_CTL } = mux_hi;
 
   // need some defines for
@@ -232,11 +356,9 @@ module top (
   assign { U414_A2_CTL, U414_A1_CTL, U414_A0_CTL } = mux_az;
 
 
-
   /////////
 
   reg [7-1:0] mode;
-
 
   // az mux does not need ot know about mux_hi
   modulation_az
@@ -260,6 +382,8 @@ module top (
     .mode(mode)
     // want to pass in some stuff here. i think.
   );
+
+  */
 
 
 
