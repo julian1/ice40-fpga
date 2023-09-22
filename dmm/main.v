@@ -40,14 +40,14 @@
 // mux choice.
 // eg. https://www.chipverify.com/verilog/verilog-4to1-mux
 
-module mux_4to1_assign #(parameter MSB=12-1)   (
-   input [MSB:0] a,
-   input [MSB:0] b,
-   input [MSB:0] c,
-   input [MSB:0] d,
+module mux_4to1_assign #(parameter MSB =12)   (
+   input [MSB-1:0] a,
+   input [MSB-1:0] b,
+   input [MSB-1:0] c,
+   input [MSB-1:0] d,
 
    input [1:0] sel,               // input sel used to select between a,b,c,d
-   output [MSB:0] out);
+   output [MSB-1:0] out);
 
    // When sel[1] is 0, (sel[0]? b:a) is selected and when sel[1] is 1, (sel[0] ? d:c) is taken
    // When sel[0] is 0, a is sent to output, else b and when sel[0] is 0, c is sent to output, else d
@@ -270,42 +270,31 @@ module top (
     for the monitor.   eg. monitor could just be assigned at top level. rather than be mode specific
     OR. just use another mux_4to1. for the monitor.
   */
-/*
-  reg [12-1:0] vec_blinky = 0;
-  reg [12-1:0] vec_dummy12 = 0;
 
-  mux_4to1_assign #( 8-1 )
-  mux_4to1_assign_1  (
-   .a( vec_dummy12),
-   .b( vec_dummy12),
-   .c( vec_blinky),
-   .d( vec_dummy12),
+  reg [12-1:0] mux_out_counter;
 
-   .sel( 2'b10 ),
-   .out( mux_out )      // driver.
-  );
-
-*/
   counter  #( 12 )    // MSB is number of bits
   counter0
   (
     .clk(CLK),
-    .out( mux_out )
+    .out( mux_out_counter)
   );
 
 
-  // U402 isn't working???
-  // now working. except U402 A0. pin. top left pin.
+  reg [12-1:0] vec_dummy12 = 0;
 
-  //  Resizing cell port top.blinker.vec_leds from 12 bits to 8 bits.
-/*
-  blinker #(  )
-  blinker
-    (
-    .clk( CLK ),
-    .vec_leds( vec_blinky  )      // what happens to the high-bits????
+  mux_4to1_assign #( 12 )
+  mux_4to1_assign_1  (
+   .a( vec_dummy12),
+   .b( vec_dummy12),
+   .c( mux_out_counter),
+   .d( vec_dummy12),
+
+   .sel( 2'b10 ),
+   .out( mux_out )
   );
-*/
+
+
 
   /////////////////////////////////////////////
 
@@ -315,26 +304,27 @@ module top (
     } = mon_out;
 
 
-  reg [8-1:0] vec_dummy8 = 0;   // mode0_mux_out
-  reg [8-1:0] vec_mon;      // mode0_mux_out
-
-  mux_4to1_assign  #( 8-1 )
-  mux_4to1_assign_2 (
-
-   .a( vec_dummy8),
-   .b( vec_dummy8),
-   .c( vec_mon),      // mode.
-   .d( vec_dummy8),
-
-   .sel( 2'b10 ),
-   .out( mon_out )      // driver.
-  );
-
+  reg [8-1:0] vec_mon_counter;      // mode0_mux_out
 
   // change name counter_mon.
   counter  counter1(
     .clk(CLK),
-    .out( mon_out)
+    .out( vec_mon_counter )
+  );
+
+
+  reg [8-1:0] vec_dummy8 = 0;   // mode0_mux_out
+
+  mux_4to1_assign  #( 8 )
+  mux_4to1_assign_2 (
+
+   .a( vec_dummy8),
+   .b( vec_dummy8),
+   .c( vec_mon_counter),      // mode.
+   .d( vec_dummy8),
+
+   .sel( 2'b10 ),
+   .out( mon_out )
   );
 
 

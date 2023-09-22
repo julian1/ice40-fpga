@@ -1,6 +1,8 @@
 
-
-// useful test pattern generator
+/*
+  perhaps rename generator
+  some test pattern generator
+*/
 
 `default_nettype none
 
@@ -10,7 +12,7 @@ module blinker    (
   input clk,
 
   // module outputs can be safely ignored,
-  output reg [8-1: 0] vec_leds      // change name out.
+  output reg [8-1: 0] out      // change name out.
 );
 
   localparam BITS = 5;
@@ -24,7 +26,7 @@ module blinker    (
     counter   <= counter + 1;
     outcnt    <= counter >> LOG2DELAY;
 
-    vec_leds  <= outcnt ^ (outcnt >> 1);
+    out  <= outcnt ^ (outcnt >> 1);
   end
 
 endmodule
