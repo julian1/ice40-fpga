@@ -11,7 +11,7 @@
 `include "register_set.v"
 `include "mux_spi.v"
 `include "blinker.v"
-`include "modulation_az.v"
+// `include "modulation_az.v"
 
 
 
@@ -49,11 +49,97 @@ module mux_4to1_assign #(parameter MSB =12)   (
    input [1:0] sel,               // input sel used to select between a,b,c,d
    output [MSB-1:0] out);
 
-   // When sel[1] is 0, (sel[0]? b:a) is selected and when sel[1] is 1, (sel[0] ? d:c) is taken
-   // When sel[0] is 0, a is sent to output, else b and when sel[0] is 0, c is sent to output, else d
    assign out = sel[1] ? (sel[0] ? d : c) : (sel[0] ? b : a);
 
 endmodule
+
+
+
+
+
+
+
+module test_accumulation_cap (
+
+  input   clk,
+  input   reset,                    // async
+
+  // Actually why even bother to group. into the vector....   because of the mode muxer. for the counter.perhaps we should pass....
+
+  output reg [13-1:0 ] conditioning_out
+
+);
+
+  reg [31:0]    clk_count = 0;           // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
+/*
+  assign SIG_PC_SW_CTL,
+      himux2,
+      himux,
+      azmux
+*/
+  // destructure
+  wire [4-1:0] azmux;
+  wire [4-1:0] himux;
+  wire [4-1:0] himux2;
+  wire sig_pc_sw_ctl;
+
+  // nice.
+  assign { sig_pc_sw_ctl, himux2, himux,  azmux } = conditioning_out;
+
+  assign azmux  = 0;  // off
+  assign himux2 = 0;  // off
+
+  assign himux = clk_count;
+
+  assign sig_pc_sw_ctl = clk_count;
+
+
+  // want active lo?????
+
+  // always @(posedge clk  or posedge reset )
+  always @(posedge clk  or posedge reset )
+   if(reset)
+    begin
+      clk_count <= 0;
+    end
+    else
+    begin
+
+      clk_count <= clk_count - 1;
+
+/*
+      // we can trigger on these if we want
+      case (clk_count)
+
+        0:                  // start.  turn on both dcv, and cap.  to reset cap voltage to the input voltage value - eg. 0,10,-10 V.
+          begin
+            mux_hi  <= `MUX_HI1_DCV | (`MUX_HI2_TEMP1 << 3);
+            mode    <= `AZ_MODE_SIGNAL_HI;
+          end
+
+        `CLK_FREQ * 1:       // at 1 sec.  stop cap charge by switching off DCV in, and change mode to AZ switchiing, to build charge on cap.
+          begin
+            mux_hi  <= `MUX_HI2_TEMP1 << 3;
+            mode    <= `AZ_MODE_AZ_NORMAL;
+          end
+
+        `CLK_FREQ * 5:       // at 5 secs.  stop az switching, and allow sample measure of the charge on the cap.
+          mode      <= `AZ_MODE_SIGNAL_HI;
+
+        `CLK_FREQ * 10:      // after 10secs.  reset the cycle
+          clk_count <= 0;
+
+      endcase
+*/
+    end
+
+endmodule
+
+
+
+
+
+
 
 
 
@@ -98,9 +184,10 @@ module top (
   input U1004_4094_DATA,   // this is unused. but it's an input
 
 
+  ///////////////
+
+  // pre-charge
   output SIG_PC_SW_CTL,
-
-
 
 
   // himux
@@ -249,19 +336,42 @@ module top (
 
 
   /////////////////////
-  assign { _4094_OE_CTL } = 1;    //  on for test.
+  assign { _4094_OE_CTL } = 1;    //  on for test.  should defer to mcu control. after check supplies.
 
 
 
+  // conditioning.
+  // I think we do want to pass the pre-charge switch.  remember thiso
+  // EXCEPT  - not all test functions will need it.
+
+  // think it makes sense to pass logically together as group..
+  // likewise. adc.  will be the four current switches. and adc latch.
+
+  // output led. can be passed in separate muxer.
+
+  // it may be better to group by mux .
+  // TODO . should have enable pin.   last - same as when controlled by 4094.
 
 
+  /*
+      conditioning switching outputs.
+      these are not the complete set of outputs for a module. but eases  handling of mode muxing.
+      en. order inputs the same as
 
-  reg [12-1:0 ] mux_out ;
+      structure and  pattern destructure on the otherside like .
+  */
+
+  wire [4-1:0 ] himux2 = { U402_EN_CTL, U402_A2_CTL, U402_A1_CTL, U402_A0_CTL};     // U402
+  wire [4-1:0 ] himux =  { U413_EN_CTL, U413_A2_CTL, U413_A1_CTL, U413_A0_CTL };   // U413
+  wire [4-1:0 ] azmux =  { U414_EN_CTL, U414_A2_CTL, U414_A1_CTL, U414_A0_CTL };    // U414
+
+  reg [13-1:0 ] conditioning_out ;
   assign  {
-      U402_A0_CTL, U402_A1_CTL, U402_A2_CTL, U402_EN_CTL,   // himux 2
-      U413_A0_CTL, U413_A1_CTL, U413_A2_CTL, U413_EN_CTL,   // himux
-      U414_A0_CTL, U414_A1_CTL, U414_A2_CTL, U414_EN_CTL    // az mux
-    } = mux_out;
+      SIG_PC_SW_CTL,
+      himux2,
+      himux,
+      azmux
+    } = conditioning_out;
 
 
   /*
@@ -271,40 +381,46 @@ module top (
     OR. just use another mux_4to1. for the monitor.
   */
 
-  reg [12-1:0] mux_out_counter;
-
-  counter  #( 12 )    // MSB is number of bits
+  reg [13-1:0] conditioning_out_counter;
+  counter  #( 13 )    // MSB is number of bits
   counter0
   (
     .clk(CLK),
-    .out( mux_out_counter)
+    .out( conditioning_out_counter)
   );
 
 
-  reg [12-1:0] vec_dummy12 = 0;
+  reg [13-1:0] conditioning_out;  // for test accumulation.
+  test_accumulation_cap
+  test_accumulation_cap (
+    .clk( CLK),
+    .reset(0),    // active hi. reconsider... but we lose timing anaylysis
+    . conditioning_out(  conditioning_out)
 
-  mux_4to1_assign #( 12 )
+  );
+
+  reg [13-1:0] vec_dummy13 = 0;
+
+  mux_4to1_assign #( 13 )
   mux_4to1_assign_1  (
-   .a( vec_dummy12),
-   .b( vec_dummy12),
-   .c( mux_out_counter),
-   .d( vec_dummy12),
+   .a( vec_dummy13),
+   // .b( vec_dummy13),     we don't actually seem to need to supply a dummy.
+   .c( conditioning_out_counter),
+   .d( conditioning_out),
 
-   .sel( 2'b10 ),
-   .out( mux_out )
+   .sel( 2'b11 ),
+   .out( conditioning_out )
   );
 
 
 
   /////////////////////////////////////////////
 
-  reg [8-1: 0] mon_out ;
-  assign  {
-       MON7, MON6, MON5,MON4, MON3, MON2, MON1, MON0
-    } = mon_out;
+  //
+  wire [8-1: 0] mon_out = { MON7, MON6, MON5,MON4, MON3, MON2, MON1, MON0 } ;
 
 
-  reg [8-1:0] vec_mon_counter;      // mode0_mux_out
+  reg [8-1:0] vec_mon_counter;      // mode0_conditioning_out
 
   // change name counter_mon.
   counter  counter1(
@@ -313,7 +429,7 @@ module top (
   );
 
 
-  reg [8-1:0] vec_dummy8 = 0;   // mode0_mux_out
+  reg [8-1:0] vec_dummy8 = 0;   // mode0_conditioning_out
 
   mux_4to1_assign  #( 8 )
   mux_4to1_assign_2 (
