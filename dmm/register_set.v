@@ -21,6 +21,7 @@
 `define REG_4094                9
 
 
+`define REG_MODE                12 
 
 
 
@@ -58,8 +59,10 @@ module register_set #(parameter MSB=40)   (
   output reg [24-1:0] reg_4094,     // TODO change name it's a state register for OE. status .  or SR. reg_4094_.   or SR_4094,   sr_4094.
                                                 // no it's a state register. not status.
 
+  output reg [24-1:0] reg_mode// ,
+
   // passing a monitor in here, is useful, for monitoring internal. eg. the
-  output reg [7-1:0]   vec_monitor,
+  // output reg [7-1:0]   vec_monitor,
 );
 
 
@@ -165,6 +168,8 @@ module register_set #(parameter MSB=40)   (
             `REG_LED:       reg_led     <= val24;
             `REG_SPI_MUX:   reg_spi_mux <= val24;
             `REG_4094:      reg_4094    <= val24;
+            
+            `REG_MODE:      reg_mode <= val24;
 
           endcase
       end

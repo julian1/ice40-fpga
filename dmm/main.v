@@ -58,7 +58,8 @@ endmodule
 
 
 // `define NUM_BITS        13
-`define NUM_BITS        14    // with led  
+// `define NUM_BITS        14    // with led
+`define NUM_BITS        22    // with monitor
 
 
 
@@ -77,8 +78,7 @@ module test_accumulation_cap (
   input   clk,
   input   reset,     // async
 
-  // output reg [`NUM_BITS-1:0 ] conditioning_out
-  output [`NUM_BITS-1:0 ] conditioning_out
+  output [`NUM_BITS-1:0 ] out
 
 );
 
@@ -92,8 +92,10 @@ module test_accumulation_cap (
   reg sig_pc_sw_ctl;
   reg led0;
 
+  reg [8-1: 0] monitor;//  = { MON7, MON6, MON5,MON4, MON3, MON2, MON1, MON0 } ;
+
   // nice.
-  assign { led0, sig_pc_sw_ctl, himux2, himux,  azmux } = conditioning_out;
+  assign { monitor, led0, sig_pc_sw_ctl, himux2, himux,  azmux } = out;
 
   /* perhaps create some macros for MUX_1OF8_S1.
     // not sure.  can represent 8|(4-1)   for s4. etc.
@@ -128,10 +130,13 @@ module test_accumulation_cap (
       case (clk_count)
         0:
           begin
-            azmux  = 0;  // off
-            himux =  4'b1001;  // s2 select himux2.  for leakage test this should be off.
+            // off
+            monitor <= 0;
+            azmux  <= 0;
+            sig_pc_sw_ctl <= 0;
 
-
+            // muxes
+            himux   <=  4'b1001;  // s2 select himux2.  for leakage test this should be off.
             himux2  <= 4'b1011;  // select ground to clear charge on cap.    s4 - A400-5 gnd. / 8|(4-1).
             led0    <= 0;
           end
@@ -157,6 +162,34 @@ endmodule
 
 
 
+
+module test_pattern (
+  input   clk,
+  output [`NUM_BITS-1:0 ] out
+);
+  // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
+  reg [31:0]   counter = 0;
+
+  // destructure
+  reg [4-1:0] azmux;
+  reg [4-1:0] himux;
+  reg [4-1:0] himux2;
+  reg sig_pc_sw_ctl;
+  reg led0;
+  reg [8-1: 0] monitor;
+  // nice.
+  assign { monitor, led0, sig_pc_sw_ctl, himux2, himux,  azmux } = out;
+
+  localparam LOG2DELAY = 22;
+
+  assign  led0  = counter >> LOG2DELAY;  // continuous assignment, generates warning but ok here.    
+
+  always@(posedge clk) begin
+    counter <= counter + 1;
+    monitor <= monitor + 1;
+  end
+
+endmodule
 
 
 
@@ -316,13 +349,15 @@ module top (
 
   // TODO change prefix to w_
 
-  //wire [24-1:0] reg_led;
+  wire [24-1:0] reg_led;
   // assign {  LED0 } = reg_led;
 
   wire [24-1:0] reg_4094;   // TODO remove
   // assign { _4094_OE_CTL } = reg_4094;
 
 
+  // should be a register??cj because not connected to otuput wires.
+  reg [24-1:0] reg_mode;     // = 8'b00000001; // test
 
   register_set // #( 32 )   // register bank  . change name 'registers'
   register_set
@@ -334,9 +369,11 @@ module top (
     // . dout( SPI_MISO ),        // drive miso output pin directly.
 
     // registers
-  //   . reg_led(reg_led),        leave.
+    . reg_led(reg_led),        // required as test register
     . reg_spi_mux(reg_spi_mux),
-    . reg_4094(reg_4094 )// ,
+    . reg_4094(reg_4094 ) ,
+
+    . reg_mode( reg_mode)
 
   );
 
@@ -388,6 +425,9 @@ module top (
       ext interupt.  that data is ready.
       ---
       the led is a useful visual indicator. fpga wants to take control of it.
+      -------
+
+      REMEMBER inputs (comparator) line-sense etc. are easy. they just fan out to whatever module needs them.
 
   */
 
@@ -397,10 +437,13 @@ module top (
   wire [4-1:0 ] himux =  { U413_EN_CTL, U413_A2_CTL, U413_A1_CTL, U413_A0_CTL };   // U413
   wire [4-1:0 ] azmux =  { U414_EN_CTL, U414_A2_CTL, U414_A1_CTL, U414_A0_CTL };    // U414
 
+  wire [8-1: 0] monitor = { MON7, MON6, MON5,MON4, MON3, MON2, MON1, MON0 } ;
 
+  // TODO - rename   no longer just conditioning.  but controls all outputs.
   reg [`NUM_BITS-1:0 ] conditioning_out ;
 
   assign  {
+      monitor,
       LED0,
       SIG_PC_SW_CTL,
       himux2,
@@ -425,13 +468,26 @@ module top (
     .out( counter0_out)
   );
 
+
+
+
+  reg [`NUM_BITS-1:0] test_pattern_out;
+  test_pattern 
+  test_pattern (
+    .clk( CLK),
+    .out(  test_pattern_out)
+  );
+
+
+
+  //
   // change reg name to test_accumulation_cap_out.
   reg [`NUM_BITS-1:0] test_accumulation_cap_out;  // for test accumulation.
   test_accumulation_cap
   test_accumulation_cap (
     .clk( CLK),
     .reset(0),    // active hi. reconsider... but we lose timing anaylysis
-    . conditioning_out(  test_accumulation_cap_out)
+    . out(  test_accumulation_cap_out)
 
   );
 
@@ -439,23 +495,24 @@ module top (
 
   mux_4to1_assign #( `NUM_BITS )
   mux_4to1_assign_1  (
-   .a( vec_dummy13),  // 00
-   // .b( vec_dummy13),   // 01  we don't actually seem to need to supply a dummy.
+   .a( test_pattern_out),  // 00
+   .b( vec_dummy13),   // 01  we don't actually seem to need to supply a dummy.
    .c( counter0_out), // 10
    .d( test_accumulation_cap_out ),         // 11
 
-   .sel( 2'b11 ),
+   // .sel( 2'b10 ),                           // So. we want to assign this to a mode register.   and then set it.
+   .sel( reg_mode ),                           // So. we want to assign this to a mode register.   and then set it.
    .out( conditioning_out )
   );
 
 
-
+/*
   /////////////////////////////////////////////
   //
 
-  // Now we probably don't want the 
+  // Now we probably don't want the
 
-  wire [8-1: 0] mon_out = { MON7, MON6, MON5,MON4, MON3, MON2, MON1, MON0 } ;
+  wire [8-1: 0] monitor = { MON7, MON6, MON5,MON4, MON3, MON2, MON1, MON0 } ;
 
 
   reg [8-1:0] vec_mon_counter;      // mode0_conditioning_out
@@ -478,11 +535,11 @@ module top (
    .d( vec_dummy8),
 
    .sel( 2'b10 ),
-   .out( mon_out )
+   .out( monitor )
   );
 
 
-
+*/
 
 
 
