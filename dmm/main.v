@@ -54,12 +54,17 @@ module mux_4to1_assign #(parameter MSB =12)   (
 endmodule
 
 
+/*
+  - for mcu direct control of fpga mode. consider making the register-bank big enough to fit all fpga output bits. if needed.
+  - or split into two.
+  ----
+  - working with single bit-vectors eases things.
+*/
 
-
-
+// better name.  output control.
 // `define NUM_BITS        13
 // `define NUM_BITS        14    // with led
-`define NUM_BITS        22    // with monitor
+`define NUM_BITS        22    // with monitor.   this actually fits in a 24 bit register. just. to allow a mcu control mode.
 
 
 
@@ -182,7 +187,7 @@ module test_pattern (
 
   localparam LOG2DELAY = 22;
 
-  assign  led0  = counter >> LOG2DELAY;  // continuous assignment, generates warning but ok here.    
+  assign  led0  = counter >> LOG2DELAY;  // continuous assignment, generates warning but ok here.
 
   always@(posedge clk) begin
     counter <= counter + 1;
@@ -265,27 +270,6 @@ module top (
 
   reg dummy;
 
-  // Put the strobe as first.
-  // monitor isolator/spi,                                                  D4          D3       D2       D1        D0
-  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  SPI_MISO, SPI_MOSI, SPI_CLK,  SPI_CS  /* RAW-CLK */} ;
-
-//  assign { MON7, MON6, /*MON5,*/ MON4, MON3 , MON2, MON1 /* MON0 */ } = {  SPI_MISO, SPI_MOSI, SPI_CLK,  SPI_CS  /* RAW-CLK */} ;
-
-  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  _4094_OE_CTL  /* RAW-CLK */} ;
-
-  // monitor the 4094 spi                                                 D6       D5             D4            D3              D2              D1                 D0
-  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  SPI_CLK, SPI_CS2, U1004_4094_DATA, GLB_4094_DATA, GLB_4094_CLK, GLB_4094_STROBE_CTL  /* RAW-CLK */} ;
-
-
-  // monitor the 4094 spi                                               D4            D3              D2              D1                 D0
-  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  _4094_OE_CTL, GLB_4094_DATA, GLB_4094_CLK, GLB_4094_STROBE_CTL  /* RAW-CLK */} ;
-
-  //                                                                       D5           D4        D3        D2       D1        D0
-  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = { _4094_OE_CTL,   SPI_MISO, SPI_MOSI, SPI_CLK,  SPI_CS  /* RAW-CLK */} ;
-  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = 0  ;
-
-  // ok. this does work.
-  // assign SPI_MISO = 1;
 
   ////////////////////////////////////////
   // spi muxing
@@ -359,6 +343,14 @@ module top (
   // should be a register??cj because not connected to otuput wires.
   reg [24-1:0] reg_mode;     // = 8'b00000001; // test
 
+  // EXTR. registers MUST have > 24 bits. for writer.
+  // test pattern - turn everything off. doesn't need to be a reg.
+  // EXTR. pass this to the register bank.
+  // reg [`NUM_BITS-1:0] reg_test_pattern ;
+  reg [24 - 1 :0] reg_test_pattern ;    // EXTR truncated.
+
+
+
   register_set // #( 32 )   // register bank  . change name 'registers'
   register_set
     (
@@ -373,7 +365,8 @@ module top (
     . reg_spi_mux(reg_spi_mux),
     . reg_4094(reg_4094 ) ,
 
-    . reg_mode( reg_mode)
+    . reg_mode( reg_mode),
+    . reg_test_pattern( reg_test_pattern)
 
   );
 
@@ -472,7 +465,7 @@ module top (
 
 
   reg [`NUM_BITS-1:0] test_pattern_out;
-  test_pattern 
+  test_pattern
   test_pattern (
     .clk( CLK),
     .out(  test_pattern_out)
@@ -491,15 +484,12 @@ module top (
 
   );
 
-  // test pattern - turn everything off. doesn't need to be a reg.
-  reg [`NUM_BITS-1:0] test_pattern_zero = 0;
-
 
 
   mux_4to1_assign #( `NUM_BITS )
   mux_4to1_assign_1  (
    .a( test_pattern_out),  // 00
-   .b( test_pattern_zero),        // 01  turn everything off.
+   .b( reg_test_pattern),        // 01  mcu controllable.
    .c( counter0_out),     // 10
    .d( test_accumulation_cap_out ),         // 11
 
@@ -507,6 +497,41 @@ module top (
    .sel( reg_mode ),                           // So. we want to assign this to a mode register.   and then set it.
    .out( conditioning_out )
   );
+
+
+
+endmodule
+
+
+
+
+
+
+
+
+
+
+  // Put the strobe as first.
+  // monitor isolator/spi,                                                  D4          D3       D2       D1        D0
+  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  SPI_MISO, SPI_MOSI, SPI_CLK,  SPI_CS  /* RAW-CLK */} ;
+
+//  assign { MON7, MON6, /*MON5,*/ MON4, MON3 , MON2, MON1 /* MON0 */ } = {  SPI_MISO, SPI_MOSI, SPI_CLK,  SPI_CS  /* RAW-CLK */} ;
+
+  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  _4094_OE_CTL  /* RAW-CLK */} ;
+
+  // monitor the 4094 spi                                                 D6       D5             D4            D3              D2              D1                 D0
+  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  SPI_CLK, SPI_CS2, U1004_4094_DATA, GLB_4094_DATA, GLB_4094_CLK, GLB_4094_STROBE_CTL  /* RAW-CLK */} ;
+
+
+  // monitor the 4094 spi                                               D4            D3              D2              D1                 D0
+  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  _4094_OE_CTL, GLB_4094_DATA, GLB_4094_CLK, GLB_4094_STROBE_CTL  /* RAW-CLK */} ;
+
+  //                                                                       D5           D4        D3        D2       D1        D0
+  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = { _4094_OE_CTL,   SPI_MISO, SPI_MOSI, SPI_CLK,  SPI_CS  /* RAW-CLK */} ;
+  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = 0  ;
+
+  // ok. this does work.
+  // assign SPI_MISO = 1;
 
 
 /*
@@ -588,11 +613,6 @@ module top (
   );
 
   */
-
-
-
-endmodule
-
 
 
 
