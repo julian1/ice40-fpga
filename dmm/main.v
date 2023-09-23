@@ -57,19 +57,28 @@ endmodule
 
 
 
-`define NUM_BITS        13
+// `define NUM_BITS        13
+`define NUM_BITS        14    // with led  
 
 
 
 
 `define CLK_FREQ        20000000
 
+
+
+`define SOFF      4'b0000
+`define S1        4'b1000
+
+            // himux2 <= 4'b1011;  // select ground to clear charge on cap.    s4 - A400-5 gnd. / 8|(4-1).
+
 module test_accumulation_cap (
 
   input   clk,
   input   reset,     // async
 
-  output reg [`NUM_BITS-1:0 ] conditioning_out
+  // output reg [`NUM_BITS-1:0 ] conditioning_out
+  output [`NUM_BITS-1:0 ] conditioning_out
 
 );
 
@@ -77,30 +86,32 @@ module test_accumulation_cap (
   reg [31:0]    clk_count = 0;
 
   // destructure
-  wire [4-1:0] azmux;
-  wire [4-1:0] himux;
-  wire [4-1:0] himux2;
-  wire sig_pc_sw_ctl;
+  reg [4-1:0] azmux;
+  reg [4-1:0] himux;
+  reg [4-1:0] himux2;
+  reg sig_pc_sw_ctl;
+  reg led0;
 
   // nice.
-  assign { sig_pc_sw_ctl, himux2, himux,  azmux } = conditioning_out;
+  assign { led0, sig_pc_sw_ctl, himux2, himux,  azmux } = conditioning_out;
 
   /* perhaps create some macros for MUX_1OF8_S1.
     // not sure.  can represent 8|(4-1)   for s4. etc.
     // most code is not going to care. there will just be a register for the zero, and a register for the signal.
   */
 
-  assign azmux  = 0;  // off
-  // assign himux2 = 4'b1000;  // s1 select dcv-source-hi
-  assign himux =  4'b1001;  // s2 select himux2.  for leakage test this should be off.
-
-  assign sig_pc_sw_ctl = clk_count;
+  // Can move to reset. but might as well set in the block.
+  // assign sig_pc_sw_ctl = clk_count;
 
   // it would actually be  nice to have control over the led here.  we need a mode state variable.
   // and the interupt. actually.
   // sampling the charge - is a bit difficult.  because this is a kind of input modulation...
-  // actually it's just a slow. nplc.  sample zero. and sample signal. with cap.
-  // it *can* be a regular
+  /*
+      - actually this functionality - *can* be incorporated into regular AZ switching and measurement.
+        the gnd and the off signal.  are just the normal 2 mode AZ.
+
+      - But not charge-injection testing.  actually maybe even charge injection.
+  */
 
   // always @(posedge clk  or posedge reset )
   always @(posedge clk  or posedge reset )
@@ -117,13 +128,20 @@ module test_accumulation_cap (
       case (clk_count)
         0:
           begin
-            himux2 <= 4'b1011;  // select ground to clear charge on cap.    s4 - A400-5 gnd. / 8|(4-1).
+            azmux  = 0;  // off
+            himux =  4'b1001;  // s2 select himux2.  for leakage test this should be off.
+
+
+            himux2  <= 4'b1011;  // select ground to clear charge on cap.    s4 - A400-5 gnd. / 8|(4-1).
+            led0    <= 0;
           end
 
         `CLK_FREQ * 1:
           begin
             himux2 <= 4'b1000;  // s1 select dcv-source-hi.  actually for real.  actually we would turn off to test leakage.
                                 // need to be high-z mode to measure.  or measure from op-amp.
+
+            led0    <= 1;
           end
 
         `CLK_FREQ * 2:
@@ -298,8 +316,8 @@ module top (
 
   // TODO change prefix to w_
 
-  wire [24-1:0] reg_led;
-  assign {  LED0 } = reg_led;
+  //wire [24-1:0] reg_led;
+  // assign {  LED0 } = reg_led;
 
   wire [24-1:0] reg_4094;   // TODO remove
   // assign { _4094_OE_CTL } = reg_4094;
@@ -316,7 +334,7 @@ module top (
     // . dout( SPI_MISO ),        // drive miso output pin directly.
 
     // registers
-    . reg_led(reg_led),
+  //   . reg_led(reg_led),        leave.
     . reg_spi_mux(reg_spi_mux),
     . reg_4094(reg_4094 )// ,
 
@@ -374,12 +392,16 @@ module top (
   */
 
   // prefix these with v_ or vec_ ?
+  // should perhaps be registers.
   wire [4-1:0 ] himux2 = { U402_EN_CTL, U402_A2_CTL, U402_A1_CTL, U402_A0_CTL};     // U402
   wire [4-1:0 ] himux =  { U413_EN_CTL, U413_A2_CTL, U413_A1_CTL, U413_A0_CTL };   // U413
   wire [4-1:0 ] azmux =  { U414_EN_CTL, U414_A2_CTL, U414_A1_CTL, U414_A0_CTL };    // U414
 
+
   reg [`NUM_BITS-1:0 ] conditioning_out ;
+
   assign  {
+      LED0,
       SIG_PC_SW_CTL,
       himux2,
       himux,
@@ -394,32 +416,33 @@ module top (
     OR. just use another mux_4to1. for the monitor.
   */
 
-  reg [`NUM_BITS-1:0] conditioning_out_counter;
-  counter  #( 13 )    // MSB is number of bits
+  // change name counter0_out
+  reg [`NUM_BITS-1:0] counter0_out;
+  counter  #( `NUM_BITS )    // MSB is number of bits
   counter0
   (
     .clk(CLK),
-    .out( conditioning_out_counter)
+    .out( counter0_out)
   );
 
-
-  reg [`NUM_BITS-1:0] conditioning_out;  // for test accumulation.
+  // change reg name to test_accumulation_cap_out.
+  reg [`NUM_BITS-1:0] test_accumulation_cap_out;  // for test accumulation.
   test_accumulation_cap
   test_accumulation_cap (
     .clk( CLK),
     .reset(0),    // active hi. reconsider... but we lose timing anaylysis
-    . conditioning_out(  conditioning_out)
+    . conditioning_out(  test_accumulation_cap_out)
 
   );
 
   reg [`NUM_BITS-1:0] vec_dummy13 = 0;
 
-  mux_4to1_assign #( 13 )
+  mux_4to1_assign #( `NUM_BITS )
   mux_4to1_assign_1  (
-   .a( vec_dummy13),
-   // .b( vec_dummy13),     we don't actually seem to need to supply a dummy.
-   .c( conditioning_out_counter),
-   .d( conditioning_out),
+   .a( vec_dummy13),  // 00
+   // .b( vec_dummy13),   // 01  we don't actually seem to need to supply a dummy.
+   .c( counter0_out), // 10
+   .d( test_accumulation_cap_out ),         // 11
 
    .sel( 2'b11 ),
    .out( conditioning_out )
@@ -428,8 +451,10 @@ module top (
 
 
   /////////////////////////////////////////////
-
   //
+
+  // Now we probably don't want the 
+
   wire [8-1: 0] mon_out = { MON7, MON6, MON5,MON4, MON3, MON2, MON1, MON0 } ;
 
 
