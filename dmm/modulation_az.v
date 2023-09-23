@@ -86,7 +86,7 @@ module modulation_az_tester (
     else
     begin
 
-      clk_count <= clk_count - 1;
+      clk_count <= clk_count - 1;     // TODO review why count down???
 
       // we can trigger on these if we want
       case (clk_count)

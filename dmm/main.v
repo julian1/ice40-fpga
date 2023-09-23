@@ -57,26 +57,25 @@ endmodule
 
 
 
+`define NUM_BITS        13
 
+
+
+
+`define CLK_FREQ        20000000
 
 module test_accumulation_cap (
 
   input   clk,
-  input   reset,                    // async
+  input   reset,     // async
 
-  // Actually why even bother to group. into the vector....   because of the mode muxer. for the counter.perhaps we should pass....
-
-  output reg [13-1:0 ] conditioning_out
+  output reg [`NUM_BITS-1:0 ] conditioning_out
 
 );
 
-  reg [31:0]    clk_count = 0;           // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
-/*
-  assign SIG_PC_SW_CTL,
-      himux2,
-      himux,
-      azmux
-*/
+  // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
+  reg [31:0]    clk_count = 0;
+
   // destructure
   wire [4-1:0] azmux;
   wire [4-1:0] himux;
@@ -86,15 +85,22 @@ module test_accumulation_cap (
   // nice.
   assign { sig_pc_sw_ctl, himux2, himux,  azmux } = conditioning_out;
 
-  assign azmux  = 0;  // off
-  assign himux2 = 0;  // off
+  /* perhaps create some macros for MUX_1OF8_S1.
+    // not sure.  can represent 8|(4-1)   for s4. etc.
+    // most code is not going to care. there will just be a register for the zero, and a register for the signal.
+  */
 
-  assign himux = clk_count;
+  assign azmux  = 0;  // off
+  // assign himux2 = 4'b1000;  // s1 select dcv-source-hi
+  assign himux =  4'b1001;  // s2 select himux2.  for leakage test this should be off.
 
   assign sig_pc_sw_ctl = clk_count;
 
-
-  // want active lo?????
+  // it would actually be  nice to have control over the led here.  we need a mode state variable.
+  // and the interupt. actually.
+  // sampling the charge - is a bit difficult.  because this is a kind of input modulation...
+  // actually it's just a slow. nplc.  sample zero. and sample signal. with cap.
+  // it *can* be a regular
 
   // always @(posedge clk  or posedge reset )
   always @(posedge clk  or posedge reset )
@@ -105,32 +111,27 @@ module test_accumulation_cap (
     else
     begin
 
-      clk_count <= clk_count - 1;
+      clk_count <= clk_count + 1;   // positive clk
 
-/*
       // we can trigger on these if we want
       case (clk_count)
-
-        0:                  // start.  turn on both dcv, and cap.  to reset cap voltage to the input voltage value - eg. 0,10,-10 V.
+        0:
           begin
-            mux_hi  <= `MUX_HI1_DCV | (`MUX_HI2_TEMP1 << 3);
-            mode    <= `AZ_MODE_SIGNAL_HI;
+            himux2 <= 4'b1011;  // select ground to clear charge on cap.    s4 - A400-5 gnd. / 8|(4-1).
           end
 
-        `CLK_FREQ * 1:       // at 1 sec.  stop cap charge by switching off DCV in, and change mode to AZ switchiing, to build charge on cap.
+        `CLK_FREQ * 1:
           begin
-            mux_hi  <= `MUX_HI2_TEMP1 << 3;
-            mode    <= `AZ_MODE_AZ_NORMAL;
+            himux2 <= 4'b1000;  // s1 select dcv-source-hi.  actually for real.  actually we would turn off to test leakage.
+                                // need to be high-z mode to measure.  or measure from op-amp.
           end
 
-        `CLK_FREQ * 5:       // at 5 secs.  stop az switching, and allow sample measure of the charge on the cap.
-          mode      <= `AZ_MODE_SIGNAL_HI;
-
-        `CLK_FREQ * 10:      // after 10secs.  reset the cycle
+        `CLK_FREQ * 2:
           clk_count <= 0;
 
+
       endcase
-*/
+
     end
 
 endmodule
@@ -359,13 +360,25 @@ module top (
       en. order inputs the same as
 
       structure and  pattern destructure on the otherside like .
+      ----------
+
+      Actually it might be easier to group everything.
+      add the led.
+      add the adc switches.
+      comparator latch.
+      monitor.
+      ext interupt.  that data is ready.
+      ---
+      the led is a useful visual indicator. fpga wants to take control of it.
+
   */
 
+  // prefix these with v_ or vec_ ?
   wire [4-1:0 ] himux2 = { U402_EN_CTL, U402_A2_CTL, U402_A1_CTL, U402_A0_CTL};     // U402
   wire [4-1:0 ] himux =  { U413_EN_CTL, U413_A2_CTL, U413_A1_CTL, U413_A0_CTL };   // U413
   wire [4-1:0 ] azmux =  { U414_EN_CTL, U414_A2_CTL, U414_A1_CTL, U414_A0_CTL };    // U414
 
-  reg [13-1:0 ] conditioning_out ;
+  reg [`NUM_BITS-1:0 ] conditioning_out ;
   assign  {
       SIG_PC_SW_CTL,
       himux2,
@@ -381,7 +394,7 @@ module top (
     OR. just use another mux_4to1. for the monitor.
   */
 
-  reg [13-1:0] conditioning_out_counter;
+  reg [`NUM_BITS-1:0] conditioning_out_counter;
   counter  #( 13 )    // MSB is number of bits
   counter0
   (
@@ -390,7 +403,7 @@ module top (
   );
 
 
-  reg [13-1:0] conditioning_out;  // for test accumulation.
+  reg [`NUM_BITS-1:0] conditioning_out;  // for test accumulation.
   test_accumulation_cap
   test_accumulation_cap (
     .clk( CLK),
@@ -399,7 +412,7 @@ module top (
 
   );
 
-  reg [13-1:0] vec_dummy13 = 0;
+  reg [`NUM_BITS-1:0] vec_dummy13 = 0;
 
   mux_4to1_assign #( 13 )
   mux_4to1_assign_1  (
