@@ -77,7 +77,8 @@ module test_accumulation_cap (
   input   clk,
   input   reset,     // async
 
-  output reg [`NUM_BITS-1:0 ] conditioning_out
+  // output reg [`NUM_BITS-1:0 ] conditioning_out
+  output [`NUM_BITS-1:0 ] conditioning_out
 
 );
 
@@ -85,11 +86,11 @@ module test_accumulation_cap (
   reg [31:0]    clk_count = 0;
 
   // destructure
-  wire [4-1:0] azmux;
-  wire [4-1:0] himux;
-  wire [4-1:0] himux2;
-  wire sig_pc_sw_ctl;
-  wire led0;
+  reg [4-1:0] azmux;
+  reg [4-1:0] himux;
+  reg [4-1:0] himux2;
+  reg sig_pc_sw_ctl;
+  reg led0;
 
   // nice.
   assign { led0, sig_pc_sw_ctl, himux2, himux,  azmux } = conditioning_out;
@@ -99,11 +100,8 @@ module test_accumulation_cap (
     // most code is not going to care. there will just be a register for the zero, and a register for the signal.
   */
 
-  assign azmux  = 0;  // off
-  // assign himux2 = 4'b1000;  // s1 select dcv-source-hi
-  assign himux =  4'b1001;  // s2 select himux2.  for leakage test this should be off.
-
-  assign sig_pc_sw_ctl = clk_count;
+  // Can move to reset. but might as well set in the block.
+  // assign sig_pc_sw_ctl = clk_count;
 
   // it would actually be  nice to have control over the led here.  we need a mode state variable.
   // and the interupt. actually.
@@ -130,6 +128,10 @@ module test_accumulation_cap (
       case (clk_count)
         0:
           begin
+            azmux  = 0;  // off
+            himux =  4'b1001;  // s2 select himux2.  for leakage test this should be off.
+
+
             himux2  <= 4'b1011;  // select ground to clear charge on cap.    s4 - A400-5 gnd. / 8|(4-1).
             led0    <= 0;
           end
@@ -390,16 +392,13 @@ module top (
   */
 
   // prefix these with v_ or vec_ ?
+  // should perhaps be registers.
   wire [4-1:0 ] himux2 = { U402_EN_CTL, U402_A2_CTL, U402_A1_CTL, U402_A0_CTL};     // U402
   wire [4-1:0 ] himux =  { U413_EN_CTL, U413_A2_CTL, U413_A1_CTL, U413_A0_CTL };   // U413
   wire [4-1:0 ] azmux =  { U414_EN_CTL, U414_A2_CTL, U414_A1_CTL, U414_A0_CTL };    // U414
 
 
-
-
   reg [`NUM_BITS-1:0 ] conditioning_out ;
-
-
 
   assign  {
       LED0,
@@ -417,21 +416,22 @@ module top (
     OR. just use another mux_4to1. for the monitor.
   */
 
-  reg [`NUM_BITS-1:0] conditioning_out_counter;
+  // change name counter0_out
+  reg [`NUM_BITS-1:0] counter0_out;
   counter  #( `NUM_BITS )    // MSB is number of bits
   counter0
   (
     .clk(CLK),
-    .out( conditioning_out_counter)
+    .out( counter0_out)
   );
 
-
-  reg [`NUM_BITS-1:0] conditioning_out;  // for test accumulation.
+  // change reg name to test_accumulation_cap_out.
+  reg [`NUM_BITS-1:0] test_accumulation_cap_out;  // for test accumulation.
   test_accumulation_cap
   test_accumulation_cap (
     .clk( CLK),
     .reset(0),    // active hi. reconsider... but we lose timing anaylysis
-    . conditioning_out(  conditioning_out)
+    . conditioning_out(  test_accumulation_cap_out)
 
   );
 
@@ -439,10 +439,10 @@ module top (
 
   mux_4to1_assign #( `NUM_BITS )
   mux_4to1_assign_1  (
-   .a( vec_dummy13),
-   // .b( vec_dummy13),     we don't actually seem to need to supply a dummy.
-   .c( conditioning_out_counter),
-   .d( conditioning_out),
+   .a( vec_dummy13),  // 00
+   // .b( vec_dummy13),   // 01  we don't actually seem to need to supply a dummy.
+   .c( counter0_out), // 10
+   .d( test_accumulation_cap_out ),         // 11
 
    .sel( 2'b11 ),
    .out( conditioning_out )
@@ -451,8 +451,10 @@ module top (
 
 
   /////////////////////////////////////////////
-
   //
+
+  // Now we probably don't want the 
+
   wire [8-1: 0] mon_out = { MON7, MON6, MON5,MON4, MON3, MON2, MON1, MON0 } ;
 
 
