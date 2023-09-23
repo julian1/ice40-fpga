@@ -491,13 +491,16 @@ module top (
 
   );
 
-  reg [`NUM_BITS-1:0] vec_dummy13 = 0;
+  // test pattern - turn everything off. doesn't need to be a reg.
+  reg [`NUM_BITS-1:0] test_pattern_zero = 0;
+
+
 
   mux_4to1_assign #( `NUM_BITS )
   mux_4to1_assign_1  (
    .a( test_pattern_out),  // 00
-   .b( vec_dummy13),   // 01  we don't actually seem to need to supply a dummy.
-   .c( counter0_out), // 10
+   .b( test_pattern_zero),        // 01  turn everything off.
+   .c( counter0_out),     // 10
    .d( test_accumulation_cap_out ),         // 11
 
    // .sel( 2'b10 ),                           // So. we want to assign this to a mode register.   and then set it.
