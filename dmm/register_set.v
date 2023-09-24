@@ -22,7 +22,7 @@
 
 
 `define REG_MODE                12
-`define REG_TEST_PATTERN        14
+`define REG_DIRECT        14
 
 
 
@@ -188,7 +188,7 @@ module register_set #(parameter MSB=40)   (
 
             `REG_MODE:      reg_mode <= val24;
 
-            `REG_TEST_PATTERN: reg_test_pattern <= val24;
+            `REG_DIRECT: reg_test_pattern <= val24;
 
 
           endcase
