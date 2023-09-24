@@ -386,11 +386,25 @@ module top (
 
 
 
-  // TODO. try putting the register set last.   then can pass the w_conditioning_out straight into the block.
 
-  // assign w_conditioning_out = test_pattern_out ;
   assign w_conditioning_out = reg_direct ;
 
+  // TODO. try putting the register set last.   then can pass the w_conditioning_out straight into the block.
+
+/*
+  mux_4to1_assign #( `NUM_BITS )
+  mux_4to1_assign_1  (
+
+   .a( reg_direct ),  // 00
+   .b( reg_direct ),        // 01  mcu controllable... needs a better name  mode_test_pattern. .   these are modes...
+   .c( reg_direct ),     // 10
+   .d( reg_direct ),         // 11
+
+   .sel( 2'b00 ),                           // So. we want to assign this to a mode register.   and then set it.
+   // .sel( reg_mode ),                           // So. we want to assign this to a mode register.   and then set it.
+   .out( w_conditioning_out )
+  );
+*/
 
 
 endmodule

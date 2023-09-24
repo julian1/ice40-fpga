@@ -91,10 +91,9 @@ module register_set #(parameter MSB=40)   (
     reg_4094      = 0;
 
 
-     reg_mode = 0;
+     // reg_mode = 0;      // thisi doesn't work.  we lose relay.
 
-     // reg_direct = 0;
-     reg_direct = 1<<13 ;
+     reg_direct = 1<<13 ;   // but relay works, when do this...a absolutely weird.
 
 
 
