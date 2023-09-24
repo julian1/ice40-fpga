@@ -40,16 +40,29 @@
 // mux choice.
 // eg. https://www.chipverify.com/verilog/verilog-4to1-mux
 
-module mux_4to1_assign #(parameter MSB =12)   (
+module mux_4to1_assign #(parameter MSB =22)   (
    input [MSB-1:0] a,
    input [MSB-1:0] b,
    input [MSB-1:0] c,
    input [MSB-1:0] d,
 
-   input wire [1:0] sel,               // 2bits. input sel used to select between a,b,c,d
+   input [1:0] sel,               // 2bits. input sel used to select between a,b,c,d
    output [MSB-1:0] out);
 
-   assign out = sel[1] ? (sel[0] ? d : c) : (sel[0] ? b : a);
+   // assign out = sel[1] ? (sel[0] ? d : c) : (sel[0] ? b : a);
+   // assign out = a  ;          // ok. this worked.
+   // assign out = 1<<13 ;
+
+  // as soon as we use this it fails....
+
+  
+  // combinatorial assign.   not sequential. doesn't work.
+  always @ ( sel or a ) begin
+    case (sel)
+      default : out <= a;
+    endcase
+  end
+  
 
 endmodule
 
@@ -340,7 +353,8 @@ module top (
 
   wire [24-1:0] reg_4094;   // TODO remove
 
-  wire [1:0] reg_mode;     // two bits
+  // wire [1:0] reg_mode;     // two bits
+  wire [24-1:0] reg_mode;     // two bits
 
   wire [24 - 1 :0] reg_direct ;    // EXTR truncated.
 
@@ -387,11 +401,11 @@ module top (
 
 
 
-  assign w_conditioning_out = reg_direct ;
+  // assign w_conditioning_out = reg_direct ;
 
   // TODO. try putting the register set last.   then can pass the w_conditioning_out straight into the block.
 
-/*
+
   mux_4to1_assign #( `NUM_BITS )
   mux_4to1_assign_1  (
 
@@ -404,7 +418,7 @@ module top (
    // .sel( reg_mode ),                           // So. we want to assign this to a mode register.   and then set it.
    .out( w_conditioning_out )
   );
-*/
+
 
 
 endmodule
