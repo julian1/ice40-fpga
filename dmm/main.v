@@ -271,8 +271,6 @@ module top (
 );
 
 
-  // reg dummy;
-
 
   ////////////////////////////////////////
   // spi muxing
@@ -297,13 +295,10 @@ module top (
   assign { U1004_4094_DATA } = vec_miso;    // this isn't right ... it is spi_miso?//
 
 
-  // jeezus.
-
-  // dout for fpga spi.
-  // need to rename. it's an internal dout... that can be muxed out.
- //  wire my_dout ;
-  reg my_dout ; // should be a register, since it's written to.
-
+  // should be a wire. since it is only used combinatorially .   from the gpio input wire to the mux_spi where it is a wire, and then the output. 
+  wire w_dout ; // should be a register, since it's written to.
+                  // NO. think it should be moved to mux_spi.
+                    // NO. it is only used combinatorially.
 
 
   mux_spi #( )      // output from POV of the mcu. ie. fpga as slave.
@@ -323,7 +318,7 @@ module top (
 
     ////////////////
 
-    . dout(my_dout),                              // use when cs active
+    . dout(w_dout),                              // use when cs active
     . vec_miso(vec_miso),                         // use when cs2 active
     . miso(SPI_MISO)                              // output pin
   );
@@ -336,24 +331,17 @@ module top (
 
   // TODO change prefix to w_
 
+  /////////////////////
+  assign { _4094_OE_CTL } = 1;    //  on for test.  should defer to mcu control. after check supplies.
+
+
+
   wire [24-1:0] reg_led;
-  // assign {  LED0 } = reg_led;
 
   wire [24-1:0] reg_4094;   // TODO remove
-  // assign { _4094_OE_CTL } = reg_4094;
 
-
-  // should be a register??cj because not connected to otuput wires.
-
-  // because this is a register rather than a wire?????
-
-  // reg [24-1:0] reg_mode;     // = 8'b00000001; // test
   wire [1:0] reg_mode;     // two bits
 
-  // EXTR. registers MUST have > 24 bits. for writer.
-  // test pattern - turn everything off. doesn't need to be a reg.
-  // EXTR. pass this to the register bank.
-  // reg [`NUM_BITS-1:0] reg_direct ;
   wire [24 - 1 :0] reg_direct ;    // EXTR truncated.
 
 
@@ -363,7 +351,7 @@ module top (
     . clk(SPI_CLK),
     . cs(SPI_CS),
     . din(SPI_MOSI),
-    . dout( my_dout ),            // drive miso from via muxer
+    . dout( w_dout ),            // drive miso from via muxer
     // . dout( SPI_MISO ),        // drive miso output pin directly.
 
     // registers
@@ -378,58 +366,6 @@ module top (
   );
 
 
-  // reg [3:0] vec_dummy;
-
-/*
-  blinker #(  )
-  blinker
-    (
-    .clk( CLK ),
-    // .vec_leds( { MON7, MON6, MON5, MON4, MON3 , MON2, MON1, dummy  } )
-    .vec_leds( { LED0, vec_dummy } )
-  );
-*/
-
-
-  /////////////////////
-  assign { _4094_OE_CTL } = 1;    //  on for test.  should defer to mcu control. after check supplies.
-
-
-
-  // conditioning.
-  // I think we do want to pass the pre-charge switch.  remember thiso
-  // EXCEPT  - not all test functions will need it.
-
-  // think it makes sense to pass logically together as group..
-  // likewise. adc.  will be the four current switches. and adc latch.
-
-  // output led. can be passed in separate muxer.
-
-  // it may be better to group by mux .
-  // TODO . should have enable pin.   last - same as when controlled by 4094.
-
-
-  /*
-      conditioning switching outputs.
-      these are not the complete set of outputs for a module. but eases  handling of mode muxing.
-      en. order inputs the same as
-
-      structure and  pattern destructure on the otherside like .
-      ----------
-
-      Actually it might be easier to group everything.
-      add the led.
-      add the adc switches.
-      comparator latch.
-      monitor.
-      ext interupt.  that data is ready.
-      ---
-      the led is a useful visual indicator. fpga wants to take control of it.
-      -------
-
-      REMEMBER inputs (comparator) line-sense etc. are easy. they just fan out to whatever module needs them.
-
-  */
 
   // prefix these with v_ or vec_ ?
   // should perhaps be registers.
@@ -454,6 +390,12 @@ module top (
 
   // assign w_conditioning_out = test_pattern_out ;
   assign w_conditioning_out = reg_direct ;
+
+
+
+endmodule
+
+
 
 
 
@@ -535,12 +477,55 @@ module top (
 */
 
 
-endmodule
+  // reg [3:0] vec_dummy;
+
+/*
+  blinker #(  )
+  blinker
+    (
+    .clk( CLK ),
+    // .vec_leds( { MON7, MON6, MON5, MON4, MON3 , MON2, MON1, dummy  } )
+    .vec_leds( { LED0, vec_dummy } )
+  );
+*/
 
 
 
 
+  // conditioning.
+  // I think we do want to pass the pre-charge switch.  remember thiso
+  // EXCEPT  - not all test functions will need it.
 
+  // think it makes sense to pass logically together as group..
+  // likewise. adc.  will be the four current switches. and adc latch.
+
+  // output led. can be passed in separate muxer.
+
+  // it may be better to group by mux .
+  // TODO . should have enable pin.   last - same as when controlled by 4094.
+
+
+  /*
+      conditioning switching outputs.
+      these are not the complete set of outputs for a module. but eases  handling of mode muxing.
+      en. order inputs the same as
+
+      structure and  pattern destructure on the otherside like .
+      ----------
+
+      Actually it might be easier to group everything.
+      add the led.
+      add the adc switches.
+      comparator latch.
+      monitor.
+      ext interupt.  that data is ready.
+      ---
+      the led is a useful visual indicator. fpga wants to take control of it.
+      -------
+
+      REMEMBER inputs (comparator) line-sense etc. are easy. they just fan out to whatever module needs them.
+
+  */
 
 
 

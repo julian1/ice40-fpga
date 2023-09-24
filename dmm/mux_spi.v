@@ -5,6 +5,9 @@
 
 
 module mux_spi    (
+
+  // everything is a wire.
+
   input [8-1:0] reg_spi_mux,     // change name vec_active_device
   input cs2,
   input clk,
