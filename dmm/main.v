@@ -489,7 +489,7 @@ module top (
   mux_4to1_assign #( `NUM_BITS )
   mux_4to1_assign_1  (
    .a( test_pattern_out),  // 00
-   .b( reg_test_pattern),        // 01  mcu controllable.
+   .b( reg_test_pattern),        // 01  mcu controllable... needs a better name  mode_test_pattern. .   these are modes...
    .c( counter0_out),     // 10
    .d( test_accumulation_cap_out ),         // 11
 
