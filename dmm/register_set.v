@@ -21,8 +21,9 @@
 `define REG_4094                9
 
 
-`define REG_MODE                12
-`define REG_TEST_PATTERN        14
+// `define REG_MODE                16  // 10000
+`define REG_MODE                12  // 10000
+`define REG_DIRECT        14
 
 
 
@@ -42,7 +43,7 @@ endfunction
 
 
 /*
-  EXTR.  Be careful. 
+  EXTR.  Be careful.
     passing a register shorter than 24bits. here. corrupts behavior.
     kind of bizarre.
 */
@@ -69,7 +70,7 @@ module register_set #(parameter MSB=40)   (
 
   output reg [24-1:0] reg_mode,
 
-  output reg [24-1:0] reg_test_pattern    // better name?
+  output reg [24-1:0] reg_direct    // better name?
 
   // passing a monitor in here, is useful, for monitoring internal. eg. the
   // output reg [7-1:0]   vec_monitor,
@@ -92,7 +93,8 @@ module register_set #(parameter MSB=40)   (
 
      reg_mode = 0;
 
-     reg_test_pattern = 0;
+     // reg_direct = 0;
+     reg_direct = 1<<13 ;
 
 
 
@@ -149,6 +151,11 @@ module register_set #(parameter MSB=40)   (
               `REG_SPI_MUX:   out <= reg_spi_mux << 8;
               `REG_4094:      out <= reg_4094 << 8;
 
+
+              `REG_MODE:      out <= reg_mode << 8;   // ok..
+              `REG_DIRECT:    out <= reg_direct << 8;
+
+
               default:        out <=  24'b000011110000111100001111 << 8;
 
             endcase
@@ -161,16 +168,13 @@ module register_set #(parameter MSB=40)   (
   wire [  7 -1 : 0 ] addr = in[ MSB-2: MSB-8 ];  // single byte for reg/address,
 
   // change to increase bits.
-  wire [24-1 :0] val24   = in[ MSB-8- 1  : 0 ] ;              // lo 24 bits/ ... FIXME. indexing not quite correct.
-
+  // wire [24-1 :0] val24   = in[ MSB-8- 1  : 0 ] ;              // lo 24 bits/ ... FIXME. indexing not quite correct.
+  wire [24-1 :0] val24   = in[ 24 - 1 : 0 ] ;              // lo 24 bits/ ... FIXME. indexing not quite correct.
 
   // wire [8-1 :0] val8      = in[ 8 - 1  : 0 ] ;              // lo 24 bits/ ... FIXME. indexing not quite correct.
 
-  // wire [32-1 :0] val32   = in[ MSB-8- 1  : 0 ] ;
-
   // FIXME/REVIEW - does not look right - indexing outside array?
   wire flag = in[ MSB- 1   ] ;
-
 
 
   // set/write
@@ -186,9 +190,8 @@ module register_set #(parameter MSB=40)   (
             `REG_SPI_MUX:   reg_spi_mux <= val24;
             `REG_4094:      reg_4094    <= val24;
 
-            `REG_MODE:      reg_mode <= val24;
-
-            `REG_TEST_PATTERN: reg_test_pattern <= val24;
+            `REG_MODE:      reg_mode <= val24;      // ok.
+            `REG_DIRECT:    reg_direct <= val24;
 
 
           endcase

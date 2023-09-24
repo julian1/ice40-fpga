@@ -46,7 +46,7 @@ module mux_4to1_assign #(parameter MSB =12)   (
    input [MSB-1:0] c,
    input [MSB-1:0] d,
 
-   input [1:0] sel,               // input sel used to select between a,b,c,d
+   input wire [1:0] sel,               // 2bits. input sel used to select between a,b,c,d
    output [MSB-1:0] out);
 
    assign out = sel[1] ? (sel[0] ? d : c) : (sel[0] ? b : a);
@@ -202,6 +202,9 @@ endmodule
 
 
 module top (
+
+  // these are all treated as wires.
+
   input  CLK,
 
 
@@ -268,7 +271,7 @@ module top (
 );
 
 
-  reg dummy;
+  // reg dummy;
 
 
   ////////////////////////////////////////
@@ -341,14 +344,17 @@ module top (
 
 
   // should be a register??cj because not connected to otuput wires.
-  reg [24-1:0] reg_mode;     // = 8'b00000001; // test
+
+  // because this is a register rather than a wire?????
+
+  // reg [24-1:0] reg_mode;     // = 8'b00000001; // test
+  wire [1:0] reg_mode;     // two bits
 
   // EXTR. registers MUST have > 24 bits. for writer.
   // test pattern - turn everything off. doesn't need to be a reg.
   // EXTR. pass this to the register bank.
-  // reg [`NUM_BITS-1:0] reg_test_pattern ;
-  reg [24 - 1 :0] reg_test_pattern ;    // EXTR truncated.
-
+  // reg [`NUM_BITS-1:0] reg_direct ;
+  wire [24 - 1 :0] reg_direct ;    // EXTR truncated.
 
 
   register_set // #( 32 )   // register bank  . change name 'registers'
@@ -365,13 +371,14 @@ module top (
     . reg_spi_mux(reg_spi_mux),
     . reg_4094(reg_4094 ) ,
 
-    . reg_mode( reg_mode),
-    . reg_test_pattern( reg_test_pattern)
+    . reg_mode( reg_mode ),      // ok.
+
+    . reg_direct( reg_direct )
 
   );
 
 
-  reg [3:0] vec_dummy;
+  // reg [3:0] vec_dummy;
 
 /*
   blinker #(  )
@@ -427,14 +434,35 @@ module top (
   // prefix these with v_ or vec_ ?
   // should perhaps be registers.
   wire [4-1:0 ] himux2 = { U402_EN_CTL, U402_A2_CTL, U402_A1_CTL, U402_A0_CTL};     // U402
-  wire [4-1:0 ] himux =  { U413_EN_CTL, U413_A2_CTL, U413_A1_CTL, U413_A0_CTL };   // U413
+  wire [4-1:0 ] himux =  { U413_EN_CTL, U413_A2_CTL, U413_A1_CTL, U413_A0_CTL };    // U413
   wire [4-1:0 ] azmux =  { U414_EN_CTL, U414_A2_CTL, U414_A1_CTL, U414_A0_CTL };    // U414
 
   wire [8-1: 0] monitor = { MON7, MON6, MON5,MON4, MON3, MON2, MON1, MON0 } ;
 
-  // TODO - rename   no longer just conditioning.  but controls all outputs.
-  reg [`NUM_BITS-1:0 ] conditioning_out ;
+  wire [`NUM_BITS-1:0 ] w_conditioning_out = {
+      monitor,
+      LED0,                   // 1<<13
+      SIG_PC_SW_CTL,
+      himux2,
+      himux,
+      azmux
+    };
 
+
+
+  // TODO. try putting the register set last.   then can pass the w_conditioning_out straight into the block.
+
+  // assign w_conditioning_out = test_pattern_out ;
+  assign w_conditioning_out = reg_direct ;
+
+
+
+
+/*
+    "reg cannot be assigned with a continuous assignment"
+    so this is wrong.
+
+  reg [`NUM_BITS-1:0 ] w_conditioning_out ;
   assign  {
       monitor,
       LED0,
@@ -442,8 +470,8 @@ module top (
       himux2,
       himux,
       azmux
-    } = conditioning_out;
-
+    } = w_conditioning_out;
+*/
 
   /*
     we probably want to add the led to this. and the pre-charge switch.
@@ -452,6 +480,7 @@ module top (
     OR. just use another mux_4to1. for the monitor.
   */
 
+/*
   // change name counter0_out
   reg [`NUM_BITS-1:0] counter0_out;
   counter  #( `NUM_BITS )    // MSB is number of bits
@@ -460,8 +489,6 @@ module top (
     .clk(CLK),
     .out( counter0_out)
   );
-
-
 
 
   reg [`NUM_BITS-1:0] test_pattern_out;
@@ -486,18 +513,26 @@ module top (
 
 
 
+
+*/
+
+
+/*
+
+
   mux_4to1_assign #( `NUM_BITS )
   mux_4to1_assign_1  (
-   .a( test_pattern_out),  // 00
-   .b( reg_test_pattern),        // 01  mcu controllable... needs a better name  mode_test_pattern. .   these are modes...
-   .c( counter0_out),     // 10
-   .d( test_accumulation_cap_out ),         // 11
 
-   // .sel( 2'b10 ),                           // So. we want to assign this to a mode register.   and then set it.
+   .a( test_pattern_out ),  // 00
+   .b( reg_direct ),        // 01  mcu controllable... needs a better name  mode_test_pattern. .   these are modes...
+   .c( test_pattern_out ),     // 10
+   .d( test_pattern_out ),         // 11
+
+   // .sel( 2'b00 ),                           // So. we want to assign this to a mode register.   and then set it.
    .sel( reg_mode ),                           // So. we want to assign this to a mode register.   and then set it.
-   .out( conditioning_out )
+   .out( w_conditioning_out )
   );
-
+*/
 
 
 endmodule
@@ -543,7 +578,7 @@ endmodule
   wire [8-1: 0] monitor = { MON7, MON6, MON5,MON4, MON3, MON2, MON1, MON0 } ;
 
 
-  reg [8-1:0] vec_mon_counter;      // mode0_conditioning_out
+  reg [8-1:0] vec_mon_counter;      // mode0_w_conditioning_out
 
   // change name counter_mon.
   counter  counter1(
@@ -552,7 +587,7 @@ endmodule
   );
 
 
-  reg [8-1:0] vec_dummy8 = 0;   // mode0_conditioning_out
+  reg [8-1:0] vec_dummy8 = 0;   // mode0_w_conditioning_out
 
   mux_4to1_assign  #( 8 )
   mux_4to1_assign_2 (
