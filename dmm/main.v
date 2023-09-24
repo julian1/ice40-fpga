@@ -346,8 +346,8 @@ module top (
   // EXTR. registers MUST have > 24 bits. for writer.
   // test pattern - turn everything off. doesn't need to be a reg.
   // EXTR. pass this to the register bank.
-  // reg [`NUM_BITS-1:0] reg_test_pattern ;
-  reg [24 - 1 :0] reg_test_pattern ;    // EXTR truncated.
+  // reg [`NUM_BITS-1:0] reg_direct ;
+  reg [24 - 1 :0] reg_direct ;    // EXTR truncated.
 
 
 
@@ -366,7 +366,9 @@ module top (
     . reg_4094(reg_4094 ) ,
 
     . reg_mode( reg_mode),
-    . reg_test_pattern( reg_test_pattern)
+    // . reg_direct( reg_direct)
+
+    . reg_test_pattern( reg_direct )
 
   );
 
@@ -489,7 +491,7 @@ module top (
   mux_4to1_assign #( `NUM_BITS )
   mux_4to1_assign_1  (
    .a( test_pattern_out),  // 00
-   .b( reg_test_pattern),        // 01  mcu controllable... needs a better name  mode_test_pattern. .   these are modes...
+   .b( reg_direct),        // 01  mcu controllable... needs a better name  mode_test_pattern. .   these are modes...
    .c( counter0_out),     // 10
    .d( test_accumulation_cap_out ),         // 11
 
