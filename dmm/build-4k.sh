@@ -1,4 +1,5 @@
 
+# nix-shell -p yosys arachne-pnr icestorm usbutils nextpnr -I  nixpkgs=/home/me/devel/nixpkgs02
 
 ##!/bin/bash
 
