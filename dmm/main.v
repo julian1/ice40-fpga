@@ -158,29 +158,17 @@ module test_accumulation_cap (
 endmodule
 
 
-/*
-
-  Warning: Async reset value `\default_out [7:0]' is not constant!
-
-*/
-
 
 module test_pattern (
   input   clk,
-  // input   reset,     // async
 
-  // input [`NUM_BITS-1:0 ]      direct,      // not
 
   input [`NUM_BITS-1:0 ]      default_out ,       // gets passed reg_direct...   why not just set a bit???? in
-  // input [`NUM_BITS-1:0 ]      mode,       // gets passed reg_direct...   why not just set a bit???? in
   output reg  [`NUM_BITS-1:0 ] out   // wire.kk
 );
+
   // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
   reg [31:0]   counter = 0;
-
-
-  // THESE MUST BE REGISTERS BECAUSE LHS on always.
-
 
   always@(posedge clk  )
       begin
@@ -192,35 +180,10 @@ module test_pattern (
           end
         else
           begin
-            // but writing the az mux does work.
-            // out[ 4 -1 : 0 ]  <= out [ 4 - 1 : 0  ] + 1;   //   ok. this works on first mux. but 4094 relay doesn't work.  how?. why?
 
-            // OK. this works.  relay works. and monitor pattern is turned off and on. nice.
-            // out[ 16 : 16 -2 ]  <= out [ 16 : 16 -2   ] + 1;   // GOOD. bottom 3 bits. of monitor.
-
-            // out[ 14 + 2 : 14 ]  <= out [ 14 + 2 : 14   ] + 1; // works.
-
-            // out[ 14 + 7 : 14 ]  <= out [ 14 + 7 : 14   ] + 1;     // doesn't start.... very weird.
-            // out[ 14 + 6 : 14 ]  <= out [ 14 + 6 : 14   ] + 1;     // doesn't start
-            // out[ 14 + 5 : 14 ]  <= out [ 14 + 5 : 14   ] + 1;         // WORKS....  eg. twiddles nice pattern on first 6 bits of monitor output
-
-            // out[ 14 + 7 : 14+6 ]  <= out [ 14 + 7 : 14+6   ] + 1;        // doesn't because of start.
-            // out[ 14 + 7 : 14+7 ]  <= out [ 14 + 7 : 14+7   ] + 1;        // get pattern on top monitor pin.  but 4094 relay doesn't work.  very strange.
-
-
-            // out[ 14 + 5 : 0 ]  <= out [ 14 + 5 : 0   ] + 1;           // THIS WORKS. all bits except top 2 monitor. starts, relay works.   and alternating test pattern.
-
-            // out[ 14 + 6 : 0 ]  <= out [ 14 + 6 : 0   ] + 1;           // changed pin assignment MON6, MON7. to pin 1 and pin 2
-                                                                      // also doesn't work. bizarre...
-
-                                                                      // ok. somehow overflowing the register set which is 24 bits????
-
-
+            // works all monitor pins.
             // remove the himux2  reg_direct value is not working.
-            // out[ 15 : 0 ]  <= out [ 15  : 0   ] + 1;
             out[ 17 : 0 ]  <= out [ 17  : 0   ] + 1;
-
-            // SO is there a bad connection. or wrong/duplicate  pinout.
 
           end
       end
