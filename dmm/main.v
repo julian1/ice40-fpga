@@ -10,20 +10,9 @@
 
 `include "register_set.v"
 `include "mux_spi.v"
-`include "blinker.v"
+//`include "blinker.v"
 // `include "modulation_az.v"
 
-
-
-
-
-/*
-  TODO
-  module myreset a soft reset module...
-  that decodes an spi command/address/value, and resets all lines.
-
-  need to think how to handle peripheral reset.
-*/
 
 
 
@@ -34,30 +23,8 @@
 
 `default_nettype none
 
-
-// set by 4094. set by blinker.  set by test modulation.
-
-// mux choice.
-// eg. https://www.chipverify.com/verilog/verilog-4to1-mux
-// OK possibility canno
-
-// this kind of
-
-
-
-/*
-  - for mcu direct control of fpga mode. consider making the register-bank big enough to fit all fpga output bits. if needed.
-  - or split into two.
-  ----
-  - working with single bit-vectors eases things.
-*/
-
-// better name.  output control.
-// `define NUM_BITS        13
-// `define NUM_BITS        14    // with led
-// `define NUM_BITS        22    // with monitor.   this actually fits in a 24 bit register. just. to allow a mcu control mode.
-// `define NUM_BITS        22    // with monitor.   this actually fits in a 24 bit register. just. to allow a mcu control mode.
-`define NUM_BITS        18    // with monitor.   this actually fits in a 24 bit register. just. to allow a mcu control mode.
+`define NUM_BITS        18    // with monitor.   and remove one of the himuxes.
+                              // avoid getting into the upper bits of the register.
 
 
 
@@ -66,96 +33,23 @@
 
 
 
-`define SOFF      4'b0000
-`define S1        4'b1000
 
-            // himux2 <= 4'b1011;  // select ground to clear charge on cap.    s4 - A400-5 gnd. / 8|(4-1).
+module mux_4to1_assign #(parameter MSB =24)   (
+   input [MSB-1:0] a,
+   input [MSB-1:0] b,
+   input [MSB-1:0] c,
+   input [MSB-1:0] d,
 
-module test_accumulation_cap (
+   input [1:0] sel,               // 2bits. input sel used to select between a,b,c,d
 
-  input   clk,
-  input   reset,     // async
+   output [MSB-1:0] out
 
-  output [`NUM_BITS-1:0 ] out
+  );
 
-);
-
-  // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
-  reg [31:0]    clk_count = 0;
-
-  // destructure
-  reg [4-1:0] azmux;
-  reg [4-1:0] himux;
-  reg [4-1:0] himux2;
-  reg sig_pc_sw_ctl;
-  reg led0;
-
-  reg [8-1: 0] monitor;//  = { MON7, MON6, MON5,MON4, MON3, MON2, MON1, MON0 } ;
-
-  // nice.
-  assign { monitor, led0, sig_pc_sw_ctl, himux2, himux,  azmux } = out;
-
-  /* perhaps create some macros for MUX_1OF8_S1.
-    // not sure.  can represent 8|(4-1)   for s4. etc.
-    // most code is not going to care. there will just be a register for the zero, and a register for the signal.
-  */
-
-  // Can move to reset. but might as well set in the block.
-  // assign sig_pc_sw_ctl = clk_count;
-
-  // it would actually be  nice to have control over the led here.  we need a mode state variable.
-  // and the interupt. actually.
-  // sampling the charge - is a bit difficult.  because this is a kind of input modulation...
-  /*
-      - actually this functionality - *can* be incorporated into regular AZ switching and measurement.
-        the gnd and the off signal.  are just the normal 2 mode AZ.
-
-      - But not charge-injection testing.  actually maybe even charge injection.
-  */
-
-  // always @(posedge clk  or posedge reset )
-  always @(posedge clk  or posedge reset )
-   if(reset)
-    begin
-      clk_count <= 0;
-    end
-    else
-    begin
-
-      clk_count <= clk_count + 1;   // positive clk
-
-      // we can trigger on these if we want
-      case (clk_count)
-        0:
-          begin
-            // off
-            monitor <= 0;
-            azmux  <= 0;
-            sig_pc_sw_ctl <= 0;
-
-            // muxes
-            himux   <=  4'b1001;  // s2 select himux2.  for leakage test this should be off.
-            himux2  <= 4'b1011;  // select ground to clear charge on cap.    s4 - A400-5 gnd. / 8|(4-1).
-            led0    <= 0;
-          end
-
-        `CLK_FREQ * 1:
-          begin
-            himux2 <= 4'b1000;  // s1 select dcv-source-hi.  actually for real.  actually we would turn off to test leakage.
-                                // need to be high-z mode to measure.  or measure from op-amp.
-
-            led0    <= 1;
-          end
-
-        `CLK_FREQ * 2:
-          clk_count <= 0;
-
-
-      endcase
-
-    end
+   assign out = sel[1] ? (sel[0] ? d : c) : (sel[0] ? b : a);
 
 endmodule
+
 
 
 
@@ -163,29 +57,19 @@ module test_pattern (
   input   clk,
 
 
-  input [`NUM_BITS-1:0 ]      default_out ,       // gets passed reg_direct...   why not just set a bit???? in
   output reg  [`NUM_BITS-1:0 ] out   // wire.kk
 );
-
-  // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
-  reg [31:0]   counter = 0;
 
   always@(posedge clk  )
       begin
 
-        counter <= counter + 1;
-        if( default_out)       // non zero.
-          begin
-            out  <= default_out ;                         //   ok. this works on first mux. but 4094 relay doesn't work.  how?. why?
-          end
-        else
-          begin
 
-            // works all monitor pins.
-            // remove the himux2  reg_direct value is not working.
-            out[ 17 : 0 ]  <= out [ 17  : 0   ] + 1;
+        // works all monitor pins.
+        // remove the himux2  reg_direct value is not working.
+        // out[ 17 : 0 ]  <= out [ 17  : 0   ] + 1;
+        // out  <= out  + 1;
+        out  <= out  + 1;
 
-          end
       end
 
 endmodule
@@ -387,21 +271,86 @@ module top (
 
   // ok. basic function pass through works.
 
+
+  reg[ `NUM_BITS-1:0 ]  test_pattern_out;
   test_pattern
   test_pattern (
     .clk( CLK),
-    // .reset( 1'b0),           // 0 == run normal. eg. test_pattern
-    // .direct ( reg_direct ),    // 1 == use reset value.  eg. reg_direct.
-    .default_out( reg_direct  ),
-    .out(  w_conditioning_out )
+
+    .out(  test_pattern_out )
   );
 
+
+
+  reg[ `NUM_BITS-1:0 ]  test_pattern_out_2;
+  test_pattern
+  test_pattern_2 (
+    .clk( CLK),
+
+    .out(  test_pattern_out_2 )
+  );
+
+
+
+  // ok
+  // so it's strange. a register in the gg
+
+
+  mux_4to1_assign #( 18 )
+  mux_4to1_assign_1  (
+
+   .a( 18'b0 ),     // 00
+   .b( test_pattern_out ),        // 01  mcu controllable... needs a better name  mode_test_pattern. .   these are modes...
+   .c( test_pattern_out_2 ),     // 10
+   .d( reg_direct[ 18 - 1 :  0 ]   ),     // 11
+
+   // .sel( 2'b00 ),     // OK.  but when we try to pass reg_mode it fails?????                          and reg_mode doesn't work... it doesn't truncate properly
+
+    // when we try to pass reg_modde here. then 4094 comms fails. doesn't start , and return value fails.
+    // ....
+
+    // . spi_cs(SPI_CS),
+   .sel( reg_mode[ 1 : 0 ]  ),
+   .out( w_conditioning_out )
+  );
 
 
 endmodule
 
 
+/*
+module test_pattern (
+  input   clk,
 
+
+  input [`NUM_BITS-1:0 ]      default_out ,       // gets passed reg_direct...   why not just set a bit???? in
+  output reg  [`NUM_BITS-1:0 ] out   // wire.kk
+);
+
+  // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
+  reg [31:0]   counter = 0;
+
+  always@(posedge clk  )
+      begin
+
+        counter <= counter + 1;
+        if( default_out)       // non zero.
+          begin
+            out  <= default_out ;                         //   ok. this works on first mux. but 4094 relay doesn't work.  how?. why?
+          end
+        else
+          begin
+
+            // works all monitor pins.
+            // remove the himux2  reg_direct value is not working.
+            out[ 17 : 0 ]  <= out [ 17  : 0   ] + 1;
+
+          end
+      end
+
+endmodule
+
+*/
 
 
 /*
