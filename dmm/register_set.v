@@ -176,7 +176,7 @@ module register_set #(parameter MSB=40)   (
   wire flag = in[ MSB- 1   ] ;
 
 
-  // set/write
+  // set/write the register
   always @ (posedge cs)   // cs done.
   begin
     if(count == MSB ) // MSB
@@ -190,8 +190,10 @@ module register_set #(parameter MSB=40)   (
             `REG_4094:      reg_4094    <= val32;
 
             `REG_MODE:      reg_mode <= val32;      // ok.
-            `REG_DIRECT:    reg_direct <= { 8'b11111111, val32[ 24-1 : 0 ] }  ;   // this works except the top bit. so it's pretty good.
+            `REG_DIRECT:    reg_direct <= val32   ;   // this works except the top bit. so it's pretty good.
+            // `REG_DIRECT:    reg_direct <= { 8'b11111111, val32[ 24-1 : 0 ] }  ;   // this works except the top bit. so it's pretty good.
 
+            // what if write two registers.  and can test values.
 
           endcase
       end
