@@ -184,14 +184,24 @@ module register_set #(parameter MSB=40)   (
           end // count == 8
 
 
+        /* 
+          // NO.  remember count variable uses '<=' so it is delayed... 
+
+          OK. this is genuinely hard.
+          because the count and the data aggregation  ... are delayed... by use of '<=' assignment.
+          fuck.
+        */
+
+
         // issue could be count.  or msb or addr decoding.
 
         // with count == MSB-1 ... it sets everything to 0. weird?????
 
-        if(count == MSB - 1 && in[ MSB- 2   ]  == 0 ) // OK.
+        // if(count == MSB - 1 && in[ MSB- 2   ]  == 0 ) // OK.
+        if(count == MSB /*- 1 && in[ MSB- 2   ]  == 0 */ ) // NO.  remember count variable uses '<=' so it is delayed...  
 
           // OK. it is being set
-          reg_led     <= 24'b000011110000111100001111 ;   // this is right.... 
+          reg_led     <= 24'b000011110000111100001111 ;   // this is right....
           // reg_led     <= addr  ;
           // reg_led     <= in[MSB-2-1 : MSB-8-1 ] ;      // set to the passed address
 /*
