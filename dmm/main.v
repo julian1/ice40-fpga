@@ -261,8 +261,8 @@ module top (
   wire [`NUM_BITS-1:0 ] w_conditioning_out = {
 
       // w_dummy,
-      monitor,
-      LED0,                   // 1<<13      bit 9.  512.
+      monitor,                // bit 10,    1024.
+      LED0,                   // 1<<9      bit 9.  512.
       SIG_PC_SW_CTL,
 //       himux2,              // remove the himux2
       himux,
