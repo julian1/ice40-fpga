@@ -63,14 +63,14 @@ module register_set #(parameter MSB=40)   (
   // todo. consider adding bitwidth in name.
   // need to be regs, because assign in sequential code/ always block.
 
-  output reg [24-1:0] reg_led ,
-  output reg [24-1:0] reg_spi_mux,
-  output reg [24-1:0] reg_4094,     // TODO change name it's a state register for OE. status .  or SR. reg_4094_.   or SR_4094,   sr_4094.
+  output reg [32-1:0] reg_led ,
+  output reg [32-1:0] reg_spi_mux,
+  output reg [32-1:0] reg_4094,     // TODO change name it's a state register for OE. status .  or SR. reg_4094_.   or SR_4094,   sr_4094.
                                                 // no it's a state register. not status.
 
-  output reg [24-1:0] reg_mode,
+  output reg [32-1:0] reg_mode,
 
-  output reg [24-1:0] reg_direct    // better name?
+  output reg [32-1:0] reg_direct    // better name?
 
   // passing a monitor in here, is useful, for monitoring internal. eg. the
   // output reg [7-1:0]   vec_monitor,

@@ -214,14 +214,15 @@ module top (
 
 
 
-  wire [24-1:0] reg_led;
+  wire [32-1:0] reg_led;
 
-  wire [24-1:0] reg_4094;   // TODO remove
+  wire [32-1:0] reg_4094;   // TODO remove
 
   // wire [1:0] reg_mode;     // two bits
-  wire [24-1:0] reg_mode;     // two bits
+  wire [32-1:0] reg_mode;     // two bits
 
-  wire [24 - 1 :0] reg_direct ;    // EXTR truncated.
+  // wire [24 - 1 :0] reg_direct ;    // EXTR truncated.
+  wire [32 - 1 :0] reg_direct ;    // EXTR truncated.
 
 
   register_set // #( 32 )   // register bank  . change name 'registers'
@@ -261,7 +262,7 @@ module top (
 
       // w_dummy,
       monitor,
-      LED0,                   // 1<<13
+      LED0,                   // 1<<13      bit 9.  512.
       SIG_PC_SW_CTL,
 //       himux2,              // remove the himux2
       himux,
@@ -306,9 +307,9 @@ module top (
    .c( test_pattern_out_2 ),     // 10
 
    // .d( 18'b0 ),     // 00  OK.
-   .d( 18'b111111111111111111 ),     // 00  OK.
+   // .d( 18'b111111111111111111 ),     // 00  OK.
 
-   // .d( reg_direct[ 18 - 1 :  0 ]   ),     // when we pass a hard-coded value in here...  then read/write reg_direct works.
+   .d( reg_direct[ 18 - 1 :  0 ]   ),     // when we pass a hard-coded value in here...  then read/write reg_direct works.
                                           // it is very strange.
 
    .sel( reg_mode[ 1 : 0 ]  ),
