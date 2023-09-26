@@ -157,6 +157,8 @@ module register_set #(parameter MSB=40)   (
 
 
               default:        out <=  24'b000011110000111100001111 << 8;
+              // default:        out <=  32'b00001111000011110000111100001111<< 8;     // 32 bit value appears to work.
+                                                                                        // NO. when we write this we lose the relay. bizzare.
 
             endcase
           end
