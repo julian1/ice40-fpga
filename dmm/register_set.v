@@ -76,7 +76,8 @@ module register_set #(parameter MSB=40)   (
 
   // To use in an inout. the initial block is a driver. so must be placed here.
   initial begin
-    reg_led       = 24'b101010101010101010101010; // magic, keep. useful test vector
+    // reg_led       = 24'b101010101010101010101010; // magic, keep. useful test vector
+    reg_led       = 24'b101010101010101010101111; // magic, keep. useful test vector
     reg_spi_mux   = 0;          // no spi device active
     reg_4094      = 0;
 
@@ -130,22 +131,6 @@ module register_set #(parameter MSB=40)   (
 
         // OK, we are getting an error here...
 
-        if(count == MSB && flag == 0) // MSB
-
-          case (addr)
-
-            `REG_LED:       reg_led     <= val32;
-            `REG_SPI_MUX:   reg_spi_mux <= val32;
-            `REG_4094:      reg_4094    <= val32;
-
-            `REG_MODE:      reg_mode <= val32;      // ok.
-            `REG_DIRECT:    reg_direct <= val32   ;   // this works except the top bit. so it's pretty good.
-            // `REG_DIRECT:    reg_direct <= { 8'b11111111, val32[ 24-1 : 0 ] }  ;   // this works except the top bit. so it's pretty good.
-
-            // what if write two registers.  and can test values.
-
-          endcase
-
 
         count   <= 0;
         in      <= 0;
@@ -183,7 +168,6 @@ module register_set #(parameter MSB=40)   (
               // default:        out <=  in[8 - 2  : 0] << 8;
               // default:        out <=  in[8 - 1  : 0] << 8 ;     // return passed address
 
-
               `REG_LED:       out <= reg_led << 8;
               `REG_SPI_MUX:   out <= reg_spi_mux << 8;
               `REG_4094:      out <= reg_4094 << 8;
@@ -193,13 +177,32 @@ module register_set #(parameter MSB=40)   (
               `REG_DIRECT:    out <= reg_direct << 8;
               // `REG_DIRECT:    out <= { reg_direct , 8'b0 } ;   // this fails.... weird.
 
-
               default:        out <=  24'b000011110000111100001111 << 8;
               // default:        out <=  32'b00001111000011110000111100001111<< 8;     // 32 bit value appears to work.
-                                                                                        // NO. when we write this we lose the relay. bizzare.
 
             endcase
-          end
+          end // count == 8
+
+
+        // issue could be count.  or could be addr decoding. 
+
+        if(count == MSB /*&& flag == 0 */) // MSB
+
+          case (addr)
+
+            `REG_LED:       reg_led     <= val32;
+            `REG_SPI_MUX:   reg_spi_mux <= val32;
+            `REG_4094:      reg_4094    <= val32;
+
+            `REG_MODE:      reg_mode <= val32;      // ok.
+            `REG_DIRECT:    reg_direct <= val32   ;   // this works except the top bit. so it's pretty good.
+            // `REG_DIRECT:    reg_direct <= { 8'b11111111, val32[ 24-1 : 0 ] }  ;   // this works except the top bit. so it's pretty good.
+
+            // what if write two registers.  and can test values.
+
+          endcase
+
+
 
       end
   end
