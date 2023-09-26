@@ -154,6 +154,7 @@ module register_set #(parameter MSB=40)   (
 
               `REG_MODE:      out <= reg_mode << 8;   // ok..
               `REG_DIRECT:    out <= reg_direct << 8;
+              // `REG_DIRECT:    out <= { reg_direct , 8'b0 } ;   // this fails.... weird.
 
 
               default:        out <=  24'b000011110000111100001111 << 8;

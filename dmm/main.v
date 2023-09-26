@@ -23,7 +23,7 @@
 
 `default_nettype none
 
-`define NUM_BITS        18    // with monitor.   and remove one of the himuxes.
+`define NUM_BITS        22    // with monitor.   and remove one of the himuxes.
                               // avoid getting into the upper bits of the register.
 
 
@@ -261,10 +261,10 @@ module top (
   wire [`NUM_BITS-1:0 ] w_conditioning_out = {
 
       // w_dummy,
-      monitor,                // bit 10,    1024.
-      LED0,                   // 1<<9      bit 9.  512.
+      monitor,                // bit 14. + 8= j    bit 10,    1024.
+      LED0,                   // bit 13.  8192. 
       SIG_PC_SW_CTL,
-//       himux2,              // remove the himux2
+      himux2,              // remove the himux2
       himux,
       azmux
     };
@@ -297,20 +297,20 @@ module top (
   // so it's strange. a register in the gg
 
 
-  mux_4to1_assign #( 18 )
+  mux_4to1_assign #( `NUM_BITS )
   mux_4to1_assign_1  (
 
     // when we change the order of these things - it fucks up.
 
-   .a( 18'b0 ),     // 00
-   .b( 18'b111111111111111111 ),     // 00
+   .a( 22'b0 ),     // 00
+   .b( 22'b1111111111111111111111 ),     // 00
    // .b( test_pattern_out ),        // 01  mcu controllable... needs a better name  mode_test_pattern. .   these are modes...
    .c( test_pattern_out ),     // 10
 
    // .d( 18'b0 ),     // 00  OK.
    // .d( 18'b111111111111111111 ),     // 00  OK.
 
-   .d( reg_direct[ 18 - 1 :  0 ]   ),     // when we pass a hard-coded value in here...  then read/write reg_direct works.
+   .d( reg_direct[ 22 - 1 :  0 ]   ),     // when we pass a hard-coded value in here...  then read/write reg_direct works.
                                           // it is very strange.
 
    .sel( reg_mode[ 1 : 0 ]  ),
