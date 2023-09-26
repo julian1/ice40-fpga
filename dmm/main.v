@@ -303,8 +303,9 @@ module top (
     // when we change the order of these things - it fucks up.
 
    .a( 18'b0 ),     // 00
-   .b( test_pattern_out ),        // 01  mcu controllable... needs a better name  mode_test_pattern. .   these are modes...
-   .c( test_pattern_out_2 ),     // 10
+   .b( 18'b111111111111111111 ),     // 00
+   // .b( test_pattern_out ),        // 01  mcu controllable... needs a better name  mode_test_pattern. .   these are modes...
+   .c( test_pattern_out ),     // 10
 
    // .d( 18'b0 ),     // 00  OK.
    // .d( 18'b111111111111111111 ),     // 00  OK.
