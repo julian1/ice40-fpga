@@ -153,7 +153,7 @@ module top (
   ////////////////////////////////////////
   // spi muxing
 
-  wire [24-1:0] reg_spi_mux ;// = 8'b00000001; // test
+  wire [32-1:0] reg_spi_mux ;// = 8'b00000001; // test
 
 
   // rather than doing individual assignments. - should just pass in anoter vector whether it's active low.
@@ -182,7 +182,7 @@ module top (
   mux_spi #( )      // output from POV of the mcu. ie. fpga as slave.
   mux_spi
   (
-    . reg_spi_mux(reg_spi_mux),
+    . reg_spi_mux(reg_spi_mux[ 8-1 : 0 ] ),
     . cs2(SPI_CS2),
     . clk(SPI_CLK),
     . mosi(SPI_MOSI ),
