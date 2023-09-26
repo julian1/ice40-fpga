@@ -102,7 +102,21 @@ module register_set #(parameter MSB=40)   (
 
   wire flag = in[ MSB- 1   ] ;
 
+/*
+  EXTR.  async  - is means for reset. so set a constant default initial value of 0.
 
+        it is not meant to be use for sampling the cs when it return hi at the finish of the sequence.
+
+        BUT - it's an issue. because we don't necessarily get a clk signal after the cs goes high on which to sample.
+
+        OR do we even care......     just clock the value in on the
+
+
+        So potential solution. is just to always take the value. on the clk.    and not care about the poedge.
+        And perhaps
+
+        ACTUALLY WE USE the reset... to set constant 0 values for the registers . so it is useful.
+*/
 
   // read
   // clock value into into out var
