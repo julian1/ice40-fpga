@@ -184,14 +184,16 @@ module register_set #(parameter MSB=40)   (
           end // count == 8
 
 
-        // issue could be count.  or msb or addr decoding. 
+        // issue could be count.  or msb or addr decoding.
 
         // with count == MSB-1 ... it sets everything to 0. weird?????
 
-        if(count == MSB - 1 && in[ MSB- 2   ]  == 0 ) // MSB
+        if(count == MSB - 1 && in[ MSB- 2   ]  == 0 ) // OK.
 
           // OK. it is being set
-          reg_led     <= 24'b000011110000111100001111 ;
+          // reg_led     <= 24'b000011110000111100001111 ;
+          // reg_led     <= addr  ;
+          reg_led     <= in[MSB-2-1 : MSB-8-1 ] ;      // set to the passed address
 /*
           case (addr)
 
