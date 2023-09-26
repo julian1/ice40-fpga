@@ -302,14 +302,13 @@ module top (
    .a( 18'b0 ),     // 00
    .b( test_pattern_out ),        // 01  mcu controllable... needs a better name  mode_test_pattern. .   these are modes...
    .c( test_pattern_out_2 ),     // 10
-   .d( reg_direct[ 18 - 1 :  0 ]   ),     // 11
 
-   // .sel( 2'b00 ),     // OK.  but when we try to pass reg_mode it fails?????                          and reg_mode doesn't work... it doesn't truncate properly
+   // .d( 18'b0 ),     // 00  OK.
+   .d( 18'b111111111111111111 ),     // 00  OK.
 
-    // when we try to pass reg_modde here. then 4094 comms fails. doesn't start , and return value fails.
-    // ....
+   // .d( reg_direct[ 18 - 1 :  0 ]   ),     // when we pass a hard-coded value in here...  then read/write reg_direct works.
+                                          // it is very strange.
 
-    // . spi_cs(SPI_CS),
    .sel( reg_mode[ 1 : 0 ]  ),
    .out( w_conditioning_out )
   );
