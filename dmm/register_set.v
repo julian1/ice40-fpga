@@ -170,13 +170,8 @@ module register_set #(parameter MSB=40)   (
   // TODO 7 bits, address space, without the write bit set.
   wire [  7 -1 : 0 ] addr = in[ MSB-2: MSB-8 ];  // single byte for reg/address,
 
-  // change to increase bits.
-  // wire [24-1 :0] val24   = in[ MSB-8- 1  : 0 ] ;              // lo 24 bits/ ... FIXME. indexing not quite correct.
   wire [24-1 :0] val24   = in[ 24 - 1 : 0 ] ;              // lo 24 bits/ ... FIXME. indexing not quite correct.
 
-  // wire [8-1 :0] val8      = in[ 8 - 1  : 0 ] ;              // lo 24 bits/ ... FIXME. indexing not quite correct.
-
-  // FIXME/REVIEW - does not look right - indexing outside array?
   wire flag = in[ MSB- 1   ] ;
 
 
