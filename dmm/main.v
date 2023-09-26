@@ -299,6 +299,8 @@ module top (
   mux_4to1_assign #( 18 )
   mux_4to1_assign_1  (
 
+    // when we change the order of these things - it fucks up.
+
    .a( 18'b0 ),     // 00
    .b( test_pattern_out ),        // 01  mcu controllable... needs a better name  mode_test_pattern. .   these are modes...
    .c( test_pattern_out_2 ),     // 10
