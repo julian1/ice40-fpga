@@ -170,7 +170,8 @@ module register_set #(parameter MSB=40)   (
   // TODO 7 bits, address space, without the write bit set.
   wire [  7 -1 : 0 ] addr = in[ MSB-2: MSB-8 ];  // single byte for reg/address,
 
-  wire [24-1 :0] val24   = in[ 24 - 1 : 0 ] ;              // lo 24 bits/ ... FIXME. indexing not quite correct.
+  // wire [24-1 :0] val24   = in[ 24 - 1 : 0 ] ;              // lo 24 bits/ ... FIXME. indexing not quite correct.
+  wire [32-1 :0] val32   = in[ 32 - 1 : 0 ] ;              // lo 24 bits/ ... FIXME. indexing not quite correct.
 
   wire flag = in[ MSB- 1   ] ;
 
@@ -184,22 +185,25 @@ module register_set #(parameter MSB=40)   (
         if ( flag == 0  )  // 0 means write.
           case (addr)
 
-            `REG_LED:       reg_led     <= val24;
-            `REG_SPI_MUX:   reg_spi_mux <= val24;
-            `REG_4094:      reg_4094    <= val24;
+            `REG_LED:       reg_led     <= val32;
+            `REG_SPI_MUX:   reg_spi_mux <= val32;
+            `REG_4094:      reg_4094    <= val32;
 
-            `REG_MODE:      reg_mode <= val24;      // ok.
-            `REG_DIRECT:    reg_direct <= val24;
+            `REG_MODE:      reg_mode <= val32;      // ok.
+            `REG_DIRECT:    reg_direct <= { 8'b11111111, val32[ 24-1 : 0 ] }  ;   // this works except the top bit. so it's pretty good.
 
 
           endcase
       end
 
+    // if we comment this code it fails....
     // we could handle bit set/clear/toggle updates here, if we wanted, for 8 bit registers.
+
     else if( count ==  8 + 8 + 8 )
       begin
 
       end
+
   end
 
 
