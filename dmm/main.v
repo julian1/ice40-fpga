@@ -10,7 +10,7 @@
 
 `include "register_set.v"
 `include "mux_spi.v"
-`include "blinker.v"
+//`include "blinker.v"
 // `include "modulation_az.v"
 
 
@@ -32,33 +32,44 @@
 `define CLK_FREQ        20000000
 
 
+
+
+module mux_4to1_assign #(parameter MSB =24)   (
+   input [MSB-1:0] a,
+   input [MSB-1:0] b,
+   input [MSB-1:0] c,
+   input [MSB-1:0] d,
+
+   input [1:0] sel,               // 2bits. input sel used to select between a,b,c,d
+
+   output [MSB-1:0] out
+
+  );
+
+   assign out = sel[1] ? (sel[0] ? d : c) : (sel[0] ? b : a);
+
+endmodule
+
+
+
+
 module test_pattern (
   input   clk,
 
 
-  input [`NUM_BITS-1:0 ]      default_out ,       // gets passed reg_direct...   why not just set a bit???? in
   output reg  [`NUM_BITS-1:0 ] out   // wire.kk
 );
-
-  // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
-  reg [31:0]   counter = 0;
 
   always@(posedge clk  )
       begin
 
-        counter <= counter + 1;
-        if( default_out)       // non zero.
-          begin
-            out  <= default_out ;                         //   ok. this works on first mux. but 4094 relay doesn't work.  how?. why?
-          end
-        else
-          begin
 
-            // works all monitor pins.
-            // remove the himux2  reg_direct value is not working.
-            out[ 17 : 0 ]  <= out [ 17  : 0   ] + 1;
+        // works all monitor pins.
+        // remove the himux2  reg_direct value is not working.
+        // out[ 17 : 0 ]  <= out [ 17  : 0   ] + 1;
+        // out  <= out  + 1;
+        out  <= out  + 1;
 
-          end
       end
 
 endmodule
@@ -260,21 +271,86 @@ module top (
 
   // ok. basic function pass through works.
 
+
+  reg[ `NUM_BITS-1:0 ]  test_pattern_out;
   test_pattern
   test_pattern (
     .clk( CLK),
-    // .reset( 1'b0),           // 0 == run normal. eg. test_pattern
-    // .direct ( reg_direct ),    // 1 == use reset value.  eg. reg_direct.
-    .default_out( reg_direct  ),
-    .out(  w_conditioning_out )
+
+    .out(  test_pattern_out )
   );
 
+
+
+  reg[ `NUM_BITS-1:0 ]  test_pattern_out_2;
+  test_pattern
+  test_pattern_2 (
+    .clk( CLK),
+
+    .out(  test_pattern_out_2 )
+  );
+
+
+
+  // ok
+  // so it's strange. a register in the gg
+
+
+  mux_4to1_assign #( 18 )
+  mux_4to1_assign_1  (
+
+   .a( 18'b0 ),     // 00
+   .b( test_pattern_out ),        // 01  mcu controllable... needs a better name  mode_test_pattern. .   these are modes...
+   .c( test_pattern_out_2 ),     // 10
+   .d( reg_direct[ 18 - 1 :  0 ]   ),     // 11
+
+   // .sel( 2'b00 ),     // OK.  but when we try to pass reg_mode it fails?????                          and reg_mode doesn't work... it doesn't truncate properly
+
+    // when we try to pass reg_modde here. then 4094 comms fails. doesn't start , and return value fails.
+    // ....
+
+    // . spi_cs(SPI_CS),
+   .sel( reg_mode[ 1 : 0 ]  ),
+   .out( w_conditioning_out )
+  );
 
 
 endmodule
 
 
+/*
+module test_pattern (
+  input   clk,
 
+
+  input [`NUM_BITS-1:0 ]      default_out ,       // gets passed reg_direct...   why not just set a bit???? in
+  output reg  [`NUM_BITS-1:0 ] out   // wire.kk
+);
+
+  // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
+  reg [31:0]   counter = 0;
+
+  always@(posedge clk  )
+      begin
+
+        counter <= counter + 1;
+        if( default_out)       // non zero.
+          begin
+            out  <= default_out ;                         //   ok. this works on first mux. but 4094 relay doesn't work.  how?. why?
+          end
+        else
+          begin
+
+            // works all monitor pins.
+            // remove the himux2  reg_direct value is not working.
+            out[ 17 : 0 ]  <= out [ 17  : 0   ] + 1;
+
+          end
+      end
+
+endmodule
+
+*/
 
 
 /*
