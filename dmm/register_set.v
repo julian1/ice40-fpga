@@ -184,10 +184,15 @@ module register_set #(parameter MSB=40)   (
           end // count == 8
 
 
-        // issue could be count.  or could be addr decoding. 
+        // issue could be count.  or msb or addr decoding. 
 
-        if(count == MSB /*&& flag == 0 */) // MSB
+        // with count == MSB-1 ... it sets everything to 0. weird?????
 
+        if(count == MSB - 1 && in[ MSB- 2   ]  == 0 ) // MSB
+
+          // OK. it is being set
+          reg_led     <= 24'b000011110000111100001111 ;
+/*
           case (addr)
 
             `REG_LED:       reg_led     <= val32;
@@ -201,6 +206,7 @@ module register_set #(parameter MSB=40)   (
             // what if write two registers.  and can test values.
 
           endcase
+*/
 
 
 
