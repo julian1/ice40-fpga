@@ -191,11 +191,11 @@ module register_set #(parameter MSB=40)   (
         if(count == MSB - 1 && in[ MSB- 2   ]  == 0 ) // OK.
 
           // OK. it is being set
-          // reg_led     <= 24'b000011110000111100001111 ;
+          reg_led     <= 24'b000011110000111100001111 ;   // this is right.... 
           // reg_led     <= addr  ;
-          reg_led     <= in[MSB-2-1 : MSB-8-1 ] ;      // set to the passed address
+          // reg_led     <= in[MSB-2-1 : MSB-8-1 ] ;      // set to the passed address
 /*
-          case (addr)
+          case (in[MSB-2-1 : MSB-8-1 ])
 
             `REG_LED:       reg_led     <= val32;
             `REG_SPI_MUX:   reg_spi_mux <= val32;
