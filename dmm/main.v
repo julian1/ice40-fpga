@@ -282,7 +282,7 @@ module top (
   );
 
 
-
+/*
   reg[ `NUM_BITS-1:0 ]  test_pattern_out_2;
   test_pattern
   test_pattern_2 (
@@ -291,7 +291,7 @@ module top (
     .out(  test_pattern_out_2 )
   );
 
-
+*/
 
   // ok
   // so it's strange. a register in the gg
