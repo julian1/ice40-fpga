@@ -25,6 +25,7 @@ icepack ./build/main.asc ./build/main.bin
 
 icetime ./build/main.asc -d hx1k 2>&1 | tee ./build/icetime.txt
 
+cat ./build/yosys-errors.txt
 
 echo "finished"
 

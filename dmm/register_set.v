@@ -28,16 +28,6 @@
 
 
 
-function [4-1:0] update (input [4-1:0] x, input [4-1:0] set, input [4-1:0] clear,);
-  begin
-    if( clear & set  /*!= 0*/  ) // if both a bit of both set and clear are set, then treat as toggle
-      update =  (clear & set )  ^ x ; // xor. to toggle.
-    else
-      update = ~(  ~(x | set ) | clear);    // clear in priority
-  end
-endfunction
-
-
 
 // reg [ 12 - 1: 0 ] reg_array[ 32 - 1 : 0 ] ;    // 12x   32 bit registers
 
@@ -101,6 +91,19 @@ module register_set #(parameter MSB=40)   (
   end
 
 
+
+
+
+  // TODO 7 bits, address space, without the write bit set.
+  wire [  7 -1 : 0 ] addr = in[ MSB-2: MSB-8 ];  // single byte for reg/address,
+
+  // wire [24-1 :0] val24   = in[ 24 - 1 : 0 ] ;              // lo 24 bits/ ... FIXME. indexing not quite correct.
+  wire [32-1 :0] val32   = in[ 32 - 1 : 0 ] ;              // lo 24 bits/ ... FIXME. indexing not quite correct.
+
+  wire flag = in[ MSB- 1   ] ;
+
+
+
   // read
   // clock value into into out var
   // USING A NEG EDGE CLOCK.
@@ -110,6 +113,26 @@ module register_set #(parameter MSB=40)   (
     if(cs)
       // cs not asserted (active lo), so reset regs
       begin
+
+        // OK, we are getting an error here...
+
+        if(count == MSB && flag == 0) // MSB
+
+          case (addr)
+
+            `REG_LED:       reg_led     <= val32;
+            `REG_SPI_MUX:   reg_spi_mux <= val32;
+            `REG_4094:      reg_4094    <= val32;
+
+            `REG_MODE:      reg_mode <= val32;      // ok.
+            `REG_DIRECT:    reg_direct <= val32   ;   // this works except the top bit. so it's pretty good.
+            // `REG_DIRECT:    reg_direct <= { 8'b11111111, val32[ 24-1 : 0 ] }  ;   // this works except the top bit. so it's pretty good.
+
+            // what if write two registers.  and can test values.
+
+          endcase
+
+
         count   <= 0;
         in      <= 0;
         out     <= 0;
@@ -167,48 +190,17 @@ module register_set #(parameter MSB=40)   (
       end
   end
 
-  // TODO 7 bits, address space, without the write bit set.
-  wire [  7 -1 : 0 ] addr = in[ MSB-2: MSB-8 ];  // single byte for reg/address,
-
-  // wire [24-1 :0] val24   = in[ 24 - 1 : 0 ] ;              // lo 24 bits/ ... FIXME. indexing not quite correct.
-  wire [32-1 :0] val32   = in[ 32 - 1 : 0 ] ;              // lo 24 bits/ ... FIXME. indexing not quite correct.
-
-  wire flag = in[ MSB- 1   ] ;
-
-
-  // set/write the register
-  always @ (posedge cs)   // cs done.
-  begin
-    if(count == MSB ) // MSB
-      begin
-
-        if ( flag == 0  )  // 0 means write.
-          case (addr)
-
-            `REG_LED:       reg_led     <= val32;
-            `REG_SPI_MUX:   reg_spi_mux <= val32;
-            `REG_4094:      reg_4094    <= val32;
-
-            `REG_MODE:      reg_mode <= val32;      // ok.
-            `REG_DIRECT:    reg_direct <= val32   ;   // this works except the top bit. so it's pretty good.
-            // `REG_DIRECT:    reg_direct <= { 8'b11111111, val32[ 24-1 : 0 ] }  ;   // this works except the top bit. so it's pretty good.
-
-            // what if write two registers.  and can test values.
-
-          endcase
-      end
-
-    // if we comment this code it fails....
-    // we could handle bit set/clear/toggle updates here, if we wanted, for 8 bit registers.
-
-    else if( count ==  8 + 8 + 8 )
-      begin
-
-      end
-
-  end
-
 
 endmodule
+
+
+function [4-1:0] update (input [4-1:0] x, input [4-1:0] set, input [4-1:0] clear,);
+  begin
+    if( clear & set  /*!= 0*/  ) // if both a bit of both set and clear are set, then treat as toggle
+      update =  (clear & set )  ^ x ; // xor. to toggle.
+    else
+      update = ~(  ~(x | set ) | clear);    // clear in priority
+  end
+endfunction
 
 
