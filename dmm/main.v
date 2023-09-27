@@ -23,10 +23,11 @@
 
 `default_nettype none
 
-`define NUM_BITS        22    // with monitor.   and remove one of the himuxes.
+// `define NUM_BITS        22    // with monitor.   and remove one of the himuxes.
                               // avoid getting into the upper bits of the register.
 
 
+`define NUM_BITS        29    //
 
 
 `define CLK_FREQ        20000000
@@ -259,6 +260,9 @@ module top (
 
   );
 
+  ///////////////////////////
+
+
 
 
   // prefix these with v_ or vec_ ?
@@ -269,16 +273,22 @@ module top (
 
   wire [8-1: 0] monitor = { MON7, MON6, MON5,MON4, MON3, MON2, MON1, MON0 } ;
 
+  wire [4-1:0 ] adcmux =  { U902_SW3_CTL, U902_SW2_CTL, U902_SW1_CTL, U902_SW0_CTL };    // U902
 
-  // wire [2-1:0] w_dummy;     // pad to 24 bits
+
+  // 4x4=16 + 8mon + 5 = 29 bits.
 
   wire [`NUM_BITS-1:0 ] w_conditioning_out = {
 
-      // w_dummy,
-      monitor,                // bit 14. + 8= j    bit 10,    1024.
+      SPI_INTERUPT_OUT,
+      MEAS_COMPLETE_CTL,
+      CMPR_LATCH_CTL,
+      adcmux,                  // 19 bits.
+
+      monitor,                // 15.    bit 14 from 0.. + 8= j    bit 10,    1024.
       LED0,                   // bit 13.  8192.
       SIG_PC_SW_CTL,
-      himux2,              // remove the himux2
+      himux2,              // remove the himux2  12.
       himux,
       azmux
     };
@@ -316,15 +326,23 @@ module top (
 
     // when we change the order of these things - it fucks up.
 
-   .a( 22'b0 ),     // 00
-   .b( 22'b1111111111111111111111 ),     // 00
+   // .a( 22'b0 ),     // 00
+   // .b( 22'b1111111111111111111111 ),     // 00
+
+   .a( { `NUM_BITS{ 0 } }   ),     // 00
+
+   .b( 29'b11111111111111111111111111111   ),     // 00
+   // .b( { `NUM_BITS{ 1 } }  ),     // 00
+
+
+
    // .b( test_pattern_out ),        // 01  mcu controllable... needs a better name  mode_test_pattern. .   these are modes...
    .c( test_pattern_out ),     // 10
 
    // .d( 18'b0 ),     // 00  OK.
    // .d( 18'b111111111111111111 ),     // 00  OK.
 
-   .d( reg_direct[ 22 - 1 :  0 ]   ),     // when we pass a hard-coded value in here...  then read/write reg_direct works.
+   .d( reg_direct[ `NUM_BITS - 1 :  0 ]   ),     // when we pass a hard-coded value in here...  then read/write reg_direct works.
                                           // it is very strange.
 
    .sel( reg_mode[ 1 : 0 ]  ),
