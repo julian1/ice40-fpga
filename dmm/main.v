@@ -306,20 +306,6 @@ module top (
   );
 
 
-/*
-  reg[ `NUM_BITS-1:0 ]  test_pattern_out_2;
-  test_pattern
-  test_pattern_2 (
-    .clk( CLK),
-
-    .out(  test_pattern_out_2 )
-  );
-
-*/
-
-  // ok
-  // so it's strange. a register in the gg
-
 
   mux_4to1_assign #( `NUM_BITS )
   mux_4to1_assign_1  (
@@ -332,15 +318,10 @@ module top (
    .a( { `NUM_BITS{ 0 } }   ),     // 00
 
    .b( 29'b11111111111111111111111111111   ),     // 00
-   // .b( { `NUM_BITS{ 1 } }  ),     // 00
+   // .b( { `NUM_BITS{ 1 } }  ),     // 00  doesn't appear to work???
 
 
-
-   // .b( test_pattern_out ),        // 01  mcu controllable... needs a better name  mode_test_pattern. .   these are modes...
    .c( test_pattern_out ),     // 10
-
-   // .d( 18'b0 ),     // 00  OK.
-   // .d( 18'b111111111111111111 ),     // 00  OK.
 
    .d( reg_direct[ `NUM_BITS - 1 :  0 ]   ),     // when we pass a hard-coded value in here...  then read/write reg_direct works.
                                           // it is very strange.
@@ -351,6 +332,25 @@ module top (
 
 
 endmodule
+
+
+
+
+
+
+
+
+
+/*
+  reg[ `NUM_BITS-1:0 ]  test_pattern_out_2;
+  test_pattern
+  test_pattern_2 (
+    .clk( CLK),
+
+    .out(  test_pattern_out_2 )
+  );
+
+*/
 
 
 /*
