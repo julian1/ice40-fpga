@@ -8,8 +8,10 @@
   instead use async cs - only to init/reset values when non enabled.
   but when the spi transfer is inititiated by cs going lo, we are committed to reading/writing values according to the clkcount.
   this is because cannot rely on cs edge of cs as async signal together with setting non-constant values.
-  there was a yosys error that was not given because the code was split/factored into two always blocks.
+  there was a yosys error that was masked/not given because the code was split/factored into two always blocks.
 
+  note that if cs goes high early, indicating wrong/or aborted spi, then the current transaction is not completed as desired.
+  and it would still be possible to have multi length values, by having the same reg function on a second count factor.
 */
 
 
