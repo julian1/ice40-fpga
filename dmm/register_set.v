@@ -115,7 +115,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
             one possibility is to use blocking assignment.
             but better/simpler - is to add extra byte, and accept that some of the higher bits are lost
         */
-        if(count == 8)
+        if(count == 8)    // TODO - THINK WE SHOULDUSE bcount==8 here.  and this might fix the top bit issue.
           begin
             // case (`REG_LED  ) //  correct.
             case (in[8 - 2  : 0 ] )
