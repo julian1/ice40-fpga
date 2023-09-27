@@ -10,7 +10,7 @@
 
 `include "register_set.v"
 `include "mux_spi.v"
-`include "blinker.v"
+//`include "blinker.v"
 // `include "modulation_az.v"
 
 
@@ -23,7 +23,7 @@
 
 `default_nettype none
 
-`define NUM_BITS        18    // with monitor.   and remove one of the himuxes.
+`define NUM_BITS        22    // with monitor.   and remove one of the himuxes.
                               // avoid getting into the upper bits of the register.
 
 
@@ -32,33 +32,47 @@
 `define CLK_FREQ        20000000
 
 
+<<<<<<< HEAD
+=======
+
+
+module mux_4to1_assign #(parameter MSB =24)   (
+   input [MSB-1:0] a,
+   input [MSB-1:0] b,
+   input [MSB-1:0] c,
+   input [MSB-1:0] d,
+
+   input [1:0] sel,               // 2bits. input sel used to select between a,b,c,d
+
+   output [MSB-1:0] out
+
+  );
+
+   assign out = sel[1] ? (sel[0] ? d : c) : (sel[0] ? b : a);
+
+endmodule
+
+
+
+
+>>>>>>> 2e54793 (squash update - working with vectors properly subscripted for reducing width for sel, and output.)
 module test_pattern (
   input   clk,
 
 
-  input [`NUM_BITS-1:0 ]      default_out ,       // gets passed reg_direct...   why not just set a bit???? in
   output reg  [`NUM_BITS-1:0 ] out   // wire.kk
 );
-
-  // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
-  reg [31:0]   counter = 0;
 
   always@(posedge clk  )
       begin
 
-        counter <= counter + 1;
-        if( default_out)       // non zero.
-          begin
-            out  <= default_out ;                         //   ok. this works on first mux. but 4094 relay doesn't work.  how?. why?
-          end
-        else
-          begin
 
-            // works all monitor pins.
-            // remove the himux2  reg_direct value is not working.
-            out[ 17 : 0 ]  <= out [ 17  : 0   ] + 1;
+        // works all monitor pins.
+        // remove the himux2  reg_direct value is not working.
+        // out[ 17 : 0 ]  <= out [ 17  : 0   ] + 1;
+        // out  <= out  + 1;
+        out  <= out  + 1;
 
-          end
       end
 
 endmodule
@@ -142,7 +156,7 @@ module top (
   ////////////////////////////////////////
   // spi muxing
 
-  wire [24-1:0] reg_spi_mux ;// = 8'b00000001; // test
+  wire [32-1:0] reg_spi_mux ;// = 8'b00000001; // test
 
 
   // rather than doing individual assignments. - should just pass in anoter vector whether it's active low.
@@ -171,7 +185,7 @@ module top (
   mux_spi #( )      // output from POV of the mcu. ie. fpga as slave.
   mux_spi
   (
-    . reg_spi_mux(reg_spi_mux),
+    . reg_spi_mux(reg_spi_mux[ 8-1 : 0 ] ),
     . cs2(SPI_CS2),
     . clk(SPI_CLK),
     . mosi(SPI_MOSI ),
@@ -203,14 +217,15 @@ module top (
 
 
 
-  wire [24-1:0] reg_led;
+  wire [32-1:0] reg_led;
 
-  wire [24-1:0] reg_4094;   // TODO remove
+  wire [32-1:0] reg_4094;   // TODO remove
 
   // wire [1:0] reg_mode;     // two bits
-  wire [24-1:0] reg_mode;     // two bits
+  wire [32-1:0] reg_mode;     // two bits
 
-  wire [24 - 1 :0] reg_direct ;    // EXTR truncated.
+  // wire [24 - 1 :0] reg_direct ;    // EXTR truncated.
+  wire [32 - 1 :0] reg_direct ;    // EXTR truncated.
 
 
   register_set // #( 32 )   // register bank  . change name 'registers'
@@ -249,10 +264,10 @@ module top (
   wire [`NUM_BITS-1:0 ] w_conditioning_out = {
 
       // w_dummy,
-      monitor,
-      LED0,                   // 1<<13
+      monitor,                // bit 14. + 8= j    bit 10,    1024.
+      LED0,                   // bit 13.  8192. 
       SIG_PC_SW_CTL,
-//       himux2,              // remove the himux2
+      himux2,              // remove the himux2
       himux,
       azmux
     };
@@ -260,21 +275,88 @@ module top (
 
   // ok. basic function pass through works.
 
+
+  reg[ `NUM_BITS-1:0 ]  test_pattern_out;
   test_pattern
   test_pattern (
     .clk( CLK),
-    // .reset( 1'b0),           // 0 == run normal. eg. test_pattern
-    // .direct ( reg_direct ),    // 1 == use reset value.  eg. reg_direct.
-    .default_out( reg_direct  ),
-    .out(  w_conditioning_out )
+
+    .out(  test_pattern_out )
   );
 
+
+/*
+  reg[ `NUM_BITS-1:0 ]  test_pattern_out_2;
+  test_pattern
+  test_pattern_2 (
+    .clk( CLK),
+
+    .out(  test_pattern_out_2 )
+  );
+
+*/
+
+  // ok
+  // so it's strange. a register in the gg
+
+
+  mux_4to1_assign #( `NUM_BITS )
+  mux_4to1_assign_1  (
+
+    // when we change the order of these things - it fucks up.
+
+   .a( 22'b0 ),     // 00
+   .b( 22'b1111111111111111111111 ),     // 00
+   // .b( test_pattern_out ),        // 01  mcu controllable... needs a better name  mode_test_pattern. .   these are modes...
+   .c( test_pattern_out ),     // 10
+
+   // .d( 18'b0 ),     // 00  OK.
+   // .d( 18'b111111111111111111 ),     // 00  OK.
+
+   .d( reg_direct[ 22 - 1 :  0 ]   ),     // when we pass a hard-coded value in here...  then read/write reg_direct works.
+                                          // it is very strange.
+
+   .sel( reg_mode[ 1 : 0 ]  ),
+   .out( w_conditioning_out )
+  );
 
 
 endmodule
 
 
+/*
+module test_pattern (
+  input   clk,
 
+
+  input [`NUM_BITS-1:0 ]      default_out ,       // gets passed reg_direct...   why not just set a bit???? in
+  output reg  [`NUM_BITS-1:0 ] out   // wire.kk
+);
+
+  // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
+  reg [31:0]   counter = 0;
+
+  always@(posedge clk  )
+      begin
+
+        counter <= counter + 1;
+        if( default_out)       // non zero.
+          begin
+            out  <= default_out ;                         //   ok. this works on first mux. but 4094 relay doesn't work.  how?. why?
+          end
+        else
+          begin
+
+            // works all monitor pins.
+            // remove the himux2  reg_direct value is not working.
+            out[ 17 : 0 ]  <= out [ 17  : 0   ] + 1;
+
+          end
+      end
+
+endmodule
+
+*/
 
 
 /*
