@@ -32,8 +32,6 @@
 `define CLK_FREQ        20000000
 
 
-<<<<<<< HEAD
-=======
 
 
 module mux_4to1_assign #(parameter MSB =24)   (
@@ -55,7 +53,6 @@ endmodule
 
 
 
->>>>>>> 2e54793 (squash update - working with vectors properly subscripted for reducing width for sel, and output.)
 module test_pattern (
   input   clk,
 

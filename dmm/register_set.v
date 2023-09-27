@@ -1,17 +1,17 @@
 
 /*
-// we MUST read 8 bits here, to have the lsb bits of the register address.
-    but this creates issue for how quickly we can stuff data into dout, so that the value can be read
-    one option is to change to non blocking.
-    but simpler - is to just padd an extra byte an use a couple of bits.
+  --------------------
+
+  - OK. rewritten/ changed the register_bank strategy. sep 2023.
+
+  rather than use the async cs going high as a final clk pulse on which to set the register values .
+  instead use async cs - only to init/reset values when non enabled.
+  but when the spi transfer is inititiated by cs going lo, we are committed to reading/writing values according to the clkcount.
+  this is because cannot rely on cs edge of cs as async signal together with setting non-constant values.
+  there was a yosys error that was not given because the code was split/factored into two always blocks.
+
 */
 
-
-/*
-    could add back the bitwise set,clear,toggle, for a 8 bit reg, then could aggrevate registers if we wanted.
-    error flags etc.
-
-*/
 
 `default_nettype none
 
@@ -29,17 +29,7 @@
 
 
 
-// reg [ 12 - 1: 0 ] reg_array[ 32 - 1 : 0 ] ;    // 12x   32 bit registers
-
-
-/*
-  EXTR.  Be careful.
-    passing a register shorter than 24bits. here. corrupts behavior.
-    kind of bizarre.
-*/
-
-
-module register_set #(parameter MSB=40)   (
+module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,   4 bytes data.
 
   // spi
   input  clk,
@@ -50,17 +40,12 @@ module register_set #(parameter MSB=40)   (
 
   ////////////
   // regs
-  // todo. consider adding bitwidth in name.
-  // need to be regs, because assign in sequential code/ always block.
 
   output reg [32-1:0] reg_led ,
   output reg [32-1:0] reg_spi_mux,
   output reg [32-1:0] reg_4094,     // TODO change name it's a state register for OE. status .  or SR. reg_4094_.   or SR_4094,   sr_4094.
-                                                // no it's a state register. not status.
-
   output reg [32-1:0] reg_mode,
-
-  output reg [32-1:0] reg_direct    // better name?
+  output reg [32-1:0] reg_direct
 
   // passing a monitor in here, is useful, for monitoring internal. eg. the
   // output reg [7-1:0]   vec_monitor,
@@ -86,58 +71,19 @@ module register_set #(parameter MSB=40)   (
     reg_led       = 24'b101010101010101010101111; // magic, keep. useful test vector
     reg_spi_mux   = 0;          // no spi device active
     reg_4094      = 0;
-
-
-     // reg_mode = 0;      // thisi doesn't work.  we lose relay.
-
-     // reg_direct = 1<<13 ;   // but relay works, when do this...a absolutely weird.
-     reg_direct = 0  ;   // but relay works, when do this...a absolutely weird.     OK. now works.
-
-
+    reg_mode      = 0;      
+    reg_direct    = 0  ;   
 
   end
 
 
-
-
-
-  // TODO 7 bits, address space, without the write bit set.
-  wire [  7 -1 : 0 ] addr = in[ MSB-2: MSB-8 ];  // single byte for reg/address,
-
-  // wire [24-1 :0] val24   = in[ 24 - 1 : 0 ] ;              // lo 24 bits/ ... FIXME. indexing not quite correct.
-  wire [32-1 :0] val32   = in[ 32 - 1 : 0 ] ;              // lo 24 bits/ ... FIXME. indexing not quite correct.
-
-  wire flag = in[ MSB- 1   ] ;
-
-/*
-  EXTR.  async  - is means for reset. so set a constant default initial value of 0.
-
-        it is not meant to be use for sampling the cs when it return hi at the finish of the sequence.
-
-        BUT - it's an issue. because we don't necessarily get a clk signal after the cs goes high on which to sample.
-
-        OR do we even care......     just clock the value in on the
-
-
-        So potential solution. is just to always take the value. on the clk.    and not care about the poedge.
-        And perhaps
-
-        ACTUALLY WE USE the reset... to set constant 0 values for the registers . so it is useful.
-*/
-
-  // read
-  // clock value into into out var
-  // USING A NEG EDGE CLOCK.
   always @ (negedge clk or posedge cs)
-  // always @ (posedge clk or posedge cs)
   begin
     if(cs)
       // cs not asserted (active lo), so reset regs
       begin
 
-        // OK, we are getting an error here...
-
-
+        // async state on cs, must be constant.
         count   <= 0;
         in      <= 0;
         out     <= 0;
@@ -145,11 +91,9 @@ module register_set #(parameter MSB=40)   (
     else
       // cs asserted, clock data in and out
       begin
-        /*
-          whoot. now  non-blocking.
-        */
+
+
         // shift din into in register
-        // in <= {in[MSB-2:0], din};
         in <= {in[MSB-2:0], din};
 
         // shift data from out register
@@ -157,11 +101,12 @@ module register_set #(parameter MSB=40)   (
 
         count <= count + 1;
 
-
+        // blocking so that have the current count and data...
+        // but should not be too slow... because references non-blocking state
         bin     = {in[MSB-2:0], din};
 
+        // blocking count. references non-blocking.
         bcount  = count + 1;
-
 
 
         /*
@@ -197,34 +142,11 @@ module register_set #(parameter MSB=40)   (
           end // count == 8
 
 
-        /*
-          // NO.  remember count variable uses '<=' so it is delayed...
-
-          OK. this is genuinely hard.
-          because the count and the data aggregation  ... are delayed... by use of '<=' assignment.
-          fuck.
-
-          count is also one behind.
-
-          bcount      - for blocking count.
-          bin         - for blockiing in.  making the data available immediately for assignment.
-        */
-
-
-        // issue could be count.  or msb or addr decoding.
-
-        // with count == MSB-1 ... it sets everything to 0. weird?????
-
-        // if(count == MSB - 1 && in[ MSB- 2   ]  == 0 ) // OK.
-        if(bcount == MSB && bin[ MSB- 1   ]  == 0  )
+        if(bcount == MSB && bin[ MSB- 1]  == 0  )   // have all bits and write flag is set.
 
           // OK. it is being set
           // reg_led     <= 24'b000011110000111100001111 ;   // this is right....
-          // reg_led     <= addr  ;
-          // reg_led     <= bin[MSB-2-1 : MSB-8-1 ] ;      // set to the passed address
-          // reg_led     <= bin[MSB-2 : MSB-8 ] ;      // works to return the address
-
-
+          // reg_led     <= bin[MSB-2 : MSB-8 ] ;      // works to return the address that was passed.
 
           case (  bin[MSB-2 : MSB-8 ] )
 
@@ -232,15 +154,11 @@ module register_set #(parameter MSB=40)   (
             `REG_SPI_MUX:   reg_spi_mux <= bin;
             `REG_4094:      reg_4094    <= bin;
 
-            `REG_MODE:      reg_mode    <= bin;      // ok.
-            `REG_DIRECT:    reg_direct  <= bin;   // this works except the top bit. so it's pretty good.
+            `REG_MODE:      reg_mode    <= bin;
+            `REG_DIRECT:    reg_direct  <= bin;
 
-            // `REG_DIRECT:    reg_direct <= { 8'b11111111, val32[ 24-1 : 0 ] }  ;   // this works except the top bit. so it's pretty good.
-            // what if write two registers.  and can test values.
 
           endcase
-
-
 
 
       end
@@ -248,15 +166,5 @@ module register_set #(parameter MSB=40)   (
 
 
 endmodule
-
-
-function [4-1:0] update (input [4-1:0] x, input [4-1:0] set, input [4-1:0] clear,);
-  begin
-    if( clear & set  /*!= 0*/  ) // if both a bit of both set and clear are set, then treat as toggle
-      update =  (clear & set )  ^ x ; // xor. to toggle.
-    else
-      update = ~(  ~(x | set ) | clear);    // clear in priority
-  end
-endfunction
 
 
