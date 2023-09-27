@@ -5,13 +5,16 @@
   - OK. rewritten/ changed the register_bank strategy. sep 2023.
 
   rather than use the async cs going high as a final clk pulse on which to set the register values .
-  instead use async cs - only to init/reset values when non enabled.
-  but when the spi transfer is inititiated by cs going lo, we are committed to reading/writing values according to the clkcount.
+  instead use async cs - only to hold values in init/reset when cs is non enabled.
+  but when the spi transfer is inititiated by cs going lo, we are become committed to reading/writing values according to the clk count.
   this is because cannot rely on cs edge of cs as async signal together with setting non-constant values.
   there was a yosys error that was masked/not given because the code was split/factored into two always blocks.
 
-  note that if cs goes high early, indicating wrong/or aborted spi, then the current transaction is not completed as desired.
-  and it would still be possible to have multi length values, by having the same reg function on a second count factor.
+  note that if cs goes high early, indicating wrong/or aborted spi, then clk count and input data is reset without reg values being updated which is the desired behavior.
+  different spi length transfers are possible with more than once update function, eg. on a second count factor.
+  or code register specific transfer count/length
+
+  but all this means we have to use small blocking assignment - to arrange write on the final spi clk pulse. because we are not guaranteed anymore further clk cycles
 */
 
 
@@ -23,7 +26,6 @@
 `define REG_4094                9
 
 
-// `define REG_MODE                16  // 10000
 `define REG_MODE                12  // 10000
 `define REG_DIRECT        14
 
@@ -73,8 +75,8 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
     reg_led       = 24'b101010101010101010101111; // magic, keep. useful test vector
     reg_spi_mux   = 0;          // no spi device active
     reg_4094      = 0;
-    reg_mode      = 0;      
-    reg_direct    = 0  ;   
+    reg_mode      = 0;
+    reg_direct    = 0  ;
 
   end
 
