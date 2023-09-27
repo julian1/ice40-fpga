@@ -312,13 +312,15 @@ module top (
 
     // when we change the order of these things - it fucks up.
 
-   // .a( 22'b0 ),     // 00
+   // .a( 22'b0 ),     // 00  ok. will zero pad?
    // .b( 22'b1111111111111111111111 ),     // 00
 
-   .a( { `NUM_BITS{ 0 } }   ),     // 00
+   .a( { `NUM_BITS{ 1'b0 } }   ),     // 00 OK.
 
-   .b( 29'b11111111111111111111111111111   ),     // 00
-   // .b( { `NUM_BITS{ 1 } }  ),     // 00  doesn't appear to work???
+   // .b( 29'b11111111111111111111111111111   ),     // 00 OK.
+   // .b( { `NUM_BITS { 1 } }  ),     // this doesn't work. because extends default 32 bit length by NUM_BITS?
+   .b( { `NUM_BITS { 1'b1 } }  ),     // 00  works.
+
 
 
    .c( test_pattern_out ),     // 10
