@@ -44,7 +44,7 @@ set_io UNUSED_2         91
 
 set_io SIG_PC_SW_CTL    93
 
-set_io U402_EN_CTL      1 
+set_io U402_EN_CTL      94
 set_io U402_A0_CTL      95
 set_io U402_A1_CTL      96
 set_io U402_A2_CTL      97
