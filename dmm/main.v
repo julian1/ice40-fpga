@@ -86,19 +86,7 @@ module top (
   input  CLK,
 
 
-  output MON0,
-  output MON1,
-  output MON2,
-  output MON3,
-  output MON4,
-  output MON5,
-  output MON6,
-  output MON7,
 
-
-
-  // leds
-  output LED0,
 
   // spi
   input  SPI_CLK,
@@ -107,8 +95,6 @@ module top (
   input  SPI_CS2,
   output SPI_MISO,
   // output b
-
-  output SPI_INTERUPT_OUT,
 
 
 
@@ -119,14 +105,17 @@ module top (
   output GLB_4094_CLK,
   output GLB_4094_DATA,
   output GLB_4094_STROBE_CTL,
-  input U1004_4094_DATA,   // this is unused. but it's an input
+  input  U1004_4094_DATA,   // this is unused. but it's an input
 
 
   ///////////////
+  // outputs - used modally.
 
-  // pre-charge
-  output SIG_PC_SW_CTL,
-
+  // azmux
+  output U414_A0_CTL,
+  output U414_A1_CTL,
+  output U414_A2_CTL,
+  output U414_EN_CTL,
 
   // himux
   output U413_A0_CTL,
@@ -140,11 +129,36 @@ module top (
   output U402_A2_CTL,
   output U402_EN_CTL,
 
-  // azmux
-  output U414_A0_CTL,
-  output U414_A1_CTL,
-  output U414_A2_CTL,
-  output U414_EN_CTL,
+  // pre-charge
+  output SIG_PC_SW_CTL,
+
+  // leds
+  output LED0,
+
+  // monitor
+  output MON0,
+  output MON1,
+  output MON2,
+  output MON3,
+  output MON4,
+  output MON5,
+  output MON6,
+  output MON7,
+
+
+  //
+  output SPI_INTERUPT_OUT,    // make modal . i think.
+
+  output MEAS_COMPLETE_CTL,
+
+  //  adc current switches
+  output U902_SW0_CTL,
+  output U902_SW1_CTL,
+  output U902_SW2_CTL,
+  output U902_SW3_CTL,
+  output CMPR_LATCH_CTL
+
+  ////////////
 
 );
 
@@ -262,7 +276,7 @@ module top (
 
       // w_dummy,
       monitor,                // bit 14. + 8= j    bit 10,    1024.
-      LED0,                   // bit 13.  8192. 
+      LED0,                   // bit 13.  8192.
       SIG_PC_SW_CTL,
       himux2,              // remove the himux2
       himux,

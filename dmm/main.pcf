@@ -30,7 +30,7 @@ set_io GLB_4094_STROBE_CTL 74
 set_io GLB_4094_DATA    75
 set_io _4094_OE_CTL     76
 
-set_io UNUSED_1         78
+set_io UNUSED_1         78  # this is unconnected.  but aligns with level-shift ic. .  rename RESERVED.
 
 
 set_io U1004_4094_DATA  79
@@ -39,7 +39,7 @@ set_io SWITCH_SENSE_OUT  81
 set_io DCV_OVP_OUT      87
 set_io OHMS_OVP_OUT     88
 set_io SUPPLY_SENSE_OUT 90
-set_io UNUSED_2         91
+set_io UNUSED_2         91    # connects to level-shift.  but level-shift unconnected. rename RESERVED.
 
 
 set_io SIG_PC_SW_CTL    93
