@@ -71,6 +71,12 @@ module register_set #(parameter MSB=40)   (
   reg [MSB-1:0] out  ;    // register for output.  should be size of MSB due to high bits
   reg [8-1:0]   count;
 
+
+
+  reg [MSB-1:0] bin;      // could be MSB-8-1 i think.
+  reg [8-1:0]   bcount;
+
+
   wire dout = out[MSB- 1 -1 ];
 
 
@@ -151,6 +157,13 @@ module register_set #(parameter MSB=40)   (
 
         count <= count + 1;
 
+
+        bin     = {in[MSB-2:0], din};
+
+        bcount  = count + 1;
+
+
+
         /*
         // we MUST read 8 bits here, in order to get the lsb bits of the register address.
             but this creates issue for how quickly we can stuff data into dout, to be read by the master on the clk cycle,
@@ -190,6 +203,11 @@ module register_set #(parameter MSB=40)   (
           OK. this is genuinely hard.
           because the count and the data aggregation  ... are delayed... by use of '<=' assignment.
           fuck.
+
+          count is also one behind.
+
+          bcount      - for blocking count.
+          bin         - for blockiing in.  making the data available immediately for assignment.
         */
 
 
@@ -198,12 +216,15 @@ module register_set #(parameter MSB=40)   (
         // with count == MSB-1 ... it sets everything to 0. weird?????
 
         // if(count == MSB - 1 && in[ MSB- 2   ]  == 0 ) // OK.
-        if(count == MSB /*- 1 && in[ MSB- 2   ]  == 0 */ ) // NO.  remember count variable uses '<=' so it is delayed...  
+        if(bcount == MSB && bin[ MSB- 1   ]  == 0  ) 
 
           // OK. it is being set
-          reg_led     <= 24'b000011110000111100001111 ;   // this is right....
+          // reg_led     <= 24'b000011110000111100001111 ;   // this is right....
           // reg_led     <= addr  ;
           // reg_led     <= in[MSB-2-1 : MSB-8-1 ] ;      // set to the passed address
+
+
+          reg_led     <= bin;
 /*
           case (in[MSB-2-1 : MSB-8-1 ])
 
