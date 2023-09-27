@@ -197,8 +197,8 @@ module register_set #(parameter MSB=40)   (
           end // count == 8
 
 
-        /* 
-          // NO.  remember count variable uses '<=' so it is delayed... 
+        /*
+          // NO.  remember count variable uses '<=' so it is delayed...
 
           OK. this is genuinely hard.
           because the count and the data aggregation  ... are delayed... by use of '<=' assignment.
@@ -216,30 +216,30 @@ module register_set #(parameter MSB=40)   (
         // with count == MSB-1 ... it sets everything to 0. weird?????
 
         // if(count == MSB - 1 && in[ MSB- 2   ]  == 0 ) // OK.
-        if(bcount == MSB && bin[ MSB- 1   ]  == 0  ) 
+        if(bcount == MSB && bin[ MSB- 1   ]  == 0  )
 
           // OK. it is being set
           // reg_led     <= 24'b000011110000111100001111 ;   // this is right....
           // reg_led     <= addr  ;
-          // reg_led     <= in[MSB-2-1 : MSB-8-1 ] ;      // set to the passed address
+          // reg_led     <= bin[MSB-2-1 : MSB-8-1 ] ;      // set to the passed address
+          // reg_led     <= bin[MSB-2 : MSB-8 ] ;      // works to return the address
 
 
-          reg_led     <= bin;
-/*
-          case (in[MSB-2-1 : MSB-8-1 ])
 
-            `REG_LED:       reg_led     <= val32;
-            `REG_SPI_MUX:   reg_spi_mux <= val32;
-            `REG_4094:      reg_4094    <= val32;
+          case (  bin[MSB-2 : MSB-8 ] )
 
-            `REG_MODE:      reg_mode <= val32;      // ok.
-            `REG_DIRECT:    reg_direct <= val32   ;   // this works except the top bit. so it's pretty good.
+            `REG_LED:       reg_led     <= bin;
+            `REG_SPI_MUX:   reg_spi_mux <= bin;
+            `REG_4094:      reg_4094    <= bin;
+
+            `REG_MODE:      reg_mode    <= bin;      // ok.
+            `REG_DIRECT:    reg_direct  <= bin;   // this works except the top bit. so it's pretty good.
+
             // `REG_DIRECT:    reg_direct <= { 8'b11111111, val32[ 24-1 : 0 ] }  ;   // this works except the top bit. so it's pretty good.
-
             // what if write two registers.  and can test values.
 
           endcase
-*/
+
 
 
 
