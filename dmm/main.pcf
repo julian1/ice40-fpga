@@ -14,12 +14,8 @@ set_io MON2             28
 set_io MON3             29
 set_io MON4             31
 set_io MON5             32
-
 set_io MON6             33
 set_io MON7             34
-
-#set_io MON6             1 
-#set_io MON7             2 
 
 
 
@@ -74,17 +70,12 @@ set_io SPI_CLK          56
 set_io SPI_MOSI         60
 set_io SPI_CS2          61
 set_io SPI_MISO         62
-set_io SPI_INTERUPT_OUT   63        # TODO RENAME in code  was SPI_INT
+set_io SPI_INTERUPT_CTL   63
 set_io SPI_CS           64
 
 
 ###############################
 
-# set_io U1004_4094_DATA  112
-# set_io GLB_4094_MISO_CTL 112
-
-
-# set_io ICE_CLK          129   # TODO RENAME in code.
 set_io CLK              129
 
 

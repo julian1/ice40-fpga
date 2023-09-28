@@ -148,7 +148,7 @@ module top (
 
 
   //
-  output SPI_INTERUPT_OUT,    // make modal . i think.
+  output SPI_INTERUPT_CTL,    // make modal . i think.
 
   output MEAS_COMPLETE_CTL,
 
@@ -280,7 +280,7 @@ module top (
 
   wire [`NUM_BITS-1:0 ] w_conditioning_out = {
 
-      SPI_INTERUPT_OUT,
+      SPI_INTERUPT_CTL,
       MEAS_COMPLETE_CTL,
       CMPR_LATCH_CTL,
       adcmux,                  // 19 bits.
