@@ -130,7 +130,7 @@ module top (
 
 
   //
-  output SPI_INTERUPT_CTL,    // make modal . i think.
+  output SPI_INTERUPT_CTL,    // should be modeal. eg. same as meas complete
 
   output MEAS_COMPLETE_CTL,
 
@@ -288,6 +288,8 @@ module top (
   );
 
 
+  // ok. now we want a modulation - where pre-charge is spun. but we have mcu control over the muxes.
+  // which allows switching in
 
   mux_8to1_assign #( `NUM_BITS )
   mux_8to1_assign_1  (
