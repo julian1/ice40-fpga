@@ -47,7 +47,18 @@ module mux_4to1_assign #(parameter MSB =24)   (
 
   );
 
-   assign out = sel[1] ? (sel[0] ? d : c) : (sel[0] ? b : a);
+  // if written like this, then there is no error.
+   // assign out = sel[1] ? (sel[0] ? d : c) : (sel[0] ? b : a);
+
+  // verilog nonblocking. combinatorial assign.  appears to work, even if generates a warning.
+  always @(*) 
+     case (sel)
+      2'b00 :  out = a;
+      2'b01 :  out = b;
+      2'b10 :  out = c;
+      2'b11 :  out = d;
+    endcase
+
 
 endmodule
 
