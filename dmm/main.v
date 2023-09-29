@@ -32,8 +32,10 @@
 `define CLK_FREQ        20000000
 
 
-
-
+// `define IDX_MUX          0
+`define IDX_SIG_PC_SW_CTL   12
+`define IDX_LED0            13
+`define IDX_MONITOR         15
 
 
 module test_pattern (
@@ -63,33 +65,28 @@ endmodule
 
 module test_pattern_2 (
 
-  input   clk,                                        // master clk.
-  input [ `NUM_BITS - 1 :0 ] reg_direct,              // synchronized on spi_cs.
-  // output reg  [`NUM_BITS-1:0 ] out   // wire.kk
-  output [`NUM_BITS-1:0 ] out                         //
+  input   clk,                               // master clk.
+
+  input [ `NUM_BITS - 1 :0 ] reg_direct,     // synchronous on spi_clk.
+  input [ `NUM_BITS - 1 :0 ] reg_direct2,    // synchronous on spi_clk.
+
+
+  output reg [`NUM_BITS-1:0 ] out            //output reg -> driving wire.  not working.
 );
 
   reg [31:0]   counter = 0;
 
-  // ok....................
-  // part continuous assign. it's a register.
-  // OK. we could split up, the vetor .
+  reg [1: 0] state = 0;  // sig/zero .   could have 4 mode representation.
+                          // is a single reg a single state
 
 /*
-  EXTR - passing things (in modules) by wire is always more flexible.
-    because we can always assign wire to a local reg.
-    but once its a reg we cannot go back to a wire.
+  keeping the bit unused would be neat.
+  EXTR.
+
+    - the the entire sequencing for AZ,AG,ratiometric - could be represented with a series of 4 bit vectors. and counts.
+    - but - perhaps simpler to treat sequencing of the PC independenty.
+
 */
-
-  reg [1: 0] reg_pc = 0;
-  reg [1: 0] reg_led = 0;
-
-  assign out[ 11 : 0 ]          = reg_direct[ 11 : 0 ];
-  assign out[ 12 ]              = reg_pc;
-  assign out[ 13 ]              = reg_led ;
-  assign out[ `NUM_BITS-1:14 ]  = reg_direct[ `NUM_BITS-1 : 14 ];
-
-  // ok. 
 
   always@(posedge clk  )
       begin
@@ -100,18 +97,28 @@ module test_pattern_2 (
 
         if(counter == `CLK_FREQ / 10 )   // 10Hz.
           begin
-            // overide counter increment
+
+            // reset counter - overide
             counter <= 0 ;
 
-            // out[ 12 ] <= out[ 12 ] + 1;     // pc switch
-            // out[ 13 ] <= out[ 13 ] + 1;     // led
+            // for the test-- spin the precharge switch - but keep mux constant - by repeating the patterns.
+            // for mux leakage - don't want to spin pre-charge, but do need the floated mux.
 
-            reg_pc    <= reg_pc + 1;
-            reg_led   <= reg_led + 1;
-          end
+            if(state)
+              begin
+                state           <= 0;
+                // out[ 13 : 0 ]   <= reg_direct[ 13 : 0 ];      // reg_direct low order bits. for muxes and led and pc.
+                out             <= reg_direct;
+              end
+            else
+              begin
+                state           <= 1;
+                // out[ 13 : 0 ]   <= reg_direct[ 14 + 13  : 14  ]; // reg_direct high order bits.
+                out             <= reg_direct2;
+              end
 
-
-      end
+          end // counter
+      end   // posedge clk
 
 endmodule
 
@@ -269,14 +276,11 @@ module top (
 
 
   wire [32-1:0] reg_led;
-
   wire [32-1:0] reg_4094;   // TODO remove
-
-  // wire [1:0] reg_mode;     // two bits
   wire [32-1:0] reg_mode;     // two bits
 
-  // wire [24 - 1 :0] reg_direct ;    // EXTR truncated.
-  wire [32 - 1 :0] reg_direct ;    // EXTR truncated.
+  wire [32 - 1 :0] reg_direct;
+  wire [32 - 1 :0] reg_direct2;
 
 
   register_set // #( 32 )   // register bank  . change name 'registers'
@@ -295,7 +299,8 @@ module top (
 
     . reg_mode( reg_mode ),      // ok.
 
-    . reg_direct( reg_direct )
+    . reg_direct( reg_direct ),
+    . reg_direct2( reg_direct2 )
 
   );
 
@@ -349,7 +354,8 @@ module top (
   test_pattern_2
   test_pattern_2 (
     .clk( CLK),
-    .reg_direct( reg_direct[ `NUM_BITS - 1 :  0 ]),
+    .reg_direct(  reg_direct[ `NUM_BITS - 1 :  0 ]),      // truncate 32 bit reg, to output vec.
+    .reg_direct2( reg_direct2[ `NUM_BITS - 1 :  0 ]),
     .out(  test_pattern_2_out )
   );
 

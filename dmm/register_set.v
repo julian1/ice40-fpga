@@ -21,13 +21,14 @@
 `default_nettype none
 
 
-`define REG_LED                 7
-`define REG_SPI_MUX             8
-`define REG_4094                9
+`define REG_LED           7
+`define REG_SPI_MUX       8
+`define REG_4094          9
 
 
-`define REG_MODE                12  // 10000
+`define REG_MODE          12  // 10000
 `define REG_DIRECT        14
+`define REG_DIRECT2       15
 
 
 
@@ -49,7 +50,8 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   output reg [32-1:0] reg_spi_mux,
   output reg [32-1:0] reg_4094,     // TODO change name it's a state register for OE. status .  or SR. reg_4094_.   or SR_4094,   sr_4094.
   output reg [32-1:0] reg_mode,
-  output reg [32-1:0] reg_direct
+  output reg [32-1:0] reg_direct,
+  output reg [32-1:0] reg_direct2
 
   // passing a monitor in here, is useful, for monitoring internal. eg. the
   // output reg [7-1:0]   vec_monitor,
@@ -77,6 +79,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
     reg_4094      = 0;
     reg_mode      = 0;
     reg_direct    = 0  ;
+    reg_direct2    = 0  ;
 
   end
 
@@ -137,6 +140,8 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
               `REG_MODE:      out <= reg_mode << 8;   // ok..
               `REG_DIRECT:    out <= reg_direct << 8;
+              `REG_DIRECT2:    out <= reg_direct2 << 8;
+
               // `REG_DIRECT:    out <= { reg_direct , 8'b0 } ;   // this fails.... weird.
 
               default:        out <=  24'b000011110000111100001111 << 8;
@@ -160,6 +165,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
             `REG_MODE:      reg_mode    <= bin;
             `REG_DIRECT:    reg_direct  <= bin;
+            `REG_DIRECT2:   reg_direct2  <= bin;
 
 
           endcase
