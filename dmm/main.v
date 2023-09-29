@@ -11,7 +11,9 @@
 `include "register_set.v"
 `include "mux_spi.v"
 //`include "blinker.v"
-// `include "modulation_az.v"
+
+
+`include "modulation_az.v"
 
 `include "mux_assign.v"
 
@@ -60,7 +62,7 @@ module test_pattern (
 endmodule
 
 
-
+// perhaps change name mode_4_pattern
 // mode 4.
 
 module test_pattern_2 (
@@ -80,9 +82,6 @@ module test_pattern_2 (
                           // is a single reg a single state
 
 /*
-  keeping the bit unused would be neat.
-  EXTR.
-
     - the the entire sequencing for AZ,AG,ratiometric - could be represented with a series of 4 bit vectors. and counts.
     - but - perhaps simpler to treat sequencing of the PC independenty.
 
@@ -107,13 +106,11 @@ module test_pattern_2 (
             if(state)
               begin
                 state           <= 0;
-                // out[ 13 : 0 ]   <= reg_direct[ 13 : 0 ];      // reg_direct low order bits. for muxes and led and pc.
                 out             <= reg_direct;
               end
             else
               begin
                 state           <= 1;
-                // out[ 13 : 0 ]   <= reg_direct[ 14 + 13  : 14  ]; // reg_direct high order bits.
                 out             <= reg_direct2;
               end
 

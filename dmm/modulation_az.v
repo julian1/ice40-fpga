@@ -19,132 +19,41 @@
 `define CLK_FREQ        20000000
 
 
-// `define MUX_HI_2_NC = ;
-
-`define MUX_HI1_NC      (5-1)   // s5 == NC
-`define MUX_HI1_DCV     (7-1)   // s7 == DCV-IN
-
-
-// `define MUX_HI2_SHIFT   3
-`define MUX_HI2_NC      (3-1)   // s3 == NC
-`define MUX_HI2_TEMP1   (2-1)   // s2 == TEMP1  use for charge cap.
-
-
-`define MUX_HI_DCV_IN   ( `MUX_HI1_DCV | `MUX_HI2_NC << 3)
-
 
 ////////////////////
 
+// TODO this value needs the EN pin set.
 
-`define MUX_AZ_PC_OUT   (0 )      // mux precharge output, or a zero.   s1 == PC-OUT == SIGNAL
-`define MUX_AZ_ZERO     (8 - 1)   // s8 == 4.7k to star-ground.  change to value in a register .   all the LO they are all ZEROcall it ZER
+`define MUX_AZ_PC_OUT_PIN   4'b1000   // AZ switch pin muxes pc-out.
 
 `define SW_PC_SIGNAL    1
 `define SW_PC_BOOT      0
 
 
 
-`define AZ_MODE_AZ_NORMAL   1
-`define AZ_MODE_SIGNAL_HI   2
-`define AZ_MODE_LO          3
-`define AZ_MODE_AZ_NO_PC    4     // use for testing,  charge injection will be the AZ switch.
-
-
 
 /*
-  IMPORTANT - rather than inject an additional conditional into the az_muxer, to control whether precharge is used,
-  instead just add an additional modulation mode
-
-  only issue with all this - is that it's always active.
-  perhaps - need o
-  ---
-
-  change name az_test_controller ?
-  prefix with test?
-
-  or test_modulation_az
-
 */
-
-module modulation_az_tester (
-
-  input   clk,
-  input   reset,                    // async
-
-  // outputs are registers.
-  output reg [6-1:0 ] mux_hi,
-  output reg [7-1: 0 ] mode,
-);
-
-  reg [31:0]    clk_count = 0;           // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
-
-  always @(posedge clk  or posedge reset )
-   if(reset)
-    begin
-      clk_count <= 0;
-    end
-    else
-    begin
-
-      clk_count <= clk_count - 1;     // TODO review why count down???
-
-      // we can trigger on these if we want
-      case (clk_count)
-
-        0:                  // start.  turn on both dcv, and cap.  to reset cap voltage to the input voltage value - eg. 0,10,-10 V.
-          begin
-            mux_hi  <= `MUX_HI1_DCV | (`MUX_HI2_TEMP1 << 3);
-            mode    <= `AZ_MODE_SIGNAL_HI;
-          end
-
-        `CLK_FREQ * 1:       // at 1 sec.  stop cap charge by switching off DCV in, and change mode to AZ switchiing, to build charge on cap.
-          begin
-            mux_hi  <= `MUX_HI2_TEMP1 << 3;
-            mode    <= `AZ_MODE_AZ_NORMAL;
-          end
-
-        `CLK_FREQ * 5:       // at 5 secs.  stop az switching, and allow sample measure of the charge on the cap.
-          mode      <= `AZ_MODE_SIGNAL_HI;
-
-        `CLK_FREQ * 10:      // after 10secs.  reset the cycle
-          clk_count <= 0;
-
-      endcase
-    end
-
-endmodule
-
-
-
-
-
-
-
-
-
-
-
-
 
 module modulation_az (
 
+  // remember hi mux is not manipulated, or passed into this module.
+  // inistead the hi signal is seleced by the AZ mux, via the pre-charge switch
+
   input   clk,
-  input   reset,                    // async
+  input   reset,
 
-  input   [7-1: 0 ] mode,
+  // lo mux input to use.
+  input [  3-1 : 0 ] az_mux_val,
 
-  // input   use_precharge,         // for comparison
-
+  /// outputs.
   output reg  sw_pc_ctl,
-  output reg [  3-1 : 0 ] mux_az ,       // going to be driven -  so should  be a register
-
-
-  output reg [7-1:0]   vec_monitor,
-
-  // output reg mon1// , mon2, mon3, mon4, mon5, mon6, mon7,
-  // output reg mon1
+  output reg [ 3-1:0 ] azmux ,       // change name   az lo value.
+  output reg [ 7-1:0]   monitor,
 
 );
+
+
 
   // localparam x = 1;
 
@@ -161,7 +70,7 @@ module modulation_az (
 
 
   reg dummy ;
-  assign vec_monitor = { mux_az , sw_pc_ctl, dummy} ; // nice
+  assign monitor = { azmux , sw_pc_ctl, dummy} ; // nice
 
   // this would be an async signal???
   wire run = 1;
@@ -205,7 +114,7 @@ module modulation_az (
             state           <= 15;
             clk_count_down  <= clk_count_precharge_n;
             sw_pc_ctl       <= `SW_PC_BOOT;
-            //mux_az          <= `MUX_ZERO;        // doesn't matter. but leave defined.
+            //azmux          <= `MUX_ZERO;        // oesn't matter. but should leave defined?
           end
         15:
           if(clk_count_down == 0)
@@ -213,40 +122,22 @@ module modulation_az (
 
         ////////////////////////////
         // loop. precharge_start
-        // switch az mux to signal/pc output (signal is protected by pc)  - the 'precharge phase' or settle phase
+        // switch az mux to the PC OUT (signal is currently protected by pc)  - the 'precharge phase' or settle phase
         2:
-          case (mode)
-            `AZ_MODE_AZ_NORMAL:  //   normal AZ/precharge mode cycle
-              begin
-                state           <= 25;
-                clk_count_down  <= clk_count_precharge_n;
-                mux_az          <= `MUX_AZ_PC_OUT;          // select signal
-              end
+            begin
+              state           <= 25;
+              clk_count_down  <= clk_count_precharge_n;
+              azmux          <= `MUX_AZ_PC_OUT_PIN;      // pin s1
+              // azmux          <= 4'b1000 ;
+            end
 
-            `AZ_MODE_SIGNAL_HI:        // hold and follow the output from the himux
-              begin
-                sw_pc_ctl       <= `SW_PC_SIGNAL;
-                mux_az          <= `MUX_AZ_PC_OUT;
-              end
-
-            `AZ_MODE_LO:       // hold lo, which lo should be read from the register.
-              begin
-                sw_pc_ctl       <= `SW_PC_BOOT;   // park at boot. doesn't really matter.
-                mux_az          <= `MUX_AZ_ZERO;
-              end
-
-            default:  // should be error condition .
-              mux_az          <= `MUX_AZ_PC_OUT;
-              // this is
-
-          endcase
 
         25:
           if(clk_count_down == 0)
             state <= 3;
 
         /////////////////////////
-        // switch pc to signal - take signal sample .   sample_phase_start.
+        // take the signal sample.   by switching pc to signal
         3:
           begin
             state           <= 35;
@@ -257,7 +148,7 @@ module modulation_az (
           if(clk_count_down == 0)
             state <= 4;
 
-        // switch pc to boot - to re-protect signal
+        // switch pc back to boot - to re-protect signal
         4:
           begin
             state           <= 45;
@@ -269,12 +160,12 @@ module modulation_az (
             state <= 5;
 
         /////////////////////////
-        // switch mux to zero (signal is protected by pc) - take zero sample - zero psample phase. (do we want a pause here?)
+        // take the zero - (signal is protected by pc
         5:
           begin
             state           <= 55;
             clk_count_down  <= clk_count_sample_n;
-            mux_az          <= `MUX_AZ_ZERO;
+            azmux          <= az_mux_val;
           end
         55:
           if(clk_count_down == 0)
