@@ -289,28 +289,29 @@ module top (
 
 
 
-  mux_4to1_assign #( `NUM_BITS )
-  mux_4to1_assign_1  (
+  mux_8to1_assign #( `NUM_BITS )
+  mux_8to1_assign_1  (
 
     // when we change the order of these things - it fucks up.
 
    // .a( 22'b0 ),     // 00  ok. will zero pad?
    // .b( 22'b1111111111111111111111 ),     // 00
-
    .a( { `NUM_BITS{ 1'b0 } }   ),     // 00 OK.
-
    // .b( 29'b11111111111111111111111111111   ),     // 00 OK.
    // .b( { `NUM_BITS { 1 } }  ),     // this doesn't work. because extends default 32 bit length by NUM_BITS?
    .b( { `NUM_BITS { 1'b1 } }  ),     // 00  works.
-
-
-
    .c( test_pattern_out ),     // 10
+   .d( reg_direct[ `NUM_BITS - 1 :  0 ]   ),     // when we pass a hard-coded value in here...  then read/write reg_direct works.  // it is very strange.
 
-   .d( reg_direct[ `NUM_BITS - 1 :  0 ]   ),     // when we pass a hard-coded value in here...  then read/write reg_direct works.
-                                          // it is very strange.
 
-   .sel( reg_mode[ 1 : 0 ]  ),
+   .e( 22'b0 ),     // 4      works.
+   .f( 22'b0  ),     // 5  works.
+   .g(  22'b0 ),     // 6 works.
+   .h( test_pattern_out  ),     // 7
+
+
+   .sel( reg_mode[ 2 : 0 ]),
+
    .out( w_conditioning_out )
   );
 
