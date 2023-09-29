@@ -59,6 +59,65 @@ endmodule
 
 
 
+//    .d( reg_direct[ `NUM_BITS - 1 :  0 ]   ),     // when we pass a hard-coded value in here...  then read/write reg_direct works.  // it is very strange.
+
+module test_pattern_2 (
+  input   clk,
+  input [ `NUM_BITS - 1 :0 ] reg_direct,
+  // output reg  [`NUM_BITS-1:0 ] out   // wire.kk
+  output [`NUM_BITS-1:0 ] out   // wire.kk
+);
+
+  // having a counter isn't good here...  because of the increment.
+  // counter <= counter + 1;
+
+  // count up counter.
+  reg [31:0]   counter = 0;
+
+  // ok....................
+  // part continuous assign. it's a register.
+  // OK. we could split up, the vetor .
+
+/*
+  EXTR - passing things (in modules) by wire is always more flexible.
+    because we can always assign wire to a local reg.
+    but once its a reg we cannot go back to a wire.
+*/
+
+  reg [1: 0] reg_pc = 0;
+  reg [1: 0] reg_led = 0;
+
+  assign out[ 11 : 0 ]          = reg_direct[ 11 : 0 ];
+  assign out[ 12 ]              = reg_pc;
+  assign out[ 13 ]              = reg_led ;
+  assign out[ `NUM_BITS-1:14 ]  = reg_direct[ `NUM_BITS-1 : 14 ];
+
+
+  always@(posedge clk  )
+      begin
+
+        // default.
+        counter <= counter + 1;
+
+
+        if(counter == `CLK_FREQ / 10 )   // 10Hz.
+          begin
+            // overide counter increment
+            counter <= 0 ;
+
+            // out[ 12 ] <= out[ 12 ] + 1;     // pc switch
+            // out[ 13 ] <= out[ 13 ] + 1;     // led
+
+            reg_pc    <= reg_pc + 1;
+            reg_led   <= reg_led + 1;
+          end
+
+
+      end
+
+endmodule
+
+
 
 
 
@@ -265,12 +324,11 @@ module top (
       SPI_INTERUPT_CTL,
       MEAS_COMPLETE_CTL,
       CMPR_LATCH_CTL,
-      adcmux,                  // 19 bits.
-
-      monitor,                // 15.    bit 14 from 0.. + 8= j    bit 10,    1024.
-      LED0,                   // bit 13.  8192.
-      SIG_PC_SW_CTL,
-      himux2,              // remove the himux2  12.
+      adcmux,                 // 23rd bit.  1<<22 = 4194304
+      monitor,                // 15th bit.  1<<14 = 16384
+      LED0,                   // 14th bit.  1<<13 = 8192.
+      SIG_PC_SW_CTL,          // 13th bit.  1<<12.
+      himux2,
       himux,
       azmux
     };
@@ -283,13 +341,27 @@ module top (
   test_pattern
   test_pattern (
     .clk( CLK),
-
     .out(  test_pattern_out )
   );
 
 
+
+
+  reg[ `NUM_BITS-1:0 ]  test_pattern_2_out;
+  test_pattern_2
+  test_pattern_2 (
+    .clk( CLK),
+    .reg_direct( reg_direct[ `NUM_BITS - 1 :  0 ]),
+    .out(  test_pattern_2_out )
+  );
+
+
+
+
   // ok. now we want a modulation - where pre-charge is spun. but we have mcu control over the muxes.
   // which allows switching in
+
+  // mode...
 
   mux_8to1_assign #( `NUM_BITS )
   mux_8to1_assign_1  (
@@ -306,10 +378,10 @@ module top (
    .d( reg_direct[ `NUM_BITS - 1 :  0 ]   ),     // when we pass a hard-coded value in here...  then read/write reg_direct works.  // it is very strange.
 
 
-   .e( 22'b0 ),     // 4      works.
+   .e( test_pattern_2_out ),     // 4      works.
    .f( 22'b0  ),     // 5  works.
    .g(  22'b0 ),     // 6 works.
-   .h( test_pattern_out  ),     // 7
+   .h( 22'b0  ),     // 7
 
 
    .sel( reg_mode[ 2 : 0 ]),
