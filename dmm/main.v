@@ -59,19 +59,16 @@ endmodule
 
 
 
-//    .d( reg_direct[ `NUM_BITS - 1 :  0 ]   ),     // when we pass a hard-coded value in here...  then read/write reg_direct works.  // it is very strange.
+// mode 4.
 
 module test_pattern_2 (
+
   input   clk,                                        // master clk.
   input [ `NUM_BITS - 1 :0 ] reg_direct,              // synchronized on spi_cs.
   // output reg  [`NUM_BITS-1:0 ] out   // wire.kk
   output [`NUM_BITS-1:0 ] out                         //
 );
 
-  // having a counter isn't good here...  because of the increment.
-  // counter <= counter + 1;
-
-  // count up counter.
   reg [31:0]   counter = 0;
 
   // ok....................
@@ -92,6 +89,7 @@ module test_pattern_2 (
   assign out[ 13 ]              = reg_led ;
   assign out[ `NUM_BITS-1:14 ]  = reg_direct[ `NUM_BITS-1 : 14 ];
 
+  // ok. 
 
   always@(posedge clk  )
       begin
