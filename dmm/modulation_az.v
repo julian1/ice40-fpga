@@ -65,7 +65,8 @@ module modulation_az (
 
   reg [31:0]    clk_count_down;           // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
 
-  reg [24-1:0]  clk_count_sample_n    = `CLK_FREQ / 100;   // 100nplc  10ms.
+  // reg [24-1:0]  clk_count_sample_n    = `CLK_FREQ / 100;   // 100nplc  10ms. + precharge
+  reg [24-1:0]  clk_count_sample_n    = `CLK_FREQ / 10;   // == 0.1s  == 5 nplc .
 
   reg [24-1:0]  clk_count_precharge_n = `CLK_FREQ / 1000;   // 1ms
 
@@ -114,6 +115,9 @@ module modulation_az (
             clk_count_down  <= clk_count_precharge_n;
             sw_pc_ctl       <= `SW_PC_BOOT;
             //azmux          <= `MUX_ZERO;        // oesn't matter. but should leave defined?
+
+
+            monitor         <= { 8 { 1'b0 } } ;     // reset
           end
         15:
           if(clk_count_down == 0)
@@ -143,6 +147,7 @@ module modulation_az (
             clk_count_down  <= clk_count_sample_n;
             sw_pc_ctl       <= `SW_PC_SIGNAL;
             led0            <= 1;
+            monitor[0]      <= 1;
           end
         35:
           if(clk_count_down == 0)
@@ -167,6 +172,7 @@ module modulation_az (
             clk_count_down  <= clk_count_sample_n;
             azmux          <= az_mux_val;
             led0            <= 0;
+            monitor[0]      <= 0;
           end
         55:
           if(clk_count_down == 0)

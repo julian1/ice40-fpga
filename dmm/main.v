@@ -27,17 +27,44 @@
 `default_nettype none
 
 
-// for main output vector
-`define NUM_BITS        29    //
 
 
 `define CLK_FREQ        20000000
 
 
-`define IDX_AZMUX          0
-`define IDX_SIG_PC_SW_CTL   12
-`define IDX_LED0            13
-`define IDX_MONITOR         15
+
+/*
+      SPI_INTERUPT_CTL,
+      MEAS_COMPLETE_CTL,
+      CMPR_LATCH_CTL,
+      adcmux,                 // 23rd bit.  1<<22 = 4194304
+      monitor,                // 15th bit.  1<<14 = 16384
+      LED0,                   // 14th bit.  1<<13 = 8192.
+      SIG_PC_SW_CTL,          // 13th bit.  1<<12.
+      himux2,
+      himux,
+      azmux
+
+*/
+
+// this is the index.  not the bit number. works with +=
+
+`define IDX_AZMUX             0     // 0,1,2,3
+`define IDX_HIMUX             4     // 4,5,6,7
+`define IDX_HIMUX2            8     // 8,9,10,11
+`define IDX_SIG_PC_SW_CTL     12
+`define IDX_LED0              13
+`define IDX_MONITOR           14    // 14,15,16,17,  18,19,20,21   think pin 14.
+`define IDX_ADCMUX            22    // 22,23,24,25
+`define IDX_CMPS_LATCH_CTL    26
+`define IDX_MEAS_COMPLETE_CTL 27
+`define IDX_SPI_INTERUPT_CTL  28
+
+
+// change name IDX_END...???  main output vector
+`define NUM_BITS        29    //
+
+
 
 
 module test_pattern (
@@ -353,6 +380,26 @@ module top (
 
 
 
+  // might be easier - to just use numerals as indicies for everything not assigned.
+  // is it possible to do multiple subsripts?? eg with a comma?
+
+/*
+
+
+x +: N, The start position of the vector is given by x and you count up from x by N.
+
+There is also
+
+x -: N, in this case the start position is x and you count down from x by N.
+
+
+logic [31: 0] a_vect;
+a_vect[ 0 +: 8] // == a_vect[ 7 : 0]
+a_vect[15 -: 8] // == a_vect[15 : 8]
+
+don't have to do the -1. everywhere this is good.  eg. it's a span.
+
+*/
 
 
   wire [ `NUM_BITS-1:0 ]  modulation_az_out ;
@@ -369,17 +416,15 @@ module top (
 
     //
     .sw_pc_ctl( modulation_az_out[ `IDX_SIG_PC_SW_CTL ]  ),
-    .azmux (    modulation_az_out[ `IDX_AZMUX + 4 - 1: `IDX_AZMUX ] ),
+    .azmux (    modulation_az_out[ `IDX_AZMUX +: 4] ),
     .led0(      modulation_az_out[ `IDX_LED0 ] ),
-    .monitor(   modulation_az_out[ `IDX_MONITOR + 8 - 1: `IDX_MONITOR  ] )    // we could pass subset of monitor if watned. eg. only 4 pins...
+    // .monitor(   modulation_az_out[ `IDX_MONITOR + 8 - 1: `IDX_MONITOR  ] )    // we could pass subset of monitor if watned. eg. only 4 pins...
+    .monitor(   modulation_az_out[ `IDX_MONITOR +: 8  ] )    // we could pass subset of monitor if watned. eg. only 4 pins...
 
   );
 
-  
-  // might be easier - to just use numerals as indicies for everything not assigned.
-  // is it possible to do multiple subsripts?? eg with a comma?
-
-  assign modulation_az_out[ `NUM_BITS - 1 : `IDX_MONITOR + 8 - 1  ] = reg_direct[ `NUM_BITS - 1 : `IDX_MONITOR + 8 - 1 ];
+  assign modulation_az_out[ `IDX_HIMUX +: 8 ]       = reg_direct[ `IDX_HIMUX +: 8 ];
+  assign modulation_az_out[ `IDX_ADCMUX +: 7 ] = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
 
 
 
