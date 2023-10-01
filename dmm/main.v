@@ -232,9 +232,6 @@ module top (
   wire [8-1:0] vec_miso ;
   assign { U1004_4094_DATA } = vec_miso;
 
-  // reg [7-1:0] dummy7;
-  // assign vec_miso[ 8-1 : 1 ] = dummy7;
-
 
   // should be a wire. since it is only used combinatorially .   from the gpio input wire to the mux_spi where it is a wire, and then the output.
   wire w_dout ; // should be a register, since it's written to.
@@ -342,7 +339,7 @@ module top (
   // ok. basic function pass through works.
 
 
-  reg[ `NUM_BITS-1:0 ]  test_pattern_out;
+  wire [ `NUM_BITS-1:0 ]  test_pattern_out;
   test_pattern
   test_pattern (
     .clk( CLK),
@@ -353,7 +350,7 @@ module top (
 
   // TODO - these outputs. I think should be wires... the regsisters are in the modules.
 
-  reg[ `NUM_BITS-1:0 ]  test_pattern_2_out;
+  wire [ `NUM_BITS-1:0 ]  test_pattern_2_out;
   test_pattern_2
   test_pattern_2 (
     .clk( CLK),
@@ -427,7 +424,7 @@ module top (
    .d( reg_direct[ `NUM_BITS - 1 :  0 ]   ),  // 3.    // when we pass a hard-coded value in here...  then read/write reg_direct works.  // it is very strange.
 
    .e( test_pattern_2_out ),     // 4      works.
-   .f( modulation_az_out),     // 5
+   .f( modulation_az_out),      // 5
 
    // .f( 22'b0  ),     // 5  works.
    .g(  22'b0 ),     // 6 works.
