@@ -32,8 +32,7 @@
 
 
 
-/*
-*/
+
 
 module modulation_az (
 
@@ -44,12 +43,14 @@ module modulation_az (
   input   reset,
 
   // lo mux input to use.
-  input [  3-1 : 0 ] az_mux_val,
+  input [  4-1 : 0 ] az_mux_val,
 
   /// outputs.
   output reg  sw_pc_ctl,
-  output reg [ 3-1:0 ] azmux ,       // change name   az lo value.
-  output reg [ 7-1:0]   monitor,
+  output reg [ 4-1:0 ] azmux ,       // change name   az lo value.
+
+  output reg led0,
+  output reg [ 8-1:0]   monitor,
 
 );
 
@@ -69,8 +70,6 @@ module modulation_az (
   reg [24-1:0]  clk_count_precharge_n = `CLK_FREQ / 1000;   // 1ms
 
 
-  reg dummy ;
-  assign monitor = { azmux , sw_pc_ctl, dummy} ; // nice
 
   // this would be an async signal???
   wire run = 1;
@@ -143,6 +142,7 @@ module modulation_az (
             state           <= 35;
             clk_count_down  <= clk_count_sample_n;
             sw_pc_ctl       <= `SW_PC_SIGNAL;
+            led0            <= 1;
           end
         35:
           if(clk_count_down == 0)
@@ -166,6 +166,7 @@ module modulation_az (
             state           <= 55;
             clk_count_down  <= clk_count_sample_n;
             azmux          <= az_mux_val;
+            led0            <= 0;
           end
         55:
           if(clk_count_down == 0)

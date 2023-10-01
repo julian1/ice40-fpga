@@ -34,7 +34,7 @@
 `define CLK_FREQ        20000000
 
 
-// `define IDX_MUX          0
+`define IDX_AZMUX          0
 `define IDX_SIG_PC_SW_CTL   12
 `define IDX_LED0            13
 `define IDX_MONITOR         15
@@ -227,8 +227,13 @@ module top (
   wire [8-1:0] vec_mosi;
   assign { GLB_4094_DATA } = vec_mosi;
 
+  /////
+
   wire [8-1:0] vec_miso ;
-  assign { U1004_4094_DATA } = vec_miso;    // this isn't right ... it is spi_miso?//
+  assign { U1004_4094_DATA } = vec_miso;
+
+  // reg [7-1:0] dummy7;
+  // assign vec_miso[ 8-1 : 1 ] = dummy7;
 
 
   // should be a wire. since it is only used combinatorially .   from the gpio input wire to the mux_spi where it is a wire, and then the output.
@@ -346,6 +351,7 @@ module top (
 
 
 
+  // TODO - these outputs. I think should be wires... the regsisters are in the modules.
 
   reg[ `NUM_BITS-1:0 ]  test_pattern_2_out;
   test_pattern_2
@@ -355,6 +361,48 @@ module top (
     .reg_direct2( reg_direct2[ `NUM_BITS - 1 :  0 ]),
     .out(  test_pattern_2_out )
   );
+
+
+
+  // we want to assign the red_direct to modulation_az_out.  except for the wires going to the modulation az
+
+  // OK. hang on.   ONLY THE ACTUAL
+  // why is this a register rather than a wire???? the module has the registers.
+
+    // default assignment
+  // assign modulation_az_out = reg_direct;
+
+
+  wire [ `NUM_BITS-1:0 ]  modulation_az_out ;
+  modulation_az
+  modulation_az (
+
+    // remember hi mux is not manipulated, or passed into this module.
+    // instead the hi signal is selected by the AZ mux, via the pre-charge switch
+    // himux is controlled by reg-direct.
+
+    .clk(CLK),
+    .reset( 1'b0 ),
+
+    .az_mux_val(  reg_direct[ 4-1 : 0 ] ),      // only needs to read the azmux value to use. when not muxing the precharge (boot,or sig).
+
+    //
+    .sw_pc_ctl( modulation_az_out[ `IDX_SIG_PC_SW_CTL ]  ),
+    .azmux (    modulation_az_out[ `IDX_AZMUX + 4 - 1: `IDX_AZMUX ] ),
+    .led0(      modulation_az_out[ `IDX_LED0 ] ),
+    .monitor(   modulation_az_out[ `IDX_MONITOR + 8 - 1: `IDX_MONITOR  ] )    // we could pass subset of monitor if watned. eg. only 4 pins...
+
+  );
+
+  // EXTR. pass the led as well....
+
+  // OK. hang on.
+  // all other bits (eg. himux) are controlled by mcu/ reg_direct
+  assign modulation_az_out[ `NUM_BITS - 1 : `IDX_MONITOR + 8 - 1 ] = reg_direct[ `NUM_BITS - 1 : `IDX_MONITOR + 8 - 1 ];
+
+
+
+
 
 
 
@@ -375,12 +423,13 @@ module top (
    // .b( 29'b11111111111111111111111111111   ),     // 00 OK.
    // .b( { `NUM_BITS { 1 } }  ),     // this doesn't work. because extends default 32 bit length by NUM_BITS?
    .b( { `NUM_BITS { 1'b1 } }  ),     // 00  works.
-   .c( test_pattern_out ),     // 10
-   .d( reg_direct[ `NUM_BITS - 1 :  0 ]   ),     // when we pass a hard-coded value in here...  then read/write reg_direct works.  // it is very strange.
-
+   .c( test_pattern_out ),                  // 2
+   .d( reg_direct[ `NUM_BITS - 1 :  0 ]   ),  // 3.    // when we pass a hard-coded value in here...  then read/write reg_direct works.  // it is very strange.
 
    .e( test_pattern_2_out ),     // 4      works.
-   .f( 22'b0  ),     // 5  works.
+   .f( modulation_az_out),     // 5
+
+   // .f( 22'b0  ),     // 5  works.
    .g(  22'b0 ),     // 6 works.
    .h( 22'b0  ),     // 7
 
