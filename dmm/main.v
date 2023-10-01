@@ -67,25 +67,21 @@ endmodule
 
 module test_pattern_2 (
 
+  /*
+    just mux output between two values. not sure if this is useful.
+    versus real az.
+  */
+
   input   clk,                               // master clk.
 
   input [ `NUM_BITS - 1 :0 ] reg_direct,     // synchronous on spi_clk.
   input [ `NUM_BITS - 1 :0 ] reg_direct2,    // synchronous on spi_clk.
 
-
   output reg [`NUM_BITS-1:0 ] out            //output reg -> driving wire.  not working.
 );
 
   reg [31:0]   counter = 0;
-
-  reg [1: 0] state = 0;  // sig/zero .   could have 4 mode representation.
-                          // is a single reg a single state
-
-/*
-    - the the entire sequencing for AZ,AG,ratiometric - could be represented with a series of 4 bit vectors. and counts.
-    - but - perhaps simpler to treat sequencing of the PC independenty.
-
-*/
+  reg [1: 0] state = 0;  // sig/zero .   could have 4 mode representation.  // is a single reg a single state
 
   always@(posedge clk  )
       begin
@@ -93,13 +89,10 @@ module test_pattern_2 (
         // default.
         counter <= counter + 1;
 
-
         if(counter == `CLK_FREQ / 10 )   // 10Hz.
           begin
-
             // reset counter - overide
             counter <= 0 ;
-
             // for the test-- spin the precharge switch - but keep mux constant - by repeating the patterns.
             // for mux leakage - don't want to spin pre-charge, but do need the floated mux.
 
@@ -113,7 +106,6 @@ module test_pattern_2 (
                 state           <= 1;
                 out             <= reg_direct2;
               end
-
           end // counter
       end   // posedge clk
 
@@ -361,13 +353,6 @@ module top (
 
 
 
-  // we want to assign the red_direct to modulation_az_out.  except for the wires going to the modulation az
-
-  // OK. hang on.   ONLY THE ACTUAL
-  // why is this a register rather than a wire???? the module has the registers.
-
-    // default assignment
-  // assign modulation_az_out = reg_direct;
 
 
   wire [ `NUM_BITS-1:0 ]  modulation_az_out ;
@@ -380,7 +365,6 @@ module top (
 
     .clk(CLK),
     .reset( 1'b0 ),
-
     .az_mux_val(  reg_direct[ 4-1 : 0 ] ),      // only needs to read the azmux value to use. when not muxing the precharge (boot,or sig).
 
     //
@@ -391,10 +375,9 @@ module top (
 
   );
 
-  // EXTR. pass the led as well....
+  
+  // might be easier - to just use numerals as indicies for everything not assigned.
 
-  // OK. hang on.
-  // all other bits (eg. himux) are controlled by mcu/ reg_direct
   assign modulation_az_out[ `NUM_BITS - 1 : `IDX_MONITOR + 8 - 1 ] = reg_direct[ `NUM_BITS - 1 : `IDX_MONITOR + 8 - 1 ];
 
 
