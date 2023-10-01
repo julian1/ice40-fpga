@@ -377,8 +377,9 @@ module top (
 
   
   // might be easier - to just use numerals as indicies for everything not assigned.
+  // is it possible to do multiple subsripts?? eg with a comma?
 
-  assign modulation_az_out[ `NUM_BITS - 1 : `IDX_MONITOR + 8 - 1 ] = reg_direct[ `NUM_BITS - 1 : `IDX_MONITOR + 8 - 1 ];
+  assign modulation_az_out[ `NUM_BITS - 1 : `IDX_MONITOR + 8 - 1  ] = reg_direct[ `NUM_BITS - 1 : `IDX_MONITOR + 8 - 1 ];
 
 
 
@@ -397,19 +398,14 @@ module top (
 
     // when we change the order of these things - it fucks up.
 
-   // .a( 22'b0 ),     // 00  ok. will zero pad?
-   // .b( 22'b1111111111111111111111 ),     // 00
-   .a( { `NUM_BITS{ 1'b0 } }   ),     // 00 OK.
-   // .b( 29'b11111111111111111111111111111   ),     // 00 OK.
-   // .b( { `NUM_BITS { 1 } }  ),     // this doesn't work. because extends default 32 bit length by NUM_BITS?
-   .b( { `NUM_BITS { 1'b1 } }  ),     // 00  works.
+   .a( { `NUM_BITS { 1'b0 } } ),            // 0 .
+   .b( { `NUM_BITS { 1'b1 } } ),            // 1.
    .c( test_pattern_out ),                  // 2
    .d( reg_direct[ `NUM_BITS - 1 :  0 ]   ),  // 3.    // when we pass a hard-coded value in here...  then read/write reg_direct works.  // it is very strange.
 
-   .e( test_pattern_2_out ),     // 4      works.
-   .f( modulation_az_out),      // 5
+   .e( test_pattern_2_out ),                // 4      works.
+   .f( modulation_az_out),                  // 5
 
-   // .f( 22'b0  ),     // 5  works.
    .g(  22'b0 ),     // 6 works.
    .h( 22'b0  ),     // 7
 
