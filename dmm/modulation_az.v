@@ -65,8 +65,7 @@ module modulation_az (
 
   reg [31:0]    clk_count_down;           // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
 
-  // reg [24-1:0]  clk_count_sample_n    = `CLK_FREQ / 100;   // 100nplc  10ms. + precharge
-  reg [24-1:0]  clk_count_sample_n    = `CLK_FREQ / 10;   // == 0.1s  == 5 nplc .
+  reg [24-1:0]  clk_count_sample_n    = `CLK_FREQ / 50 ;   // (50x / secon) == 1nplc.
 
   reg [24-1:0]  clk_count_precharge_n = `CLK_FREQ / 1000;   // 1ms
 
@@ -125,13 +124,13 @@ module modulation_az (
 
         ////////////////////////////
         // loop. precharge_start
-        // switch az mux to the PC OUT (signal is currently protected by pc)  - the 'precharge phase' or settle phase
+        // switch azmux to PC OUT.    (signal is currently protected by pc)  - the 'precharge phase' or settle phase
         2:
             begin
               state           <= 25;
               clk_count_down  <= clk_count_precharge_n;
               azmux          <= `MUX_AZ_PC_OUT_PIN;      // pin s1
-              // azmux          <= 4'b1000 ;
+              monitor[0]      <= 1;
             end
 
 
@@ -140,32 +139,34 @@ module modulation_az (
             state <= 3;
 
         /////////////////////////
-        // take the signal sample.   by switching pc to signal
+        // PC SW manipulation.
+        // take the raw signal sample.   by switching pc_sw to signal
         3:
           begin
             state           <= 35;
             clk_count_down  <= clk_count_sample_n;
             sw_pc_ctl       <= `SW_PC_SIGNAL;
             led0            <= 1;
-            monitor[0]      <= 1;
+            monitor[1]      <= 1;
           end
         35:
           if(clk_count_down == 0)
             state <= 4;
 
-        // switch pc back to boot - to re-protect signal
+        // re-protect signal. by switching pc_sw back to boot
         4:
           begin
             state           <= 45;
             clk_count_down  <= clk_count_precharge_n; // time less important here
             sw_pc_ctl       <= `SW_PC_BOOT;
+            monitor[1]      <= 0;
           end
         45:
           if(clk_count_down == 0)
             state <= 5;
 
         /////////////////////////
-        // take the zero - (signal is protected by pc
+        // take the zero - by switching az mux.
         5:
           begin
             state           <= 55;
