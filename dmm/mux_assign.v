@@ -9,7 +9,7 @@ module mux_4to1_assign #(parameter MSB =24)   (
    input [MSB-1:0] d,
 
    // 2 bits
-   input [1:0] sel,
+   input [2-1:0] sel,
 
    output [MSB-1:0] out
 
@@ -45,13 +45,16 @@ module mux_8to1_assign #(parameter MSB =24)   (
    input [MSB-1:0] h,
 
     // 3 bits.
-   input [2:0] sel,
+   input [3-1 :0] sel,
+   // input [7:0] sel,
 
    output [MSB-1:0] out
 
   );
 
-  // written like this, there is no warning.
+
+  // 94MHz.
+  // using case expression, generates warning. as ternary expression this is none
    assign out =
       sel[2] ?
         sel[1] ?
@@ -60,6 +63,19 @@ module mux_8to1_assign #(parameter MSB =24)   (
 
             (sel[0] ? d : c) : (sel[0] ? b : a);
 
+
+/*
+  // one hot.
+  // 98.11 MHz.
+   assign out =
+            (sel[0] ? b :
+            (sel[1] ? c :
+            (sel[2] ? d :
+            (sel[3] ? e :
+            (sel[4] ? f :
+            (sel[5] ? g :
+            (sel[6] ? h :   a)))))));
+ */
 
 endmodule
 

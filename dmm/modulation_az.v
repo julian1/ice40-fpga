@@ -17,6 +17,7 @@
 
 
 `define CLK_FREQ        20000000
+// note. that counter freq is half clk, because increments on clk.
 
 
 
@@ -63,11 +64,15 @@ module modulation_az (
 
   reg [7-1:0]   state = 0 ;     // should expose in module, not sure.
 
-  reg [31:0]    clk_count_down;           // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
+  reg [31:0]    clk_count_down;           // clk_count for the current phase. 31 bits timing spec is better than 24 bits. weird. ??? 36MHz v 32MHz
 
-  reg [24-1:0]  clk_count_sample_n    = `CLK_FREQ / 50 ;   // (50x / secon) == 1nplc.
+  // reg [24-1:0]  clk_count_sample_n    = `CLK_FREQ / 2 / 50 ;   // (50x / secon) == 1nplc.
 
-  reg [24-1:0]  clk_count_precharge_n = `CLK_FREQ / 1000;   // 1ms
+  // one plc = 1/50s = 20ms. ten = 200ms.
+  // signal looks like 100ms.  not correct because there is 
+  reg [24-1:0]  clk_count_sample_n    = `CLK_FREQ / 2 / 50 * 10 ;   // 10nplc 
+
+  reg [24-1:0]  clk_count_precharge_n = `CLK_FREQ / 2 / 1000;   // 1ms
 
 
 
@@ -140,7 +145,8 @@ module modulation_az (
 
         /////////////////////////
         // PC SW manipulation.
-        // take the raw signal sample.   by switching pc_sw to signal
+        // The trick is that the PC switching runs inside the AZ switch in the time dimension.
+        // expose/take the raw signal sample.   by switching pc_sw to signal
         3:
           begin
             state           <= 35;
