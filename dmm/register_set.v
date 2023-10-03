@@ -30,7 +30,7 @@
 `define REG_DIRECT        14
 `define REG_DIRECT2       15      // don't use. deprecate .   was only for initial AZ switching test.
 
-`define REG_CLK_COUNT_SAMPLE_N 16   // clk sample time
+`define REG_CLK_SAMPLE_DURATION 16   // clk sample time
 
 
 
@@ -53,7 +53,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   output reg [32-1:0] reg_mode,
   output reg [32-1:0] reg_direct,
   output reg [32-1:0] reg_direct2,     // 
-  output reg [32-1:0] reg_clk_count_sample_n 
+  output reg [32-1:0] reg_clk_sample_duration 
 
   // passing a monitor in here, is useful, for monitoring internal. eg. the
   // output reg [7-1:0]   vec_monitor,
@@ -82,7 +82,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
     reg_mode      = 0;
     reg_direct    = 0  ;
     reg_direct2    = 0  ;
-    reg_clk_count_sample_n = 0;
+    reg_clk_sample_duration = 0;
   end
 
 
@@ -143,7 +143,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
               `REG_DIRECT:    out <= reg_direct << 8;
               `REG_DIRECT2:    out <= reg_direct2 << 8;
 
-              `REG_CLK_COUNT_SAMPLE_N:  out <= reg_clk_count_sample_n << 8;     // clk_count_sample_n clk_time_sample_clksample_time ??
+              `REG_CLK_SAMPLE_DURATION:  out <= reg_clk_sample_duration << 8;     // clk_count_sample_n clk_time_sample_clksample_time ??
 
               // `REG_DIRECT:    out <= { reg_direct , 8'b0 } ;   // this fails.... weird.
 
@@ -170,7 +170,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
             `REG_DIRECT:    reg_direct  <= bin;
             `REG_DIRECT2:   reg_direct2  <= bin;
 
-            `REG_CLK_COUNT_SAMPLE_N:  reg_clk_count_sample_n <= bin;
+            `REG_CLK_SAMPLE_DURATION:  reg_clk_sample_duration <= bin;
 
           endcase
 

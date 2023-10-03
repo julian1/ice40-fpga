@@ -250,6 +250,7 @@ module top (
 
   wire [32 - 1 :0] reg_direct;
   wire [32 - 1 :0] reg_direct2;
+  wire [32-1 : 0] reg_clk_sample_duration;  // 32/31 bit nice. for long sample.
 
 
   register_set // #( 32 )   // register bank  . change name 'registers'
@@ -269,8 +270,9 @@ module top (
     . reg_mode( reg_mode ),      // ok.
 
     . reg_direct( reg_direct ),
-    . reg_direct2( reg_direct2 )
+    . reg_direct2( reg_direct2 ),
 
+    . reg_clk_sample_duration( reg_clk_sample_duration)
   );
 
   ///////////////////////////
@@ -335,6 +337,8 @@ module top (
     .azmux_hi_val(  reg_direct2[ `IDX_AZMUX +: 4 ] ),        // we need control over lo-mux hi value. to turn off. for charge-injection accumulation measurement.
     //.azmux_lo2_val( reg_direct3[ 4-1 : 0 ]   ),
     // .azmux_hi2_val(  reg_direct4[ 4-1 : 0 ]  ),
+
+    .clk_sample_duration( reg_clk_sample_duration ), 
 
     // outputs
     .sw_pc_ctl( modulation_az_out[ `IDX_SIG_PC_SW_CTL ]  ),

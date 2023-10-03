@@ -16,8 +16,8 @@
 `default_nettype none
 
 
+// note. counter freq is half clk, because increments on clk.
 `define CLK_FREQ        20000000
-// note. that counter freq is half clk, because increments on clk.
 
 
 
@@ -45,7 +45,8 @@ module modulation_az (
 
   // lo mux input to use.
   input [  4-1 : 0 ] azmux_lo_val,
-  input [  4-1 : 0 ] azmux_hi_val,  // should almost always be S1 == 4'b1000 , for pc-out. except when off, or 4 cycle measurement.
+  input [  4-1 : 0 ] azmux_hi_val,          // should almost always be S1 == 4'b1000, for pc-out. except when off for charge-accumulation tests, bbor 4 cycle measurement.
+  input [ 32-1 : 0 ] clk_sample_duration,  // 32/31 bit nice. for long sample....  wrongly named it is counter_sample_duration. not clk...
 
   /// outputs.
   output reg  sw_pc_ctl,
@@ -65,7 +66,7 @@ module modulation_az (
   // OK. but perhaps want to be written as a single bitvector again. for ease.
 
   // want to be able to do a sample for 1s. or longer .
-  // REG_CLK_COUNT_SAMPLE_N
+  // REG_CLK_SAMPLE_DURATION
 
   // remember counter is already divided by 2. from the 20MHz to 10Mhz..
   // reg [24-1:0]  clk_count_sample_n    = `CLK_FREQ / 50 * 10 ;    // 10nplc.  200ms. for both signal, and zero.
@@ -147,7 +148,9 @@ module modulation_az (
         3:
           begin
             state           <= 35;
-            clk_count_down  <= clk_count_sample_n;
+            // clk_count_down  <= clk_count_sample_n;
+            clk_count_down  <= clk_sample_duration;
+
             sw_pc_ctl       <= `SW_PC_SIGNAL;
             led0            <= 1;
             monitor[1]      <= 1;
@@ -173,7 +176,8 @@ module modulation_az (
         5:
           begin
             state           <= 55;
-            clk_count_down  <= clk_count_sample_n;
+            // clk_count_down  <= clk_count_sample_n;
+            clk_count_down  <= clk_sample_duration;
             azmux           <= azmux_lo_val;
             led0            <= 0;
             monitor[0]      <= 0;
