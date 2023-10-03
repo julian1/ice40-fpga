@@ -44,7 +44,7 @@ module modulation_az (
   input   reset,
 
   // lo mux input to use.
-  input [  4-1 : 0 ] az_mux_val,
+  input [  4-1 : 0 ] azmux_lo_val,
 
   /// outputs.
   output reg  sw_pc_ctl,
@@ -64,13 +64,12 @@ module modulation_az (
 
   reg [7-1:0]   state = 0 ;     // should expose in module, not sure.
 
-  reg [31:0]    clk_count_down;           // clk_count for the current phase. 31 bits timing spec is better than 24 bits. weird. ??? 36MHz v 32MHz
+  reg [31:0]    clk_count_down;           // clk_count for the current phase. using 31 bitss, gives faster timing spec.  v 24 bits. weird. ??? 36MHz v 32MHz
 
-  // reg [24-1:0]  clk_count_sample_n    = `CLK_FREQ / 2 / 50 ;   // (50x / secon) == 1nplc.
 
   // remember counter is already divided by 2. from the 20MHz to 10Mhz..
-  // reg [24-1:0]  clk_count_sample_n    = `CLK_FREQ / 50 * 10 ;   // 10nplc  .  200ms. for both signal, and zero.
-  reg [24-1:0]  clk_count_sample_n    = `CLK_FREQ / 50 ;   // 1nplc  .  20ms. for both signal, and zero.
+  // reg [24-1:0]  clk_count_sample_n    = `CLK_FREQ / 50 * 10 ;    // 10nplc.  200ms. for both signal, and zero.
+  reg [24-1:0]  clk_count_sample_n    = `CLK_FREQ / 50 ;            // 1nplc.   20ms. for both signal, and zero.
 
   reg [24-1:0]  clk_count_precharge_n = `CLK_FREQ / 2 / 1000;   // 500us.
 
@@ -177,7 +176,7 @@ module modulation_az (
           begin
             state           <= 55;
             clk_count_down  <= clk_count_sample_n;
-            azmux          <= az_mux_val;
+            azmux           <= azmux_lo_val;
             led0            <= 0;
             monitor[0]      <= 0;
           end
