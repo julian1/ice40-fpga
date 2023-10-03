@@ -124,22 +124,21 @@ module modulation_az (
           if(clk_count_down == 0)
             state <= 2;
 
+
         ////////////////////////////
         // loop. azmux to the output of the precharge  switch
         // switch azmux to PC OUT.    (signal is currently protected by pc)  - the 'precharge phase' or settle phase
         2:
             begin
               state           <= 25;
-              clk_count_down  <= clk_count_precharge_n;
-              // azmux          <=   `MUX_AZ_PC_OUT_PIN;      // pin s1
+              clk_count_down  <= clk_count_precharge_n;  // normally pin s1
               azmux          <=   azmux_hi_val;
               monitor[0]      <= 1;
             end
-
-
         25:
           if(clk_count_down == 0)
             state <= 3;
+
 
         /////////////////////////
         // PC SW manipulation.
