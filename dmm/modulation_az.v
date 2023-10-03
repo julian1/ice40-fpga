@@ -62,16 +62,7 @@ module modulation_az (
   reg [31:0]    clk_count_down;           // clk_count for the current phase. using 31 bitss, gives faster timing spec.  v 24 bits. weird. ??? 36MHz v 32MHz
 
 
-  // these registers need to be controllable, to run switch pre-charge switch fast.
-  // OK. but perhaps want to be written as a single bitvector again. for ease.
-
-  // want to be able to do a sample for 1s. or longer .
-  // REG_CLK_SAMPLE_DURATION
-
-  // remember counter is already divided by 2. from the 20MHz to 10Mhz..
-  // reg [24-1:0]  clk_count_sample_n    = `CLK_FREQ / 50 * 10 ;    // 10nplc.  200ms. for both signal, and zero.
-  reg [24-1:0]  clk_count_sample_n    = `CLK_FREQ / 50 ;            // 1nplc.   20ms. for both signal, and zero.
-
+  // change name clk_precharge_duration_n
   reg [24-1:0]  clk_count_precharge_n = `CLK_FREQ / 2 / 1000;   // 500us.
 
 
