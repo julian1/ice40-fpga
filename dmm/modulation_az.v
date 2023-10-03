@@ -55,17 +55,15 @@ module modulation_az (
 
 );
 
-
-
   // localparam x = 1;
 
-
-  // pack and unpack monitor header. should be register.
 
   reg [7-1:0]   state = 0 ;     // should expose in module, not sure.
 
   reg [31:0]    clk_count_down;           // clk_count for the current phase. using 31 bitss, gives faster timing spec.  v 24 bits. weird. ??? 36MHz v 32MHz
 
+
+  // these registers need to be controllable, to run fast precharge. 
 
   // remember counter is already divided by 2. from the 20MHz to 10Mhz..
   // reg [24-1:0]  clk_count_sample_n    = `CLK_FREQ / 50 * 10 ;    // 10nplc.  200ms. for both signal, and zero.
