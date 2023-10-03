@@ -328,11 +328,15 @@ module top (
     // instead the hi signal is selected by the AZ mux, via the pre-charge switch
     // himux is controlled by reg-direct.
 
+    // inputs
     .clk(CLK),
     .reset( 1'b0 ),
-    .az_mux_val(  reg_direct[ 4-1 : 0 ] ),      // only needs to read the azmux value to use. when not muxing the precharge (boot,or sig).
+    .azmux_lo_val(  reg_direct[  `IDX_AZMUX +: 4 ] ),       // expand width for fpga control of himux/himux2. for ratiometric, and AG cycle.  (boot,or sig).
+    .azmux_hi_val(  reg_direct2[ `IDX_AZMUX +: 4 ] ),        // we need control over lo-mux hi value. to turn off. for charge-injection accumulation measurement.
+    //.azmux_lo2_val( reg_direct3[ 4-1 : 0 ]   ),
+    // .azmux_hi2_val(  reg_direct4[ 4-1 : 0 ]  ),
 
-    //
+    // outputs
     .sw_pc_ctl( modulation_az_out[ `IDX_SIG_PC_SW_CTL ]  ),
     .azmux (    modulation_az_out[ `IDX_AZMUX +: 4] ),
     .led0(      modulation_az_out[ `IDX_LED0 ] ),
@@ -343,8 +347,17 @@ module top (
   assign modulation_az_out[ `IDX_HIMUX +: 8 ]  = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
   assign modulation_az_out[ `IDX_ADCMUX +: 7 ] = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
 
+  /* when testing the modulation_az. for charge accumulation.
+      // we want the az mux to stay off through the cycle....
+
+      // can use a flag bit.
+      // or pass two registers for the lo. and the hi. and with 4 cycle.  need four.
+      // is it clearer .  withotu flags.
 
 
+      // remember that we need a count.
+
+  */
 
 
 

@@ -25,7 +25,7 @@
 
 // TODO this value needs the EN pin set.
 
-`define MUX_AZ_PC_OUT_PIN   4'b1000   // AZ switch pin muxes pc-out.
+// `define MUX_AZ_PC_OUT_PIN   4'b1000   // AZ switch pin muxes pc-out.
 
 `define SW_PC_SIGNAL    1
 `define SW_PC_BOOT      0
@@ -45,25 +45,27 @@ module modulation_az (
 
   // lo mux input to use.
   input [  4-1 : 0 ] azmux_lo_val,
+  input [  4-1 : 0 ] azmux_hi_val,  // should almost always be S1 == 4'b1000 , for pc-out. except when off, or 4 cycle measurement.
 
   /// outputs.
   output reg  sw_pc_ctl,
   output reg [ 4-1:0 ] azmux ,       // change name   az lo value.
 
   output reg led0,
-  output reg [ 8-1:0]   monitor,
+  output reg [ 8-1:0]  monitor,
 
 );
-
-  // localparam x = 1;
-
 
   reg [7-1:0]   state = 0 ;     // should expose in module, not sure.
 
   reg [31:0]    clk_count_down;           // clk_count for the current phase. using 31 bitss, gives faster timing spec.  v 24 bits. weird. ??? 36MHz v 32MHz
 
 
-  // these registers need to be controllable, to run fast precharge. 
+  // these registers need to be controllable, to run switch pre-charge switch fast.
+  // OK. but perhaps want to be written as a single bitvector again. for ease.
+
+  // want to be able to do a sample for 1s. or longer .
+  // REG_CLK_COUNT_SAMPLE_N
 
   // remember counter is already divided by 2. from the 20MHz to 10Mhz..
   // reg [24-1:0]  clk_count_sample_n    = `CLK_FREQ / 50 * 10 ;    // 10nplc.  200ms. for both signal, and zero.
@@ -116,8 +118,6 @@ module modulation_az (
             clk_count_down  <= clk_count_precharge_n;
             sw_pc_ctl       <= `SW_PC_BOOT;
             //azmux          <= `MUX_ZERO;        // oesn't matter. but should leave defined?
-
-
             monitor         <= { 8 { 1'b0 } } ;     // reset
           end
         15:
@@ -125,13 +125,14 @@ module modulation_az (
             state <= 2;
 
         ////////////////////////////
-        // loop. precharge_start
+        // loop. azmux to the output of the precharge  switch
         // switch azmux to PC OUT.    (signal is currently protected by pc)  - the 'precharge phase' or settle phase
         2:
             begin
               state           <= 25;
               clk_count_down  <= clk_count_precharge_n;
-              azmux          <= `MUX_AZ_PC_OUT_PIN;      // pin s1
+              // azmux          <=   `MUX_AZ_PC_OUT_PIN;      // pin s1
+              azmux          <=   azmux_hi_val;
               monitor[0]      <= 1;
             end
 

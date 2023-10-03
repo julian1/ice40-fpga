@@ -16,10 +16,12 @@ module mux_4to1_assign #(parameter MSB =24)   (
   );
 
   // if written like this, then there is no error.
-  assign out = sel[1] ? (sel[0] ? d : c) : (sel[0] ? b : a);
+  assign out = sel[1] ? 
+                  (sel[0] ? d : c) 
+                  : (sel[0] ? b : a);
 
 /*
-  // verilog nonblocking. combinatorial assign.  appears to work, even if generates a warning.
+  // verilog nonblocking. combinatorial assign.  works in yosys, even if generates a warning.
   always @(*)
      case (sel)
       2'b00 :  out = a;
