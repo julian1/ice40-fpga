@@ -70,7 +70,7 @@ module modulation_az (
 
   // one plc = 1/50s = 20ms. ten = 200ms.
   // signal looks like 100ms.  not correct because there is 
-  reg [24-1:0]  clk_count_sample_n    = `CLK_FREQ / 2 / 50 * 10 ;   // 10nplc 
+  reg [24-1:0]  clk_count_sample_n    = `CLK_FREQ / 2 / 50 * 10 ;   // 10nplc  .  this is 100ms. / 5nplc. /  
 
   reg [24-1:0]  clk_count_precharge_n = `CLK_FREQ / 2 / 1000;   // 1ms
 
