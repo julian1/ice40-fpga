@@ -377,7 +377,12 @@ module top (
 
     // when we change the order of these things - it fucks up.
 
-   .a( { `NUM_BITS { 1'b0 } } ),            // 0 .
+
+   // .a( { `NUM_BITS { 1'b0 } } ),            // 0 .
+   .a(  {   { 15 { 1'b0 } },  reg_led[ 0],   { 13 { 1'b0 } } }    ),        // it's easier to see what is going on if fpga comes up under mcu control.
+                                                                            // mode 0, all outputs are 0, except led follows reg_led.
+    
+
    .b( { `NUM_BITS { 1'b1 } } ),            // 1.
    .c( test_pattern_out ),                  // 2
    .d( reg_direct[ `NUM_BITS - 1 :  0 ]   ),  // 3.    // when we pass a hard-coded value in here...  then read/write reg_direct works.  // it is very strange.

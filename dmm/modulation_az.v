@@ -63,8 +63,7 @@ module modulation_az (
 
 
   // change name clk_precharge_duration_n
-  reg [24-1:0]  clk_count_precharge_n = `CLK_FREQ / 2 / 1000;   // 500us.
-
+  reg [24-1:0]  clk_count_precharge_n = `CLK_FREQ * 500e-6 ;   // 500us.
 
 
   // this would be an async signal???
