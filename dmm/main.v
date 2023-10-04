@@ -365,8 +365,6 @@ module top (
 
 
 
-
-
   // ok. now we want a modulation - where pre-charge is spun. but we have mcu control over the muxes.
   // which allows switching in
 
@@ -377,27 +375,29 @@ module top (
 
     // when we change the order of these things - it fucks up.
 
-
-   // .a( { `NUM_BITS { 1'b0 } } ),            // 0 .
-   .a(  {   { 15 { 1'b0 } },  reg_led[ 0],   { 13 { 1'b0 } } }    ),        // it's easier to see what is going on if fpga comes up under mcu control.
+    // default mode. 
+    // actually not sure, if shouldn't blink led on own counter.
+    // actually might be better 0 - blink on counter, while cpu can set to mode 1. to blink in response to reg.
+    // .a( { `NUM_BITS { 1'b0 } } ),            // 0 .
+    .a(  {   { 15 { 1'b0 } },  reg_led[ 0],   { 13 { 1'b0 } } }    ),        // it's easier to see what is going on if fpga comes up under mcu control.
                                                                             // mode 0, all outputs are 0, except led follows reg_led.
     
 
-   .b( { `NUM_BITS { 1'b1 } } ),            // 1.
-   .c( test_pattern_out ),                  // 2
-   .d( reg_direct[ `NUM_BITS - 1 :  0 ]   ),  // 3.    // when we pass a hard-coded value in here...  then read/write reg_direct works.  // it is very strange.
+    .b( { `NUM_BITS { 1'b1 } } ),            // 1.
+    .c( test_pattern_out ),                  // 2
+    .d( reg_direct[ `NUM_BITS - 1 :  0 ]   ),  // 3.    // when we pass a hard-coded value in here...  then read/write reg_direct works.  // it is very strange.
 
-   // .e( test_pattern_2_out ),
-   .e( modulation_az_out),                  // 4
-   .f(  22'b0 ),     // 6 works.
+    // .e( test_pattern_2_out ),
+    .e( modulation_az_out),                  // 4
+    .f(  22'b0 ),     // 6 works.
 
-   .g(  22'b0 ),     // 6 works.
-   .h( 22'b0  ),     // 7
+    .g(  22'b0 ),     // 6 works.
+    .h( 22'b0  ),     // 7
 
 
-   .sel( reg_mode[ 2 : 0 ]),
+    .sel( reg_mode[ 2 : 0 ]),
 
-   .out( w_conditioning_out )
+    .out( w_conditioning_out )
   );
 
 
