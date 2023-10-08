@@ -3,10 +3,9 @@
   we have the two clk transitions. but it makes it clearer to read.
 
 
-  TODO - change name 'zero' -> 'lo'.  not sure.
-
-  TODO - change 'active'   to 'mode'
-
+  TODO
+      - renam ename 'zero' -> 'lo'.  not sure.
+      - rename change 'active'   to 'mode'
           eg. normal AZ. where we switch between SIG/ZERO
 
 */
@@ -23,14 +22,9 @@
 
 ////////////////////
 
-// TODO this value needs the EN pin set.
-
-// `define MUX_AZ_PC_OUT_PIN   4'b1000   // AZ switch pin muxes pc-out.
 
 `define SW_PC_SIGNAL    1
 `define SW_PC_BOOT      0
-
-
 
 
 
@@ -85,30 +79,16 @@ module modulation_az (
       case (state)
 
         // precharge switch - protects the signal. from the charge-injection of the AZ switch.
-        //////////////////
-        // 1. switch precharge to boot voltage. (to protect signal)
-        //
-        // 2. switch AZ mux to signal.  (signal is protected by precharge).  AZ=SIG, PC=
-        // 3. switch precharge  to signal.  and take sample.
-        // 4. switch precharge to boot (to protect signal).
-        // 5. switch AZ mux to zero - take sample.
-        // 6  goto 2.
-
-        // state vars are needed - because the actual zero used - will be encoded in a register.
-
-        // sample period needs to be equal for both.
-
-        0:
+          0:
           // having a state like, this may be useful for debuggin, because can put a pulse on the monitor.
           state <= 1;
 
-        // switch pc to boot to protect signal
+        // switch pre-charge switch to boot to protect signal
         1:
           begin
             state           <= 15;
             clk_count_down  <= clk_count_precharge_n;
             sw_pc_ctl       <= `SW_PC_BOOT;
-            //azmux          <= `MUX_ZERO;        // oesn't matter. but should leave defined?
             monitor         <= { 8 { 1'b0 } } ;     // reset
           end
         15:
@@ -117,8 +97,8 @@ module modulation_az (
 
 
         ////////////////////////////
-        // loop. azmux to the output of the precharge  switch
-        // switch azmux to PC OUT.    (signal is currently protected by pc)  - the 'precharge phase' or settle phase
+        // switch azmux from LO to PC OUT (BOOT).    (signal is currently protected by pc)  - the 'precharge phase' or settle phase
+        // precharge phase.
         2:
             begin
               state           <= 25;
@@ -132,15 +112,11 @@ module modulation_az (
 
 
         /////////////////////////
-        // PC SW manipulation.
-        // The trick is that the PC switching runs inside the AZ switch in the time dimension.
-        // expose/take the raw signal sample.   by switching pc_sw to signal
+        // switch pc-switch from BOOT to signal. take hi measure
         3:
           begin
             state           <= 35;
-            // clk_count_down  <= clk_count_sample_n;
             clk_count_down  <= clk_sample_duration;
-
             sw_pc_ctl       <= `SW_PC_SIGNAL;
             led0            <= 1;
             monitor[1]      <= 1;
@@ -149,7 +125,7 @@ module modulation_az (
           if(clk_count_down == 0)
             state <= 4;
 
-        // re-protect signal. by switching pc_sw back to boot
+        // switch pre-charge switch back to boot to protect signal again
         4:
           begin
             state           <= 45;
@@ -162,11 +138,10 @@ module modulation_az (
             state <= 5;
 
         /////////////////////////
-        // take the zero - by switching az mux.
+        // switch az mux to lo.   take lo measurement
         5:
           begin
             state           <= 55;
-            // clk_count_down  <= clk_count_sample_n;
             clk_count_down  <= clk_sample_duration;
             azmux           <= azmux_lo_val;
             led0            <= 0;
