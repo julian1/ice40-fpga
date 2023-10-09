@@ -90,6 +90,7 @@ module modulation_az (
             state           <= 15;
             clk_count_down  <= clk_count_precharge_n;
             sw_pc_ctl       <= `SW_PC_BOOT;
+            // azmux           <=  azmux_lo_val;       // should be defined. or set in async reset. not left over state.
             monitor         <= { 8 { 1'b0 } } ;     // reset
           end
         15:
