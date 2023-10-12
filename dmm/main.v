@@ -240,12 +240,15 @@ module top (
   // TODO change prefix to w_
 
   /////////////////////
-  assign { _4094_OE_CTL } = 1;    //  on for test.  should defer to mcu control. after check supplies.
 
 
 
   wire [32-1:0] reg_led;
   wire [32-1:0] reg_4094;   // TODO remove
+
+  assign { _4094_OE_CTL } = reg_4094;    //  lo. start up not enabled.
+  // assign { _4094_OE_CTL } = 1;    //  on for test.  should defer to mcu control. after check supplies.
+
   wire [32-1:0] reg_mode;     // two bits
 
   wire [32 - 1 :0] reg_direct;
@@ -338,7 +341,7 @@ module top (
     //.azmux_lo2_val( reg_direct3[ 4-1 : 0 ]   ),
     // .azmux_hi2_val(  reg_direct4[ 4-1 : 0 ]  ),
 
-    .clk_sample_duration( reg_clk_sample_duration ), 
+    .clk_sample_duration( reg_clk_sample_duration ),
 
     // outputs
     .sw_pc_ctl( modulation_az_out[ `IDX_SIG_PC_SW_CTL ]  ),
@@ -375,13 +378,13 @@ module top (
 
     // when we change the order of these things - it fucks up.
 
-    // default mode. 
+    // default mode.
     // actually not sure, if shouldn't blink led on own counter.
     // actually might be better 0 - blink on counter, while cpu can set to mode 1. to blink in response to reg.
     // .a( { `NUM_BITS { 1'b0 } } ),            // 0 .
     .a(  {   { 15 { 1'b0 } },  reg_led[ 0],   { 13 { 1'b0 } } }    ),        // it's easier to see what is going on if fpga comes up under mcu control.
                                                                             // mode 0, all outputs are 0, except led follows reg_led.
-    
+
 
     .b( { `NUM_BITS { 1'b1 } } ),            // 1.
     .c( test_pattern_out ),                  // 2
