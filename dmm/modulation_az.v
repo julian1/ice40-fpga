@@ -39,7 +39,7 @@ module modulation_az (
 
   // lo mux input to use.
   input [  4-1 : 0 ] azmux_lo_val,
-  input [  4-1 : 0 ] azmux_hi_val,          // should almost always be S1 == 4'b1000, for pc-out. except when off for charge-accumulation tests, bbor 4 cycle measurement.
+  input [  4-1 : 0 ] azmux_hi_val,          // should almost always be S1 == 4'b1000, for pc-out. except when want to isolate just the pre-charge switch  charge contribution.
   input [ 32-1 : 0 ] clk_sample_duration,  // 32/31 bit nice. for long sample....  wrongly named it is counter_sample_duration. not clk...
 
   /// outputs.
