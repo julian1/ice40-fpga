@@ -337,7 +337,8 @@ module top (
     .clk(CLK),
     .reset( 1'b0 ),
     .azmux_lo_val(  reg_direct[  `IDX_AZMUX +: 4 ] ),       // expand width for fpga control of himux/himux2. for ratiometric, and AG cycle.  (boot,or sig).
-    .azmux_hi_val(  reg_direct2[ `IDX_AZMUX +: 4 ] ),        // we need control over lo-mux hi value. to turn off. for charge-injection accumulation measurement.
+
+    // .azmux_hi_val(  reg_direct2[ `IDX_AZMUX +: 4 ] ),        // modulation_az hardcodes the hi_val . since does not change for normal az operation
     //.azmux_lo2_val( reg_direct3[ 4-1 : 0 ]   ),
     // .azmux_hi2_val(  reg_direct4[ 4-1 : 0 ]  ),
 

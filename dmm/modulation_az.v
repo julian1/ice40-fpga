@@ -27,6 +27,10 @@
 `define SW_PC_BOOT      0
 
 
+// AZMUX PC-OUT select the hi
+`define S1              ((1<<3)|(1-1))
+`define AZMUX_HI_VAL    `S1     // PC-OUT
+
 
 
 module modulation_az (
@@ -39,12 +43,14 @@ module modulation_az (
 
   // lo mux input to use.
   input [  4-1 : 0 ] azmux_lo_val,
-  input [  4-1 : 0 ] azmux_hi_val,          // should almost always be S1 == 4'b1000, for pc-out. except when want to isolate just the pre-charge switch  charge contribution.
+
+  // modulation_az hardcodes the hi_val . since does not change for normal az operation
+  // input [  4-1 : 0 ] azmux_hi_val,          // should almost always be S1 == 4'b1000, for pc-out. except when want to isolate just the pre-charge switch  charge contribution.
   input [ 32-1 : 0 ] clk_sample_duration,  // 32/31 bit nice. for long sample....  wrongly named it is counter_sample_duration. not clk...
 
   /// outputs.
   output reg  sw_pc_ctl,
-  output reg [ 4-1:0 ] azmux ,       // change name   az lo value.
+  output reg [ 4-1:0 ] azmux,
 
   output reg led0,
   output reg [ 8-1:0]  monitor,
@@ -105,7 +111,9 @@ module modulation_az (
             begin
               state           <= 25;
               clk_count_down  <= clk_count_precharge_n;  // normally pin s1
-              azmux          <=   azmux_hi_val;
+              // azmux          <= azmux_hi_val;
+              azmux             <= `AZMUX_HI_VAL;
+
               monitor[0]      <= 1;
             end
         25:
