@@ -1,4 +1,8 @@
-
+/*
+  need to add core reset back.
+  possible that a timer reg, is read, while being shifted in spi transfer, and thus sees very large value timer duration
+  behavior is to appear to lockup.
+*/
 /*
   --------------------
 
@@ -52,8 +56,8 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   output reg [32-1:0] reg_4094,     // TODO change name it's a state register for OE. status .  or SR. reg_4094_.   or SR_4094,   sr_4094.
   output reg [32-1:0] reg_mode,
   output reg [32-1:0] reg_direct,
-  output reg [32-1:0] reg_direct2,     // 
-  output reg [32-1:0] reg_clk_sample_duration 
+  output reg [32-1:0] reg_direct2,     //
+  output reg [32-1:0] reg_clk_sample_duration
 
   // passing a monitor in here, is useful, for monitoring internal. eg. the
   // output reg [7-1:0]   vec_monitor,
