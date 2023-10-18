@@ -329,18 +329,14 @@ module top (
   modulation_az
   modulation_az (
 
-    // remember hi mux is not manipulated, or passed into this module.
+    // remember himux is not manipulated, or passed to this module.
     // instead the hi signal is selected by the AZ mux, via the pre-charge switch
-    // himux is controlled by reg-direct.
+    // and himux is controlled using reg-direct.
 
     // inputs
     .clk(CLK),
     .reset( 1'b0 ),
     .azmux_lo_val(  reg_direct[  `IDX_AZMUX +: 4 ] ),       // expand width for fpga control of himux/himux2. for ratiometric, and AG cycle.  (boot,or sig).
-
-    // .azmux_hi_val(  reg_direct2[ `IDX_AZMUX +: 4 ] ),        // modulation_az hardcodes the hi_val . since does not change for normal az operation
-    //.azmux_lo2_val( reg_direct3[ 4-1 : 0 ]   ),
-    // .azmux_hi2_val(  reg_direct4[ 4-1 : 0 ]  ),
 
     .clk_sample_duration( reg_clk_sample_duration ),
 
@@ -355,24 +351,9 @@ module top (
   assign modulation_az_out[ `IDX_HIMUX +: 8 ]  = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
   assign modulation_az_out[ `IDX_ADCMUX +: 7 ] = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
 
-  /* when testing the modulation_az. for charge accumulation.
-      // we want the az mux to stay off through the cycle....
-
-      // can use a flag bit.
-      // or pass two registers for the lo. and the hi. and with 4 cycle.  need four.
-      // is it clearer .  withotu flags.
-
-
-      // remember that we need a count.
-
-  */
 
 
 
-  // ok. now we want a modulation - where pre-charge is spun. but we have mcu control over the muxes.
-  // which allows switching in
-
-  // mode...
 
   mux_8to1_assign #( `NUM_BITS )
   mux_8to1_assign_1  (
