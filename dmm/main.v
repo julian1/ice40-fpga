@@ -14,6 +14,7 @@
 
 
 `include "modulation_az.v"
+`include "modulation_pc.v"
 
 `include "mux_assign.v"
 
@@ -354,6 +355,36 @@ module top (
 
 
 
+  // only switch pc charge. other muxes  are controlled by direct register
+  wire [ `NUM_BITS-1:0 ]  modulation_pc_out ;
+  modulation_pc
+  modulation_pc (
+
+    // inputs
+    .clk(CLK),
+    .reset( 1'b0 ),
+
+    .clk_sample_duration( reg_clk_sample_duration ),
+
+    // outputs
+    .sw_pc_ctl( modulation_pc_out[ `IDX_SIG_PC_SW_CTL ]  ),
+    .led0(      modulation_pc_out[ `IDX_LED0 ] ),
+    .monitor(   modulation_pc_out[ `IDX_MONITOR +: 8  ] )    // we could pass subset of monitor if watned. eg. only 4 pins...
+
+  );
+
+  assign modulation_pc_out[ `IDX_AZMUX +: 4]   = reg_direct[ `IDX_AZMUX +: 4];     // azmux
+  assign modulation_pc_out[ `IDX_HIMUX +: 8 ]  = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
+  assign modulation_pc_out[ `IDX_ADCMUX +: 7 ] = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
+
+
+
+
+
+
+
+
+
 
   mux_8to1_assign #( `NUM_BITS )
   mux_8to1_assign_1  (
@@ -374,7 +405,7 @@ module top (
 
     // .e( test_pattern_2_out ),
     .e( modulation_az_out),                  // 4
-    .f(  22'b0 ),     // 6 works.
+    .f( modulation_pc_out),           // 6 works.
 
     .g(  22'b0 ),     // 6 works.
     .h( 22'b0  ),     // 7
