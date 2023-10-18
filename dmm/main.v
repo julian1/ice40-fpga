@@ -15,6 +15,7 @@
 
 `include "modulation_az.v"
 `include "modulation_pc.v"
+`include "modulation_no_az.v"
 
 `include "mux_assign.v"
 
@@ -338,9 +339,7 @@ module top (
     .clk(CLK),
     .reset( 1'b0 ),
     .azmux_lo_val(  reg_direct[  `IDX_AZMUX +: 4 ] ),       // expand width for fpga control of himux/himux2. for ratiometric, and AG cycle.  (boot,or sig).
-
     .clk_sample_duration( reg_clk_sample_duration ),
-
     // outputs
     .sw_pc_ctl( modulation_az_out[ `IDX_SIG_PC_SW_CTL ]  ),
     .azmux (    modulation_az_out[ `IDX_AZMUX +: 4] ),
@@ -359,13 +358,10 @@ module top (
   wire [ `NUM_BITS-1:0 ]  modulation_pc_out ;
   modulation_pc
   modulation_pc (
-
     // inputs
     .clk(CLK),
     .reset( 1'b0 ),
-
     .clk_sample_duration( reg_clk_sample_duration ),
-
     // outputs
     .sw_pc_ctl( modulation_pc_out[ `IDX_SIG_PC_SW_CTL ]  ),
     .led0(      modulation_pc_out[ `IDX_LED0 ] ),
@@ -379,6 +375,24 @@ module top (
 
 
 
+
+  wire [ `NUM_BITS-1:0 ]  modulation_no_az_out ;
+  modulation_no_az
+  modulation_no_az (
+    // inputs
+    .clk(CLK),
+    .reset( 1'b0 ),
+    .clk_sample_duration( reg_clk_sample_duration ),
+    // outputs
+    .sw_pc_ctl( modulation_no_az_out[ `IDX_SIG_PC_SW_CTL ]  ),
+    .azmux (    modulation_no_az_out[ `IDX_AZMUX +: 4] ),
+    .led0(      modulation_no_az_out[ `IDX_LED0 ] ),
+    .monitor(   modulation_no_az_out[ `IDX_MONITOR +: 8  ] )    // we could pass subset of monitor if watned. eg. only 4 pins...
+
+  );
+
+  assign modulation_no_az_out[ `IDX_HIMUX +: 8 ]  = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
+  assign modulation_no_az_out[ `IDX_ADCMUX +: 7 ] = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
 
 
 
@@ -395,7 +409,7 @@ module top (
     // actually not sure, if shouldn't blink led on own counter.
     // actually might be better 0 - blink on counter, while cpu can set to mode 1. to blink in response to reg.
     // .a( { `NUM_BITS { 1'b0 } } ),            // 0 .
-    .a(  {   { 15 { 1'b0 } },  reg_led[ 0],   { 13 { 1'b0 } } }    ),        // it's easier to see what is going on if fpga comes up under mcu control.
+    .a(  {   { 15 { 1'b0 } },  reg_led[ 0],   { 13 { 1'b0 } } }    ),        // 0. it's easier to see what is going on if fpga comes up under mcu control.
                                                                             // mode 0, all outputs are 0, except led follows reg_led.
 
 
@@ -406,8 +420,8 @@ module top (
     // .e( test_pattern_2_out ),
     .e( modulation_az_out),                  // 4
     .f( modulation_pc_out),           // 6 works.
+    .g(  modulation_no_az_out /* 22'b0*/  ),     // 7 works.
 
-    .g(  22'b0 ),     // 6 works.
     .h( 22'b0  ),     // 7
 
 
