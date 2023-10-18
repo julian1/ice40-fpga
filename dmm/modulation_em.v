@@ -1,11 +1,6 @@
 /*
 
-  only switch the pc switch. not the azmux. for charge testing.
-
-  - the no az normal case - could be represented with the direct register.
-  - but set it up as explicit mode.  / making representable as mode.
-    makes it easier for state management.
-    across different functions.
+  electrometer. almost the same as no_az.  except precharge muxes boot.  and azmux muxes boot.
 
 */
 
@@ -28,23 +23,25 @@
 `define SW_PC_BOOT      0
 
 
+// AZMUX PC-OUT select the hi
 `define S1              ((1<<3)|(1-1))
-// `define S2          ((1<<3)|(2-1))
+`define S2          ((1<<3)|(2-1))
 
 
 
 
 
-module modulation_no_az (
+module modulation_em (
 
+  // remember hi mux is not manipulated, or passed into this module.
+  // inistead the hi signal is seleced by the AZ mux, via the pre-charge switch
 
   input   clk,
   input   reset,
 
-  // modulation_az hardcodes the hi_val . since does not change for normal az operation
   input [ 32-1 : 0 ] clk_sample_duration,  // 32/31 bit nice. for long sample....  wrongly named it is counter_sample_duration. not clk...
 
-  /// outputs. these can be wires because we assign
+  // can all be wires.
   output wire sw_pc_ctl,
   output wire [ 4-1:0 ] azmux,
   output wire led0,
@@ -52,9 +49,10 @@ module modulation_no_az (
 
 );
 
-
-  assign sw_pc_ctl  = `SW_PC_SIGNAL;
-  assign azmux      = `S1;             //  pc-out
+  // can actually do electrometer a couple of ways.
+  // but blocking boot probably better.
+  assign sw_pc_ctl  = `SW_PC_BOOT;      // precharge mux boot. eg. block input.
+  assign azmux      = `S2;              // mux boot directly
   assign monitor    = 8'b00000001;
   assign led0       = 1'b1;
 

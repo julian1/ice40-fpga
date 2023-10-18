@@ -16,6 +16,7 @@
 `include "modulation_az.v"
 `include "modulation_pc.v"
 `include "modulation_no_az.v"
+`include "modulation_em.v"
 
 `include "mux_assign.v"
 
@@ -366,7 +367,6 @@ module top (
     .sw_pc_ctl( modulation_pc_out[ `IDX_SIG_PC_SW_CTL ]  ),
     .led0(      modulation_pc_out[ `IDX_LED0 ] ),
     .monitor(   modulation_pc_out[ `IDX_MONITOR +: 8  ] )    // we could pass subset of monitor if watned. eg. only 4 pins...
-
   );
 
   assign modulation_pc_out[ `IDX_AZMUX +: 4]   = reg_direct[ `IDX_AZMUX +: 4];     // azmux
@@ -388,13 +388,29 @@ module top (
     .azmux (    modulation_no_az_out[ `IDX_AZMUX +: 4] ),
     .led0(      modulation_no_az_out[ `IDX_LED0 ] ),
     .monitor(   modulation_no_az_out[ `IDX_MONITOR +: 8  ] )    // we could pass subset of monitor if watned. eg. only 4 pins...
-
   );
 
   assign modulation_no_az_out[ `IDX_HIMUX +: 8 ]  = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
   assign modulation_no_az_out[ `IDX_ADCMUX +: 7 ] = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
 
 
+
+  wire [ `NUM_BITS-1:0 ]  modulation_em_out ;
+  modulation_em
+  modulation_em (
+    // inputs
+    .clk(CLK),
+    .reset( 1'b0 ),
+    .clk_sample_duration( reg_clk_sample_duration ),
+    // outputs
+    .sw_pc_ctl( modulation_em_out[ `IDX_SIG_PC_SW_CTL ]  ),
+    .azmux (    modulation_em_out[ `IDX_AZMUX +: 4] ),
+    .led0(      modulation_em_out[ `IDX_LED0 ] ),
+    .monitor(   modulation_em_out[ `IDX_MONITOR +: 8  ] )    // we could pass subset of monitor if watned. eg. only 4 pins...
+  );
+
+  assign modulation_em_out[ `IDX_HIMUX +: 8 ]  = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
+  assign modulation_em_out[ `IDX_ADCMUX +: 7 ] = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
 
 
 
@@ -414,15 +430,11 @@ module top (
     .b( { `NUM_BITS { 1'b1 } } ),            // 1.
     .c( test_pattern_out ),                  // 2
     .d( reg_direct[ `NUM_BITS - 1 :  0 ]   ),  // 3.    // when we pass a hard-coded value in here...  then read/write reg_direct works.  // it is very strange.
-
     // .e( test_pattern_2_out ),
-
-    .e( modulation_pc_out),                   // 4 works.
+    .e( modulation_pc_out),                   // 4
     .f( modulation_az_out),                   // 5
-    .g( modulation_no_az_out /* 22'b0*/  ),  // 7 works.
-
-    .h( 22'b0  ),     // 7
-
+    .g( modulation_no_az_out),                // 7
+    .h( modulation_em_out ),                  // 8
 
     .sel( reg_mode[ 2 : 0 ]),
 
