@@ -1,12 +1,6 @@
 /*
 
-  we have the two clk transitions. but it makes it clearer to read.
-
-
-  TODO
-      - renam ename 'zero' -> 'lo'.  not sure.
-      - rename change 'active'   to 'mode'
-          eg. normal AZ. where we switch between SIG/ZERO
+  normal az
 
 */
 
