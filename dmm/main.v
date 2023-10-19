@@ -173,9 +173,19 @@ module top (
   output U902_SW1_CTL,
   output U902_SW2_CTL,
   output U902_SW3_CTL,
-  output CMPR_LATCH_CTL
+  output CMPR_LATCH_CTL,
 
   ////////////
+
+  input U1004_4094_DATA,
+  input LINE_SENSE_OUT,
+  input SWITCH_SENSE_OUT,
+  input DCV_OVP_OUT,
+  input OHMS_OVP_OUT,
+  input SUPPLY_SENSE_OUT,
+  input UNUSED_2                    // change name UNUSED_2_OUT
+
+
 
 );
 
@@ -258,6 +268,15 @@ module top (
   wire [32 - 1 :0] reg_direct2;
   wire [32-1 : 0] reg_clk_sample_duration;  // 32/31 bit nice. for long sample.
 
+  wire [32 - 1 :0] reg_status ;
+
+
+  // input U1004_4094_DATA,
+  // input LINE_SENSE_OUT,
+  // assign reg_status = 32'b0 ;
+  assign reg_status = { 27'b0 , SWITCH_SENSE_OUT, DCV_OVP_OUT, OHMS_OVP_OUT, SUPPLY_SENSE_OUT, UNUSED_2 };
+
+
 
   register_set // #( 32 )   // register bank  . change name 'registers'
   register_set
@@ -278,7 +297,9 @@ module top (
     . reg_direct( reg_direct ),
     . reg_direct2( reg_direct2 ),
 
-    . reg_clk_sample_duration( reg_clk_sample_duration)
+    . reg_clk_sample_duration( reg_clk_sample_duration),
+
+    . reg_status( reg_status )
   );
 
   ///////////////////////////

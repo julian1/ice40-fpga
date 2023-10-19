@@ -36,7 +36,7 @@
 
 `define REG_CLK_SAMPLE_DURATION 16   // clk sample time
 
-
+`define REG_STATUS        17
 
 
 module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,   4 bytes data.
@@ -57,7 +57,9 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   output reg [32-1:0] reg_mode,
   output reg [32-1:0] reg_direct,
   output reg [32-1:0] reg_direct2,     //
-  output reg [32-1:0] reg_clk_sample_duration
+  output reg [32-1:0] reg_clk_sample_duration,
+
+  input wire [32-1:0] reg_status
 
   // passing a monitor in here, is useful, for monitoring internal. eg. the
   // output reg [7-1:0]   vec_monitor,
@@ -150,6 +152,9 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
               `REG_CLK_SAMPLE_DURATION:  out <= reg_clk_sample_duration << 8;     // clk_count_sample_n clk_time_sample_clksample_time ??
 
               // `REG_DIRECT:    out <= { reg_direct , 8'b0 } ;   // this fails.... weird.
+
+              `REG_STATUS:    out <= reg_status << 8;
+
 
               default:        out <=  24'b000011110000111100001111 << 8;
               // default:        out <=  32'b00001111000011110000111100001111<< 8;     // 32 bit value appears to work.
