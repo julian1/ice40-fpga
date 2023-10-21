@@ -48,7 +48,7 @@ module modulation_az (
   output reg [ 4-1:0 ] azmux,
 
   output reg led0,
-  output reg [ 2-1:0]  monitor,
+  output reg [ 8-1:0]  monitor,   // there is no reason to prematurely narrow the monitor here. can be done at top level.
 );
 
   reg [7-1:0]   state = 0 ;     // should expose in module, not sure.
