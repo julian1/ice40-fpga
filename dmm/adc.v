@@ -11,8 +11,10 @@ module adc (
   input [ 32-1 : 0 ] clk_sample_duration,  // 32/31 bit nice. for long sample....  wrongly named it is counter_sample_duration. not clk...
   input adc_take_measure,  // wire
 
-  output reg adc_take_measure_done
+  // outputs
+  output reg adc_take_measure_done,
 
+  output reg [ 8-1:0]  monitor   // there is no reason to prematurely narrow the monitor here. can be done at top level.
 );
 
   reg [7-1:0]   state = 0 ;
@@ -26,6 +28,8 @@ module adc (
       state           <= 0;
 
       adc_take_measure_done <= 0;
+
+      monitor         <= { 8 { 1'b0 } } ;     // reset
     end
     else
     begin
@@ -52,6 +56,7 @@ module adc (
           begin
             state           <= 35;
             clk_count_down  <= clk_sample_duration;
+            monitor[0]      <= 1;     // actually monitor pin 2.
           end
 
         35:
@@ -65,6 +70,8 @@ module adc (
             state           <= 5;
             // signal measurement done
             adc_take_measure_done <= 1;
+
+            monitor[0]      <= 0;
           end
 
         5:

@@ -377,6 +377,7 @@ module top (
   wire adc_take_measure;
   wire adc_take_measure_done;
 
+  wire [ 8-1:0 ]  adc_monitor_out ;
   adc
   adc (
     // inputs
@@ -386,7 +387,8 @@ module top (
     .adc_take_measure( adc_take_measure),  // wire
 
     // outputs
-    .adc_take_measure_done(adc_take_measure_done)
+    .adc_take_measure_done(adc_take_measure_done),
+    .monitor( adc_monitor_out)
   );
 
 
@@ -423,7 +425,7 @@ module top (
 
   // pass other bits of monitor to the adc
   // assign modulation_az_out[ `IDX_MONITOR + 2 +: 6 ] = { 6 { 1'b0 } };
-  assign modulation_az_out[ `IDX_MONITOR + 2 +: 6 ] = { 6 { 1'b0 } };
+  assign modulation_az_out[ `IDX_MONITOR + 2 +: 6 ] = adc_monitor_out[ 6 -1 : 0];
 
 
 
