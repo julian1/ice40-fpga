@@ -18,6 +18,8 @@
 `include "modulation_no_az.v"
 `include "modulation_em.v"
 
+`include "adc.v"
+
 `include "mux_assign.v"
 
 
