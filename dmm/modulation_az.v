@@ -38,22 +38,17 @@ module modulation_az (
   // lo mux input to use.
   input [  4-1 : 0 ] azmux_lo_val,
 
-  // modulation_az hardcodes the hi_val . since does not change for normal az operation
-  // input [  4-1 : 0 ] azmux_hi_val,          // should almost always be S1 == 4'b1000, for pc-out. except when want to isolate just the pre-charge switch  charge contribution.
-  // input [ 32-1 : 0 ] clk_sample_duration,  // 32/31 bit nice. for long sample....  wrongly named it is counter_sample_duration. not clk...
-
+  // measure done
   input adc_take_measure_done,
 
-
+  // outputs.
   output reg adc_take_measure,
 
-  /// outputs.
   output reg  sw_pc_ctl,
   output reg [ 4-1:0 ] azmux,
 
   output reg led0,
   output reg [ 8-1:0]  monitor,
-
 );
 
   reg [7-1:0]   state = 0 ;     // should expose in module, not sure.
