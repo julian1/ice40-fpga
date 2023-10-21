@@ -20,6 +20,14 @@ module adc (
   reg [7-1:0]   state = 0 ;
   reg [31:0]    clk_count_down;
 
+/*
+  - EXTR. monitor[0] should be given the adc_take_measure signal.
+    as the initial triggering condition.
+  - also we may want to wait a bit.
+    but that should probably be done in the az mode.
+  - also want to probably pass a stamp or code. as to what we sampled.
+
+*/
 
   always @(posedge clk  or posedge reset )
    if(reset)
