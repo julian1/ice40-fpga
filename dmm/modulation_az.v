@@ -48,7 +48,7 @@ module modulation_az (
   output reg [ 4-1:0 ] azmux,
 
   output reg led0,
-  output reg [ 8-1:0]  monitor,
+  output reg [ 2-1:0]  monitor,
 );
 
   reg [7-1:0]   state = 0 ;     // should expose in module, not sure.
@@ -91,7 +91,7 @@ module modulation_az (
             clk_count_down  <= clk_count_precharge_n;
             sw_pc_ctl       <= `SW_PC_BOOT;
             // azmux           <=  azmux_lo_val;       // should be defined. or set in async reset. not left over state.
-            monitor         <= { 8 { 1'b0 } } ;     // reset
+            monitor         <= { 2 { 1'b0 } } ;     // reset
 
 
             adc_take_measure    <= 0;
