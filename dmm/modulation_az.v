@@ -121,6 +121,7 @@ module modulation_az (
 
         /////////////////////////
         // switch pc-switch from BOOT to signal. take hi measure
+        // TODO - need to provide a settle time. after switching lo..
         3:
           begin
             state           <= 35;
@@ -156,6 +157,7 @@ module modulation_az (
 
         /////////////////////////
         // switch az mux to lo.   take lo measurement
+        // TODO - need to provide a settle time. after switching lo..
         5:
           begin
             state           <= 55;
