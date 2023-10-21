@@ -346,6 +346,21 @@ module top (
   );
 
 
+  wire adc_take_measure;
+  wire adc_take_measure_done;
+
+  adc
+  adc (
+    // inputs
+    .clk(CLK),
+    .reset( 1'b0 ),
+    .clk_sample_duration( reg_clk_sample_duration ),
+    .adc_take_measure( adc_take_measure),  // wire
+
+    // outputs
+    .adc_take_measure_done(adc_take_measure_done)
+  );
+
 
 
 
@@ -361,13 +376,18 @@ module top (
     .clk(CLK),
     .reset( 1'b0 ),
     .azmux_lo_val(  reg_direct[  `IDX_AZMUX +: 4 ] ),       // expand width for fpga control of himux/himux2. for ratiometric, and AG cycle.  (boot,or sig).
-    .clk_sample_duration( reg_clk_sample_duration ),
+    // .clk_sample_duration( reg_clk_sample_duration ),
+    .adc_take_measure_done(adc_take_measure_done),
+
+
+
     // outputs
     .sw_pc_ctl( modulation_az_out[ `IDX_SIG_PC_SW_CTL ]  ),
     .azmux (    modulation_az_out[ `IDX_AZMUX +: 4] ),
     .led0(      modulation_az_out[ `IDX_LED0 ] ),
-    .monitor(   modulation_az_out[ `IDX_MONITOR +: 8  ] )    // we could pass subset of monitor if watned. eg. only 4 pins...
+    .monitor(   modulation_az_out[ `IDX_MONITOR +: 8  ] ),    // we could pass subset of monitor if watned. eg. only 4 pins...
 
+    .adc_take_measure( adc_take_measure)
   );
 
   assign modulation_az_out[ `IDX_HIMUX +: 8 ]  = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.

@@ -40,7 +40,12 @@ module modulation_az (
 
   // modulation_az hardcodes the hi_val . since does not change for normal az operation
   // input [  4-1 : 0 ] azmux_hi_val,          // should almost always be S1 == 4'b1000, for pc-out. except when want to isolate just the pre-charge switch  charge contribution.
-  input [ 32-1 : 0 ] clk_sample_duration,  // 32/31 bit nice. for long sample....  wrongly named it is counter_sample_duration. not clk...
+  // input [ 32-1 : 0 ] clk_sample_duration,  // 32/31 bit nice. for long sample....  wrongly named it is counter_sample_duration. not clk...
+
+  input adc_take_measure_done,
+
+
+  output reg adc_take_measure,
 
   /// outputs.
   output reg  sw_pc_ctl,
@@ -80,7 +85,7 @@ module modulation_az (
       case (state)
 
         // precharge switch - protects the signal. from the charge-injection of the AZ switch.
-          0:
+        0:
           // having a state like, this may be useful for debuggin, because can put a pulse on the monitor.
           state <= 1;
 
@@ -92,6 +97,9 @@ module modulation_az (
             sw_pc_ctl       <= `SW_PC_BOOT;
             // azmux           <=  azmux_lo_val;       // should be defined. or set in async reset. not left over state.
             monitor         <= { 8 { 1'b0 } } ;     // reset
+
+
+            adc_take_measure    <= 0;
           end
         15:
           if(clk_count_down == 0)
@@ -120,14 +128,26 @@ module modulation_az (
         3:
           begin
             state           <= 35;
-            clk_count_down  <= clk_sample_duration;
+            // clk_count_down  <= clk_sample_duration;
             sw_pc_ctl       <= `SW_PC_SIGNAL;
             led0            <= 1;
             monitor[1]      <= 1;
+
+            // must be a better name. trigger. rdy. do.
+            adc_take_measure    <= 1;
           end
         35:
-          if(clk_count_down == 0)
+          // wait for adc.
+          if(adc_take_measure_done == 1)
             state <= 4;
+
+          // wait for adc.
+          // if(clk_count_down == 0)
+          //   state <= 4;
+
+
+          // if(clk_count_down == 0)
+          //   state <= 4;
 
         // switch pre-charge switch back to boot to protect signal again
         4:
@@ -146,14 +166,23 @@ module modulation_az (
         5:
           begin
             state           <= 55;
-            clk_count_down  <= clk_sample_duration;
+            // clk_count_down  <= clk_sample_duration;
             azmux           <= azmux_lo_val;
             led0            <= 0;
             monitor[0]      <= 0;
+
+            // must be a better name. trigger. rdy. do.
+            adc_take_measure    <= 1;
           end
+
         55:
-          if(clk_count_down == 0)
+          // wait for adc.
+          if(adc_take_measure_done == 1)
             state <= 6;
+
+
+          // if(clk_count_down == 0)
+          //  state <= 6;
 
 
         6:
@@ -164,6 +193,93 @@ module modulation_az (
       endcase
     end
 endmodule
+
+
+
+
+module adc (
+
+  input   clk,
+  input   reset,
+
+  input [ 32-1 : 0 ] clk_sample_duration,  // 32/31 bit nice. for long sample....  wrongly named it is counter_sample_duration. not clk...
+
+  input adc_take_measure,  // wire
+  output reg adc_take_measure_done
+
+);
+
+  reg [7-1:0]   state = 0 ;     // should expose in module, not sure.
+  reg [31:0]    clk_count_down;           // clk_count for the current phase. using 31 bitss, gives faster timing spec.  v 24 bits. weird. ??? 36MHz v 32MHz
+
+
+  always @(posedge clk  or posedge reset )
+   if(reset)
+    begin
+      // set up next state, for when reset goes hi.
+      state           <= 0;
+
+      adc_take_measure_done <= 0;
+    end
+    else
+    begin
+
+      // always decrement clk for the current phase
+      clk_count_down <= clk_count_down - 1;
+
+
+      case (state)
+
+        // precharge switch - protects the signal. from the charge-injection of the AZ switch.
+        0:
+          // having a state like, this may be useful for debuggin, because can put a pulse on the monitor.
+          state <= 2;
+
+
+        /////////////////////////
+
+        2:
+          // wait for trigger that are ready to do the adc
+          if(adc_take_measure == 1)
+            state <= 3;
+
+
+        3:
+          begin
+            state           <= 35;
+            clk_count_down  <= clk_sample_duration;
+          end
+
+        35:
+          // wait for measurement
+          if(clk_count_down == 0)
+            state <= 4;
+
+
+        // switch pre-charge switch back to boot to protect signal again
+        4:
+          begin
+            state           <= 5;
+            // signal measurement done
+            adc_take_measure_done <= 1;
+          end
+
+        5:
+          begin
+            state           <= 2;
+            // clear measurement done
+            adc_take_measure_done <= 0;
+          end
+
+
+
+      endcase
+    end
+endmodule
+
+
+
+
 
 
 
