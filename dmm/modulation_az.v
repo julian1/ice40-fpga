@@ -132,10 +132,14 @@ module modulation_az (
             adc_take_measure    <= 1;
           end
         35:
-          // wait for adc.
-          if(adc_take_measure_done == 1)
-            state <= 4;
 
+          begin
+            adc_take_measure    <= 0;
+
+            // wait for adc.
+            if(adc_take_measure_done == 1)
+              state <= 4;
+          end
 
         // switch pre-charge switch back to boot to protect signal again
         4:
@@ -164,10 +168,14 @@ module modulation_az (
           end
 
         55:
-          // wait for adc.
-          if(adc_take_measure_done == 1)
-            state <= 6;
+          begin
+            adc_take_measure    <= 0;
 
+
+            // wait for adc.
+            if(adc_take_measure_done == 1)
+              state <= 6;
+          end
 
         6:
           if(run )        // place at end.
