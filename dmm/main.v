@@ -425,7 +425,8 @@ module top (
 
   // pass other bits of monitor to the adc
   // assign modulation_az_out[ `IDX_MONITOR + 2 +: 6 ] = { 6 { 1'b0 } };
-  assign modulation_az_out[ `IDX_MONITOR + 2 +: 6 ] = adc_monitor_out[ 6 -1 : 0];
+  assign modulation_az_out[ `IDX_MONITOR + 2  ]     = adc_take_measure; 
+  assign modulation_az_out[ `IDX_MONITOR + 3 +: 5 ] = adc_monitor_out[ 5 -1 : 0];
 
 
 

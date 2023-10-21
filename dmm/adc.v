@@ -21,6 +21,10 @@ module adc (
   reg [31:0]    clk_count_down;
 
 /*
+  actually it might make sense to intercept the signal.
+  and only have 5.
+
+  -----
   - EXTR. monitor[0] should be given the adc_take_measure signal.
     as the initial triggering condition.
   - also we may want to wait a bit.
