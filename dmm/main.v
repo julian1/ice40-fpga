@@ -322,7 +322,8 @@ module top (
 
   // 4x4=16 + 8mon + 5 = 29 bits.
 
-  wire [`NUM_BITS-1:0 ] w_conditioning_out = {
+
+  wire [`NUM_BITS-1:0 ] outputs_vec = {
 
       SPI_INTERUPT_CTL,
       MEAS_COMPLETE_CTL,
@@ -384,17 +385,18 @@ module top (
     .clk(CLK),
     .reset( 1'b0 ),
     .clk_sample_duration( reg_clk_sample_duration ),
-    .adc_take_measure( adc_take_measure),  // wire
+    .adc_take_measure( adc_take_measure),             // mux in
 
     // outputs
-    .adc_take_measure_done(adc_take_measure_done),
+    .adc_take_measure_done(adc_take_measure_done),    // fan out.
     .monitor( adc_monitor_out)
   );
 
 
 
 
-  wire [ `NUM_BITS-1:0 ]  modulation_az_out ;
+  wire [ `NUM_BITS-1:0 ]  modulation_az_out ;     // beter name
+  wire modulation_az_adc_take_measure;
   modulation_az
   modulation_az (
 
@@ -409,24 +411,20 @@ module top (
     // .clk_sample_duration( reg_clk_sample_duration ),
     .adc_take_measure_done(adc_take_measure_done),
 
-
-
     // outputs
     .sw_pc_ctl( modulation_az_out[ `IDX_SIG_PC_SW_CTL ]  ),
     .azmux (    modulation_az_out[ `IDX_AZMUX +: 4] ),
     .led0(      modulation_az_out[ `IDX_LED0 ] ),
     .monitor(   modulation_az_out[ `IDX_MONITOR +: 2  ] ),    // only pass 2 bit to the az monitor
 
-    .adc_take_measure( adc_take_measure)
+    .adc_take_measure( modulation_az_adc_take_measure)
   );
 
   assign modulation_az_out[ `IDX_HIMUX +: 8 ]  = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
   assign modulation_az_out[ `IDX_ADCMUX +: 7 ] = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
 
   // pass other bits of monitor to the adc
-  // assign modulation_az_out[ `IDX_MONITOR + 2 +: 6 ] = { 6 { 1'b0 } };
-  assign modulation_az_out[ `IDX_MONITOR + 2  ]     = adc_take_measure;           // bit 3. is the signal to take adc measurement.
-  assign modulation_az_out[ `IDX_MONITOR + 3 +: 5 ] = adc_monitor_out[ 5 -1 : 0]; // other bits are for adc.
+  assign modulation_az_out[ `IDX_MONITOR + 2 +: 6 ] = adc_monitor_out[ 6 -1 : 0]; // other bits are for adc.
 
 
 
@@ -439,6 +437,8 @@ module top (
     .clk(CLK),
     .reset( 1'b0 ),
     .clk_sample_duration( reg_clk_sample_duration ),
+    // .adc_take_measure_done(adc_take_measure_done),
+
     // outputs
     .sw_pc_ctl( modulation_no_az_out[ `IDX_SIG_PC_SW_CTL ]  ),
     .azmux (    modulation_no_az_out[ `IDX_AZMUX +: 4] ),
@@ -475,27 +475,62 @@ module top (
   mux_8to1_assign #( `NUM_BITS )
   mux_8to1_assign_1  (
 
-    // when we change the order of these things - it fucks up.
-
-    // default mode.
-    // actually not sure, if shouldn't blink led on own counter.
-    // actually might be better 0 - blink on counter, while cpu can set to mode 1. to blink in response to reg.
-    // .a( { `NUM_BITS { 1'b0 } } ),            // 0 .
-    .a(  {   { 15 { 1'b0 } },  reg_led[ 0],   { 13 { 1'b0 } } }    ),        // 0. it's easier to see what is going on if fpga comes up under mcu control.
-
+    .a(  {   { 15 { 1'b0 } },  reg_led[ 0],   { 13 { 1'b0 } } }    ),        // 0. deffault mode. 0 on all outputs, except follow reg_led, for led.
     .b( { `NUM_BITS { 1'b1 } } ),            // 1.
     .c( test_pattern_out ),                  // 2
     .d( reg_direct[ `NUM_BITS - 1 :  0 ]   ),  // 3.    // when we pass a hard-coded value in here...  then read/write reg_direct works.  // it is very strange.
-    // .e( test_pattern_2_out ),
     .e( modulation_pc_out),                   // 4
     .f( modulation_az_out),                   // 5
-    .g( modulation_no_az_out),                // 7
-    .h( modulation_em_out ),                  // 8
+    .g( modulation_no_az_out),                // 6
+    .h( modulation_em_out ),                  // 7
 
     .sel( reg_mode[ 2 : 0 ]),
-
-    .out( w_conditioning_out )
+    .out( outputs_vec )
   );
+
+
+
+  /*
+    OK. this works. but the muxer doesn't - very odd...
+  */
+  // assign adc_take_measure  =  modulation_az_adc_take_measure ;
+
+/*
+      - NO. issue is that at startup - the az controller has sent the signal - and is now waiting for adc.
+      but adc startups up disconnected from signal at startup.
+      So we have to reset the az controller.  when we do the switch.
+
+    --------
+
+    - Or is there a better way?  - without the muxer.  eg. a different adc. no. don't really want.
+      OR. just make the az-
+      just a reset of the az controller - so it is not blocked waiting on the adc - which is waiting for a start signal..
+
+
+*/
+
+
+  sync_mux_8 #( 1)
+  muxer_2  (
+
+    .clk(CLK),
+
+    .a( 1'b0  ),       // 0.      *****set to 1****** so doesn't block/hang at start?.
+    .b( 1'b0 ),       // 1.
+    .c( 1'b0 ),         // 2
+    .d( 1'b0  ),       // 3.
+    .e( 1'b0  ),         // 4
+    .f( modulation_az_adc_take_measure),         // 5
+    .g( 1'b0 ),         // 6
+    .h( 1'b0 ),        // 7
+
+    .sel( reg_mode[ 2 : 0 ]),     // what if we hard code it.
+    .out( adc_take_measure )
+  );
+
+
+// lets query the mode.
+
 
 
 endmodule
@@ -556,9 +591,9 @@ endmodule
 
 
 /*
-  // assign w_conditioning_out = reg_direct ;
+  // assign outputs_vec = reg_direct ;
 
-  // TODO. try putting the register set last.   then can pass the w_conditioning_out straight into the block.
+  // TODO. try putting the register set last.   then can pass the outputs_vec straight into the block.
 
 
   // mux_4to1_assign #( `NUM_BITS )
@@ -573,7 +608,7 @@ endmodule
     // when we changed this from 32 bit int default to 22 bit it worked.
    .sel( 24'b0 ),                           // So. we want to assign this to a mode register.   and then set it.
    // .sel( reg_mode ),                           // So. we want to assign this to a mode register.   and then set it.
-   .out( w_conditioning_out )
+   .out( outputs_vec )
   );
 */
 
@@ -625,7 +660,7 @@ endmodule
     "reg cannot be assigned with a continuous assignment"
     so this is wrong.
 
-  reg [`NUM_BITS-1:0 ] w_conditioning_out ;
+  reg [`NUM_BITS-1:0 ] outputs_vec ;
   assign  {
       monitor,
       LED0,
@@ -633,7 +668,7 @@ endmodule
       himux2,
       himux,
       azmux
-    } = w_conditioning_out;
+    } = outputs_vec;
 */
 
   /*
@@ -693,7 +728,7 @@ endmodule
 
    // .sel( 2'b00 ),                           // So. we want to assign this to a mode register.   and then set it.
    .sel( reg_mode ),                           // So. we want to assign this to a mode register.   and then set it.
-   .out( w_conditioning_out )
+   .out( outputs_vec )
   );
 */
 
@@ -784,7 +819,7 @@ endmodule
   wire [8-1: 0] monitor = { MON7, MON6, MON5,MON4, MON3, MON2, MON1, MON0 } ;
 
 
-  reg [8-1:0] vec_mon_counter;      // mode0_w_conditioning_out
+  reg [8-1:0] vec_mon_counter;      // mode0_outputs_vec
 
   // change name counter_mon.
   counter  counter1(
@@ -793,7 +828,7 @@ endmodule
   );
 
 
-  reg [8-1:0] vec_dummy8 = 0;   // mode0_w_conditioning_out
+  reg [8-1:0] vec_dummy8 = 0;   // mode0_outputs_vec
 
   mux_4to1_assign  #( 8 )
   mux_4to1_assign_2 (

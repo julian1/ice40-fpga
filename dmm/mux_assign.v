@@ -65,6 +65,22 @@ module mux_8to1_assign #(parameter MSB =24)   (
 
             (sel[0] ? d : c) : (sel[0] ? b : a);
 
+  // 5 == 0101
+
+
+/*
+  always @(*)
+     case (sel)
+      0 :  out = a;
+      1 :  out = b;
+      2 :  out = c;
+      3 :  out = d;
+      4 :  out = e;
+      5 :  out = f;
+      6 :  out = g;
+      7 :  out = h;
+    endcase
+*/
 
 /*
   // one hot.
@@ -80,5 +96,64 @@ module mux_8to1_assign #(parameter MSB =24)   (
  */
 
 endmodule
+
+
+
+/*
+  synch mux also not working.
+
+*/
+
+module sync_mux_8 #(parameter MSB =24)   (
+
+    input   clk,
+  // reset.
+
+   input [MSB-1:0] a,
+   input [MSB-1:0] b,
+   input [MSB-1:0] c,
+   input [MSB-1:0] d,
+
+   input [MSB-1:0] e,
+   input [MSB-1:0] f,
+   input [MSB-1:0] g,
+   input [MSB-1:0] h,
+
+    // 3 bits.
+   input [3-1 :0] sel,
+   // input [7:0] sel,
+
+  // must be reg. for synchronous
+   output reg [MSB-1:0] out
+
+  );
+
+  // always @(posedge clk  or posedge reset )
+ 
+  always @(posedge clk)
+  // always @(*)
+     case (sel)
+      0 :  out <= a;
+      1 :  out <= b;
+      2 :  out <= c;
+      3 :  out <= d;
+      4 :  out <= e;
+      5 :  out <= f;
+      6 :  out <= g;
+      7 :  out <= h;
+    endcase
+
+
+endmodule
+
+
+
+
+
+
+
+
+
+
 
 
