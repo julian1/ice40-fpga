@@ -428,8 +428,9 @@ module top (
 
 
 
-  /*  use no_az for azero no.   and electrometer modes.
-      push complexity up the stack from analog to fpga to mcu.  as soon as possible.
+  /*  use no_az for no azero and electrometer modes.
+      this pushes complexity up the stack from analog to fpga to mcu.  as soon as possible.
+      no az, and elecm. just need azmux and pc switch control given to mcu
   */
 
   wire [ `NUM_BITS-1:0 ]  modulation_no_az_out ;
@@ -447,62 +448,14 @@ module top (
     .adc_measure_start( modulation_no_az_adc_measure_start)
   );
 
-  assign modulation_no_az_out[ `IDX_SIG_PC_SW_CTL ] = reg_direct[ `IDX_SIG_PC_SW_CTL ];   // `SW_PC_SIGNAL ;
-  assign modulation_no_az_out[ `IDX_AZMUX +: 4]     = reg_direct[ `IDX_AZMUX +: 4];       // `S1;    //  pc-out
+  // pass control for muxes and pc switch to reg_direct
+  assign modulation_no_az_out[ `IDX_SIG_PC_SW_CTL ] = reg_direct[ `IDX_SIG_PC_SW_CTL ];   // eg. azero off - `SW_PC_SIGNAL ;
+  assign modulation_no_az_out[ `IDX_AZMUX +: 4]     = reg_direct[ `IDX_AZMUX +: 4];       // eg. azero off - `S1;  //  pc-out
 
   assign modulation_no_az_out[ `IDX_HIMUX +: 8 ]    = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
   assign modulation_no_az_out[ `IDX_ADCMUX +: 7 ]   = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
   // pass other bits of monitor to the adc
   assign modulation_no_az_out[ `IDX_MONITOR + 2 +: 6 ] = adc_monitor_out[ 6 -1 : 0]; // other bits are for adc.
-
-
-
-/*
-  wire [ `NUM_BITS-1:0 ]  modulation_em_out ;
-  modulation_em
-  modulation_em (
-    // inputs
-    .clk(CLK),
-    .reset( 1'b0 ),
-    .clk_sample_duration( reg_clk_sample_duration ),
-    // outputs
-    .sw_pc_ctl( modulation_em_out[ `IDX_SIG_PC_SW_CTL ]  ),
-    .azmux (    modulation_em_out[ `IDX_AZMUX +: 4] ),
-    .led0(      modulation_em_out[ `IDX_LED0 ] ),
-    .monitor(   modulation_em_out[ `IDX_MONITOR +: 8  ] )    // we could pass subset of monitor if watned. eg. only 4 pins...
-  );
-
-  assign modulation_em_out[ `IDX_HIMUX +: 8 ]  = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
-  assign modulation_em_out[ `IDX_ADCMUX +: 7 ] = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
-*/
-
-/*
-  wire [ `NUM_BITS-1:0 ]  modulation_em_out ;
-  wire modulation_em_adc_measure_start;
-  modulation_no_az
-  modulation_em (
-    // inputs
-    .clk(CLK),
-    .reset( reg_reset[ 0 ] ),
-    .adc_measure_done(adc_measure_done),
-    // outputs
-    .led0(      modulation_em_out[ `IDX_LED0 ] ),
-    .monitor(   modulation_em_out[ `IDX_MONITOR +: 2  ] ),    // we could pass subset of monitor if watned. eg. only 4 pins...
-    .adc_measure_start( modulation_em_adc_measure_start)
-  );
-  // assign sw_pc_ctl  = `SW_PC_BOOT;      // precharge mux boot. eg. block input.
-  // assign azmux      = `S2;              // mux boot directly
-
-  // these two lines are the only difference
-  assign modulation_em_out[ `IDX_SIG_PC_SW_CTL ] =  `SW_PC_BOOT;  // precharge mux boot. eg. block input.
-  assign modulation_em_out[ `IDX_AZMUX +: 4] = `S2;    // mux boot directly
-
-  assign modulation_em_out[ `IDX_HIMUX +: 8 ]  = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
-  assign modulation_em_out[ `IDX_ADCMUX +: 7 ] = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
-  // pass other bits of monitor to the adc
-  assign modulation_em_out[ `IDX_MONITOR + 2 +: 6 ] = adc_monitor_out[ 6 -1 : 0]; // other bits are for adc.
-
-*/
 
 
 
@@ -525,23 +478,13 @@ module top (
 
 
 
-  /*
-    OK. this works. but the muxer doesn't - very odd...
-  */
-  // assign adc_measure_start  =  modulation_az_adc_measure_start ;
-
 /*
-      - NO. issue is that at startup - the az controller has sent the signal - and is now waiting for adc.
-      but adc startups up disconnected from signal at startup.
-      So we have to reset the az controller.  when we do the switch.
-
+      - NO. is hanging at startup - the az controller has sent the signal - and is now waiting for adc.
     --------
 
     - Or is there a better way?  - without the muxer.  eg. a different adc. no. don't really want.
       OR. just make the az-
       just a reset of the az controller - so it is not blocked waiting on the adc - which is waiting for a start signal..
-
-
 */
 
   // change name mux_sync_8
@@ -550,7 +493,7 @@ module top (
 
     .clk(CLK),
 
-    .a( 1'b0  ),        // 0.      *****set to 1****** so doesn't block/hang at start?.
+    .a( 1'b0  ),        // 0.
     .b( 1'b0 ),         // 1.
     .c( 1'b0 ),         // 2
     .d( 1'b0  ),        // 3.
