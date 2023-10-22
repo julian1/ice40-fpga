@@ -428,6 +428,10 @@ module top (
 
 
 
+  /*  use no_az for azero no.   and electrometer modes.
+      push complexity up the stack from analog to fpga to mcu.  as soon as possible.
+  */
+
   wire [ `NUM_BITS-1:0 ]  modulation_no_az_out ;
   wire modulation_no_az_adc_measure_start;
   modulation_no_az
@@ -443,14 +447,13 @@ module top (
     .adc_measure_start( modulation_no_az_adc_measure_start)
   );
 
-  assign modulation_no_az_out[ `IDX_SIG_PC_SW_CTL ] =  `SW_PC_SIGNAL;
-  assign modulation_no_az_out[ `IDX_AZMUX +: 4] = `S1;    //  pc-out
+  assign modulation_no_az_out[ `IDX_SIG_PC_SW_CTL ] = reg_direct[ `IDX_SIG_PC_SW_CTL ];   // `SW_PC_SIGNAL ;
+  assign modulation_no_az_out[ `IDX_AZMUX +: 4]     = reg_direct[ `IDX_AZMUX +: 4];       // `S1;    //  pc-out
 
-  assign modulation_no_az_out[ `IDX_HIMUX +: 8 ]  = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
-  assign modulation_no_az_out[ `IDX_ADCMUX +: 7 ] = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
+  assign modulation_no_az_out[ `IDX_HIMUX +: 8 ]    = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
+  assign modulation_no_az_out[ `IDX_ADCMUX +: 7 ]   = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
   // pass other bits of monitor to the adc
   assign modulation_no_az_out[ `IDX_MONITOR + 2 +: 6 ] = adc_monitor_out[ 6 -1 : 0]; // other bits are for adc.
-
 
 
 
@@ -473,6 +476,7 @@ module top (
   assign modulation_em_out[ `IDX_ADCMUX +: 7 ] = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
 */
 
+/*
   wire [ `NUM_BITS-1:0 ]  modulation_em_out ;
   wire modulation_em_adc_measure_start;
   modulation_no_az
@@ -498,7 +502,7 @@ module top (
   // pass other bits of monitor to the adc
   assign modulation_em_out[ `IDX_MONITOR + 2 +: 6 ] = adc_monitor_out[ 6 -1 : 0]; // other bits are for adc.
 
-
+*/
 
 
 
@@ -513,7 +517,7 @@ module top (
     .e( modulation_pc_out),                   // 4
     .f( modulation_az_out),                   // 5
     .g( modulation_no_az_out),                // 6
-    .h( modulation_em_out ),                  // 7
+    .h( { `NUM_BITS { 1'b1 } } ),                  // 7
 
     .sel( reg_mode[ 2 : 0 ]),
     .out( outputs_vec )
@@ -546,14 +550,14 @@ module top (
 
     .clk(CLK),
 
-    .a( 1'b0  ),       // 0.      *****set to 1****** so doesn't block/hang at start?.
-    .b( 1'b0 ),       // 1.
+    .a( 1'b0  ),        // 0.      *****set to 1****** so doesn't block/hang at start?.
+    .b( 1'b0 ),         // 1.
     .c( 1'b0 ),         // 2
-    .d( 1'b0  ),       // 3.
-    .e( 1'b0  ),         // 4
-    .f( modulation_az_adc_measure_start),         // 5
-    .g( modulation_no_az_adc_measure_start ),         // 6
-    .h( modulation_em_adc_measure_start ),        // 7
+    .d( 1'b0  ),        // 3.
+    .e( 1'b0  ),        // 4
+    .f( modulation_az_adc_measure_start),      // 5
+    .g( modulation_no_az_adc_measure_start ),  // 6
+    .h( 1'b0 ),         // 7
 
     .sel( reg_mode[ 2 : 0 ]),     // what if we hard code it.
     .out( adc_measure_start )
