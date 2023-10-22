@@ -43,10 +43,10 @@ module adc (
   input   clk,
   input   reset,
   input [ 32-1 : 0 ] clk_sample_duration,  // 32/31 bit nice. for long sample....  wrongly named it is counter_sample_duration. not clk...
-  input adc_take_measure,  // wire
+  input adc_measure_start,  // wire
 
   // outputs
-  output reg adc_take_measure_done,
+  output reg adc_measure_done,
 
   output reg [ 8-1:0]  monitor   // there is no reason to prematurely narrow the monitor here. can be done at top level.
 );
@@ -59,7 +59,7 @@ module adc (
   and only have 5.
 
   -----
-  - EXTR. monitor[0] should be given the adc_take_measure signal.
+  - EXTR. monitor[0] should be given the adc_measure_start signal.
     as the initial triggering condition.
   - also we may want to wait a bit.
     but that should probably be done in the az mode.
@@ -73,7 +73,7 @@ module adc (
       // set up next state, for when reset goes hi.
       state           <= 0;
 
-      adc_take_measure_done <= 1;
+      adc_measure_done <= 1;
 
       monitor         <= { 8 { 1'b0 } } ;     // reset
     end
@@ -91,7 +91,7 @@ module adc (
           // having a state like, this may be useful for debuggin, because can put a pulse on the monitor.
             state <= 2;
 
-            adc_take_measure_done <= 1;
+            adc_measure_done <= 1;
 
             monitor[0]      <= 0;           // turn monitor on.
           end
@@ -99,14 +99,14 @@ module adc (
 
         2:
           // wait for trigger that are ready to do the adc
-          if(adc_take_measure == 1)
+          if(adc_measure_start == 1)
               state <= 3;
 
 
         3:
           // set up state for measurement
           begin
-            adc_take_measure_done <= 0;
+            adc_measure_done <= 0;
             state           <= 35;
             clk_count_down  <= clk_sample_duration;
             monitor[0]      <= 1;
@@ -127,7 +127,7 @@ module adc (
           begin
             state           <= 5;
             // signal measurement done
-            adc_take_measure_done <= 1;
+            adc_measure_done <= 1;
 
           end
 
@@ -135,7 +135,7 @@ module adc (
           begin
             state           <= 2;
             // clear measurement done
-            adc_take_measure_done <= 0;
+            adc_measure_done <= 0;
           end
 
 

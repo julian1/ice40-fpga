@@ -375,8 +375,8 @@ module top (
 
 
 
-  wire adc_take_measure;
-  wire adc_take_measure_done;
+  wire adc_measure_start;
+  wire adc_measure_done;
 
   wire [ 8-1:0 ]  adc_monitor_out ;
   adc
@@ -385,10 +385,10 @@ module top (
     .clk(CLK),
     .reset( 1'b0 ),
     .clk_sample_duration( reg_clk_sample_duration ),
-    .adc_take_measure( adc_take_measure),             // mux in
+    .adc_measure_start( adc_measure_start),             // mux in
 
     // outputs
-    .adc_take_measure_done(adc_take_measure_done),    // fan out.
+    .adc_measure_done(adc_measure_done),    // fan out.
     .monitor( adc_monitor_out)
   );
 
@@ -396,7 +396,7 @@ module top (
 
 
   wire [ `NUM_BITS-1:0 ]  modulation_az_out ;     // beter name
-  wire modulation_az_adc_take_measure;
+  wire modulation_az_adc_measure_start;
   modulation_az
   modulation_az (
 
@@ -409,7 +409,7 @@ module top (
     .reset( 1'b0 ),
     .azmux_lo_val(  reg_direct[  `IDX_AZMUX +: 4 ] ),       // expand width for fpga control of himux/himux2. for ratiometric, and AG cycle.  (boot,or sig).
     // .clk_sample_duration( reg_clk_sample_duration ),
-    .adc_take_measure_done(adc_take_measure_done),
+    .adc_measure_done(adc_measure_done),
 
     // outputs
     .sw_pc_ctl( modulation_az_out[ `IDX_SIG_PC_SW_CTL ]  ),
@@ -417,7 +417,7 @@ module top (
     .led0(      modulation_az_out[ `IDX_LED0 ] ),
     .monitor(   modulation_az_out[ `IDX_MONITOR +: 2  ] ),    // only pass 2 bit to the az monitor
 
-    .adc_take_measure( modulation_az_adc_take_measure)
+    .adc_measure_start( modulation_az_adc_measure_start)
   );
 
   assign modulation_az_out[ `IDX_HIMUX +: 8 ]  = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
@@ -437,7 +437,7 @@ module top (
     .clk(CLK),
     .reset( 1'b0 ),
     .clk_sample_duration( reg_clk_sample_duration ),
-    // .adc_take_measure_done(adc_take_measure_done),
+    // .adc_measure_done(adc_measure_done),
 
     // outputs
     .sw_pc_ctl( modulation_no_az_out[ `IDX_SIG_PC_SW_CTL ]  ),
@@ -493,7 +493,7 @@ module top (
   /*
     OK. this works. but the muxer doesn't - very odd...
   */
-  // assign adc_take_measure  =  modulation_az_adc_take_measure ;
+  // assign adc_measure_start  =  modulation_az_adc_measure_start ;
 
 /*
       - NO. issue is that at startup - the az controller has sent the signal - and is now waiting for adc.
@@ -520,12 +520,12 @@ module top (
     .c( 1'b0 ),         // 2
     .d( 1'b0  ),       // 3.
     .e( 1'b0  ),         // 4
-    .f( modulation_az_adc_take_measure),         // 5
+    .f( modulation_az_adc_measure_start),         // 5
     .g( 1'b0 ),         // 6
     .h( 1'b0 ),        // 7
 
     .sel( reg_mode[ 2 : 0 ]),     // what if we hard code it.
-    .out( adc_take_measure )
+    .out( adc_measure_start )
   );
 
 

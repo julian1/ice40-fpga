@@ -39,10 +39,10 @@ module modulation_az (
   input [  4-1 : 0 ] azmux_lo_val,
 
   // measure done
-  input adc_take_measure_done,
+  input adc_measure_done,
 
   // outputs.
-  output reg adc_take_measure,
+  output reg adc_measure_start,
 
   output reg  sw_pc_ctl,
   output reg [ 4-1:0 ] azmux,
@@ -95,7 +95,7 @@ module modulation_az (
             monitor         <= { 2 { 1'b0 } } ;     // reset
 
 
-            adc_take_measure    <= 0;
+            adc_measure_start    <= 0;
           end
         15:
           if(clk_count_down == 0)
@@ -131,15 +131,15 @@ module modulation_az (
             monitor[1]      <= 1;
 
             // must be a better name. trigger. rdy. do.
-            adc_take_measure    <= 1;
+            adc_measure_start    <= 1;
           end
         35:
 
           begin
-            adc_take_measure    <= 0;
+            adc_measure_start    <= 0;
 
             // wait for adc.
-            if(adc_take_measure_done == 1)
+            if(adc_measure_done == 1)
               state <= 4;
           end
 
@@ -167,16 +167,16 @@ module modulation_az (
             monitor[0]      <= 0;
 
             // must be a better name. trigger. rdy. do.
-            adc_take_measure    <= 1;
+            adc_measure_start    <= 1;
           end
 
         55:
           begin
-            adc_take_measure    <= 0;
+            adc_measure_start    <= 0;
 
 
             // wait for adc.
-            if(adc_take_measure_done == 1)
+            if(adc_measure_done == 1)
               state <= 6;
           end
 
