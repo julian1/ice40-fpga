@@ -16,13 +16,14 @@
 `include "modulation_az.v"
 `include "modulation_pc.v"
 `include "modulation_no_az.v"
-`include "modulation_em.v"
+// `include "modulation_em.v"
 
 `include "adc.v"
 
 `include "mux_assign.v"
 
 
+`include "defines.v"
 
 
 
@@ -437,18 +438,10 @@ module top (
     .adc_measure_done(adc_measure_done),
 
     // outputs
-    // .sw_pc_ctl( modulation_no_az_out[ `IDX_SIG_PC_SW_CTL ]  ),
-    // .azmux (    modulation_no_az_out[ `IDX_AZMUX +: 4] ),
     .led0(      modulation_no_az_out[ `IDX_LED0 ] ),
     .monitor(   modulation_no_az_out[ `IDX_MONITOR +: 2  ] ),    // we could pass subset of monitor if watned. eg. only 4 pins...
-
     .adc_measure_start( modulation_no_az_adc_measure_start)
   );
-
-
-  // continuous assign
-  // assign sw_pc_ctl  = `SW_PC_SIGNAL;
-  // assign azmux      = `S1;             //  pc-out
 
   assign modulation_no_az_out[ `IDX_SIG_PC_SW_CTL ] =  `SW_PC_SIGNAL;
   assign modulation_no_az_out[ `IDX_AZMUX +: 4] = `S1;    //  pc-out
@@ -461,7 +454,7 @@ module top (
 
 
 
-
+/*
   wire [ `NUM_BITS-1:0 ]  modulation_em_out ;
   modulation_em
   modulation_em (
@@ -478,6 +471,32 @@ module top (
 
   assign modulation_em_out[ `IDX_HIMUX +: 8 ]  = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
   assign modulation_em_out[ `IDX_ADCMUX +: 7 ] = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
+*/
+
+  wire [ `NUM_BITS-1:0 ]  modulation_em_out ;
+  wire modulation_em_adc_measure_start;
+  modulation_no_az
+  modulation_em (
+    // inputs
+    .clk(CLK),
+    .reset( reg_reset[ 0 ] ),
+    .adc_measure_done(adc_measure_done),
+    // outputs
+    .led0(      modulation_em_out[ `IDX_LED0 ] ),
+    .monitor(   modulation_em_out[ `IDX_MONITOR +: 2  ] ),    // we could pass subset of monitor if watned. eg. only 4 pins...
+    .adc_measure_start( modulation_em_adc_measure_start)
+  );
+  // assign sw_pc_ctl  = `SW_PC_BOOT;      // precharge mux boot. eg. block input.
+  // assign azmux      = `S2;              // mux boot directly
+
+  assign modulation_em_out[ `IDX_SIG_PC_SW_CTL ] =  `SW_PC_BOOT;  // precharge mux boot. eg. block input.
+  assign modulation_em_out[ `IDX_AZMUX +: 4] = `S2;    // mux boot directly
+
+  assign modulation_em_out[ `IDX_HIMUX +: 8 ]  = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
+  assign modulation_em_out[ `IDX_ADCMUX +: 7 ] = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
+  // pass other bits of monitor to the adc
+  assign modulation_em_out[ `IDX_MONITOR + 2 +: 6 ] = adc_monitor_out[ 6 -1 : 0]; // other bits are for adc.
+
 
 
 
