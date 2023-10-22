@@ -512,7 +512,7 @@ module top (
 
 */
 
-
+  // change name mux_sync_8
   sync_mux_8 #( 1)
   muxer_2  (
 
