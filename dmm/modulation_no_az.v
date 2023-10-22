@@ -37,26 +37,27 @@
 
 module modulation_no_az (
 
-
+  // inputs
   input   clk,
   input   reset,
-
-  // modulation_az hardcodes the hi_val . since does not change for normal az operation
-  input [ 32-1 : 0 ] clk_sample_duration,  // 32/31 bit nice. for long sample....  wrongly named it is counter_sample_duration. not clk...
+  input adc_measure_done,
 
   /// outputs. these can be wires because we assign
   output wire sw_pc_ctl,
   output wire [ 4-1:0 ] azmux,
-  output wire led0,
-  output wire [ 8-1:0]  monitor,
 
+  // regs/state
+  output reg adc_measure_start,
+  output reg led0,
+  output reg [ 2-1:0]  monitor,     // but it suppresses the warning.
 );
 
-
+  
+  // continuous assign
   assign sw_pc_ctl  = `SW_PC_SIGNAL;
   assign azmux      = `S1;             //  pc-out
-  assign monitor    = 8'b00000001;
-  assign led0       = 1'b1;
+  // assign monitor    = 8'b00000001;
+  // assign led0       = 1'b1;
 
   ////////////////
   reg [7-1:0]   state = 0 ;     // should expose in module, not sure.
@@ -66,8 +67,72 @@ module modulation_no_az (
 
   // change name clk_precharge_duration_n
   reg [24-1:0]  clk_count_precharge_n = `CLK_FREQ * 500e-6 ;   // 500us.
-  // reg [24-1:0]  clk_count_precharge_n = `CLK_FREQ * 5e-3 ;         // 5ms
 
+
+
+
+  always @(posedge clk  or posedge reset )
+   if(reset)
+    begin
+      // set up next state, for when reset goes hi.
+      state           <= 0;
+    end
+    else
+    begin
+
+      // always decrement clk for the current phase
+      clk_count_down <= clk_count_down - 1;
+
+
+      case (state)
+
+        // precharge switch - protects the signal. from the charge-injection of the AZ switch.
+        0:
+          // having a state like, this may be useful for debuggin, because can put a pulse on the monitor.
+          state <= 2;
+
+
+        ////////////////////////////
+        // keep a precharge phase. even though probably not needed.
+        2:
+            begin
+              state           <= 25;
+              clk_count_down  <= clk_count_precharge_n;  // normally pin s1
+              monitor[0]      <= 1;
+              monitor[1]      <= 0;
+            end
+        25:
+          if(clk_count_down == 0)
+            state <= 3;
+
+
+        /////////////////////////
+        3:
+          begin
+            state           <= 35;
+            led0            <= 1;
+
+            monitor[0]      <= 0;
+            monitor[1]      <= 1;
+
+            // must be a better name. trigger. rdy. do. start
+            adc_measure_start    <= 1;
+          end
+
+        35:
+          begin
+            adc_measure_start    <= 0;
+
+
+            // wait for adc.
+            if(adc_measure_done == 1)
+              state <= 2;
+          end
+
+
+
+
+/*
 
   // this would be an async signal???
   wire run = 1;
@@ -165,7 +230,7 @@ module modulation_no_az (
         6:
           if(run )        // place at end.
             state <= 2;
-
+*/
 
       endcase
     end

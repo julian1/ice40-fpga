@@ -32,23 +32,19 @@ module modulation_az (
   // remember hi mux is not manipulated, or passed into this module.
   // inistead the hi signal is seleced by the AZ mux, via the pre-charge switch
 
+  // inputs
   input   clk,
   input   reset,
+  input [ 4-1 : 0 ] azmux_lo_val,
+  input adc_measure_done,
 
-  // lo mux input to use.
-  input [  4-1 : 0 ] azmux_lo_val,
-
-  // modulation_az hardcodes the hi_val . since does not change for normal az operation
-  // input [  4-1 : 0 ] azmux_hi_val,          // should almost always be S1 == 4'b1000, for pc-out. except when want to isolate just the pre-charge switch  charge contribution.
-  input [ 32-1 : 0 ] clk_sample_duration,  // 32/31 bit nice. for long sample....  wrongly named it is counter_sample_duration. not clk...
-
-  /// outputs.
+  // outputs.
+  output reg adc_measure_start,
   output reg  sw_pc_ctl,
   output reg [ 4-1:0 ] azmux,
-
   output reg led0,
-  output reg [ 8-1:0]  monitor,
-
+  // output reg [ 8-1:0]  monitor,   // there is no reason to prematurely narrow the monitor here. can be done at top level.
+  output reg [ 2-1:0]  monitor,     // but it suppresses the warning.
 );
 
   reg [7-1:0]   state = 0 ;     // should expose in module, not sure.
@@ -58,11 +54,8 @@ module modulation_az (
 
   // change name clk_precharge_duration_n
   reg [24-1:0]  clk_count_precharge_n = `CLK_FREQ * 500e-6 ;   // 500us.
-  // reg [24-1:0]  clk_count_precharge_n = `CLK_FREQ * 5e-3 ;         // 5ms
 
 
-  // this would be an async signal???
-  wire run = 1;
 
   always @(posedge clk  or posedge reset )
    if(reset)
@@ -80,7 +73,7 @@ module modulation_az (
       case (state)
 
         // precharge switch - protects the signal. from the charge-injection of the AZ switch.
-          0:
+        0:
           // having a state like, this may be useful for debuggin, because can put a pulse on the monitor.
           state <= 1;
 
@@ -91,7 +84,10 @@ module modulation_az (
             clk_count_down  <= clk_count_precharge_n;
             sw_pc_ctl       <= `SW_PC_BOOT;
             // azmux           <=  azmux_lo_val;       // should be defined. or set in async reset. not left over state.
-            monitor         <= { 8 { 1'b0 } } ;     // reset
+            monitor         <= { 2 { 1'b0 } } ;     // reset
+
+
+            adc_measure_start    <= 0;
           end
         15:
           if(clk_count_down == 0)
@@ -105,9 +101,7 @@ module modulation_az (
             begin
               state           <= 25;
               clk_count_down  <= clk_count_precharge_n;  // normally pin s1
-              // azmux          <= azmux_hi_val;
               azmux             <= `AZMUX_HI_VAL;
-
               monitor[0]      <= 1;
             end
         25:
@@ -117,17 +111,26 @@ module modulation_az (
 
         /////////////////////////
         // switch pc-switch from BOOT to signal. take hi measure
+        // TODO - need to provide a settle time. after switching lo..
         3:
           begin
             state           <= 35;
-            clk_count_down  <= clk_sample_duration;
             sw_pc_ctl       <= `SW_PC_SIGNAL;
             led0            <= 1;
             monitor[1]      <= 1;
+
+            // must be a better name. trigger. rdy. do. start
+            adc_measure_start    <= 1;
           end
+
         35:
-          if(clk_count_down == 0)
-            state <= 4;
+          begin
+            adc_measure_start    <= 0;
+
+            // wait for adc.
+            if(adc_measure_done == 1)
+              state <= 4;
+          end
 
         // switch pre-charge switch back to boot to protect signal again
         4:
@@ -143,27 +146,35 @@ module modulation_az (
 
         /////////////////////////
         // switch az mux to lo.   take lo measurement
+        // TODO - need to provide a settle time. after switching lo..
         5:
           begin
             state           <= 55;
-            clk_count_down  <= clk_sample_duration;
             azmux           <= azmux_lo_val;
             led0            <= 0;
             monitor[0]      <= 0;
+
+            // must be a better name. trigger. rdy. do. start
+            adc_measure_start    <= 1;
           end
+
         55:
-          if(clk_count_down == 0)
-            state <= 6;
+          begin
+            adc_measure_start    <= 0;
 
 
-        6:
-          if(run )        // place at end.
-            state <= 2;
+            // wait for adc.
+            if(adc_measure_done == 1)
+              // and restart sequence
+              state <= 2;
+          end
+
 
 
       endcase
     end
 endmodule
+
 
 
 

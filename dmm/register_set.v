@@ -37,6 +37,7 @@
 `define REG_CLK_SAMPLE_DURATION 16   // clk sample time
 
 `define REG_STATUS        17
+`define REG_RESET         18   // reset -> hi.  normal -> lo.
 
 
 module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,   4 bytes data.
@@ -49,8 +50,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
 
   ////////////
-  // regs
-
+  // output regs
   output reg [32-1:0] reg_led ,
   output reg [32-1:0] reg_spi_mux,
   output reg [32-1:0] reg_4094,     // TODO change name it's a state register for OE. status .  or SR. reg_4094_.   or SR_4094,   sr_4094.
@@ -58,8 +58,10 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   output reg [32-1:0] reg_direct,
   output reg [32-1:0] reg_direct2,     //
   output reg [32-1:0] reg_clk_sample_duration,
+  output reg [32-1:0] reg_reset,
 
-  input wire [32-1:0] reg_status
+  // input regs
+  input wire [32-1:0] reg_status,
 
   // passing a monitor in here, is useful, for monitoring internal. eg. the
   // output reg [7-1:0]   vec_monitor,
@@ -89,6 +91,8 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
     reg_direct    = 0  ;
     reg_direct2    = 0  ;
     reg_clk_sample_duration = 0;
+    reg_reset     <= 0;
+
   end
 
 
@@ -148,8 +152,9 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
               `REG_MODE:      out <= reg_mode << 8;   // ok..
               `REG_DIRECT:    out <= reg_direct << 8;
               `REG_DIRECT2:    out <= reg_direct2 << 8;
-
               `REG_CLK_SAMPLE_DURATION:  out <= reg_clk_sample_duration << 8;     // clk_count_sample_n clk_time_sample_clksample_time ??
+              `REG_RESET:    out <= reg_reset << 8;
+
 
               // `REG_DIRECT:    out <= { reg_direct , 8'b0 } ;   // this fails.... weird.
 
@@ -178,6 +183,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
             `REG_MODE:      reg_mode    <= bin;
             `REG_DIRECT:    reg_direct  <= bin;
             `REG_DIRECT2:   reg_direct2  <= bin;
+            `REG_RESET:     reg_reset   <= bin;
 
             `REG_CLK_SAMPLE_DURATION:  reg_clk_sample_duration <= bin;
 
