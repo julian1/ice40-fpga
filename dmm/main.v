@@ -552,7 +552,7 @@ module top (
     .e( 1'b0  ),         // 4
     .f( modulation_az_adc_measure_start),         // 5
     .g( modulation_no_az_adc_measure_start ),         // 6
-    .h( 1'b0 ),        // 7
+    .h( modulation_em_adc_measure_start ),        // 7
 
     .sel( reg_mode[ 2 : 0 ]),     // what if we hard code it.
     .out( adc_measure_start )
