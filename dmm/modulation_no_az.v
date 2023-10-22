@@ -52,7 +52,7 @@ module modulation_no_az (
   output reg [ 2-1:0]  monitor,     // but it suppresses the warning.
 );
 
-  
+
   // continuous assign
   assign sw_pc_ctl  = `SW_PC_SIGNAL;
   assign azmux      = `S1;             //  pc-out
@@ -91,9 +91,9 @@ module modulation_no_az (
           // having a state like, this may be useful for debuggin, because can put a pulse on the monitor.
           state <= 2;
 
-
         ////////////////////////////
-        // keep a precharge phase. even though probably not needed.
+        // keep a 'precharge' pause duration to keep timing the same with az case.
+        // TODO. to match - want a pasuse after the same also. when add to az.
         2:
             begin
               state           <= 25;
@@ -104,7 +104,6 @@ module modulation_no_az (
         25:
           if(clk_count_down == 0)
             state <= 3;
-
 
         /////////////////////////
         3:
@@ -123,11 +122,15 @@ module modulation_no_az (
           begin
             adc_measure_start    <= 0;
 
-
             // wait for adc.
             if(adc_measure_done == 1)
               state <= 2;
           end
+
+
+      endcase
+    end
+endmodule
 
 
 
@@ -231,10 +234,5 @@ module modulation_no_az (
           if(run )        // place at end.
             state <= 2;
 */
-
-      endcase
-    end
-endmodule
-
 
 
