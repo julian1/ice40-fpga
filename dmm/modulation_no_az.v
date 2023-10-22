@@ -1,14 +1,3 @@
-/*
-
-  only switch the pc switch. not the azmux. for charge testing.
-
-  - the no az normal case - could be represented with the direct register.
-  - but set it up as explicit mode.  / making representable as mode.
-    makes it easier for state management.
-    across different functions.
-
-*/
-
 
 // implicit identifiers are only caught when modules have been instantiated
 `default_nettype none
@@ -43,8 +32,8 @@ module modulation_no_az (
   input adc_measure_done,
 
   /// outputs. these can be wires because we assign
-  output wire sw_pc_ctl,
-  output wire [ 4-1:0 ] azmux,
+  // output wire sw_pc_ctl,
+  // output wire [ 4-1:0 ] azmux,
 
   // regs/state
   output reg adc_measure_start,
@@ -54,16 +43,12 @@ module modulation_no_az (
 
 
   // continuous assign
-  assign sw_pc_ctl  = `SW_PC_SIGNAL;
-  assign azmux      = `S1;             //  pc-out
-  // assign monitor    = 8'b00000001;
-  // assign led0       = 1'b1;
+  // assign sw_pc_ctl  = `SW_PC_SIGNAL;
+  // assign azmux      = `S1;             //  pc-out
 
   ////////////////
   reg [7-1:0]   state = 0 ;     // should expose in module, not sure.
-
   reg [31:0]    clk_count_down;           // clk_count for the current phase. using 31 bitss, gives faster timing spec.  v 24 bits. weird. ??? 36MHz v 32MHz
-
 
   // change name clk_precharge_duration_n
   reg [24-1:0]  clk_count_precharge_n = `CLK_FREQ * 500e-6 ;   // 500us.

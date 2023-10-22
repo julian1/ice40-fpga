@@ -437,13 +437,21 @@ module top (
     .adc_measure_done(adc_measure_done),
 
     // outputs
-    .sw_pc_ctl( modulation_no_az_out[ `IDX_SIG_PC_SW_CTL ]  ),
-    .azmux (    modulation_no_az_out[ `IDX_AZMUX +: 4] ),
+    // .sw_pc_ctl( modulation_no_az_out[ `IDX_SIG_PC_SW_CTL ]  ),
+    // .azmux (    modulation_no_az_out[ `IDX_AZMUX +: 4] ),
     .led0(      modulation_no_az_out[ `IDX_LED0 ] ),
     .monitor(   modulation_no_az_out[ `IDX_MONITOR +: 2  ] ),    // we could pass subset of monitor if watned. eg. only 4 pins...
 
     .adc_measure_start( modulation_no_az_adc_measure_start)
   );
+
+
+  // continuous assign
+  // assign sw_pc_ctl  = `SW_PC_SIGNAL;
+  // assign azmux      = `S1;             //  pc-out
+
+  assign modulation_no_az_out[ `IDX_SIG_PC_SW_CTL ] =  `SW_PC_SIGNAL;
+  assign modulation_no_az_out[ `IDX_AZMUX +: 4] = `S1;    //  pc-out
 
   assign modulation_no_az_out[ `IDX_HIMUX +: 8 ]  = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
   assign modulation_no_az_out[ `IDX_ADCMUX +: 7 ] = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
