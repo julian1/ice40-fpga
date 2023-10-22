@@ -132,16 +132,25 @@ module modulation_az (
 
             // must be a better name. trigger. rdy. do.
             adc_measure_start    <= 1;
+            clk_count_down <= 10;
           end
-        35:
 
+        35:
           begin
             adc_measure_start    <= 0;
 
-            // wait for adc.
-            if(adc_measure_done == 1)
-              state <= 4;
+            if(clk_count_down == 0)
+              state <= 36;
           end
+
+
+        36:
+          // wait for adc.
+          if(adc_measure_done == 1)
+            state <= 4;
+
+
+
 
         // switch pre-charge switch back to boot to protect signal again
         4:

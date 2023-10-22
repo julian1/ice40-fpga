@@ -264,12 +264,13 @@ module top (
   assign { _4094_OE_CTL } = reg_4094;    //  lo. start up not enabled.
   // assign { _4094_OE_CTL } = 1;    //  on for test.  should defer to mcu control. after check supplies.
 
-  wire [32-1:0] reg_mode;     // two bits
+  wire [32-1 :0] reg_mode;     // two bits
+  wire [32-1 :0] reg_direct;
+  wire [32-1 :0] reg_direct2;
+  wire [32- 1 :0] reg_clk_sample_duration;  // 32/31 bit nice. for long sample.
+  wire [32-1 :0] reg_reset;
 
-  wire [32 - 1 :0] reg_direct;
-  wire [32 - 1 :0] reg_direct2;
-  wire [32-1 : 0] reg_clk_sample_duration;  // 32/31 bit nice. for long sample.
-
+  // inputs
   wire [32 - 1 :0] reg_status ;
 
 
@@ -293,13 +294,11 @@ module top (
     . reg_led(reg_led),        // required as test register
     . reg_spi_mux(reg_spi_mux),
     . reg_4094(reg_4094 ) ,
-
     . reg_mode( reg_mode ),      // ok.
-
     . reg_direct( reg_direct ),
     . reg_direct2( reg_direct2 ),
-
     . reg_clk_sample_duration( reg_clk_sample_duration),
+    . reg_reset( reg_reset),
 
     . reg_status( reg_status )
   );
@@ -406,9 +405,10 @@ module top (
 
     // inputs
     .clk(CLK),
-    .reset( 1'b0 ),
+    // .reset( 1'b0 ),
+    .reset( reg_reset[ 0 ] ),
+
     .azmux_lo_val(  reg_direct[  `IDX_AZMUX +: 4 ] ),       // expand width for fpga control of himux/himux2. for ratiometric, and AG cycle.  (boot,or sig).
-    // .clk_sample_duration( reg_clk_sample_duration ),
     .adc_measure_done(adc_measure_done),
 
     // outputs
