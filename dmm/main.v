@@ -489,6 +489,7 @@ module top (
   // assign sw_pc_ctl  = `SW_PC_BOOT;      // precharge mux boot. eg. block input.
   // assign azmux      = `S2;              // mux boot directly
 
+  // these two lines are the only difference
   assign modulation_em_out[ `IDX_SIG_PC_SW_CTL ] =  `SW_PC_BOOT;  // precharge mux boot. eg. block input.
   assign modulation_em_out[ `IDX_AZMUX +: 4] = `S2;    // mux boot directly
 
