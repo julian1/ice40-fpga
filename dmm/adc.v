@@ -50,6 +50,8 @@ module adc (
   output reg adc_measure_done,
   output reg [ 4-1:0 ] adcmux,
   output reg  cmpr_latch,
+
+  // OK. we may want to remove
   output reg [ 6-1:0]  monitor
 );
 
@@ -90,6 +92,11 @@ module adc (
       // always decrement clk for the current phase
       clk_count_down <= clk_count_down - 1;
 
+ 
+      // trigger off the start signal. 
+      // just about want wire this in the top level module..
+      monitor[0] =  adc_measure_start;
+
 
       case (state)
 
@@ -100,7 +107,6 @@ module adc (
 
             adc_measure_done <= 1;
 
-            monitor[0]      <= 0;           // turn monitor on.
           end
         /////////////////////////
 
@@ -116,13 +122,11 @@ module adc (
             adc_measure_done <= 0;
             state           <= 35;
             clk_count_down  <= clk_sample_duration;
-            monitor[0]      <= 1;
           end
 
         35:
           begin
 
-            monitor[0]      <= 0;
 
             // wait for measurement to complete
             if(clk_count_down == 0)

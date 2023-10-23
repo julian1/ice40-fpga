@@ -125,6 +125,14 @@ module modulation_az (
 
         35:
           begin
+            /* TODO EXTR. i think we should consider asserting adc_measure_start.
+                until we get the measure_done signal
+                no reason to constrain to a single cycle. pulse.
+                - does this always avoid the adc missing the pulse.  i think yes.
+                -----
+                - not sure. it is clearer to trigger off, and watch with LA/MSO as single pulse .
+            */
+
             adc_measure_start    <= 0;
 
             // wait for adc.
