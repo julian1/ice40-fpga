@@ -88,6 +88,8 @@ module modulation_no_az (
             begin
               state           <= 25;
               clk_count_down  <= clk_count_precharge_n;  // normally pin s1
+
+              led0                <= 0;
             end
         25:
           if(clk_count_down == 0)
@@ -97,8 +99,8 @@ module modulation_no_az (
         3:
           begin
             state           <= 35;
-            led0            <= 1;
 
+            led0            <= 1;
             // tell adc to do measure. interuptable at any time.
             adc_measure_trig    <= 1;
             monitor[1]      <= 1;
@@ -107,7 +109,7 @@ module modulation_no_az (
         35:
           begin
             adc_measure_trig    <= 0;
-            monitor[1]         <= 0;
+            monitor[1]          <= 0;
 
             // wait for adc.
             if( ! adc_measure_trig &&  adc_measure_valid )
