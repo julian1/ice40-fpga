@@ -18,22 +18,17 @@ module adc (
   input   clk,
   input   reset,
   input [ 32-1 : 0 ] clk_sample_duration,  // 32/31 bit nice. for long sample....  wrongly named it is counter_sample_duration. not clk...
-  input adc_measure_trig,  // wire
+  input adc_measure_trig,         // wire. start measurement.
 
 
-
-
+  // outputs
+  output reg  cmpr_latch,
   output reg [ 2-1:0]  refmux,     // reference current, better name?
   output reg sigmux,
   output reg resetmux,             // ang mux.
 
+  output reg adc_measure_valid,     // adc is master, and asserts valid when measurement complete
 
-  // outputs
-  output reg adc_measure_valid,     // adc is master, and asserts valid when ready to transfer control or data
-  // output reg [ 4-1:0 ] adcmux,
-  output reg  cmpr_latch,
-
-  // OK. we may want to remove
   output reg [ 6-1:0]  monitor
 );
 
@@ -54,11 +49,9 @@ module adc (
       begin
 
 
-        // monitor[0] follows the start trigger
-        // just should just about be a wire - combinatorial at the
+        // delayed by a clock cycle
         monitor[0] <=  adc_measure_trig;
         monitor[1] <=  adc_measure_valid;
-
 
 
       /////////////////
@@ -104,7 +97,7 @@ module adc (
               adc_measure_valid <= 0;
 
               // don't clear. makes it hard to tell
-              monitor[6-1: 1  ]  <= { 4 { 1'b0 } } ;     // clear
+              // monitor[6-1: 1  ]  <= { 4 { 1'b0 } } ;     // clear
 
               ////////////////
               cmpr_latch      <= 0;
