@@ -62,7 +62,7 @@
 `define IDX_LED0              13
 `define IDX_MONITOR           14    // 14,15,16,17,  18,19,20,21   think pin 14.
 `define IDX_ADCMUX            22    // 22,23,24,25
-`define IDX_CMPS_LATCH_CTL    26
+`define IDX_CMPR_LATCH_CTL    26
 `define IDX_MEAS_COMPLETE_CTL 27
 `define IDX_SPI_INTERUPT_CTL  28
 
@@ -376,14 +376,17 @@ module top (
 
   /////////////////////
   /*
-      - can have another mux deccoder. to hold/control the adc/modulation - using the reset pin. this would be quite nice.
-      ------
-      - advantage - is it eliminates extra. muxer for the control signals.  And the problems with hanging.
-      - advantage there is only a single mode. muxer.
-      - EXTR. advantage. allows different combinations of az-controller and different adc. with only single muxer for the outputs.
-      - EXTR> and no more variables - can just use reg_mode.
-      - the adc refmux, sig. should be very easy to wire up - under the same system.
-      - we can/could also pass in a reset argument. based on mode.
+    - can have another mux deccoder. to hold/control the adc/modulation - using the reset pin. this would be quite nice.
+    ------
+    - EXTR. *remember* we want the simple adc. for various leakage/pre-charge tests.  without a real modulation,
+        that is a good reason to get the flexibility . for multiple (sampler + adc ) combinations .
+    --
+    - advantage - is it eliminates extra. muxer for the control signals between sampler + adc.  And fixes issue with hanging.
+    - advantage there is only a single mode. muxer.
+    - EXTR> just use single reg_mode - to control all combinations . rather than a sample mode, and adc mode. and communication issues.
+    - EXTR. advantage. allows different combinations of az-controller and different adc. with only single muxer for the outputs.
+    - the adc refmux, sig. should be very easy to wire up - under the same system.
+    - we can/could also pass in a reset argument. based on mode.
   */
 
   wire [ `NUM_BITS-1:0 ]  modulation_az_out ;     // beter name ... it is the sample control, and adc.
@@ -396,11 +399,13 @@ module top (
     .clk(CLK),
     .reset( 1'b0 ),
     .clk_sample_duration( reg_clk_sample_duration ),
-    .adc_measure_start( adc1_measure_start),             // mux in
+    .adc_measure_start( adc1_measure_start),
 
     // outputs
-    .adc_measure_done(adc1_measure_done),    // fan out.
-    .monitor(  modulation_az_out[ `IDX_MONITOR + 2 +: 6 ]  )
+    .adc_measure_done(adc1_measure_done),
+    .adcmux(    modulation_az_out[ `IDX_ADCMUX +: 4 ] ),
+    .cmpr_latch(modulation_az_out[ `IDX_CMPR_LATCH_CTL ] ),
+    .monitor(   modulation_az_out[ `IDX_MONITOR + 2 +: 6 ]  )
   );
 
 
@@ -423,7 +428,11 @@ module top (
   );
 
   assign modulation_az_out[ `IDX_HIMUX +: 8 ]  = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
-  assign modulation_az_out[ `IDX_ADCMUX +: 7 ] = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
+  // assign modulation_az_out[ `IDX_ADCMUX +: 7 ] = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
+  assign modulation_az_out[ `IDX_MEAS_COMPLETE_CTL ] = reg_direct[ `IDX_MEAS_COMPLETE_CTL    ];  // eg. to the end.
+  assign modulation_az_out[ `IDX_SPI_INTERUPT_CTL ] = reg_direct[ `IDX_SPI_INTERUPT_CTL ];  // eg. to the end.
+
+
 
   /////////////////////
 
@@ -443,7 +452,9 @@ module top (
 
     // outputs
     .adc_measure_done(adc2_measure_done),    // fan out.
-    .monitor( modulation_no_az_out[ `IDX_MONITOR + 2 +: 6 ] )
+    .adcmux(    modulation_no_az_out[ `IDX_ADCMUX +: 4 ] ),
+    .cmpr_latch(modulation_no_az_out[ `IDX_CMPR_LATCH_CTL ] ),
+    .monitor(   modulation_no_az_out[ `IDX_MONITOR + 2 +: 6 ] )
   );
 
 
@@ -468,9 +479,12 @@ module top (
   // pass control for muxes and pc switch to reg_direct
   assign modulation_no_az_out[ `IDX_SIG_PC_SW_CTL ] = reg_direct[ `IDX_SIG_PC_SW_CTL ];   // eg. azero off - `SW_PC_SIGNAL ;
   assign modulation_no_az_out[ `IDX_AZMUX +: 4]     = reg_direct[ `IDX_AZMUX +: 4];       // eg. azero off - `S1;  //  pc-out
-
   assign modulation_no_az_out[ `IDX_HIMUX +: 8 ]    = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
-  assign modulation_no_az_out[ `IDX_ADCMUX +: 7 ]   = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
+
+  // assign modulation_no_az_out[ `IDX_ADCMUX +: 7 ]   = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
+
+  assign modulation_no_az_out[ `IDX_MEAS_COMPLETE_CTL ] = reg_direct[ `IDX_MEAS_COMPLETE_CTL    ];  // eg. to the end.
+  assign modulation_no_az_out[ `IDX_SPI_INTERUPT_CTL ] = reg_direct[ `IDX_SPI_INTERUPT_CTL ];  // eg. to the end.
 
 
 
@@ -481,14 +495,14 @@ module top (
   mux_8to1_assign #( `NUM_BITS )
   mux_8to1_assign_1  (
 
-    .a(  {   { 15 { 1'b0 } },  reg_led[ 0],   { 13 { 1'b0 } } }    ),        // 0. deffault mode. 0 on all outputs, except follow reg_led, for led.
-    .b( { `NUM_BITS { 1'b1 } } ),            // 1.
-    .c( test_pattern_out ),                  // 2
-    .d( reg_direct[ `NUM_BITS - 1 :  0 ]   ),  // 3.    // when we pass a hard-coded value in here...  then read/write reg_direct works.  // it is very strange.
+    .a( { { 15 { 1'b0 } },  reg_led[ 0], { 13 { 1'b0 } } }    ),        // 0. deffault mode. 0 on all outputs, except follow reg_led, for led.
+    .b( { `NUM_BITS { 1'b1 } } ),             // 1.
+    .c( test_pattern_out ),                   // 2
+    .d( reg_direct[ `NUM_BITS - 1 :  0 ]   ), // 3.    // when we pass a hard-coded value in here...  then read/write reg_direct works.  // it is very strange.
     .e( modulation_pc_out),                   // 4
     .f( modulation_az_out),                   // 5
     .g( modulation_no_az_out),                // 6
-    .h( { `NUM_BITS { 1'b1 } } ),                  // 7
+    .h( { `NUM_BITS { 1'b1 } } ),             // 7
 
     .sel( reg_mode[ 2 : 0 ]),
     .out( outputs_vec )

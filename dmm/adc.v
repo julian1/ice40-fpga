@@ -40,6 +40,7 @@
 
 module adc (
 
+  // inputs
   input   clk,
   input   reset,
   input [ 32-1 : 0 ] clk_sample_duration,  // 32/31 bit nice. for long sample....  wrongly named it is counter_sample_duration. not clk...
@@ -47,9 +48,9 @@ module adc (
 
   // outputs
   output reg adc_measure_done,
-
-  // output reg [ 8-1:0]  monitor   // there is no reason to prematurely narrow the monitor here. can be done at top level.
-  output reg [ 6-1:0]  monitor   // there is no reason to prematurely narrow the monitor here. can be done at top level.
+  output reg [ 4-1:0 ] adcmux,
+  output reg  cmpr_latch,
+  output reg [ 6-1:0]  monitor
 );
 
   reg [7-1:0]   state = 0 ;
@@ -65,6 +66,8 @@ module adc (
   - also we may want to wait a bit.
     but that should probably be done in the az mode.
   - also want to probably pass a stamp or code. as to what we sampled.
+      NO. that is for the sample controller.
+      EXTR. sample controller can just write a reg. depending on if sample is the HI. or the LO.
 
 */
 
@@ -77,6 +80,9 @@ module adc (
       adc_measure_done <= 1;
 
       monitor         <= { 6 { 1'b0 } } ;     // reset
+      
+      adcmux          <= { 4 { 1'b0 } } ;     // reset
+      cmpr_latch      <= 0;
     end
     else
     begin
