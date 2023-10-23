@@ -70,33 +70,11 @@ module adc (
         // always decrement clk for the current phase
         clk_count_down <= clk_count_down - 1;
 
-
-
         case (state)
 
           0:
-            begin
-              // start trigger, reset case
-              state <= 35;
-
-              // adc is master.
-              adc_measure_valid <= 0;
-
-              // don't clear. makes it hard to tell
-              monitor[6-1: 1  ]  <= { 4 { 1'b0 } } ;     // clear
-
-
-              ////////////////
-              cmpr_latch      <= 0;
-              refmux = 2'b00;
-              sigmux = 1'b0;
-              resetmux = 1'b0;
-
-              // set sample/measure period
-              clk_count_down  <= clk_sample_duration;
-            end
-
-
+              // just jump to end, to indicate valid
+              state <= 4;
 
           35:
             begin
@@ -108,7 +86,7 @@ module adc (
           4:
             // measure done
             begin
-              // assert signal measurement done/ valid
+              // assert done/valid
               adc_measure_valid <= 1;
 
             end
@@ -120,10 +98,6 @@ module adc (
         if(adc_measure_trig == 1)
           begin
 
-            // state <= 0;
-
-            // don't wait another clk cycle, until but clear valid immediately
-            // adc_measure_valid <= 0;
               state <= 35;
 
               // adc is master.
@@ -132,10 +106,8 @@ module adc (
               // don't clear. makes it hard to tell
               monitor[6-1: 1  ]  <= { 4 { 1'b0 } } ;     // clear
 
-
               ////////////////
               cmpr_latch      <= 0;
-
               refmux = 2'b00;
               sigmux = 1'b0;
               resetmux = 1'b0;
@@ -144,8 +116,6 @@ module adc (
               clk_count_down  <= clk_sample_duration;
 
           end
-
-
 
 
       end

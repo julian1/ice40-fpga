@@ -88,8 +88,6 @@ module modulation_az (
             state           <= 15;
             clk_count_down  <= clk_count_precharge_n;
             sw_pc_ctl       <= `SW_PC_BOOT;
-            // azmux           <=  azmux_lo_val;       // should be defined. or set in async reset. not left over state.
-            // monitor         <= { 2 { 1'b0 } } ;     // reset
           end
         15:
           if(clk_count_down == 0)
@@ -120,8 +118,7 @@ module modulation_az (
             sw_pc_ctl       <= `SW_PC_SIGNAL;
             led0            <= 1;
 
-            // tell the adc to start.
-            // adc is always interuptable
+            // tell the adc to start.  adc is always interuptable
             adc_measure_trig <= 1;
             monitor[1]      <= 1;
           end
@@ -130,7 +127,7 @@ module modulation_az (
           begin
             //
             adc_measure_trig <= 0;
-            monitor[1]      <= 1;
+            monitor[1]      <= 0;
 
             /* block for adc complete
               We could elevate this outside a case statement
@@ -139,6 +136,8 @@ module modulation_az (
             if( ! adc_measure_trig &&  adc_measure_valid )
               state <= 4;
           end
+
+
         //////////////////////////////
 
         // switch pre-charge switch back to boot to protect signal again
@@ -161,8 +160,7 @@ module modulation_az (
             azmux           <= azmux_lo_val;
             led0            <= 0;
 
-            // tell the adc to start.
-            // adc is always interuptable
+            // tell the adc to start.  adc is always interuptable
             adc_measure_trig <= 1;
             monitor[1]      <= 1;
           end
