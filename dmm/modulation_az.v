@@ -43,7 +43,6 @@ module modulation_az (
   output reg  sw_pc_ctl,
   output reg [ 4-1:0 ] azmux,
   output reg led0,
-  // output reg [ 8-1:0]  monitor,   // there is no reason to prematurely narrow the monitor here. can be done at top level.
   output reg [ 2-1:0]  monitor,     // but it suppresses the warning.
 );
 
@@ -60,7 +59,7 @@ module modulation_az (
   always @(posedge clk  or posedge reset )
    if(reset)
     begin
-      // set up next state, for when reset goes hi.
+      // we only require to set the state here, to setup the initial conditions.
       state           <= 0;
     end
     else
@@ -74,8 +73,14 @@ module modulation_az (
 
         // precharge switch - protects the signal. from the charge-injection of the AZ switch.
         0:
-          // having a state like, this may be useful for debuggin, because can put a pulse on the monitor.
-          state <= 1;
+          begin
+            // having a state like, this may be useful for debuggin, because can put a pulse on the monitor.
+            state <= 1;
+
+            adc_measure_trig    <= 0;
+
+            monitor         <= { 2 { 1'b0 }   } ;
+          end
 
         // switch pre-charge switch to boot to protect signal
         1:
@@ -84,10 +89,7 @@ module modulation_az (
             clk_count_down  <= clk_count_precharge_n;
             sw_pc_ctl       <= `SW_PC_BOOT;
             // azmux           <=  azmux_lo_val;       // should be defined. or set in async reset. not left over state.
-            monitor         <= { 2 { 1'b0 } } ;     // reset
-
-
-            adc_measure_trig    <= 0;
+            // monitor         <= { 2 { 1'b0 } } ;     // reset
           end
         15:
           if(clk_count_down == 0)
@@ -102,7 +104,6 @@ module modulation_az (
               state           <= 25;
               clk_count_down  <= clk_count_precharge_n;  // normally pin s1
               azmux             <= `AZMUX_HI_VAL;
-              monitor[0]      <= 1;
             end
         25:
           if(clk_count_down == 0)
@@ -110,36 +111,35 @@ module modulation_az (
 
 
         /////////////////////////
-        // switch pc-switch from BOOT to signal. take hi measure
-        // TODO - need to provide a settle time. after switching lo..
+        // switch pc-switch from BOOT to signal. and tell adc to take measurement
+        // TODO - maybe add small settle time. after switching the pc switch ..
+        // not sure.
         3:
           begin
             state           <= 35;
             sw_pc_ctl       <= `SW_PC_SIGNAL;
             led0            <= 1;
-            monitor[1]      <= 1;
 
-            // must be a better name. trigger. rdy. do. start
-            adc_measure_trig    <= 1;
+            // tell the adc to start.
+            // adc is always interuptable
+            adc_measure_trig <= 1;
+            monitor[1]      <= 1;
           end
 
         35:
           begin
-            /* TODO EXTR. i think we should consider asserting adc_measure_trig.
-                until we get the measure_done signal
-                no reason to constrain to a single cycle. pulse.
-                - does this always avoid the adc missing the pulse.  i think yes.
-                -----
-                - not sure. it is clearer to trigger off, and watch with LA/MSO as single pulse .
-            */
+            //
+            adc_measure_trig <= 0;
+            monitor[1]      <= 1;
 
-            adc_measure_trig    <= 0;
+            /* block for adc complete
+              We could elevate this outside a case statement
+              */
 
-            // wait for adc.
-            // block for adc complete
-            if(adc_measure_valid == 1)
+            if( ! adc_measure_trig &&  adc_measure_valid )
               state <= 4;
           end
+        //////////////////////////////
 
         // switch pre-charge switch back to boot to protect signal again
         4:
@@ -147,7 +147,6 @@ module modulation_az (
             state           <= 45;
             clk_count_down  <= clk_count_precharge_n; // time less important here
             sw_pc_ctl       <= `SW_PC_BOOT;
-            monitor[1]      <= 0;
           end
         45:
           if(clk_count_down == 0)
@@ -161,21 +160,27 @@ module modulation_az (
             state           <= 55;
             azmux           <= azmux_lo_val;
             led0            <= 0;
-            monitor[0]      <= 0;
 
-            // must be a better name. trigger. rdy. do. start
-            adc_measure_trig    <= 1;
+            // tell the adc to start.
+            // adc is always interuptable
+            adc_measure_trig <= 1;
+            monitor[1]      <= 1;
           end
 
         55:
           begin
-            adc_measure_trig    <= 0;
+            adc_measure_trig <= 0;
+            monitor[1]      <= 0;
 
 
-            // wait for adc.
-            if(adc_measure_valid == 1)
-              // and restart sequence
+            /* block for adc complete
+              We could elevate this outside a case statement
+              */
+
+            if( ! adc_measure_trig &&  adc_measure_valid )
+              // restart sequence
               state <= 2;
+
           end
 
 

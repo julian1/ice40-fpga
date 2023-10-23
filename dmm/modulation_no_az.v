@@ -59,7 +59,7 @@ module modulation_no_az (
   always @(posedge clk  or posedge reset )
    if(reset)
     begin
-      // set up next state, for when reset goes hi.
+      // we only require to set the state here, to setup the initial conditions.
       state           <= 0;
     end
     else
@@ -73,8 +73,13 @@ module modulation_no_az (
 
         // precharge switch - protects the signal. from the charge-injection of the AZ switch.
         0:
-          // having a state like, this may be useful for debuggin, because can put a pulse on the monitor.
-          state <= 2;
+          begin  
+            // having a state like, this may be useful for debuggin, because can put a pulse on the monitor.
+            state <= 2;
+              
+            monitor = 2'b00; 
+
+          end
 
         ////////////////////////////
         // keep a 'precharge' pause duration to keep timing the same with az case.
@@ -83,8 +88,6 @@ module modulation_no_az (
             begin
               state           <= 25;
               clk_count_down  <= clk_count_precharge_n;  // normally pin s1
-              monitor[0]      <= 1;
-              monitor[1]      <= 0;
             end
         25:
           if(clk_count_down == 0)
@@ -96,19 +99,18 @@ module modulation_no_az (
             state           <= 35;
             led0            <= 1;
 
-            monitor[0]      <= 0;
-            monitor[1]      <= 1;
-
-            // must be a better name. trigger. rdy. do. start
+            // tell adc to do measure. interuptable at any time.
             adc_measure_trig    <= 1;
+            monitor[1]      <= 1;
           end
 
         35:
           begin
             adc_measure_trig    <= 0;
+            monitor[1]         <= 0;
 
             // wait for adc.
-            if(adc_measure_valid == 1)
+            if( ! adc_measure_trig &&  adc_measure_valid )
               state <= 2;
           end
 
