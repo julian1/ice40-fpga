@@ -46,9 +46,17 @@ module adc (
   input [ 32-1 : 0 ] clk_sample_duration,  // 32/31 bit nice. for long sample....  wrongly named it is counter_sample_duration. not clk...
   input adc_measure_start,  // wire
 
+
+
+
+  output reg [ 2-1:0]  refmux,     // reference current, better name? 
+  output reg sigmux,
+  output reg resetmux,             // ang mux.
+
+
   // outputs
   output reg adc_measure_done,
-  output reg [ 4-1:0 ] adcmux,
+  // output reg [ 4-1:0 ] adcmux,
   output reg  cmpr_latch,
 
   // OK. we may want to remove
@@ -82,9 +90,14 @@ module adc (
       adc_measure_done <= 1;
 
       monitor         <= { 6 { 1'b0 } } ;     // reset
-      
-      adcmux          <= { 4 { 1'b0 } } ;     // reset
+      // adcmux          <= { 4 { 1'b0 } } ;     // reset
       cmpr_latch      <= 0;
+      ////////////////
+
+      refmux = 2'b00;
+      sigmux = 1'b0;
+      resetmux = 1'b0;
+
     end
     else
     begin
