@@ -102,6 +102,11 @@ module adc (
     else
     begin
 
+
+      // refmux <= refmux + 1;
+      // sigmux <= sigmux + 1;
+      resetmux <= resetmux + 1;
+
       // always decrement clk for the current phase
       clk_count_down <= clk_count_down - 1;
 
