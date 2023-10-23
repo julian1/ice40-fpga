@@ -407,14 +407,11 @@ module top (
 
     // outputs
     .adc_measure_done(adc1_measure_done),
-    // .adcmux(    modulation_az_out[ `IDX_ADCMUX +: 4 ] ),
     .cmpr_latch(modulation_az_out[ `IDX_CMPR_LATCH_CTL ] ),
     .monitor(   modulation_az_out[ `IDX_MONITOR + 2 +: 6 ]  ),
-
     .refmux(    modulation_az_out[ `IDX_ADCMUX +: 2 ]),      // reference current, better name?
     .sigmux(    modulation_az_out[ `IDX_ADCMUX + 2  ] ),      // change name to switch perhaps?,
     .resetmux(  modulation_az_out[ `IDX_ADCMUX + 3  ] )     // ang mux.
-
   );
 
 
@@ -461,10 +458,8 @@ module top (
 
     // outputs
     .adc_measure_done(adc2_measure_done),    // fan out.
-    // .adcmux(    modulation_no_az_out[ `IDX_ADCMUX +: 4 ] ),
     .cmpr_latch(modulation_no_az_out[ `IDX_CMPR_LATCH_CTL ] ),
     .monitor(   modulation_no_az_out[ `IDX_MONITOR + 2 +: 6 ] ),
-
     .refmux(    modulation_no_az_out[ `IDX_ADCMUX +: 2 ]),      // reference current, better name?
     .sigmux(    modulation_no_az_out[ `IDX_ADCMUX + 2  ] ),      // change name to switch perhaps?,
     .resetmux(  modulation_no_az_out[ `IDX_ADCMUX + 3  ] )     // ang mux.
