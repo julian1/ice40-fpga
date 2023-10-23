@@ -395,7 +395,7 @@ module top (
 
   wire [ `NUM_BITS-1:0 ]  modulation_az_out ;     // beter name ... it is the sample control, and adc.
   wire adc1_measure_start;
-  wire adc1_measure_done;
+  wire adc1_measure_ready;
 
   adc
   adc1 (
@@ -406,7 +406,7 @@ module top (
     .adc_measure_start( adc1_measure_start),
 
     // outputs
-    .adc_measure_done(adc1_measure_done),
+    .adc_measure_ready(adc1_measure_ready),
     .cmpr_latch(modulation_az_out[ `IDX_CMPR_LATCH_CTL ] ),
     .monitor(   modulation_az_out[ `IDX_MONITOR + 2 +: 6 ]  ),
     .refmux(    modulation_az_out[ `IDX_ADCMUX +: 2 ]),      // reference current, better name?
@@ -422,7 +422,7 @@ module top (
     .clk(CLK),
     .reset( reg_reset[ 0 ] ),
     .azmux_lo_val(  reg_direct[  `IDX_AZMUX +: 4 ] ),
-    .adc_measure_done(adc1_measure_done),
+    .adc_measure_ready(adc1_measure_ready),
 
     // outputs
     .sw_pc_ctl( modulation_az_out[ `IDX_SIG_PC_SW_CTL ]  ),
@@ -446,7 +446,7 @@ module top (
 
   wire [ `NUM_BITS-1:0 ]  modulation_no_az_out ;  // beter name ... it is the sample control, and adc.
   wire adc2_measure_start;
-  wire adc2_measure_done;
+  wire adc2_measure_ready;
 
   adc
   adc2 (
@@ -457,7 +457,7 @@ module top (
     .adc_measure_start( adc2_measure_start),             // mux in
 
     // outputs
-    .adc_measure_done(adc2_measure_done),    // fan out.
+    .adc_measure_ready(adc2_measure_ready),    // fan out.
     .cmpr_latch(modulation_no_az_out[ `IDX_CMPR_LATCH_CTL ] ),
     .monitor(   modulation_no_az_out[ `IDX_MONITOR + 2 +: 6 ] ),
     .refmux(    modulation_no_az_out[ `IDX_ADCMUX +: 2 ]),      // reference current, better name?
@@ -476,7 +476,7 @@ module top (
     // inputs
     .clk(CLK),
     .reset( reg_reset[ 0 ] ),
-    .adc_measure_done(adc2_measure_done),
+    .adc_measure_ready(adc2_measure_ready),
 
     // outputs
     .led0(      modulation_no_az_out[ `IDX_LED0 ] ),

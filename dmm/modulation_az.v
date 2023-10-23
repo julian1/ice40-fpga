@@ -36,7 +36,7 @@ module modulation_az (
   input   clk,
   input   reset,
   input [ 4-1 : 0 ] azmux_lo_val,
-  input adc_measure_done,
+  input adc_measure_ready,
 
   // outputs.
   output reg adc_measure_start,
@@ -137,7 +137,7 @@ module modulation_az (
 
             // wait for adc.
             // block for adc complete
-            if(adc_measure_done == 1)
+            if(adc_measure_ready == 1)
               state <= 4;
           end
 
@@ -173,7 +173,7 @@ module modulation_az (
 
 
             // wait for adc.
-            if(adc_measure_done == 1)
+            if(adc_measure_ready == 1)
               // and restart sequence
               state <= 2;
           end

@@ -29,7 +29,7 @@ module modulation_no_az (
   // inputs
   input   clk,
   input   reset,
-  input adc_measure_done,
+  input adc_measure_ready,
 
   /// outputs. these can be wires because we assign
   // output wire sw_pc_ctl,
@@ -108,7 +108,7 @@ module modulation_no_az (
             adc_measure_start    <= 0;
 
             // wait for adc.
-            if(adc_measure_done == 1)
+            if(adc_measure_ready == 1)
               state <= 2;
           end
 

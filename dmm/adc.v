@@ -2,7 +2,7 @@
 
     Use _start  to prefix. and perhaps _done.
     adc_measure_start
-    adc_measure_done
+    adc_measure_ready
     --------
 
       - EXTR. OR DON"T MUX.
@@ -55,7 +55,7 @@ module adc (
 
 
   // outputs
-  output reg adc_measure_done,
+  output reg adc_measure_ready,
   // output reg [ 4-1:0 ] adcmux,
   output reg  cmpr_latch,
 
@@ -87,7 +87,7 @@ module adc (
       // set up next state, for when reset goes hi.
       state           <= 0;
 
-      adc_measure_done <= 1;
+      adc_measure_ready <= 1;
 
       monitor         <= { 6 { 1'b0 } } ;     // reset
       // adcmux          <= { 4 { 1'b0 } } ;     // reset
@@ -123,7 +123,7 @@ module adc (
           // having a state like, this may be useful for debuggin, because can put a pulse on the monitor.
             state <= 2;
 
-            adc_measure_done <= 1;
+            adc_measure_ready <= 1;
 
           end
         /////////////////////////
@@ -137,7 +137,7 @@ module adc (
         3:
           // set up state for measurement
           begin
-            adc_measure_done <= 0;
+            adc_measure_ready <= 0;
             state           <= 35;
             clk_count_down  <= clk_sample_duration;
           end
@@ -156,7 +156,7 @@ module adc (
           begin
             state           <= 5;
             // signal measurement done
-            adc_measure_done <= 1;
+            adc_measure_ready <= 1;
 
           end
 
@@ -164,7 +164,7 @@ module adc (
           begin
             state           <= 2;
             // clear measurement done
-            adc_measure_done <= 0;
+            adc_measure_ready <= 0;
           end
 
 
