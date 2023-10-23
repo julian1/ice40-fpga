@@ -48,7 +48,8 @@ module adc (
   // outputs
   output reg adc_measure_done,
 
-  output reg [ 8-1:0]  monitor   // there is no reason to prematurely narrow the monitor here. can be done at top level.
+  // output reg [ 8-1:0]  monitor   // there is no reason to prematurely narrow the monitor here. can be done at top level.
+  output reg [ 6-1:0]  monitor   // there is no reason to prematurely narrow the monitor here. can be done at top level.
 );
 
   reg [7-1:0]   state = 0 ;
@@ -75,7 +76,7 @@ module adc (
 
       adc_measure_done <= 1;
 
-      monitor         <= { 8 { 1'b0 } } ;     // reset
+      monitor         <= { 6 { 1'b0 } } ;     // reset
     end
     else
     begin

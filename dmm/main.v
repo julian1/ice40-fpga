@@ -374,29 +374,32 @@ module top (
 
 
 
+  /////////////////////
 
-  wire adc_measure_start;
-  wire adc_measure_done;
+  wire [ `NUM_BITS-1:0 ]  modulation_az_out ;     // beter name ... not just modulation.   it is mode x.
 
-  wire [ 8-1:0 ]  adc_monitor_out ;
+  wire adc1_measure_start;
+  wire adc1_measure_done;
+  // wire [ 8-1:0 ]  adc1_monitor_out ;
+  // wire [ 4-1:0 ]  adc_mux_out ;
   adc
-  adc (
+  adc1 (
     // inputs
     .clk(CLK),
     .reset( 1'b0 ),
     .clk_sample_duration( reg_clk_sample_duration ),
-    .adc_measure_start( adc_measure_start),             // mux in
+    .adc_measure_start( adc1_measure_start),             // mux in
 
     // outputs
-    .adc_measure_done(adc_measure_done),    // fan out.
-    .monitor( adc_monitor_out)
+    .adc_measure_done(adc1_measure_done),    // fan out.
+    .monitor(  modulation_az_out[ `IDX_MONITOR + 2 +: 6 ]  )
   );
+  // pass other bits of monitor to the adc
+  // assign modulation_az_out[ `IDX_MONITOR + 2 +: 6 ] = adc1_monitor_out[ 6 -1 : 0]; // other bits are for adc.
 
 
 
-
-  wire [ `NUM_BITS-1:0 ]  modulation_az_out ;     // beter name
-  wire modulation_az_adc_measure_start;
+  // wire modulation_az_adc_measure_start;
   modulation_az
   modulation_az (
 
@@ -408,7 +411,7 @@ module top (
     .clk(CLK),
     .reset( reg_reset[ 0 ] ),
     .azmux_lo_val(  reg_direct[  `IDX_AZMUX +: 4 ] ),       // expand width for fpga control of himux/himux2. for ratiometric, and AG cycle.  (boot,or sig).
-    .adc_measure_done(adc_measure_done),
+    .adc_measure_done(adc1_measure_done),
 
     // outputs
     .sw_pc_ctl( modulation_az_out[ `IDX_SIG_PC_SW_CTL ]  ),
@@ -416,16 +419,37 @@ module top (
     .led0(      modulation_az_out[ `IDX_LED0 ] ),
     .monitor(   modulation_az_out[ `IDX_MONITOR +: 2  ] ),    // only pass 2 bit to the az monitor
 
-    .adc_measure_start( modulation_az_adc_measure_start)
+    .adc_measure_start( adc1_measure_start)
   );
 
   assign modulation_az_out[ `IDX_HIMUX +: 8 ]  = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
   assign modulation_az_out[ `IDX_ADCMUX +: 7 ] = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
-  // pass other bits of monitor to the adc
-  assign modulation_az_out[ `IDX_MONITOR + 2 +: 6 ] = adc_monitor_out[ 6 -1 : 0]; // other bits are for adc.
+
+
+  /////////////////////
 
 
 
+  // HMMMMM....  it works.  but is it what we want.
+
+  wire [ `NUM_BITS-1:0 ]  modulation_no_az_out ;
+
+  wire adc2_measure_start;
+  wire adc2_measure_done;
+  // wire [ 8-1:0 ]  adc2_monitor_out ;
+  // wire [ 4-1:0 ]  adc_mux_out ;
+  adc
+  adc2 (
+    // inputs
+    .clk(CLK),
+    .reset( 1'b0 ),
+    .clk_sample_duration( reg_clk_sample_duration ),
+    .adc_measure_start( adc2_measure_start),             // mux in
+
+    // outputs
+    .adc_measure_done(adc2_measure_done),    // fan out.
+    .monitor( modulation_no_az_out[ `IDX_MONITOR + 2 +: 6 ] )
+  );
 
 
   /*  use no_az for no azero and electrometer modes.
@@ -433,19 +457,18 @@ module top (
       no az, and elecm. just need azmux and pc switch control given to mcu
   */
 
-  wire [ `NUM_BITS-1:0 ]  modulation_no_az_out ;
-  wire modulation_no_az_adc_measure_start;
+  // wire modulation_no_az_adc_measure_start;
   modulation_no_az
   modulation_no_az (
     // inputs
     .clk(CLK),
     .reset( reg_reset[ 0 ] ),
-    .adc_measure_done(adc_measure_done),
+    .adc_measure_done(adc2_measure_done),
 
     // outputs
     .led0(      modulation_no_az_out[ `IDX_LED0 ] ),
     .monitor(   modulation_no_az_out[ `IDX_MONITOR +: 2  ] ),    // we could pass subset of monitor if watned. eg. only 4 pins...
-    .adc_measure_start( modulation_no_az_adc_measure_start)
+    .adc_measure_start( adc2_measure_start)
   );
 
   // pass control for muxes and pc switch to reg_direct
@@ -455,9 +478,12 @@ module top (
   assign modulation_no_az_out[ `IDX_HIMUX +: 8 ]    = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
   assign modulation_no_az_out[ `IDX_ADCMUX +: 7 ]   = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
   // pass other bits of monitor to the adc
-  assign modulation_no_az_out[ `IDX_MONITOR + 2 +: 6 ] = adc_monitor_out[ 6 -1 : 0]; // other bits are for adc.
+  // assign modulation_no_az_out[ `IDX_MONITOR + 2 +: 6 ] = adc2_monitor_out[ 6 -1 : 0]; // other bits are for adc.
 
 
+
+
+  ////////////////
 
 
   mux_8to1_assign #( `NUM_BITS )
@@ -487,6 +513,8 @@ module top (
       just a reset of the az controller - so it is not blocked waiting on the adc - which is waiting for a start signal..
 */
 
+/*
+
   // change name mux_sync_8
   sync_mux_8 #( 1)
   muxer_2  (
@@ -506,7 +534,7 @@ module top (
     .out( adc_measure_start )
   );
 
-
+*/
 // lets query the mode.
 
 
