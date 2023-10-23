@@ -1,8 +1,8 @@
 /*
 
     Use _start  to prefix. and perhaps _done.
-    adc_measure_start
-    adc_measure_ready
+    adc_measure_trig
+    adc_measure_valid
     --------
 
       - EXTR. OR DON"T MUX.
@@ -44,7 +44,7 @@ module adc (
   input   clk,
   input   reset,
   input [ 32-1 : 0 ] clk_sample_duration,  // 32/31 bit nice. for long sample....  wrongly named it is counter_sample_duration. not clk...
-  input adc_measure_start,  // wire
+  input adc_measure_trig,  // wire
 
 
 
@@ -55,7 +55,7 @@ module adc (
 
 
   // outputs
-  output reg adc_measure_ready,
+  output reg adc_measure_valid,
   // output reg [ 4-1:0 ] adcmux,
   output reg  cmpr_latch,
 
@@ -71,7 +71,7 @@ module adc (
   and only have 5.
 
   -----
-  - EXTR. monitor[0] should be given the adc_measure_start signal.
+  - EXTR. monitor[0] should be given the adc_measure_trig signal.
     as the initial triggering condition.
   - also we may want to wait a bit.
     but that should probably be done in the az mode.
@@ -87,7 +87,7 @@ module adc (
       // set up next state, for when reset goes hi.
       state           <= 0;
 
-      adc_measure_ready <= 1;
+      adc_measure_valid <= 1;
 
       monitor         <= { 6 { 1'b0 } } ;     // reset
       // adcmux          <= { 4 { 1'b0 } } ;     // reset
@@ -113,7 +113,7 @@ module adc (
  
       // trigger off the start signal. 
       // just about want wire this in the top level module..
-      monitor[0] =  adc_measure_start;
+      monitor[0] =  adc_measure_trig;
 
 
       case (state)
@@ -123,21 +123,21 @@ module adc (
           // having a state like, this may be useful for debuggin, because can put a pulse on the monitor.
             state <= 2;
 
-            adc_measure_ready <= 1;
+            adc_measure_valid <= 1;
 
           end
         /////////////////////////
 
         2:
           // block for start trigger that are ready for sample
-          if(adc_measure_start == 1)
+          if(adc_measure_trig == 1)
               state <= 3;
 
 
         3:
           // set up state for measurement
           begin
-            adc_measure_ready <= 0;
+            adc_measure_valid <= 0;
             state           <= 35;
             clk_count_down  <= clk_sample_duration;
           end
@@ -156,7 +156,7 @@ module adc (
           begin
             state           <= 5;
             // signal measurement done
-            adc_measure_ready <= 1;
+            adc_measure_valid <= 1;
 
           end
 
@@ -164,7 +164,7 @@ module adc (
           begin
             state           <= 2;
             // clear measurement done
-            adc_measure_ready <= 0;
+            adc_measure_valid <= 0;
           end
 
 

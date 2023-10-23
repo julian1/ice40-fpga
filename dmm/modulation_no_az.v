@@ -29,14 +29,14 @@ module modulation_no_az (
   // inputs
   input   clk,
   input   reset,
-  input adc_measure_ready,
+  input adc_measure_valid,
 
   /// outputs. these can be wires because we assign
   // output wire sw_pc_ctl,
   // output wire [ 4-1:0 ] azmux,
 
   // regs/state
-  output reg adc_measure_start,
+  output reg adc_measure_trig,
   output reg led0,
   output reg [ 2-1:0]  monitor,     // but it suppresses the warning.
 );
@@ -100,15 +100,15 @@ module modulation_no_az (
             monitor[1]      <= 1;
 
             // must be a better name. trigger. rdy. do. start
-            adc_measure_start    <= 1;
+            adc_measure_trig    <= 1;
           end
 
         35:
           begin
-            adc_measure_start    <= 0;
+            adc_measure_trig    <= 0;
 
             // wait for adc.
-            if(adc_measure_ready == 1)
+            if(adc_measure_valid == 1)
               state <= 2;
           end
 

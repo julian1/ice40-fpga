@@ -36,10 +36,10 @@ module modulation_az (
   input   clk,
   input   reset,
   input [ 4-1 : 0 ] azmux_lo_val,
-  input adc_measure_ready,
+  input adc_measure_valid,
 
   // outputs.
-  output reg adc_measure_start,
+  output reg adc_measure_trig,
   output reg  sw_pc_ctl,
   output reg [ 4-1:0 ] azmux,
   output reg led0,
@@ -87,7 +87,7 @@ module modulation_az (
             monitor         <= { 2 { 1'b0 } } ;     // reset
 
 
-            adc_measure_start    <= 0;
+            adc_measure_trig    <= 0;
           end
         15:
           if(clk_count_down == 0)
@@ -120,12 +120,12 @@ module modulation_az (
             monitor[1]      <= 1;
 
             // must be a better name. trigger. rdy. do. start
-            adc_measure_start    <= 1;
+            adc_measure_trig    <= 1;
           end
 
         35:
           begin
-            /* TODO EXTR. i think we should consider asserting adc_measure_start.
+            /* TODO EXTR. i think we should consider asserting adc_measure_trig.
                 until we get the measure_done signal
                 no reason to constrain to a single cycle. pulse.
                 - does this always avoid the adc missing the pulse.  i think yes.
@@ -133,11 +133,11 @@ module modulation_az (
                 - not sure. it is clearer to trigger off, and watch with LA/MSO as single pulse .
             */
 
-            adc_measure_start    <= 0;
+            adc_measure_trig    <= 0;
 
             // wait for adc.
             // block for adc complete
-            if(adc_measure_ready == 1)
+            if(adc_measure_valid == 1)
               state <= 4;
           end
 
@@ -164,16 +164,16 @@ module modulation_az (
             monitor[0]      <= 0;
 
             // must be a better name. trigger. rdy. do. start
-            adc_measure_start    <= 1;
+            adc_measure_trig    <= 1;
           end
 
         55:
           begin
-            adc_measure_start    <= 0;
+            adc_measure_trig    <= 0;
 
 
             // wait for adc.
-            if(adc_measure_ready == 1)
+            if(adc_measure_valid == 1)
               // and restart sequence
               state <= 2;
           end

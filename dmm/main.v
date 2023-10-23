@@ -394,8 +394,8 @@ module top (
   */
 
   wire [ `NUM_BITS-1:0 ]  modulation_az_out ;     // beter name ... it is the sample control, and adc.
-  wire adc1_measure_start;
-  wire adc1_measure_ready;
+  wire adc1_measure_trig;
+  wire adc1_measure_valid;
 
   adc
   adc1 (
@@ -403,10 +403,10 @@ module top (
     .clk(CLK),
     .reset( 1'b0 ),
     .clk_sample_duration( reg_clk_sample_duration ),
-    .adc_measure_start( adc1_measure_start),
+    .adc_measure_trig( adc1_measure_trig),
 
     // outputs
-    .adc_measure_ready(adc1_measure_ready),
+    .adc_measure_valid(adc1_measure_valid),
     .cmpr_latch(modulation_az_out[ `IDX_CMPR_LATCH_CTL ] ),
     .monitor(   modulation_az_out[ `IDX_MONITOR + 2 +: 6 ]  ),
     .refmux(    modulation_az_out[ `IDX_ADCMUX +: 2 ]),      // reference current, better name?
@@ -422,7 +422,7 @@ module top (
     .clk(CLK),
     .reset( reg_reset[ 0 ] ),
     .azmux_lo_val(  reg_direct[  `IDX_AZMUX +: 4 ] ),
-    .adc_measure_ready(adc1_measure_ready),
+    .adc_measure_valid(adc1_measure_valid),
 
     // outputs
     .sw_pc_ctl( modulation_az_out[ `IDX_SIG_PC_SW_CTL ]  ),
@@ -430,7 +430,7 @@ module top (
     .led0(      modulation_az_out[ `IDX_LED0 ] ),
     .monitor(   modulation_az_out[ `IDX_MONITOR +: 2  ] ),    // only pass 2 bit to the az monitor
 
-    .adc_measure_start( adc1_measure_start)
+    .adc_measure_trig( adc1_measure_trig)
   );
 
   assign modulation_az_out[ `IDX_HIMUX +: 8 ]  = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
@@ -445,8 +445,8 @@ module top (
 
 
   wire [ `NUM_BITS-1:0 ]  modulation_no_az_out ;  // beter name ... it is the sample control, and adc.
-  wire adc2_measure_start;
-  wire adc2_measure_ready;
+  wire adc2_measure_trig;
+  wire adc2_measure_valid;
 
   adc
   adc2 (
@@ -454,10 +454,10 @@ module top (
     .clk(CLK),
     .reset( 1'b0 ),
     .clk_sample_duration( reg_clk_sample_duration ),
-    .adc_measure_start( adc2_measure_start),             // mux in
+    .adc_measure_trig( adc2_measure_trig),             // mux in
 
     // outputs
-    .adc_measure_ready(adc2_measure_ready),    // fan out.
+    .adc_measure_valid(adc2_measure_valid),    // fan out.
     .cmpr_latch(modulation_no_az_out[ `IDX_CMPR_LATCH_CTL ] ),
     .monitor(   modulation_no_az_out[ `IDX_MONITOR + 2 +: 6 ] ),
     .refmux(    modulation_no_az_out[ `IDX_ADCMUX +: 2 ]),      // reference current, better name?
@@ -476,12 +476,12 @@ module top (
     // inputs
     .clk(CLK),
     .reset( reg_reset[ 0 ] ),
-    .adc_measure_ready(adc2_measure_ready),
+    .adc_measure_valid(adc2_measure_valid),
 
     // outputs
     .led0(      modulation_no_az_out[ `IDX_LED0 ] ),
     .monitor(   modulation_no_az_out[ `IDX_MONITOR +: 2  ] ),    // we could pass subset of monitor if watned. eg. only 4 pins...
-    .adc_measure_start( adc2_measure_start)
+    .adc_measure_trig( adc2_measure_trig)
   );
 
   // pass control for muxes and pc switch to reg_direct
@@ -540,12 +540,12 @@ module top (
     .c( 1'b0 ),         // 2
     .d( 1'b0  ),        // 3.
     .e( 1'b0  ),        // 4
-    .f( modulation_az_adc_measure_start),      // 5
-    .g( modulation_no_az_adc_measure_start ),  // 6
+    .f( modulation_az_adc_measure_trig),      // 5
+    .g( modulation_no_az_adc_measure_trig ),  // 6
     .h( 1'b0 ),         // 7
 
     .sel( reg_mode[ 2 : 0 ]),     // what if we hard code it.
-    .out( adc_measure_start )
+    .out( adc_measure_trig )
   );
 
 */
