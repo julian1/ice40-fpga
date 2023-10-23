@@ -216,6 +216,10 @@ module top (
   /////
 
   wire [8-1:0] vec_miso ;
+
+  // only one spi device at the moment
+  assign  vec_miso[ 8-1 : 1] = 7'b0;
+
   assign { U1004_4094_DATA } = vec_miso;
 
 
