@@ -96,9 +96,6 @@ module adc (
               // adc is master.
               adc_measure_valid <= 0;
 
-              // don't clear. makes it hard to tell
-              // monitor[6-1: 1  ]  <= { 4 { 1'b0 } } ;     // clear
-
               ////////////////
               cmpr_latch      <= 0;
               refmux = 2'b00;
@@ -118,18 +115,3 @@ endmodule
 
 
 
-
-/*
-  actually it might make sense to intercept the signal.
-  and only have 5.
-
-  -----
-  - EXTR. monitor[0] should be given the adc_measure_trig signal.
-    as the initial triggering condition.
-  - also we may want to wait a bit.
-    but that should probably be done in the az mode.
-  - also want to probably pass a stamp or code. as to what we sampled.
-      NO. that is for the sample controller.
-      EXTR. sample controller can just write a reg. depending on if sample is the HI. or the LO.
-
-*/
