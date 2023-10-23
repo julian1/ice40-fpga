@@ -375,9 +375,18 @@ module top (
 
 
   /////////////////////
+  /*
+      - can have another mux deccoder. to hold/control the adc/modulation - using the reset pin. this would be quite nice.
+      ------
+      - advantage - is it eliminates extra. muxer for the control signals.  And the problems with hanging.
+      - advantage there is only a single mode. muxer.
+      - EXTR. advantage. allows different combinations of az-controller and different adc. with only single muxer for the outputs.
+      - EXTR> and no more variables - can just use reg_mode.
+      - the adc refmux, sig. should be very easy to wire up - under the same system.
+      - we can/could also pass in a reset argument. based on mode.
+  */
 
   wire [ `NUM_BITS-1:0 ]  modulation_az_out ;     // beter name ... not just modulation.   it is mode x.
-
   wire adc1_measure_start;
   wire adc1_measure_done;
   // wire [ 8-1:0 ]  adc1_monitor_out ;
@@ -396,8 +405,6 @@ module top (
   );
   // pass other bits of monitor to the adc
   // assign modulation_az_out[ `IDX_MONITOR + 2 +: 6 ] = adc1_monitor_out[ 6 -1 : 0]; // other bits are for adc.
-
-
 
   // wire modulation_az_adc_measure_start;
   modulation_az
@@ -424,7 +431,6 @@ module top (
 
   assign modulation_az_out[ `IDX_HIMUX +: 8 ]  = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
   assign modulation_az_out[ `IDX_ADCMUX +: 7 ] = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
-
 
   /////////////////////
 
