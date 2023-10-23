@@ -386,11 +386,10 @@ module top (
       - we can/could also pass in a reset argument. based on mode.
   */
 
-  wire [ `NUM_BITS-1:0 ]  modulation_az_out ;     // beter name ... not just modulation.   it is mode x.
+  wire [ `NUM_BITS-1:0 ]  modulation_az_out ;     // beter name ... it is the sample control, and adc.
   wire adc1_measure_start;
   wire adc1_measure_done;
-  // wire [ 8-1:0 ]  adc1_monitor_out ;
-  // wire [ 4-1:0 ]  adc_mux_out ;
+
   adc
   adc1 (
     // inputs
@@ -403,21 +402,15 @@ module top (
     .adc_measure_done(adc1_measure_done),    // fan out.
     .monitor(  modulation_az_out[ `IDX_MONITOR + 2 +: 6 ]  )
   );
-  // pass other bits of monitor to the adc
-  // assign modulation_az_out[ `IDX_MONITOR + 2 +: 6 ] = adc1_monitor_out[ 6 -1 : 0]; // other bits are for adc.
 
-  // wire modulation_az_adc_measure_start;
+
   modulation_az
   modulation_az (
-
-    // remember himux is not manipulated, or passed to this module.
-    // instead the hi signal is selected by the AZ mux, via the pre-charge switch
-    // and himux is controlled using reg-direct.
 
     // inputs
     .clk(CLK),
     .reset( reg_reset[ 0 ] ),
-    .azmux_lo_val(  reg_direct[  `IDX_AZMUX +: 4 ] ),       // expand width for fpga control of himux/himux2. for ratiometric, and AG cycle.  (boot,or sig).
+    .azmux_lo_val(  reg_direct[  `IDX_AZMUX +: 4 ] ),
     .adc_measure_done(adc1_measure_done),
 
     // outputs
@@ -436,14 +429,10 @@ module top (
 
 
 
-  // HMMMMM....  it works.  but is it what we want.
-
-  wire [ `NUM_BITS-1:0 ]  modulation_no_az_out ;
-
+  wire [ `NUM_BITS-1:0 ]  modulation_no_az_out ;  // beter name ... it is the sample control, and adc.
   wire adc2_measure_start;
   wire adc2_measure_done;
-  // wire [ 8-1:0 ]  adc2_monitor_out ;
-  // wire [ 4-1:0 ]  adc_mux_out ;
+
   adc
   adc2 (
     // inputs
@@ -463,7 +452,6 @@ module top (
       no az, and elecm. just need azmux and pc switch control given to mcu
   */
 
-  // wire modulation_no_az_adc_measure_start;
   modulation_no_az
   modulation_no_az (
     // inputs
@@ -483,8 +471,6 @@ module top (
 
   assign modulation_no_az_out[ `IDX_HIMUX +: 8 ]    = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
   assign modulation_no_az_out[ `IDX_ADCMUX +: 7 ]   = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
-  // pass other bits of monitor to the adc
-  // assign modulation_no_az_out[ `IDX_MONITOR + 2 +: 6 ] = adc2_monitor_out[ 6 -1 : 0]; // other bits are for adc.
 
 
 
