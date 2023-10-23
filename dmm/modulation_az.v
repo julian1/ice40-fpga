@@ -136,6 +136,7 @@ module modulation_az (
             adc_measure_start    <= 0;
 
             // wait for adc.
+            // block for adc complete
             if(adc_measure_done == 1)
               state <= 4;
           end

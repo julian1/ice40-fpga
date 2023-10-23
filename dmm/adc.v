@@ -111,7 +111,7 @@ module adc (
         /////////////////////////
 
         2:
-          // wait for trigger that are ready to do the adc
+          // block for start trigger that are ready for sample
           if(adc_measure_start == 1)
               state <= 3;
 
