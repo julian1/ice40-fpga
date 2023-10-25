@@ -25,6 +25,7 @@
 
 `include "defines.v"
 
+`include "adc_modulation.v"
 
 
 
@@ -493,6 +494,20 @@ module top (
 
   assign modulation_no_az_out[ `IDX_MEAS_COMPLETE_CTL ] = reg_direct[ `IDX_MEAS_COMPLETE_CTL    ];  // eg. to the end.
   assign modulation_no_az_out[ `IDX_SPI_INTERUPT_CTL ] = reg_direct[ `IDX_SPI_INTERUPT_CTL ];  // eg. to the end.
+
+
+
+
+
+  adc_modulation 
+  adc3(
+
+    .clk(CLK)
+
+
+  );
+
+
 
 
 
