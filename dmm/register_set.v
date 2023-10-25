@@ -34,7 +34,7 @@
 `define REG_DIRECT        14
 `define REG_DIRECT2       15      // don't use. deprecate .   was only for initial AZ switching test.
 
-`define REG_CLK_SAMPLE_DURATION 16   // clk sample time
+`define REG_CLK_SAMPLE_DURATION 16   // clk sample time. change name aperture.
 
 `define REG_STATUS        17
 `define REG_RESET         18   // reset -> hi.  normal -> lo.
