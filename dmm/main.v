@@ -12,7 +12,7 @@
 `include "mux_spi.v"
 //`include "blinker.v"
 
-
+// change name samp_modulation_az    - sample modulation or just sampler_az, etc
 `include "modulation_az.v"
 `include "modulation_pc.v"
 `include "modulation_no_az.v"
@@ -25,7 +25,7 @@
 
 `include "defines.v"
 
-`include "adc_modulation.v"
+`include "adc_modulation_00.v"
 
 
 
@@ -381,7 +381,7 @@ module top (
     .monitor(   modulation_pc_out[ `IDX_MONITOR +: 8  ] )    // we could pass subset of monitor if watned. eg. only 4 pins...
   );
 
-  assign modulation_pc_out[ `IDX_AZMUX +: 4]   = register_set.reg_direct[ `IDX_AZMUX +: 4];     // azmux
+  assign modulation_pc_out[ `IDX_AZMUX +: 4]   = reg_direct[ `IDX_AZMUX +: 4];     // azmux
   assign modulation_pc_out[ `IDX_HIMUX +: 8 ]  = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
   assign modulation_pc_out[ `IDX_ADCMUX +: 7 ] = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
 
