@@ -365,6 +365,7 @@ module adc_modulation (
             sigmux          <= 0;
             refmux          <= `MUX_REF_RESET;
 
+            cmpr_latch      <= 1;  // disabled, inactive.
 
 
             monitor     <=  6'b000000;
@@ -709,6 +710,54 @@ module adc_modulation (
 
 
       endcase
+
+
+        // adc is interuptable/ can be triggered to start at any time.
+        if(adc_measure_trig == 1)
+          begin
+
+            // de-assert valid measurement
+            adc_measure_valid <= 0;
+
+            // reset vars, and transition to runup state
+            state           <= `STATE_RESET;
+            clk_count       <= 0;
+
+
+            // JA
+            sigmux          <= 0;
+            refmux          <= `MUX_REF_RESET;
+
+
+            cmpr_latch      <= 1;  // disabled, inactive.
+
+            monitor     <=  6'b000000;
+
+
+/*
+              state <= 35;
+
+              // adc is master.
+              adc_measure_valid <= 0;
+
+              ////////////////
+              cmpr_latch      <= 0;  active.
+              refmux = 2'b00;
+              sigmux = 1'b0;
+              resetmux = 1'b0;
+
+              // set sample/measure period
+              clk_count_down  <= clk_sample_duration;
+
+
+              monitor     <=  6'b000000; 
+*/
+
+          end
+
+
+
+
     end
 
 
