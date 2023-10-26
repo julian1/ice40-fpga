@@ -68,16 +68,15 @@ module modulation_no_az (
       // always decrement clk for the current phase
       clk_count_down <= clk_count_down - 1;
 
-
       case (state)
 
         // precharge switch - protects the signal. from the charge-injection of the AZ switch.
         0:
-          begin  
+          begin
             // having a state like, this may be useful for debuggin, because can put a pulse on the monitor.
             state <= 2;
-              
-            monitor = 2'b00; 
+
+            monitor = 2'b00;
 
           end
 
@@ -89,7 +88,10 @@ module modulation_no_az (
               state           <= 25;
               clk_count_down  <= clk_count_precharge_n;  // normally pin s1
 
-              led0                <= 0;
+              // led blink freq, on alternate sampples, to match az-mode.
+              led0    <= led0  + 1;
+
+              // led0                <= 0;
             end
         25:
           if(clk_count_down == 0)
@@ -100,7 +102,7 @@ module modulation_no_az (
           begin
             state           <= 35;
 
-            led0            <= 1;
+            // led0            <= 1;
             // tell adc to do measure. interuptable at any time.
             adc_measure_trig    <= 1;
             monitor[1]      <= 1;
