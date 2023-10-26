@@ -55,6 +55,8 @@
 */
 
 // this is the index.  not the bit number. works with +=
+// needs a prefix. to distinguish. from any other.  GPO_IDX_AZMUX  or GPO_IDX_AXMUX.
+// to ADC_MEAS_IDX_COUNT_UP  or ADC_IDX_COUNT_UP
 
 `define IDX_AZMUX             0     // 0,1,2,3
 `define IDX_HIMUX             4     // 4,5,6,7
@@ -68,7 +70,7 @@
 `define IDX_SPI_INTERUPT_CTL  28
 
 
-// change name IDX_END...???  main output vector
+// change name GPO_NUM_BITS IDX_END...???  or GPO_IDX_END  main output vector
 `define NUM_BITS        29    //
 
 
@@ -379,7 +381,7 @@ module top (
     .monitor(   modulation_pc_out[ `IDX_MONITOR +: 8  ] )    // we could pass subset of monitor if watned. eg. only 4 pins...
   );
 
-  assign modulation_pc_out[ `IDX_AZMUX +: 4]   = reg_direct[ `IDX_AZMUX +: 4];     // azmux
+  assign modulation_pc_out[ `IDX_AZMUX +: 4]   = register_set.reg_direct[ `IDX_AZMUX +: 4];     // azmux
   assign modulation_pc_out[ `IDX_HIMUX +: 8 ]  = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
   assign modulation_pc_out[ `IDX_ADCMUX +: 7 ] = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
 

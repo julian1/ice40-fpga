@@ -4,6 +4,8 @@
 
 
 # better name HW_FLAGS
+# put these as inputs in the status register.
+# perhaps as the first three bits.
 set_io HW0              19
 set_io HW1              20
 set_io HW2              21

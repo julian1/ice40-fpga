@@ -1,3 +1,28 @@
+/*
+  remember that can aggregate as many regs as we want into a vector at the call site.
+  and don't have to create a vector.
+
+  mux_8to1_assign( n ) {
+    ...
+    .e( ... )
+    .f(  { a, b, c } ) ,
+    .sel( sel)  ,
+    .out( { a_out, b_out, c_out } )
+  }
+
+  EXTR.  this can also work - to support concatenating inputs and outputs, for two way.
+          actually not sure.
+
+
+    .e(  { a_in, a_out } ) ,
+    .f(  { b_in, b_out } ) ,
+
+
+  but still needs all variables to be declared. while with single vector can just use a vector.
+  and use indicies/ slices..
+
+   - EXTR.  possibility to do (mux 8 to 1) -> (1 to 8).   to enable mixing/matching the sample controller/ and adc..
+*/
 
 `default_nettype none
 
@@ -16,8 +41,8 @@ module mux_4to1_assign #(parameter MSB =24)   (
   );
 
   // if written like this, then there is no error.
-  assign out = sel[1] ? 
-                  (sel[0] ? d : c) 
+  assign out = sel[1] ?
+                  (sel[0] ? d : c)
                   : (sel[0] ? b : a);
 
 /*
@@ -129,7 +154,7 @@ module sync_mux_8 #(parameter MSB =24)   (
   );
 
   // always @(posedge clk  or posedge reset )
- 
+
   always @(posedge clk)
   // always @(*)
      case (sel)
