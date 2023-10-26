@@ -269,7 +269,7 @@ module adc_modulation (
     begin
 
       // delayed by a clock cycle
-      monitor[0] <=  adc_measure_trig;
+      // monitor[0] <=  adc_measure_trig;
       monitor[1] <=  adc_measure_valid;
 
 
@@ -377,10 +377,15 @@ module adc_modulation (
 
 
         `STATE_RESET:    // let integrator reset.
-          if(clk_count >= clk_count_reset_n)
-            // state <= `STATE_SIG_SETTLE_START;
-            // JA
-            state <= `STATE_SIG_START;
+          begin
+            monitor[0]   <=  0;
+
+            if(clk_count >= clk_count_reset_n)
+              // state <= `STATE_SIG_SETTLE_START;
+              // JA
+              state <= `STATE_SIG_START;
+          end
+
 
 /*
         // JA -  we may want this. to let the signal amplifier stabilize?
@@ -746,7 +751,8 @@ module adc_modulation (
 
             cmpr_latch_ctl          <= 1; // disabled, inactive.
 
-            monitor     <=  6'b000000;    // indicate we have started.
+            // monitor     <=  6'b000000;    // indicate we have started.
+            monitor     <=  6'b000001;    // indicate we have started.
 
 
 /*
