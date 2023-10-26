@@ -3,12 +3,13 @@
 
 ////////////////////////////
 
+/*
 
 `define HIMUX_SEL_SIG_HI      4'b1110
 `define HIMUX_SEL_REF_HI      4'b1101
 `define HIMUX_SEL_REF_LO      4'b1011
 `define HIMUX_SEL_ANG         4'b0111
-
+*/
 
 
 /*
@@ -121,13 +122,15 @@ module adc_modulation (
   // input [ 2-1:0]  refmux,     // these are being modified.can be writtern.
   // input           sigmux,
 
-  output reg [5-1:0]   state,     // not sure about exposing this like this. but we could project it on the monitor.
+  // output reg [5-1:0]   state,     // not sure about exposing this like this. but we could project it on the monitor.
+                                  // but this can be done internally.
+
   // output reg [4-1:0]  himux,   // JA. remove
 
 
   // both should be input wires. both are driven.
   // input           com_interupt,
-  output reg      com_interupt,
+  // output reg      com_interupt,  // JA remove.
   output reg      cmpr_latch_ctl,
 
 
@@ -156,7 +159,7 @@ module adc_modulation (
     and input wire can still be driven.
   */
 
-
+  reg [5-1:0]   state;
 
   /*
      EXTR. could be useful to spi query the current state
@@ -168,7 +171,7 @@ module adc_modulation (
   initial begin
     state           = `STATE_RESET_START;   // 0
 
-    com_interupt    = 1; // active lo move this to an initial condition.
+    // com_interupt    = 1; // active lo move this to an initial condition.
 
     cmpr_latch_ctl  = 1; // disable comparator,
 
@@ -351,7 +354,7 @@ module adc_modulation (
             clk_count       <= 0;
 
             // TODO change com_interupt to active hi.   can invert when wire up the output. if want.
-            com_interupt  <= 1;   // active lo. turn off.
+            // com_interupt  <= 1;   // active lo. turn off.
 
 /*
             // switch op to integrator analog input, and sigmux on, to reset the integrator
@@ -365,7 +368,7 @@ module adc_modulation (
 
 
 
-            monitor     <=  6'b000000; 
+            monitor     <=  6'b000000;
           end
 
 
@@ -665,7 +668,7 @@ module adc_modulation (
                 // turn off all inputs. actually should leave. because we will turn on to reset the integrator.
                 refmux                  <= `MUX_REF_NONE;
 
-                com_interupt            <= 0;   // active lo, set interupt
+                // com_interupt            <= 0;   // active lo, set interupt
 
                 // record all the counts and rundown everything
                 count_up_last           <= count_up;
@@ -680,6 +683,10 @@ module adc_modulation (
                 clk_count_mux_neg_last  <= clk_count_mux_neg;
                 clk_count_mux_pos_last  <= clk_count_mux_pos;
                 clk_count_mux_rd_last   <= clk_count_mux_rd;;
+
+
+                // signal valid.
+                adc_measure_valid <= 1;
 
               end
           end
