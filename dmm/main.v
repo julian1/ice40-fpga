@@ -490,12 +490,28 @@ module top (
 
     .comparator_val( CMPR_P_OUT ),
 
+/*
+    clk_count_reset_n   =  10000;
+    // 26MHz ???
+    clk_count_var_n     = 185;    // 330pF
+    clk_count_fix_n     = 24;   // 24 is faster than 23... weird.
+
+    clk_count_aper_n    = (2 * 2000000);    // ? 200ms TODO check this.
+                                            // yes. 4000000 == 10PNLC, 5 sps.
+    use_slow_rundown    = 1;
+    use_fast_rundown    = 1;
+*/
 
     // outputs
+    . clk_count_reset_n( 10000 ) ,
+    . clk_count_fix_n( 24 ) ,
+    . clk_count_var_n( 185 ) ,
+    . clk_count_aper_n( 2 * 2000000) ,
+    . use_slow_rundown( 1'b1 ),
+    . use_fast_rundown( 1'b1 ),
+
     .adc_measure_valid(adc2_measure_valid),    // fan out.
     .cmpr_latch_ctl(modulation_no_az_out[ `IDX_CMPR_LATCH_CTL ] ),
-
-
 
     .monitor(   modulation_no_az_out[ `IDX_MONITOR + 2 +: 6 ] ),
 
