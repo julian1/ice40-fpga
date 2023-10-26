@@ -683,7 +683,7 @@ module adc_modulation (
 
                 // com_interupt            <= 0;   // active lo, set interupt
 
-                // record all the counts and rundown everything
+                // record all the counts asap. in this immeidate clk cycle.
                 count_up_last           <= count_up;
                 count_down_last         <= count_down;
                 count_trans_up_last     <= count_trans_up; // OK. this works.
