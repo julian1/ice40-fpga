@@ -81,8 +81,7 @@ module adc_modulation (
 
   input           clk,
 
-  // inout           reset,
-  inout           reset,  // JA
+  // inout           reset,  // JA
 
 
   // JA added
@@ -243,7 +242,7 @@ module adc_modulation (
 
   always @(posedge clk)
 
-
+/*
     // EXTR. use if(!reset) to force, because `STATE_RESET_START only runs for a single clk cycle;
     // it's also slightly faster
     if(!reset)  // external reset, active lo
@@ -252,17 +251,18 @@ module adc_modulation (
         state           <= `STATE_RESET_START;
 
         com_interupt  <= 1;   // active lo. turn off.
-        /*
+        / *
         // keep integrator analog input, and sigmux on, to reset the integrator
         himux           <= `HIMUX_SEL_ANG;
         sigmux          <= 1;
         refmux          <= `MUX_REF_NONE;
-        */
+        * /
         // JA. sigmux is off.
         sigmux          <= 0;
         refmux          <= `MUX_REF_RESET;
       end
     else
+*/
 
     begin
 

@@ -108,6 +108,8 @@ module top (
 
 
 
+  //
+  // inputs
 
   // spi
   input  SPI_CLK,
@@ -117,20 +119,34 @@ module top (
   output SPI_MISO,
   // output b
 
+  input U1004_4094_DATA,
+  input LINE_SENSE_OUT,
+  input SWITCH_SENSE_OUT,
+  input DCV_OVP_OUT,
+  input OHMS_OVP_OUT,
+  input SUPPLY_SENSE_OUT,
+  input UNUSED_2,                    // change name UNUSED_2_OUT
+
+  // input  U1004_4094_DATA,   // this is unused. but it's an input
+
+
+
+  // or OUT_P and OUT_N ?
+  input CMPR_P_OUT,
+  input CMPR_N_OUT,
+
 
 
   //////////////////////////
+  // outputs
+
   // 4094
   output _4094_OE_CTL,
 
   output GLB_4094_CLK,
   output GLB_4094_DATA,
   output GLB_4094_STROBE_CTL,
-  input  U1004_4094_DATA,   // this is unused. but it's an input
 
-
-  ///////////////
-  // outputs - used modally.
 
   // azmux
   output U414_A0_CTL,
@@ -180,15 +196,6 @@ module top (
   output CMPR_LATCH_CTL,
 
   ////////////
-
-  input U1004_4094_DATA,
-  input LINE_SENSE_OUT,
-  input SWITCH_SENSE_OUT,
-  input DCV_OVP_OUT,
-  input OHMS_OVP_OUT,
-  input SUPPLY_SENSE_OUT,
-  input UNUSED_2                    // change name UNUSED_2_OUT
-
 
 
 );
@@ -475,14 +482,21 @@ module top (
 
 
     .clk(CLK),
-    .reset( 1'b0 ),
+    // .reset( 1'b0 ),
 
+    // inputs
     // .clk_sample_duration( reg_clk_sample_duration ),
     .adc_measure_trig( adc2_measure_trig),             // mux in
+
+    .comparator_val( CMPR_P_OUT ),
+
 
     // outputs
     .adc_measure_valid(adc2_measure_valid),    // fan out.
     .cmpr_latch_ctl(modulation_no_az_out[ `IDX_CMPR_LATCH_CTL ] ),
+
+
+
     .monitor(   modulation_no_az_out[ `IDX_MONITOR + 2 +: 6 ] ),
 
     .refmux(  { modulation_no_az_out[ `IDX_ADCMUX + 3  ],  modulation_no_az_out[ `IDX_ADCMUX +: 2 ]   } ),      // pos, neg, reset. on two different 4053,
