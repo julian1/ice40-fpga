@@ -117,7 +117,6 @@ module adc_modulation (
   // output reg resetmux,             // ang mux.
 
 
-  output reg [ 6-1:0]  monitor,
 
   ////////////////////////////////
   // input [ 2-1:0]  refmux,     // these are being modified.can be writtern.
@@ -363,6 +362,10 @@ module adc_modulation (
             // JA
             sigmux          <= 0;
             refmux          <= `MUX_REF_RESET;
+
+
+
+            monitor     <=  6'b000000; 
           end
 
 
