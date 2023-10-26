@@ -348,25 +348,19 @@ module adc_modulation (
 
         `STATE_RESET_START:
           begin
+
+            // JA default hold state. wait until get trigger .
+
             // reset vars, and transition to runup state
-            state           <= `STATE_RESET;
+            // state           <= `STATE_RESET;       // DO NOT ADVANCE until have trigger.
+
             clk_count       <= 0;
 
-            // TODO change com_interupt to active hi.   can invert when wire up the output. if want.
-            // com_interupt  <= 1;   // active lo. turn off.
-
-/*
-            // switch op to integrator analog input, and sigmux on, to reset the integrator
-            himux           <= `HIMUX_SEL_ANG;
-            sigmux          <= 1;
-            refmux          <= `MUX_REF_NONE;
-*/
             // JA
             sigmux          <= 0;
             refmux          <= `MUX_REF_RESET;
 
             cmpr_latch      <= 1;  // disabled, inactive.
-
 
             monitor     <=  6'b000000;
           end
@@ -750,7 +744,7 @@ module adc_modulation (
               clk_count_down  <= clk_sample_duration;
 
 
-              monitor     <=  6'b000000; 
+              monitor     <=  6'b000000;
 */
 
           end
