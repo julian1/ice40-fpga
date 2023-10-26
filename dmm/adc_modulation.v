@@ -268,6 +268,13 @@ module adc_modulation (
 
     begin
 
+      // delayed by a clock cycle
+      monitor[0] <=  adc_measure_trig;
+      monitor[1] <=  adc_measure_valid;
+
+
+
+
       // always increment clk for the current phase
       clk_count     <= clk_count + 1;
 
@@ -349,6 +356,8 @@ module adc_modulation (
         `STATE_RESET_START:
           begin
 
+            state <= `STATE_DONE;
+/*
             // JA default hold state. wait until get trigger .
 
             // reset vars, and transition to runup state
@@ -363,6 +372,7 @@ module adc_modulation (
             cmpr_latch      <= 1;  // disabled, inactive.
 
             monitor     <=  6'b000000;
+*/
           end
 
 
@@ -664,6 +674,7 @@ module adc_modulation (
 
                 // turn off all inputs. actually should leave. because we will turn on to reset the integrator.
                 refmux                  <= `MUX_REF_NONE;
+                sigmux                  <= 0;
 
                 // com_interupt            <= 0;   // active lo, set interupt
 
@@ -693,6 +704,18 @@ module adc_modulation (
 
         `STATE_DONE:
           begin
+
+              // we come here from the default start state.
+              // signal valid.
+              adc_measure_valid <= 1;
+
+              // turn off all inputs. actually should leave. because we will turn on to reset the integrator.
+              refmux                  <= `MUX_REF_NONE;
+              sigmux                  <= 0;
+
+
+
+
 /*
     JA wait here.
             // com_interupt  <= 1;   // active lo. turn off.
@@ -717,15 +740,13 @@ module adc_modulation (
             state           <= `STATE_RESET;
             clk_count       <= 0;
 
-
             // JA
             sigmux          <= 0;
             refmux          <= `MUX_REF_RESET;
 
+            cmpr_latch_ctl          <= 1; // disabled, inactive.
 
-            cmpr_latch      <= 1;  // disabled, inactive.
-
-            monitor     <=  6'b000000;
+            monitor     <=  6'b000000;    // indicate we have started.
 
 
 /*
