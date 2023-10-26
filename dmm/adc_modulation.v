@@ -105,6 +105,8 @@ module adc_modulation (
   ////////////////////////////////
   // JA ADDED.
 
+  output reg adc_measure_valid,     // adc is master, and asserts valid when measurement complete
+
   output reg [ 6-1:0]  monitor,
 
   // outputs
@@ -114,7 +116,6 @@ module adc_modulation (
   output reg sigmux,
   // output reg resetmux,             // ang mux.
 
-  output reg adc_measure_valid,     // adc is master, and asserts valid when measurement complete
 
   output reg [ 6-1:0]  monitor,
 
@@ -233,8 +234,6 @@ module adc_modulation (
 
   // JA.
   wire sig_active     =  sigmux == 1;
-  // JA
-  wire reset_active   =  refmux == `MUX_REF_RESET;
 
 
   // OK. it's working with good values at nplc 10, 11, 12. for cal loop. after very heavy refactor mar 13. 2022.
@@ -369,10 +368,13 @@ module adc_modulation (
 
         `STATE_RESET:    // let integrator reset.
           if(clk_count >= clk_count_reset_n)
-            state <= `STATE_SIG_SETTLE_START;
+            // state <= `STATE_SIG_SETTLE_START;
+            // JA
+            state <= `STATE_SIG_START;
 
 /*
-    JA
+        // JA -  we may want this. to let the signal amplifier stabilize?
+        // we can reduce the time to 0 if desired.
 
         `STATE_SIG_SETTLE_START:
           begin
