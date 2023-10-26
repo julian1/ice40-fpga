@@ -379,7 +379,10 @@ module adc_modulation (
 
 /*
         // JA -  we may want this. to let the signal amplifier stabilize?
+        // - it neither voltage nor current change.
         // we can reduce the time to 0 if desired.
+
+        // this pause - was for the amplifier to settle after switching reset/LO/SIGNAL.
 
         `STATE_SIG_SETTLE_START:
           begin
@@ -695,10 +698,13 @@ module adc_modulation (
 
         `STATE_DONE:
           begin
+/*
+    JA wait here.
             // com_interupt  <= 1;   // active lo. turn off.
                                   // we don't really need to do this here.
                                   // it needs to be done in reset
             state         <= `STATE_RESET_START;
+*/
           end
 
 
