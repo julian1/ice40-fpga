@@ -1,24 +1,26 @@
 /*
-  need to add core reset back.
-  possible that a timer reg, is read, while being shifted in spi transfer, and thus sees very large value timer duration
-  behavior is to appear to lockup.
-*/
-/*
-  --------------------
+  shows trying to use r_bank, and rw_bank.
+  issue is that yosys doesn't  allow port export.
 
-  - OK. rewritten/ changed the register_bank strategy. sep 2023.
+- looking at dimensional arrays and ram/mem assignment. again.
+- looks like a better way to handle. but export in the module port, may be a system verilog feature, that yosys doesn't support .
 
-  rather than use the async cs going high as a final clk pulse on which to set the register values .
-  instead use async cs - only to hold values in init/reset when cs is non enabled.
-  but when the spi transfer is inititiated by cs going lo, we are become committed to reading/writing values according to the clk count.
-  this is because cannot rely on cs edge of cs as async signal together with setting non-constant values.
-  there was a yosys error that was masked/not given because the code was split/factored into two always blocks.
+  --------
 
-  note that if cs goes high early, indicating wrong/or aborted spi, then clk count and input data is reset without reg values being updated which is the desired behavior.
-  different spi length transfers are possible with more than once update function, eg. on a second count factor.
-  or code register specific transfer count/length
+      =================
+    OK. defined inside the module. but not in the port.
 
-  but all this means we have to use small blocking assignment - to arrange write on the final spi clk pulse. because we are not guaranteed anymore further clk cycles
+      unpacked array in ports #2717
+        https://github.com/YosysHQ/yosys/issues/2717
+
+      Cannot pass memories in as module ports #3230
+        https://github.com/YosysHQ/yosys/issues/3230
+
+      possible workaround.
+      https://old.reddit.com/r/yosys/comments/44d7v6/arrays_as_inputs_to_modules/
+
+      =================
+
 */
 
 
@@ -60,10 +62,16 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   output reg [32-1:0] reg_clk_sample_duration,
   output reg [32-1:0] reg_reset,
 
-  // input regs. 
+  // input regs.
   input wire [32-1:0] reg_status,
 
 
+ input [ (32-1) * (10-1) : 0  ] dst_vector,
+
+ output [ (32-1) * (10-1) : 0  ] src_vector,
+
+
+ // output reg [ 32-1 : 0 ]  xxx [ 10 -1 : 0 ];    // multidimensional array doesnt work.
 
   // passing a monitor in here, is useful, for monitoring internal. eg. the
   // output reg [7-1:0]   vec_monitor,
@@ -72,6 +80,30 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   // this works in yosys
   wire [32-1:0] r_bank [10-1 :0] ;
   reg [32-1:0] rw_bank [10-1 :0] ;
+
+
+    // assign dst
+
+/*
+    following,
+        https://github.com/YosysHQ/yosys/issues/2717
+
+        https://old.reddit.com/r/yosys/comments/44d7v6/arrays_as_inputs_to_modules/
+*/
+    genvar i;
+
+    generate for (i = 0; i < 10 ; i = i+1) begin
+        assign dst_vector[i*(10 -1) +: 31 ] = r_bank [i];
+
+    end endgenerate
+
+
+    generate for (i = 0; i < 10 ; i = i+1) begin
+        // assign src_vector[i*(10 -1) +: 31 ] = rw_bank [i];
+        assign  rw_bank [i] = src_vector[i*(10 -1) +: 31 ] ;
+
+    end endgenerate
+
 
 
 
@@ -104,13 +136,13 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
     rw_bank[  0  ] = 123; rw_bank[  1  ] = 123; rw_bank[  2  ] = 123;
     rw_bank[  3  ] = 123; rw_bank[  4  ] = 123; rw_bank[  5  ] = 123;
     rw_bank[  6  ] = 123; rw_bank[  7  ] = 123; rw_bank[  8  ] = 123;
-    rw_bank[  9  ] = 123; 
+    rw_bank[  9  ] = 123;
 
 
     r_bank[  0  ] = 123; r_bank[  1  ] = 123; r_bank[  2  ] = 123;
     r_bank[  3  ] = 123; r_bank[  4  ] = 123; r_bank[  5  ] = 123;
     r_bank[  6  ] = 123; r_bank[  7  ] = 123; r_bank[  8  ] = 123;
-    r_bank[  9  ] = 123; 
+    r_bank[  9  ] = 123;
 
 
   end
@@ -209,6 +241,11 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
             `REG_RESET:     reg_reset   <= bin;
 
             `REG_CLK_SAMPLE_DURATION:  reg_clk_sample_duration <= bin;
+
+              default:
+
+                  rw_bank[ bin[MSB-2 : MSB-8 ] ] <= bin;
+
 
           endcase
 

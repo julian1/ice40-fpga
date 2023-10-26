@@ -8,7 +8,9 @@
 
 
 
+//`include "register_set_01.v"
 `include "register_set.v"
+
 `include "mux_spi.v"
 //`include "blinker.v"
 
