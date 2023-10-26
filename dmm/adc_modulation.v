@@ -105,18 +105,17 @@ module adc_modulation (
   ////////////////////////////////
   // JA ADDED.
 
+  // outputs
+
   output reg adc_measure_valid,     // adc is master, and asserts valid when measurement complete
 
   output reg [ 6-1:0]  monitor,
 
-  // outputs
   //output reg  cmpr_latch,
   // output reg [ 2-1:0]  refmux,     // reference current, better name?
   output reg [ 3-1:0]  refmux,     // reference current, better name?
   output reg sigmux,
   // output reg resetmux,             // ang mux.
-
-
 
   ////////////////////////////////
   // input [ 2-1:0]  refmux,     // these are being modified.can be writtern.
