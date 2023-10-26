@@ -47,11 +47,29 @@
 `define STATE_FAST_ABOVE    23
 
 
+/*
 // ref mux state.
 `define MUX_REF_NONE        2'b00
 `define MUX_REF_POS         2'b01
 `define MUX_REF_NEG         2'b10
 `define MUX_REF_SLOW_POS    2'b11
+*/
+
+/* JA there's a lot of confusion around this.
+  particularly old code that turns on sigmux and himux - in order to reset. turn
+  - it makes sense to factor this now.
+  ----
+
+  Note that this combines two 4053 switch..
+*/
+
+// ref mux state.
+`define MUX_REF_NONE        3'b000
+`define MUX_REF_POS         3'b001
+`define MUX_REF_NEG         3'b010
+`define MUX_REF_SLOW_POS    3'b011
+`define MUX_REF_RESET       3'b100
+
 
 
 
@@ -60,7 +78,15 @@
 // module my_modulation (
 module adc_modulation (
 
+
   input           clk,
+
+  // inout           reset,
+  inout           reset,  // JA
+
+
+  // JA added
+  input adc_measure_trig,         // wire. start measurement.
 
   // comparator input
   input           comparator_val,
@@ -71,23 +97,33 @@ module adc_modulation (
   inout [24-1:0]  clk_count_var_n,
   input [31:0]    clk_count_aper_n,
 
-  // REVIEW input/output.
-
   input           use_slow_rundown,
   input           use_fast_rundown,
-
-  input [4-1:0]   himux_sel, // JA
-  inout           reset,
-
-  input [ 2-1:0]  refmux,     // these are being modified.can be writtern.
-  input           sigmux,
+  // input [4-1:0]   himux_sel, // JA
 
 
-  ////////////
+  ////////////////////////////////
+  // JA ADDED.
+
+  output reg [ 6-1:0]  monitor,
+
   // outputs
+  //output reg  cmpr_latch,
+  // output reg [ 2-1:0]  refmux,     // reference current, better name?
+  output reg [ 3-1:0]  refmux,     // reference current, better name?
+  output reg sigmux,
+  // output reg resetmux,             // ang mux.
 
-  output reg [5-1:0]   state,     // only thing that writes the
-  output reg [4-1:0]  himux,   // JA
+  output reg adc_measure_valid,     // adc is master, and asserts valid when measurement complete
+
+  output reg [ 6-1:0]  monitor,
+
+  ////////////////////////////////
+  // input [ 2-1:0]  refmux,     // these are being modified.can be writtern.
+  // input           sigmux,
+
+  output reg [5-1:0]   state,     // not sure about exposing this like this. but we could project it on the monitor.
+  // output reg [4-1:0]  himux,   // JA. remove
 
 
   // both should be input wires. both are driven.
@@ -186,16 +222,22 @@ module adc_modulation (
 
 
 
-
+/*
   // TODO use something like this, instead of done
   // the the period that we are integrating the signal.
   wire sig_active     = himux == himux_sel     && sigmux == 1;    // j  TODO rather than assign. should be wire.
 
 
   wire reset_active   = himux === `HIMUX_SEL_ANG && sigmux === 1;
+*/
+
+  // JA.
+  wire sig_active     =  sigmux == 1;
+  // JA
+  wire reset_active   =  refmux == `MUX_REF_RESET;
+
 
   // OK. it's working with good values at nplc 10, 11, 12. for cal loop. after very heavy refactor mar 13. 2022.
-
   // IMPORTANT ! is not.   ~ is complement.
 
 
@@ -212,11 +254,15 @@ module adc_modulation (
         state           <= `STATE_RESET_START;
 
         com_interupt  <= 1;   // active lo. turn off.
-
+        /*
         // keep integrator analog input, and sigmux on, to reset the integrator
         himux           <= `HIMUX_SEL_ANG;
         sigmux          <= 1;
         refmux          <= `MUX_REF_NONE;
+        */
+        // JA. sigmux is off.
+        sigmux          <= 0;
+        refmux          <= `MUX_REF_RESET;
       end
     else
 
@@ -264,12 +310,14 @@ module adc_modulation (
         `MUX_REF_POS:
             clk_count_mux_pos <=  clk_count_mux_pos + 1;
 
-        `MUX_REF_SLOW_POS:  // TODO change name to REF_BOTH. or REF_RD
+        `MUX_REF_SLOW_POS:  // TODO change name to REF_BOTH. or REF_RD slow.
             clk_count_mux_rd <= clk_count_mux_rd + 1;
 
         `MUX_REF_NONE:
           ; // switches are turned off at start. and also at prerundown.
 
+        `MUX_REF_RESET:
+          ;
 
       endcase
       // count_pos_on
@@ -304,12 +352,18 @@ module adc_modulation (
             state           <= `STATE_RESET;
             clk_count       <= 0;
 
+            // TODO change com_interupt to active hi.   can invert when wire up the output. if want.
             com_interupt  <= 1;   // active lo. turn off.
 
+/*
             // switch op to integrator analog input, and sigmux on, to reset the integrator
             himux           <= `HIMUX_SEL_ANG;
             sigmux          <= 1;
             refmux          <= `MUX_REF_NONE;
+*/
+            // JA
+            sigmux          <= 0;
+            refmux          <= `MUX_REF_RESET;
           end
 
 
@@ -317,6 +371,8 @@ module adc_modulation (
           if(clk_count >= clk_count_reset_n)
             state <= `STATE_SIG_SETTLE_START;
 
+/*
+    JA
 
         `STATE_SIG_SETTLE_START:
           begin
@@ -331,7 +387,7 @@ module adc_modulation (
         `STATE_SIG_SETTLE:
           if(clk_count >= clk_count_reset_n)
             state <= `STATE_SIG_START;
-
+*/
 
         // beginning of signal integration
         `STATE_SIG_START:
@@ -355,11 +411,16 @@ module adc_modulation (
 
             // clear the aperture counter
             clk_count_aper  <= 0;
-
+/*
             // turn on signal input, to start signal integration
             // himux        <= himux_sel;
             sigmux          <= 1;
             // refmux       <= `MUX_REF_NONE;
+*/
+            // JA
+            sigmux          <= 1;
+            refmux       <= `MUX_REF_NONE;
+
           end
 
 
@@ -372,7 +433,7 @@ module adc_modulation (
             refmux        <= `MUX_REF_POS; // initial direction
 
 
-            cmpr_latch_ctl  <= 0; // enable comparator,
+            cmpr_latch_ctl  <= 0; // enable comparator, // JA correct. 0 means it is transparent.
           end
 
         `STATE_FIX_POS:

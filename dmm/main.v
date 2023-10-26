@@ -449,6 +449,7 @@ module top (
   wire adc2_measure_trig;
   wire adc2_measure_valid;
 
+/*
   adc
   adc2 (
     // inputs
@@ -465,12 +466,32 @@ module top (
     .sigmux(    modulation_no_az_out[ `IDX_ADCMUX + 2  ] ),      // change name to switch perhaps?,
     .resetmux(  modulation_no_az_out[ `IDX_ADCMUX + 3  ] )     // ang mux.
   );
+*/
 
 
-  /*  use no_az for no azero and electrometer modes.
-      this pushes complexity up the stack from analog to fpga to mcu.  as soon as possible.
-      no az, and elecm. just need azmux and pc switch control given to mcu
-  */
+  adc_modulation
+  adc2(
+
+
+
+    .clk(CLK),
+    .reset( 1'b0 ),
+
+    // .clk_sample_duration( reg_clk_sample_duration ),
+    .adc_measure_trig( adc2_measure_trig),             // mux in
+
+    // outputs
+    .adc_measure_valid(adc2_measure_valid),    // fan out.
+    .cmpr_latch_ctl(modulation_no_az_out[ `IDX_CMPR_LATCH_CTL ] ),
+    .monitor(   modulation_no_az_out[ `IDX_MONITOR + 2 +: 6 ] ),
+
+    .refmux(  { modulation_no_az_out[ `IDX_ADCMUX + 3  ],  modulation_no_az_out[ `IDX_ADCMUX +: 2 ]   } ),      // pos, neg, reset. on two different 4053,
+    .sigmux(    modulation_no_az_out[ `IDX_ADCMUX + 2  ] ),                                     // change name to switch perhaps?,
+
+
+  );
+
+
 
   modulation_no_az
   modulation_no_az (
@@ -498,16 +519,10 @@ module top (
 
 
 
-
-  adc_modulation 
-  adc3(
-
-    .clk(CLK)
-
-
-  );
-
-
+  /*  use no_az for no azero and electrometer modes.
+      this pushes complexity up the stack from analog to fpga to mcu.  as soon as possible.
+      no az, and elecm. just need azmux and pc switch control given to mcu
+  */
 
 
 
