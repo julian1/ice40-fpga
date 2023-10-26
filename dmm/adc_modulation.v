@@ -749,7 +749,7 @@ module adc_modulation (
             sigmux          <= 0;
             refmux          <= `MUX_REF_RESET;
 
-            cmpr_latch_ctl          <= 1; // disabled, inactive.
+            cmpr_latch_ctl          <= 1; // // disable comparator, enable latch
 
             // monitor     <=  6'b000000;    // indicate we have started.
             monitor     <=  6'b000001;    // indicate we have started.
