@@ -66,7 +66,7 @@
 `define IDX_SIG_PC_SW_CTL     12
 `define IDX_LED0              13
 `define IDX_MONITOR           14    // 14,15,16,17,  18,19,20,21   think pin 14.
-`define IDX_ADCMUX            22    // 22,23,24,25  .  change name refmux. for reference current or adcrefmux
+`define IDX_ADC_REF            22    // 22,23,24,25  .  change name refmux. for reference current or adcrefmux
 `define IDX_CMPR_LATCH_CTL    26
 `define IDX_MEAS_COMPLETE_CTL 27
 `define IDX_SPI_INTERUPT_CTL  28
@@ -385,7 +385,7 @@ module top (
 
   assign modulation_pc_out[ `IDX_AZMUX +: 4]   = reg_direct[ `IDX_AZMUX +: 4];     // azmux
   assign modulation_pc_out[ `IDX_HIMUX +: 8 ]  = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
-  assign modulation_pc_out[ `IDX_ADCMUX +: 7 ] = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
+  assign modulation_pc_out[ `IDX_ADC_REF +: 7 ] = reg_direct[ `IDX_ADC_REF +: 7   ];  // eg. to the end.
 
 
 
@@ -421,9 +421,9 @@ module top (
     .adc_measure_valid(adc1_measure_valid),
     .cmpr_latch(modulation_az_out[ `IDX_CMPR_LATCH_CTL ] ),
     .monitor(   modulation_az_out[ `IDX_MONITOR + 2 +: 6 ]  ),
-    .refmux(    modulation_az_out[ `IDX_ADCMUX +: 2 ]),      // reference current, better name?
-    .sigmux(    modulation_az_out[ `IDX_ADCMUX + 2  ] ),      // change name to switch perhaps?,
-    .resetmux(  modulation_az_out[ `IDX_ADCMUX + 3  ] )     // ang mux.
+    .refmux(    modulation_az_out[ `IDX_ADC_REF +: 2 ]),      // reference current, better name?
+    .sigmux(    modulation_az_out[ `IDX_ADC_REF + 2  ] ),      // change name to switch perhaps?,
+    .resetmux(  modulation_az_out[ `IDX_ADC_REF + 3  ] )     // ang mux.
   );
 
 
@@ -446,7 +446,7 @@ module top (
   );
 
   assign modulation_az_out[ `IDX_HIMUX +: 8 ]  = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
-  // assign modulation_az_out[ `IDX_ADCMUX +: 7 ] = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
+  // assign modulation_az_out[ `IDX_ADC_REF +: 7 ] = reg_direct[ `IDX_ADC_REF +: 7   ];  // eg. to the end.
   assign modulation_az_out[ `IDX_MEAS_COMPLETE_CTL ] = reg_direct[ `IDX_MEAS_COMPLETE_CTL    ];  // eg. to the end.
   assign modulation_az_out[ `IDX_SPI_INTERUPT_CTL ] = reg_direct[ `IDX_SPI_INTERUPT_CTL ];  // eg. to the end.
 
@@ -473,9 +473,9 @@ module top (
     .adc_measure_valid(adc2_measure_valid),    // fan out.
     .cmpr_latch(modulation_no_az_out[ `IDX_CMPR_LATCH_CTL ] ),
     .monitor(   modulation_no_az_out[ `IDX_MONITOR + 2 +: 6 ] ),
-    .refmux(    modulation_no_az_out[ `IDX_ADCMUX +: 2 ]),      // reference current, better name?
-    .sigmux(    modulation_no_az_out[ `IDX_ADCMUX + 2  ] ),      // change name to switch perhaps?,
-    .resetmux(  modulation_no_az_out[ `IDX_ADCMUX + 3  ] )     // ang mux.
+    .refmux(    modulation_no_az_out[ `IDX_ADC_REF +: 2 ]),      // reference current, better name?
+    .sigmux(    modulation_no_az_out[ `IDX_ADC_REF + 2  ] ),      // change name to switch perhaps?,
+    .resetmux(  modulation_no_az_out[ `IDX_ADC_REF + 3  ] )     // ang mux.
   );
 */
 
@@ -518,8 +518,8 @@ module top (
 
     .monitor(   modulation_no_az_out[ `IDX_MONITOR + 2 +: 6 ] ),
 
-    .refmux(  { modulation_no_az_out[ `IDX_ADCMUX + 3  ],  modulation_no_az_out[ `IDX_ADCMUX +: 2 ]   } ),      // pos, neg, reset. on two different 4053,
-    .sigmux(    modulation_no_az_out[ `IDX_ADCMUX + 2  ] ),                                     // change name to switch perhaps?,
+    .refmux(  { modulation_no_az_out[ `IDX_ADC_REF + 3  ],  modulation_no_az_out[ `IDX_ADC_REF +: 2 ]   } ),      // pos, neg, reset. on two different 4053,
+    .sigmux(    modulation_no_az_out[ `IDX_ADC_REF + 2  ] ),                                     // change name to switch perhaps?,
 
 
   );
@@ -544,7 +544,6 @@ module top (
   assign modulation_no_az_out[ `IDX_AZMUX +: 4]     = reg_direct[ `IDX_AZMUX +: 4];       // eg. azero off - `S1;  //  pc-out
   assign modulation_no_az_out[ `IDX_HIMUX +: 8 ]    = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
 
-  // assign modulation_no_az_out[ `IDX_ADCMUX +: 7 ]   = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
 
   assign modulation_no_az_out[ `IDX_MEAS_COMPLETE_CTL ] = reg_direct[ `IDX_MEAS_COMPLETE_CTL    ];  // eg. to the end.
   assign modulation_no_az_out[ `IDX_SPI_INTERUPT_CTL ] = reg_direct[ `IDX_SPI_INTERUPT_CTL ];  // eg. to the end.
