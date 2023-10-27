@@ -139,6 +139,11 @@ module top (
   input CMPR_P_OUT,
   input CMPR_N_OUT,
 
+  // hardware flags
+  input HW0,
+  input HW1,
+  input HW2,
+
 
 
   //////////////////////////
@@ -289,13 +294,19 @@ module top (
 
   // inputs
   wire [32 - 1 :0] reg_status ;
+  wire [32 - 1 :0] reg_hw;
 
 
   // input U1004_4094_DATA,
   // input LINE_SENSE_OUT,
   // assign reg_status = 32'b0 ;
-  assign reg_status = { 27'b0 , SWITCH_SENSE_OUT, DCV_OVP_OUT, OHMS_OVP_OUT, SUPPLY_SENSE_OUT, UNUSED_2 };
 
+
+  assign reg_status = { 27'b0 , SWITCH_SENSE_OUT, DCV_OVP_OUT, OHMS_OVP_OUT, SUPPLY_SENSE_OUT, UNUSED_2 };
+  // assign reg_status = { {(32 - 5){ 1'b0 }}, SWITCH_SENSE_OUT, DCV_OVP_OUT, OHMS_OVP_OUT, SUPPLY_SENSE_OUT, UNUSED_2 };
+
+
+  assign reg_hw = { {(32 - 3){ 1'b0 }},   HW2,  HW1,  HW0};
 
 
   register_set // #( 32 )   // register bank  . change name 'registers'
