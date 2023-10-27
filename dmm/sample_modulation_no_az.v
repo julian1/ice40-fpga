@@ -24,7 +24,7 @@
 
 
 
-module modulation_no_az (
+module sample_modulation_no_az (
 
   input   clk,
   input   reset,

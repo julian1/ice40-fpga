@@ -27,7 +27,7 @@
 
 
 
-module modulation_pc (
+module sample_modulation_pc (
 
   // remember hi mux is not manipulated, or passed into this module.
   // inistead the hi signal is seleced by the AZ mux, via the pre-charge switch
