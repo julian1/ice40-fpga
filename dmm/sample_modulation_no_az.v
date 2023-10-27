@@ -75,9 +75,7 @@ module sample_modulation_no_az (
       meas_valid_edge   <= { meas_valid_edge[0], adc_measure_valid };  // old, new
 
       spi_interupt_ctl  <=  meas_valid_edge != 2'b01 ;
-
-      monitor[0]        <=  meas_valid_edge == 2'b01 ;
-
+      monitor[1]        <=  meas_valid_edge == 2'b01 ;
 
 
       // always decrement clk for the current phase
@@ -90,8 +88,6 @@ module sample_modulation_no_az (
           begin
             // having a state like, this may be useful for debuggin, because can put a pulse on the monitor.
             state <= 2;
-
-            //monitor = 2'b00;
 
           end
 
@@ -118,13 +114,13 @@ module sample_modulation_no_az (
 
             // tell adc to do measure. interuptable at any time.
             adc_measure_trig    <= 1;
-            monitor[1]      <= 1;
+            monitor[0]      <= 1;   // we could do this with a single following assignment. or tie as a wire.
           end
 
         35:
           begin
             adc_measure_trig    <= 0;
-            monitor[1]          <= 0;
+            monitor[0]          <= 0;
 
             // wait for adc.
             if( ! adc_measure_trig &&  adc_measure_valid )
