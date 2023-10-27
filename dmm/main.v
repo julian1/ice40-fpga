@@ -14,12 +14,12 @@
 `include "mux_spi.v"
 //`include "blinker.v"
 
-// change name samp_modulation_az    - sample modulation or just sampler_az, etc
-`include "modulation_az.v"
-`include "modulation_pc.v"
-`include "modulation_no_az.v"
-// `include "modulation_em.v"
+`include "sample_modulation_az.v"
+`include "sample_modulation_pc.v"
+`include "sample_modulation_no_az.v"
 
+
+// change name adc_modulation_test.v
 `include "adc.v"
 
 `include "mux_assign.v"
