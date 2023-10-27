@@ -50,9 +50,17 @@ module sample_modulation_no_az (
   reg [24-1:0]  clk_count_precharge_n = `CLK_FREQ * 500e-6 ;   // 500us.
 
 
+  reg [2-1: 0 ] meas_valid_edge;
+
+
+
 
 
   always @(posedge clk  or posedge reset )
+
+
+
+
    if(reset)
     begin
       // we only require to set the state here, to setup the initial conditions.
@@ -60,6 +68,17 @@ module sample_modulation_no_az (
     end
     else
     begin
+
+
+      // emit spi_interupt pulse, on adc-measure valid
+      meas_valid_edge   <= { meas_valid_edge[0], adc_measure_valid };  // old, new
+      if(meas_valid_edge == 2'b01)
+        spi_interupt_ctl <= 0;    // active
+      else
+        spi_interupt_ctl <= 1;
+
+
+
 
       // always decrement clk for the current phase
       clk_count_down <= clk_count_down - 1;
