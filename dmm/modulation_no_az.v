@@ -26,17 +26,19 @@
 
 module modulation_no_az (
 
-  // inputs
   input   clk,
   input   reset,
+
+  // inputs
   input adc_measure_valid,
 
-  
+
   // output
-  // regs/state
   output reg adc_measure_trig,
   output reg led0,
   output reg [ 2-1:0]  monitor,     // but it suppresses the warning.
+
+  output reg spi_interupt_ctl
 );
 
 

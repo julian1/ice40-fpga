@@ -72,7 +72,7 @@
 `define IDX_SPI_INTERUPT_CTL  28
 
 
-// change name GPO_NUM_BITS IDX_END...???  or GPO_IDX_END  main output vector
+// need prefix.  or IDX_BITS   GPO_NUM_BITS IDX_END...???  or GPO_IDX_END  main output vector
 `define NUM_BITS        29    //
 
 
@@ -494,15 +494,12 @@ module top (
   adc_modulation
   adc2(
 
-
-
     .clk(CLK),
-    // .reset( 1'b0 ),
+    // .reset( 1'b0 ), // not needed. always interuptable.
 
     // inputs
     // .clk_sample_duration( reg_clk_sample_duration ),
-    .adc_measure_trig( adc2_measure_trig),             // mux in
-
+    .adc_measure_trig( adc2_measure_trig),
     .comparator_val( CMPR_P_OUT ),
 
 /*
@@ -526,11 +523,9 @@ module top (
     // outputs
     .adc_measure_valid(adc2_measure_valid),    // fan out.
     .cmpr_latch_ctl(modulation_no_az_out[ `IDX_CMPR_LATCH_CTL ] ),
-
     .monitor(   modulation_no_az_out[ `IDX_MONITOR + 2 +: 6 ] ),
-
     .refmux(  { modulation_no_az_out[ `IDX_ADC_REF + 3  ],  modulation_no_az_out[ `IDX_ADC_REF +: 2 ]   } ),      // pos, neg, reset. on two different 4053,
-    .sigmux(    modulation_no_az_out[ `IDX_ADC_REF + 2  ] ),                                     // change name to switch perhaps?,
+    .sigmux(    modulation_no_az_out[ `IDX_ADC_REF + 2  ] )                                     // change name to switch perhaps?,
 
 
   );
@@ -547,7 +542,10 @@ module top (
     // outputs
     .led0(      modulation_no_az_out[ `IDX_LED0 ] ),
     .monitor(   modulation_no_az_out[ `IDX_MONITOR +: 2  ] ),    // we could pass subset of monitor if watned. eg. only 4 pins...
-    .adc_measure_trig( adc2_measure_trig)
+    .adc_measure_trig( adc2_measure_trig),
+
+    .spi_interupt_ctl( modulation_no_az_out[ `IDX_SPI_INTERUPT_CTL  ] )
+
   );
 
   // pass control for muxes and pc switch to reg_direct
@@ -555,9 +553,9 @@ module top (
   assign modulation_no_az_out[ `IDX_AZMUX +: 4]     = reg_direct[ `IDX_AZMUX +: 4];       // eg. azero off - `S1;  //  pc-out
   assign modulation_no_az_out[ `IDX_HIMUX +: 8 ]    = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
 
-
-  assign modulation_no_az_out[ `IDX_MEAS_COMPLETE_CTL ] = reg_direct[ `IDX_MEAS_COMPLETE_CTL    ];  // eg. to the end.
-  assign modulation_no_az_out[ `IDX_SPI_INTERUPT_CTL ] = reg_direct[ `IDX_SPI_INTERUPT_CTL ];  // eg. to the end.
+  // we may want to keep under direct_reg control, rather than pass to sampler controller.
+  // so mcu can add wait until the result has been computued, not just counts fixed.
+  assign modulation_no_az_out[ `IDX_MEAS_COMPLETE_CTL ] = reg_direct[ `IDX_MEAS_COMPLETE_CTL ];
 
 
 
