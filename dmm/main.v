@@ -507,9 +507,9 @@ module top (
 */
 
     // outputs
-    . clk_count_reset_n( 10000 ) ,
-    . clk_count_fix_n( 24 ) ,
-    . clk_count_var_n( 185 ) ,
+    . clk_count_reset_n( 24'd10000 ) ,
+    . clk_count_fix_n( 24'd24 ) ,
+    . clk_count_var_n( 24'd185 ) ,
     . clk_count_aper_n( 2 * 2000000) ,
     . use_slow_rundown( 1'b1 ),
     . use_fast_rundown( 1'b1 ),
