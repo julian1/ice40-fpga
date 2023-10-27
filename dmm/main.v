@@ -19,8 +19,7 @@
 `include "sample_modulation_no_az.v"
 
 
-// change name adc_modulation_test.v
-`include "adc.v"
+`include "adc-test.v"
 
 `include "mux_assign.v"
 
