@@ -66,7 +66,7 @@
 `define IDX_SIG_PC_SW_CTL     12
 `define IDX_LED0              13
 `define IDX_MONITOR           14    // 14,15,16,17,  18,19,20,21   think pin 14.
-`define IDX_ADCMUX            22    // 22,23,24,25
+`define IDX_ADCMUX            22    // 22,23,24,25  .  change name refmux. for reference current or adcrefmux
 `define IDX_CMPR_LATCH_CTL    26
 `define IDX_MEAS_COMPLETE_CTL 27
 `define IDX_SPI_INTERUPT_CTL  28
@@ -505,8 +505,6 @@ module top (
     use_slow_rundown    = 1;
     use_fast_rundown    = 1;
 */
-
-    // outputs
     . clk_count_reset_n( 24'd10000 ) ,
     . clk_count_fix_n( 24'd24 ) ,
     . clk_count_var_n( 24'd185 ) ,
@@ -514,6 +512,7 @@ module top (
     . use_slow_rundown( 1'b1 ),
     . use_fast_rundown( 1'b1 ),
 
+    // outputs
     .adc_measure_valid(adc2_measure_valid),    // fan out.
     .cmpr_latch_ctl(modulation_no_az_out[ `IDX_CMPR_LATCH_CTL ] ),
 

@@ -31,10 +31,8 @@ module modulation_no_az (
   input   reset,
   input adc_measure_valid,
 
-  /// outputs. these can be wires because we assign
-  // output wire sw_pc_ctl,
-  // output wire [ 4-1:0 ] azmux,
-
+  
+  // output
   // regs/state
   output reg adc_measure_trig,
   output reg led0,
@@ -42,15 +40,11 @@ module modulation_no_az (
 );
 
 
-  // continuous assign
-  // assign sw_pc_ctl  = `SW_PC_SIGNAL;
-  // assign azmux      = `S1;             //  pc-out
-
   ////////////////
   reg [7-1:0]   state = 0 ;     // should expose in module, not sure.
   reg [31:0]    clk_count_down;           // clk_count for the current phase. using 31 bitss, gives faster timing spec.  v 24 bits. weird. ??? 36MHz v 32MHz
 
-  // change name clk_precharge_duration_n
+  // wait phase.
   reg [24-1:0]  clk_count_precharge_n = `CLK_FREQ * 500e-6 ;   // 500us.
 
 
@@ -81,17 +75,16 @@ module modulation_no_az (
           end
 
         ////////////////////////////
-        // keep a 'precharge' pause duration to keep timing the same with az case.
+        // keep a pause duration like a 'precharge' phase - to keep timing the same with az case.
         // TODO. to match - want a pasuse after the same also. when add to az.
         2:
             begin
               state           <= 25;
               clk_count_down  <= clk_count_precharge_n;  // normally pin s1
 
-              // led blink freq, on alternate sampples, to match az-mode.
+              // blink led, on alternate sampples, keeps visually identifiable at fast sample rates. and to match az-mode frequency.
               led0    <= led0  + 1;
 
-              // led0                <= 0;
             end
         25:
           if(clk_count_down == 0)
@@ -102,7 +95,6 @@ module modulation_no_az (
           begin
             state           <= 35;
 
-            // led0            <= 1;
             // tell adc to do measure. interuptable at any time.
             adc_measure_trig    <= 1;
             monitor[1]      <= 1;
