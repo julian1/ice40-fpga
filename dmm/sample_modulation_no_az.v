@@ -71,15 +71,12 @@ module sample_modulation_no_az (
 
 
       // emit spi_interupt pulse, on adc-measure valid
-      // note clk delay. ok. avoid combinatorial.
+      // note synchronous, has clk delay. but ok. avoid combinatorial.
       meas_valid_edge   <= { meas_valid_edge[0], adc_measure_valid };  // old, new
-      if(meas_valid_edge == 2'b01)
-        spi_interupt_ctl <= 0;    // active
-      else
-        spi_interupt_ctl <= 1;
 
-      // recode as
-      // spi_interupt_ctl <=  ! ( meas_valid_edge == 2'b01 );
+      spi_interupt_ctl  <=  meas_valid_edge != 2'b01 ;
+
+      monitor[0]        <=  meas_valid_edge == 2'b01 ;
 
 
 
@@ -94,7 +91,7 @@ module sample_modulation_no_az (
             // having a state like, this may be useful for debuggin, because can put a pulse on the monitor.
             state <= 2;
 
-            monitor = 2'b00;
+            //monitor = 2'b00;
 
           end
 
