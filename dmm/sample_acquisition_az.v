@@ -27,7 +27,7 @@
 
 
 
-module sample_modulation_az (
+module sample_acquisition_az (
 
   // remember hi mux is not manipulated, or passed into this module.
   // inistead the hi signal is seleced by the AZ mux, via the pre-charge switch
