@@ -500,15 +500,15 @@ module top (
     . use_slow_rundown( 1'b1 ),
     . use_fast_rundown( 1'b1 ),
 
-    // outputs
+    // outputs ctrl
     .adc_measure_valid(adc2_measure_valid),    // fan out.
     .cmpr_latch_ctl(sample_modulation_no_az_out[ `IDX_CMPR_LATCH_CTL ] ),
     .monitor(   sample_modulation_no_az_out[ `IDX_MONITOR + 2 +: 6 ] ),
     .refmux(  { sample_modulation_no_az_out[ `IDX_ADC_REF + 3  ],  sample_modulation_no_az_out[ `IDX_ADC_REF +: 2 ]   } ),      // pos, neg, reset. on two different 4053,
     .sigmux(    sample_modulation_no_az_out[ `IDX_ADC_REF + 2  ] ),                                     // change name to switch perhaps?,
 
-
-    .clk_count_mux_rd_last(  adc2_clk_count_mux_rd_last ),
+    // output counts
+    .clk_count_mux_neg_last( adc2_clk_count_mux_neg_last),
     .clk_count_mux_pos_last( adc2_clk_count_mux_pos_last),
     .clk_count_mux_rd_last(  adc2_clk_count_mux_rd_last)
 
@@ -538,7 +538,7 @@ module top (
   assign sample_modulation_no_az_out[ `IDX_HIMUX +: 8 ]    = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
 
   // we may want to keep under direct_reg control, rather than pass to sampler controller.
-  // so mcu can add wait until the result has been computued, not just counts fixed.
+  // so mcu can signal after result calculation, not just after counts obtained
   assign sample_modulation_no_az_out[ `IDX_MEAS_COMPLETE_CTL ] = reg_direct[ `IDX_MEAS_COMPLETE_CTL ];
 
 
@@ -596,50 +596,15 @@ module top (
 
       // read
     . reg_status( reg_status ),
-    . reg_hw_flags( reg_hw_flags)
-
-  );
-
-  ///////////////////////////
+    . reg_hw_flags( reg_hw_flags),
 
 
 
+    .reg_adc_clk_count_mux_neg( { { 8 { 1'b0 } }, adc2_clk_count_mux_neg_last }  ) ,
+    .reg_adc_clk_count_mux_pos( { { 8 { 1'b0 } }, adc2_clk_count_mux_pos_last } ) ,
+    .reg_adc_clk_count_mux_rd(  { { 8 { 1'b0 } }, adc2_clk_count_mux_rd_last }  )
 
-
-
-
-/*
-      - NO. is hanging at startup - the az controller has sent the signal - and is now waiting for adc.
-    --------
-
-    - Or is there a better way?  - without the muxer.  eg. a different adc. no. don't really want.
-      OR. just make the az-
-      just a reset of the az controller - so it is not blocked waiting on the adc - which is waiting for a start signal..
-*/
-
-/*
-
-  // change name mux_sync_8
-  sync_mux_8 #( 1)
-  muxer_2  (
-
-    .clk(CLK),
-
-    .a( 1'b0  ),        // 0.
-    .b( 1'b0 ),         // 1.
-    .c( 1'b0 ),         // 2
-    .d( 1'b0  ),        // 3.
-    .e( 1'b0  ),        // 4
-    .f( sample_modulation_az_adc_measure_trig),      // 5
-    .g( sample_modulation_no_az_adc_measure_trig ),  // 6
-    .h( 1'b0 ),         // 7
-
-    .sel( reg_mode[ 2 : 0 ]),     // what if we hard code it.
-    .out( adc_measure_trig )
-  );
-
-*/
-// lets query the mode.
+    );
 
 
 
@@ -648,368 +613,5 @@ endmodule
 
 
 
-
-
-
-
-
-/*
-  reg[ `NUM_BITS-1:0 ]  test_pattern_out_2;
-  test_pattern
-  test_pattern_2 (
-    .clk( CLK),
-
-    .out(  test_pattern_out_2 )
-  );
-
-*/
-
-
-/*
-module test_pattern (
-  input   clk,
-
-
-  input [`NUM_BITS-1:0 ]      default_out ,       // gets passed reg_direct...   why not just set a bit???? in
-  output reg  [`NUM_BITS-1:0 ] out   // wire.kk
-);
-
-  // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
-  reg [31:0]   counter = 0;
-
-  always@(posedge clk  )
-      begin
-
-        counter <= counter + 1;
-        if( default_out)       // non zero.
-          begin
-            out  <= default_out ;                         //   ok. this works on first mux. but 4094 relay doesn't work.  how?. why?
-          end
-        else
-          begin
-
-            // works all monitor pins.
-            // remove the himux2  reg_direct value is not working.
-            out[ 17 : 0 ]  <= out [ 17  : 0   ] + 1;
-
-          end
-      end
-
-endmodule
-
-*/
-
-
-/*
-  // assign outputs_vec = reg_direct ;
-
-  // TODO. try putting the register set last.   then can pass the outputs_vec straight into the block.
-
-
-  // mux_4to1_assign #( `NUM_BITS )
-  mux_4to1_assign #( 24 )
-  mux_4to1_assign_1  (
-
-   .a( reg_direct ),  // 00
-   .b( reg_direct ),        // 01  mcu controllable... needs a better name  mode_test_pattern. .   these are modes...
-   .c( reg_direct ),     // 10
-   .d( reg_direct ),         // 11
-
-    // when we changed this from 32 bit int default to 22 bit it worked.
-   .sel( 24'b0 ),                           // So. we want to assign this to a mode register.   and then set it.
-   // .sel( reg_mode ),                           // So. we want to assign this to a mode register.   and then set it.
-   .out( outputs_vec )
-  );
-*/
-
-
-/*
-module mux_4to1_assign #(parameter MSB =24)   (
-   input [MSB-1:0] a,
-   input [MSB-1:0] b,
-   input [MSB-1:0] c,
-   input [MSB-1:0] d,
-
-   // input [1:0] sel,               // 2bits. input sel used to select between a,b,c,d
-   input [24-1 :0] sel,               // 2bits. input sel used to select between a,b,c,d
-   // output [MSB-1:0] out
-   output [22-1:0] out
-
-  );
-
-  //  also fails
-   // assign out = sel[1] ? (sel[0] ? d : c) : (sel[0] ? b : a);
-
-   // assign out = a;  // ok.  now fails.... bizarre
-   // assign out = b;  // ok.
-
-   assign out = sel[0] ? a : a;     // works.
-   // assign out = sel[0] ? a : b;     // relay fails????
-
-
-
-  //  this doesn't work - led doesn't reflect change. and it generates a warning about a wire assignment.
-  // even though combinatority
-//  always @  *  begin
- //   case (sel)
-//
- //     0 :       out = a;
-  //    default : out = a;
-   // endcase
-//  end
-
-
-
-endmodule
-
-*/
-
-
-
-/*
-    "reg cannot be assigned with a continuous assignment"
-    so this is wrong.
-
-  reg [`NUM_BITS-1:0 ] outputs_vec ;
-  assign  {
-      monitor,
-      LED0,
-      SIG_PC_SW_CTL,
-      himux2,
-      himux,
-      azmux
-    } = outputs_vec;
-*/
-
-  /*
-    we probably want to add the led to this. and the pre-charge switch.
-    and the monitor.
-    for the monitor.   eg. monitor could just be assigned at top level. rather than be mode specific
-    OR. just use another mux_4to1. for the monitor.
-  */
-
-/*
-  // change name counter0_out
-  reg [`NUM_BITS-1:0] counter0_out;
-  counter  #( `NUM_BITS )    // MSB is number of bits
-  counter0
-  (
-    .clk(CLK),
-    .out( counter0_out)
-  );
-
-
-  reg [`NUM_BITS-1:0] test_pattern_out;
-  test_pattern
-  test_pattern (
-    .clk( CLK),
-    .out(  test_pattern_out)
-  );
-
-
-
-  //
-  // change reg name to test_accumulation_cap_out.
-  reg [`NUM_BITS-1:0] test_accumulation_cap_out;  // for test accumulation.
-  test_accumulation_cap
-  test_accumulation_cap (
-    .clk( CLK),
-    .reset(0),    // active hi. reconsider... but we lose timing anaylysis
-    . out(  test_accumulation_cap_out)
-
-  );
-
-
-
-
-*/
-
-
-/*
-
-
-  mux_4to1_assign #( `NUM_BITS )
-  mux_4to1_assign_1  (
-
-   .a( test_pattern_out ),  // 00
-   .b( reg_direct ),        // 01  mcu controllable... needs a better name  mode_test_pattern. .   these are modes...
-   .c( test_pattern_out ),     // 10
-   .d( test_pattern_out ),         // 11
-
-   // .sel( 2'b00 ),                           // So. we want to assign this to a mode register.   and then set it.
-   .sel( reg_mode ),                           // So. we want to assign this to a mode register.   and then set it.
-   .out( outputs_vec )
-  );
-*/
-
-
-  // reg [3:0] vec_dummy;
-
-/*
-  blinker #(  )
-  blinker
-    (
-    .clk( CLK ),
-    // .vec_leds( { MON7, MON6, MON5, MON4, MON3 , MON2, MON1, dummy  } )
-    .vec_leds( { LED0, vec_dummy } )
-  );
-*/
-
-
-
-
-  // conditioning.
-  // I think we do want to pass the pre-charge switch.  remember thiso
-  // EXCEPT  - not all test functions will need it.
-
-  // think it makes sense to pass logically together as group..
-  // likewise. adc.  will be the four current switches. and adc latch.
-
-  // output led. can be passed in separate muxer.
-
-  // it may be better to group by mux .
-  // TODO . should have enable pin.   last - same as when controlled by 4094.
-
-
-  /*
-      conditioning switching outputs.
-      these are not the complete set of outputs for a module. but eases  handling of mode muxing.
-      en. order inputs the same as
-
-      structure and  pattern destructure on the otherside like .
-      ----------
-
-      Actually it might be easier to group everything.
-      add the led.
-      add the adc switches.
-      comparator latch.
-      monitor.
-      ext interupt.  that data is ready.
-      ---
-      the led is a useful visual indicator. fpga wants to take control of it.
-      -------
-
-      REMEMBER inputs (comparator) line-sense etc. are easy. they just fan out to whatever module needs them.
-
-  */
-
-
-
-
-
-  // Put the strobe as first.
-  // monitor isolator/spi,                                                  D4          D3       D2       D1        D0
-  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  SPI_MISO, SPI_MOSI, SPI_CLK,  SPI_CS  /* RAW-CLK */} ;
-
-//  assign { MON7, MON6, /*MON5,*/ MON4, MON3 , MON2, MON1 /* MON0 */ } = {  SPI_MISO, SPI_MOSI, SPI_CLK,  SPI_CS  /* RAW-CLK */} ;
-
-  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  _4094_OE_CTL  /* RAW-CLK */} ;
-
-  // monitor the 4094 spi                                                 D6       D5             D4            D3              D2              D1                 D0
-  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  SPI_CLK, SPI_CS2, U1004_4094_DATA, GLB_4094_DATA, GLB_4094_CLK, GLB_4094_STROBE_CTL  /* RAW-CLK */} ;
-
-
-  // monitor the 4094 spi                                               D4            D3              D2              D1                 D0
-  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = {  _4094_OE_CTL, GLB_4094_DATA, GLB_4094_CLK, GLB_4094_STROBE_CTL  /* RAW-CLK */} ;
-
-  //                                                                       D5           D4        D3        D2       D1        D0
-  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = { _4094_OE_CTL,   SPI_MISO, SPI_MOSI, SPI_CLK,  SPI_CS  /* RAW-CLK */} ;
-  // assign { MON7, MON6, MON5, MON4, MON3 , MON2, MON1 /* MON0 */ } = 0  ;
-
-  // ok. this does work.
-  // assign SPI_MISO = 1;
-
-
-/*
-  /////////////////////////////////////////////
-  //
-
-  // Now we probably don't want the
-
-  wire [8-1: 0] monitor = { MON7, MON6, MON5,MON4, MON3, MON2, MON1, MON0 } ;
-
-
-  reg [8-1:0] vec_mon_counter;      // mode0_outputs_vec
-
-  // change name counter_mon.
-  counter  counter1(
-    .clk(CLK),
-    .out( vec_mon_counter )
-  );
-
-
-  reg [8-1:0] vec_dummy8 = 0;   // mode0_outputs_vec
-
-  mux_4to1_assign  #( 8 )
-  mux_4to1_assign_2 (
-
-   .a( vec_dummy8),
-   .b( vec_dummy8),
-   .c( vec_mon_counter),      // mode.
-   .d( vec_dummy8),
-
-   .sel( 2'b10 ),
-   .out( monitor )
-  );
-
-
-*/
-
-
-
-/*
-
-  // mux_hi  does not need to gokkkkkkkkkkkk
-  reg [6-1:0 ] mux_hi ;
-  assign  {   U402_A2_CTL, U402_A1_CTL, U402_A0_CTL, U413_A2_CTL, U413_A1_CTL, U413_A0_CTL } = mux_hi;
-
-  // need some defines for
-
-
-  // az
-  wire [3-1: 0] mux_az ;
-  assign { U414_A2_CTL, U414_A1_CTL, U414_A0_CTL } = mux_az;
-
-
-  /////////
-
-  reg [7-1:0] mode;
-
-  // az mux does not need ot know about mux_hi
-  sample_modulation_az
-  sample_modulation_az
-    (
-    .clk( CLK),
-    .reset( 0),
-    // .mode( 1),
-    .mode( mode ),
-    .sw_pc_ctl( SIG_PC_SW_CTL),
-    .mux_az (mux_az),
-    .vec_monitor( { MON7, MON6, MON5, MON4, MON3 , MON2, MON1, dummy  } )
-  );
-
-
-  sample_modulation_az_tester
-  sample_modulation_az_tester (
-    .clk(CLK),
-    .reset( 0),
-    .mux_hi(mux_hi),
-    .mode(mode)
-    // want to pass in some stuff here. i think.
-  );
-
-  */
-
-
-
-/*
-  // mux hi
-  reg [3-1: 0] u413 = 3'b110; // s7 == DCV-IN
-  assign { U413_A2_CTL, U413_A1_CTL, U413_A0_CTL } = u413;    //  turn on DCV. 7 - 1?   on for test.  nice. measures 125R.
-
-  // mux hi 2.
-  reg [3-1: 0] u402 = 3 - 1 ; // s3 == unconnected/ hi-z input == off.
-  assign { U402_A2_CTL, U402_A1_CTL, U402_A0_CTL } = u402;
-*/
 
 

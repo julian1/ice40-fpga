@@ -38,19 +38,10 @@
 
 `define REG_STATUS        17
 `define REG_RESET         18   // reset -> hi.  normal -> lo.
-`define REG_HW_FLAGS      19  
+`define REG_HW_FLAGS      19
 
 
-/*
-    .clk_count_mux_rd_last(  adc2_clk_count_mux_rd_last ), 
-    .clk_count_mux_pos_last( adc2_clk_count_mux_pos_last),
-    .clk_count_mux_rd_last(  adc2_clk_count_mux_rd_last)
-    
-  run->clk_count_mux_neg  = spi_ice40_reg_read(spi, REG_CLK_COUNT_MUX_NEG);
-  run->clk_count_mux_pos  = spi_ice40_reg_read(spi, REG_CLK_COUNT_MUX_POS);
-  run->clk_count_mux_rd   = spi_ice40_reg_read(spi, REG_CLK_COUNT_MUX_RD);
 
-*/
 `define REG_ADC_CLK_COUNT_MUX_NEG   30
 `define REG_ADC_CLK_COUNT_MUX_POS   31
 `define REG_ADC_CLK_COUNT_MUX_RD    32
@@ -60,6 +51,7 @@
 
 module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,   4 bytes data.
 
+  // inputs
   // spi
   input  clk,
   input  cs,
@@ -67,23 +59,31 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   output dout,      // sdo - NO. we assign it to last bit of the output.
 
 
-  ////////////
+  // input regs
+  input wire [32-1:0] reg_status,
+  input wire [32-1:0] reg_hw_flags,
+
+  // adc inputs
+  input wire [32-1:0] reg_adc_clk_count_mux_neg,
+  input wire [32-1:0] reg_adc_clk_count_mux_pos,
+  input wire [32-1:0] reg_adc_clk_count_mux_rd,
+
+
+  // outputs
   // output regs
   output reg [32-1:0] reg_led ,
   output reg [32-1:0] reg_spi_mux,
   output reg [32-1:0] reg_4094,     // TODO change name it's a state register for OE. status .  or SR. reg_4094_.   or SR_4094,   sr_4094.
   output reg [32-1:0] reg_mode,
   output reg [32-1:0] reg_direct,
-  output reg [32-1:0] reg_direct2,     //
-  output reg [32-1:0] reg_clk_sample_duration,
+  output reg [32-1:0] reg_direct2,     //  unused.
   output reg [32-1:0] reg_reset,
 
-  // input regs
-  input wire [32-1:0] reg_status,
-  input wire [32-1:0] reg_hw_flags,
 
-  // passing a monitor in here, is useful, for monitoring internal. eg. the
-  // output reg [7-1:0]   vec_monitor,
+  //
+  output reg [32-1:0] reg_clk_sample_duration,    // move
+
+
 );
 
 
@@ -159,10 +159,10 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
             case (in[8 - 2  : 0 ] )
 
               // test vectors
-              // default:        out <=  24'b000011110000111100001111 << 8;
-              // default          out <=  24'b101010101010101010101010 << 8;
-              // default:        out <=  in[8 - 2  : 0] << 8;
-              // default:        out <=  in[8 - 1  : 0] << 8 ;     // return passed address
+              // default:     out <=  24'b000011110000111100001111 << 8;
+              // default      out <=  24'b101010101010101010101010 << 8;
+              // default:     out <=  in[8 - 2  : 0] << 8;
+              // default:     out <=  in[8 - 1  : 0] << 8 ;     // return passed address
 
               `REG_LED:       out <= reg_led << 8;
               `REG_SPI_MUX:   out <= reg_spi_mux << 8;
@@ -170,18 +170,24 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
               `REG_MODE:      out <= reg_mode << 8;   // ok..
               `REG_DIRECT:    out <= reg_direct << 8;
-              `REG_DIRECT2:    out <= reg_direct2 << 8;
+              `REG_DIRECT2:   out <= reg_direct2 << 8;
+              `REG_RESET:     out <= reg_reset << 8;
+
+
               `REG_CLK_SAMPLE_DURATION:  out <= reg_clk_sample_duration << 8;     // clk_count_sample_n clk_time_sample_clksample_time ??
-              `REG_RESET:    out <= reg_reset << 8;
 
-
-              // `REG_DIRECT:    out <= { reg_direct , 8'b0 } ;   // this fails.... weird.
+              // inputs
 
               `REG_STATUS:    out <= reg_status << 8;
+              `REG_HW_FLAGS:  out <= reg_hw_flags << 8;
+
+              `REG_ADC_CLK_COUNT_MUX_NEG:   out <= reg_adc_clk_count_mux_neg << 8;
+              `REG_ADC_CLK_COUNT_MUX_POS:   out <= reg_adc_clk_count_mux_pos << 8;
+              `REG_ADC_CLK_COUNT_MUX_RD:    out <= reg_adc_clk_count_mux_rd << 8;
 
 
               default:        out <=  24'b000011110000111100001111 << 8;
-              // default:        out <=  32'b00001111000011110000111100001111<< 8;     // 32 bit value appears to work.
+              // default:     out <=  32'b00001111000011110000111100001111<< 8;     // 32 bit value appears to work.
 
             endcase
           end // count == 8
