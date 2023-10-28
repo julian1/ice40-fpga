@@ -291,6 +291,7 @@ module top (
   wire [32-1 :0] reg_direct2;
   wire [32- 1 :0] reg_clk_sample_duration;  // 32/31 bit nice. for long sample.
   wire [32-1 :0] reg_reset;
+  wire [32-1 :0] reg_arm_trigger;
 
   // inputs
   wire [32 - 1 :0] reg_status ;
@@ -532,6 +533,8 @@ module top (
 
     .adc_measure_valid(adc2_measure_valid),
 
+    .arm_trigger( reg_arm_trigger[0 ]  ) ,
+
     // outputs
     .led0(      sample_modulation_no_az_out[ `IDX_LED0 ] ),
     .monitor(   sample_modulation_no_az_out[ `IDX_MONITOR +: 2  ] ),    // we could pass subset of monitor if watned. eg. only 4 pins...
@@ -604,6 +607,8 @@ module top (
     . reg_direct2( reg_direct2 ),
     . reg_clk_sample_duration( reg_clk_sample_duration),
     . reg_reset( reg_reset),
+
+    .reg_arm_trigger ( reg_arm_trigger ),
 
       // inputs
     . reg_status( reg_status ),

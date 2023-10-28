@@ -125,13 +125,19 @@ module sample_modulation_no_az (
 
         40: // done / park
           ;
- 
+
 
       endcase
 
-      // sample_stop_go( 0 )
+     /*
+      // run/pause, stop/go, reset,set etc.
+      // edge triggered. so must perform in sequence
+      // make sure fpga is in a default mode.
+
       // no transitions, this behavior should be transparent.
-      // although we may want to start at the park condition. 
+      // although we may want to start at the park condition.
+      */
+
 
       arm_trigger_edge <= { arm_trigger_edge[0], arm_trigger};  // old, new
       if(arm_trigger_edge == 2'b01)        // trigger
