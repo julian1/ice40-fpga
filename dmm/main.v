@@ -330,6 +330,8 @@ module top (
         this way it is properly named. while the monitor can be configured in other ways.
     ----------
     EXTR - Also put the az stamp - whether hi or lo. in the status . and maybe a count.
+          - not sure. az status should probably be read with the clk_counts.
+          - or just read from the sa acquisition module state.
 */
 
   assign reg_status = {
