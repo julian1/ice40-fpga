@@ -106,7 +106,7 @@ module adc_test (
               clk_count_down  <= clk_sample_duration;
 
 
-              monitor     <=  6'b000000; 
+              // monitor     <=  6'b000000; 
 
 
           end

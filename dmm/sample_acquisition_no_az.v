@@ -143,14 +143,14 @@ module sample_acquisition_no_az (
         and can be overriden by writting trigger, then arm.
       */
 
-
+/*
       arm_trigger_edge <= { arm_trigger_edge[0], arm_trigger};  // old, new
       if(arm_trigger_edge == 2'b01)        // trigger
         state = 2;
       else if(arm_trigger_edge == 2'b10)   // park/arm/reset.
         state = 40;
 
-
+*/
 
     end
 endmodule
