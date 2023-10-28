@@ -16,7 +16,7 @@ module adc_test (
 
   // inputs
   input   clk,
-  input   reset,
+  input   reset,                // TODO remove. should always be interuptable.
   input [ 32-1 : 0 ] clk_sample_duration,  // 32/31 bit nice. for long sample....  wrongly named it is counter_sample_duration. not clk...
   input adc_measure_trig,         // wire. start measurement.
 

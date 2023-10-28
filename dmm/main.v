@@ -372,7 +372,7 @@ module top (
   sample_acquisition_pc (
     // inputs
     .clk(CLK),
-    .reset( 1'b0 ),
+    .reset( 1'b0 ), // TODO remove.
     .clk_sample_duration( reg_clk_sample_duration ),
     // outputs
     .sw_pc_ctl( sample_acquisition_pc_out[ `IDX_SIG_PC_SW_CTL ]  ),
@@ -410,7 +410,7 @@ module top (
   adc1 (
     // inputs
     .clk(CLK),
-    .reset( 1'b0 ),
+    .reset( 1'b0 ),   // remove always interuptable.
     .clk_sample_duration( reg_clk_sample_duration ),
     .adc_measure_trig( adc1_measure_trig),
 
