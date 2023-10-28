@@ -38,7 +38,6 @@
 
 `define REG_STATUS        17
 `define REG_RESET         18   // reset -> hi.  normal -> lo.
-`define REG_HW_FLAGS      19
 
 
 
@@ -62,8 +61,8 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
   // input/read only regs, externally driven.
   input wire [32-1:0] reg_status,
-  input wire [32-1:0] reg_hw_flags,
-  // ADD MONITOR HERE. as read to allow the monitor to be read. could be useful.  or have a separate
+
+  // ADD MONITOR to the reg_status . as read to allow the monitor to be read. could be useful.  or have a separate
   // or just add to reg_status.
   // EXTR.   SIMPLIFY the reg_status .    add hw_flags.   and monitor. at construction poinit
   // then in mcu code.  we selectively filter - onyl the slow things..
@@ -185,7 +184,6 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
               // inputs
 
               `REG_STATUS:    out <= reg_status << 8;
-              `REG_HW_FLAGS:  out <= reg_hw_flags << 8;
 
               `REG_ADC_CLK_COUNT_MUX_NEG:   out <= reg_adc_clk_count_mux_neg << 8;
               `REG_ADC_CLK_COUNT_MUX_POS:   out <= reg_adc_clk_count_mux_pos << 8;

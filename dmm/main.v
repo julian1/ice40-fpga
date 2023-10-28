@@ -294,7 +294,6 @@ module top (
 
   // inputs
   wire [32 - 1 :0] reg_status ;
-  wire [32 - 1 :0] reg_hw_flags;
 
 
   // input U1004_4094_DATA,
@@ -302,11 +301,8 @@ module top (
   // assign reg_status = 32'b0 ;
 
 
-  assign reg_status = { 27'b0 , SWITCH_SENSE_OUT, DCV_OVP_OUT, OHMS_OVP_OUT, SUPPLY_SENSE_OUT, UNUSED_2 };
+
   // assign reg_status = { {(32 - 5){ 1'b0 }}, SWITCH_SENSE_OUT, DCV_OVP_OUT, OHMS_OVP_OUT, SUPPLY_SENSE_OUT, UNUSED_2 };
-
-
-  assign reg_hw_flags = { {(32 - 3){ 1'b0 }},   HW2,  HW1,  HW0};
 
 
 
@@ -321,6 +317,19 @@ module top (
   wire [8-1: 0] monitor = { MON7, MON6, MON5,MON4, MON3, MON2, MON1, MON0 } ;
 
   wire [4-1:0 ] adcmux =  { U902_SW3_CTL, U902_SW2_CTL, U902_SW1_CTL, U902_SW0_CTL };    // U902
+
+
+
+
+  assign reg_status = { 
+    8'b0 ,  
+    monitor,
+    5'b0,   HW2,  HW1,  HW0 ,  
+    3'b0,   SWITCH_SENSE_OUT, DCV_OVP_OUT, OHMS_OVP_OUT, SUPPLY_SENSE_OUT, UNUSED_2 
+ };
+
+
+
 
 
   // 4x4=16 + 8mon + 5 = 29 bits.
@@ -598,7 +607,6 @@ module top (
 
       // inputs
     . reg_status( reg_status ),
-    . reg_hw_flags( reg_hw_flags),
 
 
 
