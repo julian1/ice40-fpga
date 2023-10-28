@@ -328,6 +328,8 @@ module top (
             - rather than monitor. perhaps put in the status register. adc_valid. sa_valid.  indicating done .
 
         this way it is properly named. while the monitor can be configured in other ways.
+    ----------
+    EXTR - Also put the az stamp - whether hi or lo. in the status . and maybe a count.
 */
 
   assign reg_status = {
