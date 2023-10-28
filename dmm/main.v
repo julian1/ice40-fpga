@@ -451,7 +451,6 @@ module top (
   /////////////////////
 
 
-
   wire [ `NUM_BITS-1:0 ]  sample_modulation_no_az_out ;  // beter name ... it is the sample control, and adc.
   wire adc2_measure_trig;
   wire adc2_measure_valid;
@@ -524,6 +523,7 @@ module top (
   );
 
 
+  //  change name sampler_. or just sample_no_az
 
   sample_modulation_no_az
   sample_modulation_no_az (
