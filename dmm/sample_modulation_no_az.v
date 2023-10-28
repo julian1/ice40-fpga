@@ -24,13 +24,17 @@
 
 
 
+
+
 module sample_modulation_no_az (
 
   input   clk,
-  input   reset,
+  // input   reset,
 
   // inputs
   input adc_measure_valid,
+
+  input arm_trigger ,   // why is thiis not generating a problem.
 
 
   // output
@@ -52,28 +56,19 @@ module sample_modulation_no_az (
 
   reg [2-1: 0 ] meas_valid_edge;
 
+  reg [2-1: 0 ] arm_trigger_edge;
 
 
 
 
-  always @(posedge clk  or posedge reset )
+  always @(posedge clk /* or posedge reset */ )
 
-
-
-
-   if(reset)
-    begin
-      // we only require to set the state here, to setup the initial conditions.
-      state           <= 0;
-    end
-    else
     begin
 
 
       // emit spi_interupt pulse, on adc-measure valid
       // note synchronous, has clk delay. but ok. avoid combinatorial.
       meas_valid_edge   <= { meas_valid_edge[0], adc_measure_valid };  // old, new
-
       spi_interupt_ctl  <=  meas_valid_edge != 2'b01 ;
       monitor[1]        <=  meas_valid_edge == 2'b01 ;
 
@@ -100,7 +95,7 @@ module sample_modulation_no_az (
               clk_count_down  <= clk_count_precharge_n;  // normally pin s1
 
               // blink led, on alternate sampples, keeps visually identifiable at fast sample rates. and to match az-mode frequency.
-              led0    <= led0  + 1;
+              led0            <= led0  + 1;
 
             end
         25:
@@ -127,8 +122,22 @@ module sample_modulation_no_az (
               state <= 2;
           end
 
+        40: // done park
+          ;
+ 
 
       endcase
+
+
+
+      arm_trigger_edge <= { arm_trigger_edge[0], arm_trigger};  // old, new
+      if(arm_trigger_edge == 2'b01)        // trigger
+        state = 2;
+      else if(arm_trigger_edge == 2'b10)   // park/arm/reset.
+        state = 40;
+
+
+
     end
 endmodule
 

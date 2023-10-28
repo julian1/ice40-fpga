@@ -520,7 +520,7 @@ module top (
   sample_modulation_no_az (
     // inputs
     .clk(CLK),
-    .reset( reg_reset[ 0 ] ),
+
     .adc_measure_valid(adc2_measure_valid),
 
     // outputs
@@ -578,13 +578,15 @@ module top (
   register_set // #( 32 )   // register bank  . change name 'registers'
   register_set
     (
+
+    // should prefix fields with spi_
     . clk(SPI_CLK),
     . cs(SPI_CS),
     . din(SPI_MOSI),
     . dout( w_dout ),            // drive miso from via muxer
     // . dout( SPI_MISO ),        // drive miso output pin directly.
 
-    // registers
+    // outputs
     . reg_led(reg_led),        // required as test register
     . reg_spi_mux(reg_spi_mux),
     . reg_4094(reg_4094 ) ,
@@ -594,7 +596,7 @@ module top (
     . reg_clk_sample_duration( reg_clk_sample_duration),
     . reg_reset( reg_reset),
 
-      // read
+      // inputs
     . reg_status( reg_status ),
     . reg_hw_flags( reg_hw_flags),
 

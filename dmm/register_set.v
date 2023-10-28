@@ -47,6 +47,7 @@
 `define REG_ADC_CLK_COUNT_MUX_RD    32
 
 
+// `define REG_ADC_P_APERTURE          32   // p for control parameter.
 
 
 module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,   4 bytes data.
@@ -59,18 +60,23 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   output dout,      // sdo - NO. we assign it to last bit of the output.
 
 
-  // input regs
+  // input/read only regs, externally driven.
   input wire [32-1:0] reg_status,
   input wire [32-1:0] reg_hw_flags,
+  // ADD MONITOR HERE. as read to allow the monitor to be read. could be useful.  or have a separate
+  // or just add to reg_status.
+  // EXTR.   SIMPLIFY the reg_status .    add hw_flags.   and monitor. at construction poinit
+  // then in mcu code.  we selectively filter - onyl the slow things..
+  // effectively another status register.
 
-  // adc inputs
+  // adc inputS
   input wire [32-1:0] reg_adc_clk_count_mux_neg,
   input wire [32-1:0] reg_adc_clk_count_mux_pos,
   input wire [32-1:0] reg_adc_clk_count_mux_rd,
 
 
   // outputs
-  // output regs
+  // output/writable regs, driven by this module
   output reg [32-1:0] reg_led ,
   output reg [32-1:0] reg_spi_mux,
   output reg [32-1:0] reg_4094,     // TODO change name it's a state register for OE. status .  or SR. reg_4094_.   or SR_4094,   sr_4094.
