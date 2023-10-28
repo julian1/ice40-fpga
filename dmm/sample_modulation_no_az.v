@@ -82,7 +82,8 @@ module sample_modulation_no_az (
         0:
           begin
             // having a state like, this may be useful for debuggin, because can put a pulse on the monitor.
-            state <= 2;
+            // state <= 2;
+            state <= 40;   // start at park/done/ - then require a trigger - to start.
 
           end
 
