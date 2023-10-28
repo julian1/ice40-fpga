@@ -38,7 +38,10 @@
 
 `define REG_STATUS        17
 `define REG_RESET         18   // reset -> hi.  normal -> lo.
-`define REG_ARM_TRIGGER   19
+
+
+//  add the AQUIS or SA for sample acquisition.
+`define REG_SA_ARM_TRIGGER   19
 
 
 
@@ -85,7 +88,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   output reg [32-1:0] reg_direct2,     //  unused.
   output reg [32-1:0] reg_reset,      // unused.
 
-  output reg [32-1:0] reg_arm_trigger,
+  output reg [32-1:0] reg_sa_arm_trigger,
 
   //
   output reg [32-1:0] reg_clk_sample_duration,    // move
@@ -118,7 +121,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
     reg_direct2    = 0  ;
 
     reg_reset     <= 0;
-    reg_arm_trigger <= 0;
+    reg_sa_arm_trigger <= 0;
     reg_clk_sample_duration = 0;
 
   end
@@ -188,7 +191,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
               // inputs
 
               `REG_STATUS:    out <= reg_status << 8;
-              `REG_ARM_TRIGGER:    out <= reg_arm_trigger << 8;
+              `REG_SA_ARM_TRIGGER:    out <= reg_sa_arm_trigger << 8;
 
               `REG_ADC_CLK_COUNT_MUX_NEG:   out <= reg_adc_clk_count_mux_neg << 8;
               `REG_ADC_CLK_COUNT_MUX_POS:   out <= reg_adc_clk_count_mux_pos << 8;
@@ -220,7 +223,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
             `REG_RESET:     reg_reset   <= bin;
 
 
-             `REG_ARM_TRIGGER:  reg_arm_trigger <= bin;
+             `REG_SA_ARM_TRIGGER:  reg_sa_arm_trigger <= bin;
 
             `REG_CLK_SAMPLE_DURATION:  reg_clk_sample_duration <= bin;
 
