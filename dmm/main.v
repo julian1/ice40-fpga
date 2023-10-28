@@ -294,7 +294,7 @@ module top (
 
   // inputs
   wire [32 - 1 :0] reg_status ;
-  wire [32 - 1 :0] reg_hw;
+  wire [32 - 1 :0] reg_hw_flags;
 
 
   // input U1004_4094_DATA,
@@ -306,32 +306,8 @@ module top (
   // assign reg_status = { {(32 - 5){ 1'b0 }}, SWITCH_SENSE_OUT, DCV_OVP_OUT, OHMS_OVP_OUT, SUPPLY_SENSE_OUT, UNUSED_2 };
 
 
-  assign reg_hw = { {(32 - 3){ 1'b0 }},   HW2,  HW1,  HW0};
+  assign reg_hw_flags = { {(32 - 3){ 1'b0 }},   HW2,  HW1,  HW0};
 
-
-  register_set // #( 32 )   // register bank  . change name 'registers'
-  register_set
-    (
-    . clk(SPI_CLK),
-    . cs(SPI_CS),
-    . din(SPI_MOSI),
-    . dout( w_dout ),            // drive miso from via muxer
-    // . dout( SPI_MISO ),        // drive miso output pin directly.
-
-    // registers
-    . reg_led(reg_led),        // required as test register
-    . reg_spi_mux(reg_spi_mux),
-    . reg_4094(reg_4094 ) ,
-    . reg_mode( reg_mode ),      // ok.
-    . reg_direct( reg_direct ),
-    . reg_direct2( reg_direct2 ),
-    . reg_clk_sample_duration( reg_clk_sample_duration),
-    . reg_reset( reg_reset),
-
-    . reg_status( reg_status )
-  );
-
-  ///////////////////////////
 
 
 
@@ -471,6 +447,11 @@ module top (
   wire adc2_measure_trig;
   wire adc2_measure_valid;
 
+  wire [24-1:0] adc2_clk_count_mux_neg_last;
+  wire [24-1:0] adc2_clk_count_mux_pos_last;
+  wire [24-1:0] adc2_clk_count_mux_rd_last;
+
+
 /*
   adc
   adc2 (
@@ -524,9 +505,12 @@ module top (
     .cmpr_latch_ctl(sample_modulation_no_az_out[ `IDX_CMPR_LATCH_CTL ] ),
     .monitor(   sample_modulation_no_az_out[ `IDX_MONITOR + 2 +: 6 ] ),
     .refmux(  { sample_modulation_no_az_out[ `IDX_ADC_REF + 3  ],  sample_modulation_no_az_out[ `IDX_ADC_REF +: 2 ]   } ),      // pos, neg, reset. on two different 4053,
-    .sigmux(    sample_modulation_no_az_out[ `IDX_ADC_REF + 2  ] )                                     // change name to switch perhaps?,
+    .sigmux(    sample_modulation_no_az_out[ `IDX_ADC_REF + 2  ] ),                                     // change name to switch perhaps?,
 
-  
+
+    .clk_count_mux_rd_last(  adc2_clk_count_mux_rd_last ),
+    .clk_count_mux_pos_last( adc2_clk_count_mux_pos_last),
+    .clk_count_mux_rd_last(  adc2_clk_count_mux_rd_last)
 
   );
 
@@ -586,6 +570,41 @@ module top (
     .sel( reg_mode[ 2 : 0 ]),
     .out( outputs_vec )
   );
+
+
+
+
+
+  register_set // #( 32 )   // register bank  . change name 'registers'
+  register_set
+    (
+    . clk(SPI_CLK),
+    . cs(SPI_CS),
+    . din(SPI_MOSI),
+    . dout( w_dout ),            // drive miso from via muxer
+    // . dout( SPI_MISO ),        // drive miso output pin directly.
+
+    // registers
+    . reg_led(reg_led),        // required as test register
+    . reg_spi_mux(reg_spi_mux),
+    . reg_4094(reg_4094 ) ,
+    . reg_mode( reg_mode ),      // ok.
+    . reg_direct( reg_direct ),
+    . reg_direct2( reg_direct2 ),
+    . reg_clk_sample_duration( reg_clk_sample_duration),
+    . reg_reset( reg_reset),
+
+      // read
+    . reg_status( reg_status ),
+    . reg_hw_flags( reg_hw_flags)
+
+  );
+
+  ///////////////////////////
+
+
+
+
 
 
 

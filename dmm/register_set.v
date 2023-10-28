@@ -38,6 +38,24 @@
 
 `define REG_STATUS        17
 `define REG_RESET         18   // reset -> hi.  normal -> lo.
+`define REG_HW_FLAGS      19  
+
+
+/*
+    .clk_count_mux_rd_last(  adc2_clk_count_mux_rd_last ), 
+    .clk_count_mux_pos_last( adc2_clk_count_mux_pos_last),
+    .clk_count_mux_rd_last(  adc2_clk_count_mux_rd_last)
+    
+  run->clk_count_mux_neg  = spi_ice40_reg_read(spi, REG_CLK_COUNT_MUX_NEG);
+  run->clk_count_mux_pos  = spi_ice40_reg_read(spi, REG_CLK_COUNT_MUX_POS);
+  run->clk_count_mux_rd   = spi_ice40_reg_read(spi, REG_CLK_COUNT_MUX_RD);
+
+*/
+`define REG_ADC_CLK_COUNT_MUX_NEG   30
+`define REG_ADC_CLK_COUNT_MUX_POS   31
+`define REG_ADC_CLK_COUNT_MUX_RD    32
+
+
 
 
 module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,   4 bytes data.
@@ -62,6 +80,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
   // input regs
   input wire [32-1:0] reg_status,
+  input wire [32-1:0] reg_hw_flags,
 
   // passing a monitor in here, is useful, for monitoring internal. eg. the
   // output reg [7-1:0]   vec_monitor,
