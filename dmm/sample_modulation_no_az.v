@@ -122,13 +122,15 @@ module sample_modulation_no_az (
               state <= 2;
           end
 
-        40: // done park
+        40: // done / park
           ;
  
 
       endcase
 
-
+      // sample_stop_go( 0 )
+      // no transitions, this behavior should be transparent.
+      // although we may want to start at the park condition. 
 
       arm_trigger_edge <= { arm_trigger_edge[0], arm_trigger};  // old, new
       if(arm_trigger_edge == 2'b01)        // trigger
