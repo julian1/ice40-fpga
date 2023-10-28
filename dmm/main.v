@@ -526,6 +526,8 @@ module top (
 
   //  change name sampler_. or just sample_no_az
 
+  // no. change name sample_aquisition_no_az.
+
   sample_modulation_no_az
   sample_modulation_no_az (
     // inputs

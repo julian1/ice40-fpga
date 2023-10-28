@@ -130,12 +130,17 @@ module sample_modulation_no_az (
       endcase
 
      /*
+        // aquire.
       // run/pause, stop/go, reset,set etc.
       // edge triggered. so must perform in sequence
       // make sure fpga is in a default mode.
 
       // no transitions, this behavior should be transparent.
       // although we may want to start at the park condition.
+        ---
+        but we can toggle using a sequence - at mcu startup to select what we want.
+        starting up in a default run state could be nice.
+        and can be overriden by writting trigger, then arm.
       */
 
 
