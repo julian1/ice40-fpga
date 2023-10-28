@@ -320,13 +320,21 @@ module top (
   wire [4-1:0 ] adcmux =  { U902_SW3_CTL, U902_SW2_CTL, U902_SW1_CTL, U902_SW0_CTL };    // U902
 
 
+/*
+  - sampler. - can put the valid_signal in the status register.
 
+        mcu can then loop/while/block until changes to to get our samples.
+            - eg. put these
+            - rather than monitor. perhaps put in the status register. adc_valid. sa_valid.  indicating done .
 
-  assign reg_status = { 
-    8'b0 ,  
-    monitor,
-    5'b0,   HW2,  HW1,  HW0 ,  
-    3'b0,   SWITCH_SENSE_OUT, DCV_OVP_OUT, OHMS_OVP_OUT, SUPPLY_SENSE_OUT, UNUSED_2 
+        this way it is properly named. while the monitor can be configured in other ways.
+*/
+
+  assign reg_status = {
+    8'b0 ,
+    monitor,   // adc_valid,   sa_valid
+    5'b0,   HW2,  HW1,  HW0 ,
+    3'b0,   SWITCH_SENSE_OUT, DCV_OVP_OUT, OHMS_OVP_OUT, SUPPLY_SENSE_OUT, UNUSED_2
  };
 
 
