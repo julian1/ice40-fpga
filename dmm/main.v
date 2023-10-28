@@ -406,7 +406,7 @@ module top (
   wire adc1_measure_trig;
   wire adc1_measure_valid;
 
-  adc
+  adc_test      // this is adc-test.
   adc1 (
     // inputs
     .clk(CLK),
@@ -429,7 +429,7 @@ module top (
 
     // inputs
     .clk(CLK),
-    .reset( reg_reset[ 0 ] ),
+    .reset( reg_reset[ 0 ] ),   // TODO - remove. should always be interuptable.
     .azmux_lo_val(  reg_direct[  `IDX_AZMUX +: 4 ] ),
     .adc_measure_valid(adc1_measure_valid),
 
