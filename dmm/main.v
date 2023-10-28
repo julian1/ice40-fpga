@@ -498,10 +498,8 @@ module top (
     // .reset( 1'b0 ), // not needed. always interuptable.
 
     // inputs
-    // .clk_sample_duration( reg_clk_sample_duration ),
     .adc_measure_trig( adc2_measure_trig),
     .comparator_val( CMPR_P_OUT ),
-
 /*
     clk_count_reset_n   =  10000;
     // 26MHz ???
@@ -513,6 +511,7 @@ module top (
     use_slow_rundown    = 1;
     use_fast_rundown    = 1;
 */
+    // ctrl parameters
     . clk_count_reset_n( 24'd10000 ) ,
     . clk_count_fix_n( 24'd24 ) ,
     . clk_count_var_n( 24'd185 ) ,
@@ -527,6 +526,7 @@ module top (
     .refmux(  { sample_modulation_no_az_out[ `IDX_ADC_REF + 3  ],  sample_modulation_no_az_out[ `IDX_ADC_REF +: 2 ]   } ),      // pos, neg, reset. on two different 4053,
     .sigmux(    sample_modulation_no_az_out[ `IDX_ADC_REF + 2  ] )                                     // change name to switch perhaps?,
 
+  
 
   );
 
