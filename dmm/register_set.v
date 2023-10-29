@@ -34,7 +34,6 @@
 `define REG_DIRECT        14
 `define REG_DIRECT2       15      // don't use. deprecate .   was only for initial AZ switching test.
 
-`define REG_CLK_SAMPLE_DURATION 16   // clk sample time. change name aperture.
 
 `define REG_STATUS        17
 `define REG_RESET         18   // reset -> hi.  normal -> lo.
@@ -44,6 +43,7 @@
 `define REG_SA_ARM_TRIGGER   19
 
 
+`define REG_ADC_P_APERTURE 20   // clk sample time. change name aperture.
 
 `define REG_ADC_CLK_COUNT_MUX_NEG   30
 `define REG_ADC_CLK_COUNT_MUX_POS   31
@@ -184,7 +184,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
               `REG_RESET:     out <= reg_reset << 8;
 
 
-              `REG_CLK_SAMPLE_DURATION:  out <= reg_clk_sample_duration << 8;     // clk_count_sample_n clk_time_sample_clksample_time ??
+              `REG_ADC_P_APERTURE:  out <= reg_clk_sample_duration << 8;     // clk_count_sample_n clk_time_sample_clksample_time ??
 
               // inputs
 
@@ -225,7 +225,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
              `REG_SA_ARM_TRIGGER:  reg_sa_arm_trigger <= bin;
 
-            `REG_CLK_SAMPLE_DURATION:  reg_clk_sample_duration <= bin;
+            `REG_ADC_P_APERTURE:  reg_clk_sample_duration <= bin;
 
           endcase
 
