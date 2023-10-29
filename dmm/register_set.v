@@ -48,6 +48,8 @@
 `define REG_ADC_CLK_COUNT_MUX_NEG   30
 `define REG_ADC_CLK_COUNT_MUX_POS   31
 `define REG_ADC_CLK_COUNT_MUX_RD    32
+`define REG_ADC_CLK_COUNT_MUX_SIG   33
+
 
 
 // `define REG_ADC_P_APERTURE          32   // p for control parameter.
@@ -66,16 +68,12 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   // input/read only regs, externally driven.
   input wire [32-1:0] reg_status,
 
-  // ADD MONITOR to the reg_status . as read to allow the monitor to be read. could be useful.  or have a separate
-  // or just add to reg_status.
-  // EXTR.   SIMPLIFY the reg_status .    add hw_flags.   and monitor. at construction poinit
-  // then in mcu code.  we selectively filter - onyl the slow things..
-  // effectively another status register.
 
-  // adc inputS
+  // adc inputs
   input wire [32-1:0] reg_adc_clk_count_mux_neg,
   input wire [32-1:0] reg_adc_clk_count_mux_pos,
   input wire [32-1:0] reg_adc_clk_count_mux_rd,
+  input wire [32-1:0] reg_adc_clk_count_mux_sig,
 
 
   // outputs
@@ -196,6 +194,8 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
               `REG_ADC_CLK_COUNT_MUX_NEG:   out <= reg_adc_clk_count_mux_neg << 8;
               `REG_ADC_CLK_COUNT_MUX_POS:   out <= reg_adc_clk_count_mux_pos << 8;
               `REG_ADC_CLK_COUNT_MUX_RD:    out <= reg_adc_clk_count_mux_rd << 8;
+              `REG_ADC_CLK_COUNT_MUX_SIG:   out <= reg_adc_clk_count_mux_sig << 8;
+
 
 
               default:        out <=  24'b000011110000111100001111 << 8;

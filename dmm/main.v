@@ -27,7 +27,8 @@
 
 `include "defines.v"
 
-`include "adc_modulation_00.v"
+// `include "adc_modulation_00.v"
+`include "adc_modulation_01.v"
 
 
 
@@ -449,6 +450,7 @@ module top (
   wire [24-1:0] adc2_clk_count_mux_neg_last;
   wire [24-1:0] adc2_clk_count_mux_pos_last;
   wire [24-1:0] adc2_clk_count_mux_rd_last;
+  wire [32-1:0] adc2_clk_count_mux_sig_last;
 
 
 /*
@@ -492,6 +494,7 @@ module top (
     use_fast_rundown    = 1;
 */
     // ctrl parameters
+    // should have a better prefix here
     . clk_count_reset_n( 24'd10000 ) ,
     . clk_count_fix_n( 24'd24 ) ,
     . clk_count_var_n( 24'd185 ) ,
@@ -499,17 +502,18 @@ module top (
     . use_slow_rundown( 1'b1 ),
     . use_fast_rundown( 1'b1 ),
 
-    // outputs ctrl
+    // outputs - ctrl
     .adc_measure_valid( adc2_measure_valid),    // fan out.
     .cmpr_latch_ctl(sample_acquisition_no_az_out[ `IDX_CMPR_LATCH_CTL ] ),
     .monitor(   sample_acquisition_no_az_out[ `IDX_MONITOR + 2 +: 6 ] ),
     .refmux(  { sample_acquisition_no_az_out[ `IDX_ADC_REF + 3  ],  sample_acquisition_no_az_out[ `IDX_ADC_REF +: 2 ]   } ),      // pos, neg, reset. on two different 4053,
     .sigmux(    sample_acquisition_no_az_out[ `IDX_ADC_REF + 2  ] ),                                     // change name to switch perhaps?,
 
-    // output counts
-    .clk_count_mux_neg_last( adc2_clk_count_mux_neg_last),
-    .clk_count_mux_pos_last( adc2_clk_count_mux_pos_last),
-    .clk_count_mux_rd_last(  adc2_clk_count_mux_rd_last)
+    // clk_count outputs, for currents
+    .clk_count_mux_neg_last(  adc2_clk_count_mux_neg_last),
+    .clk_count_mux_pos_last(  adc2_clk_count_mux_pos_last),
+    .clk_count_mux_rd_last(   adc2_clk_count_mux_rd_last),
+    .clk_count_mux_sig_last(  adc2_clk_count_mux_sig_last )
 
   );
 
@@ -632,10 +636,10 @@ module top (
     . reg_status( reg_status ),
 
 
-
     .reg_adc_clk_count_mux_neg( { { 8 { 1'b0 } }, adc2_clk_count_mux_neg_last }  ) ,
     .reg_adc_clk_count_mux_pos( { { 8 { 1'b0 } }, adc2_clk_count_mux_pos_last } ) ,
-    .reg_adc_clk_count_mux_rd(  { { 8 { 1'b0 } }, adc2_clk_count_mux_rd_last }  )
+    .reg_adc_clk_count_mux_rd(  { { 8 { 1'b0 } }, adc2_clk_count_mux_rd_last }  ),
+    .reg_adc_clk_count_mux_sig(   adc2_clk_count_mux_rd_last   )
 
     );
 
