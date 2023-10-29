@@ -639,7 +639,7 @@ module top (
     .reg_adc_clk_count_mux_neg( { { 8 { 1'b0 } }, adc2_clk_count_mux_neg_last }  ) ,
     .reg_adc_clk_count_mux_pos( { { 8 { 1'b0 } }, adc2_clk_count_mux_pos_last } ) ,
     .reg_adc_clk_count_mux_rd(  { { 8 { 1'b0 } }, adc2_clk_count_mux_rd_last }  ),
-    .reg_adc_clk_count_mux_sig(   adc2_clk_count_mux_rd_last   )
+    .reg_adc_clk_count_mux_sig(                   adc2_clk_count_mux_sig_last   )
 
     );
 
