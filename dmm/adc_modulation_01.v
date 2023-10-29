@@ -148,7 +148,7 @@ module adc_modulation (
   output reg [24-1:0] count_fix_up_last,
   output reg [24-1:0] count_fix_down_last,
   output reg [24-1:0] count_flip_last,
-  output reg [24-1:0] clk_count_rundown_last,
+  output reg [24-1:0] clk_count_rundown_last, // change name. phase rundown.
 
   // TODO. change to 32 bit counts, for long integrations
   // current source clk counts
@@ -242,7 +242,7 @@ module adc_modulation (
 */
 
   // JA. TODO remove.
-  wire sig_active     =  sigmux == 1;
+  // wire sig_active     =  sigmux == 1;
 
 
   // OK. it's working with good values at nplc 10, 11, 12. for cal loop. after very heavy refactor mar 13. 2022.
@@ -341,7 +341,7 @@ module adc_modulation (
       // count_pos_on
 
 
-      if(sig_active)
+      if(sigmux )
         // while integrating the signal
         begin
           // increment aperture clk count
@@ -553,7 +553,7 @@ module adc_modulation (
           if(clk_count >= p_clk_count_var)
             begin
               // signal integration finished.
-              if( !sig_active )
+              if( !sigmux)
 
                 if(use_fast_rundown)
                   begin
