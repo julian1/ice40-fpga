@@ -347,9 +347,11 @@ module adc_modulation (
           // increment aperture clk count
           clk_count_mux_sig <= clk_count_mux_sig + 1;
 
-          // have we reached end of aperture
-          if(clk_count_mux_sig >= p_clk_count_aper)
-            begin
+          // have we reached end of aperture                            // ======================================
+          // if(clk_count_mux_sig >= p_clk_count_aper)                  // aperture count termination condition.
+          if(clk_count_mux_sig >= (p_clk_count_aper - 1) )              // changed oct 30, 2023..  IMPORTANT. DIFFERENCEs MAY AFFECT calibration calculation.
+                                                                        // should be a count down
+            begin                                                       // =======================================
               // turn off signal input
               sigmux  <= 0;
 
