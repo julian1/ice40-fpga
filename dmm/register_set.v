@@ -89,7 +89,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   output reg [32-1:0] reg_sa_arm_trigger,
 
   //
-  output reg [32-1:0] reg_clk_sample_duration,    // move
+  output reg [32-1:0] reg_adc_p_aperture,    // move
 
 
 );
@@ -120,7 +120,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
     reg_reset     <= 0;
     reg_sa_arm_trigger <= 0;
-    reg_clk_sample_duration = 0;
+    reg_adc_p_aperture = 0;
 
   end
 
@@ -184,7 +184,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
               `REG_RESET:     out <= reg_reset << 8;
 
 
-              `REG_ADC_P_APERTURE:  out <= reg_clk_sample_duration << 8;     // clk_count_sample_n clk_time_sample_clksample_time ??
+              `REG_ADC_P_APERTURE:  out <= reg_adc_p_aperture << 8;     // clk_count_sample_n clk_time_sample_clksample_time ??
 
               // inputs
 
@@ -225,7 +225,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
              `REG_SA_ARM_TRIGGER:  reg_sa_arm_trigger <= bin;
 
-            `REG_ADC_P_APERTURE:  reg_clk_sample_duration <= bin;
+            `REG_ADC_P_APERTURE:  reg_adc_p_aperture <= bin;
 
           endcase
 

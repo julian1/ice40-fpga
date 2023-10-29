@@ -290,7 +290,7 @@ module top (
   wire [32-1 :0] reg_mode;     // two bits
   wire [32-1 :0] reg_direct;
   wire [32-1 :0] reg_direct2;
-  wire [32- 1 :0] reg_clk_sample_duration;  // 32/31 bit nice. for long sample.
+  wire [32- 1 :0] reg_adc_p_aperture;  // 32/31 bit nice. for long sample.
   wire [32-1 :0] reg_reset;
   wire [32-1 :0] reg_sa_arm_trigger;
 
@@ -364,7 +364,7 @@ module top (
     // inputs
     .clk(CLK),
     .reset( 1'b0 ), // TODO remove.
-    .clk_sample_duration( reg_clk_sample_duration ),
+    .clk_sample_duration( reg_adc_p_aperture ),
     // outputs
     .sw_pc_ctl( sample_acquisition_pc_out[ `IDX_SIG_PC_SW_CTL ]  ),
     .led0(      sample_acquisition_pc_out[ `IDX_LED0 ] ),
@@ -402,7 +402,7 @@ module top (
     // inputs
     .clk(CLK),
     .reset( 1'b0 ),   // remove always interuptable.
-    .clk_sample_duration( reg_clk_sample_duration ),
+    .clk_sample_duration( reg_adc_p_aperture ),
     .adc_measure_trig( adc1_measure_trig),
 
     // outputs
@@ -459,7 +459,7 @@ module top (
     // inputs
     .clk(CLK),
     .reset( 1'b0 ),
-    .clk_sample_duration( reg_clk_sample_duration ),
+    .clk_sample_duration( reg_adc_p_aperture ),
     .adc_measure_trig( adc2_measure_trig),             // mux in
 
     // outputs
@@ -498,7 +498,10 @@ module top (
     . clk_count_reset_n( 24'd10000 ) ,
     . clk_count_fix_n( 24'd24 ) ,
     . clk_count_var_n( 24'd185 ) ,
-    . clk_count_aper_n( 2 * 2000000) ,
+
+    // . clk_count_aper_n( 2 * 2000000) ,
+    . clk_count_aper_n( reg_adc_p_aperture),
+
     . use_slow_rundown( 1'b1 ),
     . use_fast_rundown( 1'b1 ),
 
@@ -631,7 +634,7 @@ module top (
     . reg_mode( reg_mode ),      // ok.
     . reg_direct( reg_direct ),
     . reg_direct2( reg_direct2 ),
-    . reg_clk_sample_duration( reg_clk_sample_duration),
+    . reg_adc_p_aperture( reg_adc_p_aperture),
     . reg_reset( reg_reset),
 
     // outputs signal acquisiation
