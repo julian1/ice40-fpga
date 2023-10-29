@@ -65,11 +65,11 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   output dout,      // sdo - NO. we assign it to last bit of the output.
 
 
-  // input/read only regs, externally driven.
+  // inputs - status, externally driven
   input wire [32-1:0] reg_status,
 
 
-  // adc inputs
+  // inputs adc
   input wire [32-1:0] reg_adc_clk_count_mux_neg,
   input wire [32-1:0] reg_adc_clk_count_mux_pos,
   input wire [32-1:0] reg_adc_clk_count_mux_rd,

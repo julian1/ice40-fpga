@@ -620,6 +620,10 @@ module top (
     . dout( w_dout ),            // drive miso from via muxer
     // . dout( SPI_MISO ),        // drive miso output pin directly.
 
+      // inputs
+    . reg_status( reg_status ),
+
+
     // outputs
     . reg_led(reg_led),        // required as test register
     . reg_spi_mux(reg_spi_mux),
@@ -630,12 +634,10 @@ module top (
     . reg_clk_sample_duration( reg_clk_sample_duration),
     . reg_reset( reg_reset),
 
+    // outputs signal acquisiation
     .reg_sa_arm_trigger ( reg_sa_arm_trigger ),
 
-      // inputs
-    . reg_status( reg_status ),
-
-
+    // outputs adc
     .reg_adc_clk_count_mux_neg( { { 8 { 1'b0 } }, adc2_clk_count_mux_neg_last }  ) ,
     .reg_adc_clk_count_mux_pos( { { 8 { 1'b0 } }, adc2_clk_count_mux_pos_last } ) ,
     .reg_adc_clk_count_mux_rd(  { { 8 { 1'b0 } }, adc2_clk_count_mux_rd_last }  ),
