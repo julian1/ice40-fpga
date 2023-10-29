@@ -94,7 +94,7 @@ module adc_modulation (
 
   // modulation parameters/count limits to use
   // rename p_clk_count_reset.
-  input [24-1:0]  clk_count_reset_n,
+  input [24-1:0]  clk_count_reset_n,    // useful if running stand-alone
   input [24-1:0]  clk_count_fix_n,
   inout [24-1:0]  clk_count_var_n,
   input [32-1:0]  clk_count_aper_n,   // eg. clk_count_mux_sig_n
@@ -239,7 +239,7 @@ module adc_modulation (
   wire reset_active   = himux === `HIMUX_SEL_ANG && sigmux === 1;
 */
 
-  // JA.
+  // JA. TODO remove.
   wire sig_active     =  sigmux == 1;
 
 

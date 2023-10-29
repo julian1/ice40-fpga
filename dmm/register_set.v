@@ -88,7 +88,13 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
   output reg [32-1:0] reg_sa_arm_trigger,
 
-  //
+/*
+  TODO.
+  clk_count_reset_n,    // useful if running stand-alone
+  clk_count_fix_n,
+  clk_count_var_n,
+  clk_count_aper_n,   // eg. clk_count_mux_sig_n
+*/
   output reg [32-1:0] reg_adc_p_aperture,    // move
 
 
