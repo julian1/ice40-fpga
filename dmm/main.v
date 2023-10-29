@@ -320,28 +320,6 @@ module top (
   wire [4-1:0 ] adcmux =  { U902_SW3_CTL, U902_SW2_CTL, U902_SW1_CTL, U902_SW0_CTL };    // U902
 
 
-/*
-  - sampler. - can put the valid_signal in the status register.
-
-        mcu can then loop/while/block until changes to to get our samples.
-            - eg. put these
-            - rather than monitor. perhaps put in the status register. adc_valid. sa_valid.  indicating done .
-
-        this way it is properly named. while the monitor can be configured in other ways.
-    ----------
-    EXTR - Also put the az stamp - whether hi or lo. in the status . and maybe a count.
-          - not sure. az status should probably be read with the clk_counts.
-          - or just read from the sa acquisition module state.
-*/
-
-  assign reg_status = {
-    8'b0 ,
-    monitor,   // adc_valid,   sa_valid
-    5'b0,   HW2,  HW1,  HW0 ,
-    3'b0,   SWITCH_SENSE_OUT, DCV_OVP_OUT, OHMS_OVP_OUT, SUPPLY_SENSE_OUT, UNUSED_2
- };
-
-
 
 
 
@@ -522,7 +500,7 @@ module top (
     . use_fast_rundown( 1'b1 ),
 
     // outputs ctrl
-    .adc_measure_valid(adc2_measure_valid),    // fan out.
+    .adc_measure_valid( adc2_measure_valid),    // fan out.
     .cmpr_latch_ctl(sample_acquisition_no_az_out[ `IDX_CMPR_LATCH_CTL ] ),
     .monitor(   sample_acquisition_no_az_out[ `IDX_MONITOR + 2 +: 6 ] ),
     .refmux(  { sample_acquisition_no_az_out[ `IDX_ADC_REF + 3  ],  sample_acquisition_no_az_out[ `IDX_ADC_REF +: 2 ]   } ),      // pos, neg, reset. on two different 4053,
@@ -596,6 +574,32 @@ module top (
     .sel( reg_mode[ 2 : 0 ]),
     .out( outputs_vec )
   );
+
+
+
+
+
+
+/*
+  - sampler. - can put the valid_signal in the status register.
+
+        mcu can then loop/while/block until changes to to get our samples.
+            - eg. put these
+            - rather than monitor. perhaps put in the status register. adc_valid. sa_valid.  indicating done .
+
+        this way it is properly named. while the monitor can be configured in other ways.
+    ----------
+    EXTR - Also put the az stamp - whether hi or lo. in the status . and maybe a count.
+          - not sure. az status should probably be read with the clk_counts.
+          - or just read from the sa acquisition module state.
+*/
+
+  assign reg_status = {
+    8'b0 ,
+    monitor,
+            HW2,  HW1,  HW0 ,   4'b0,  adc2_measure_valid,
+    3'b0,   SWITCH_SENSE_OUT, DCV_OVP_OUT, OHMS_OVP_OUT, SUPPLY_SENSE_OUT, UNUSED_2
+ };
 
 
 

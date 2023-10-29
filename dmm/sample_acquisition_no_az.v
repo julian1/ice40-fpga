@@ -54,9 +54,10 @@ module sample_acquisition_no_az (
   reg [24-1:0]  clk_count_precharge_n = `CLK_FREQ * 500e-6 ;   // 500us.
 
 
-  reg [2-1: 0 ] meas_valid_edge;
+  reg [2-1: 0 ] adc_valid_edge;
 
-  reg [2-1: 0 ] arm_trigger_edge;
+  reg [2-1: 0 ] arm_trigger_edge;  //  = "10";  // start off in state. so that arm works to halt.
+                                    // doesn't work. should be in state 0. anyway.
 
 
 
@@ -68,9 +69,9 @@ module sample_acquisition_no_az (
 
       // emit spi_interupt pulse, on adc-measure valid
       // note synchronous, has clk delay. but ok. avoid combinatorial.
-      meas_valid_edge   <= { meas_valid_edge[0], adc_measure_valid };  // old, new
-      spi_interupt_ctl  <=  meas_valid_edge != 2'b01 ;
-      monitor[1]        <=  meas_valid_edge == 2'b01 ;
+      adc_valid_edge   <= { adc_valid_edge[0], adc_measure_valid };  // old, new
+      spi_interupt_ctl  <=  adc_valid_edge != 2'b01 ;
+      monitor[1]        <=  adc_valid_edge == 2'b01 ;
 
 
       // always decrement clk for the current phase
