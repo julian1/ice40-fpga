@@ -100,6 +100,8 @@ module adc_modulation (
   input [24-1:0]  p_clk_count_fix,
   inout [24-1:0]  p_clk_count_var,
   input [32-1:0]  p_clk_count_aper,   // eg. clk_count_mux_sig_n
+                                          // names are correct. aperture is the control parameter,  and mux_sig_count is the current clk count, and should correspond.
+
 
   input           use_slow_rundown,     // prefix with p_. to indicate . a modulation control parameter.
   input           use_fast_rundown,
@@ -155,7 +157,7 @@ module adc_modulation (
   output reg [24-1:0] clk_count_mux_neg_last,
   output reg [24-1:0] clk_count_mux_pos_last,
   output reg [24-1:0] clk_count_mux_rd_last,
-  output reg [32-1:0] clk_count_mux_sig_last      // should be the same as p_aperture, p_clk_count_aper,  clk_count_mux_sig_n
+  output reg [32-1:0] clk_count_mux_sig_last      // names are correct. aperture is the control parameter,  and mux_sig_count is the current clk count, and should correspond.
 
 );
 
