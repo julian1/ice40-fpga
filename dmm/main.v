@@ -494,13 +494,13 @@ module top (
     use_fast_rundown    = 1;
 */
     // ctrl parameters
-    // should have a better prefix here
-    . clk_count_reset_n( 24'd10000 ) ,
-    . clk_count_fix_n( 24'd24 ) ,
-    . clk_count_var_n( 24'd185 ) ,
 
-    // . clk_count_aper_n( 2 * 2000000) ,
-    . clk_count_aper_n( reg_adc_p_aperture),
+    . p_clk_count_reset( 24'd10000 ) ,
+    . p_clk_count_fix( 24'd24 ) ,
+    . p_clk_count_var( 24'd185 ) ,
+
+    // . p_clk_count_aper( 2 * 2000000) ,
+    . p_clk_count_aper( reg_adc_p_aperture),
 
     . use_slow_rundown( 1'b1 ),
     . use_fast_rundown( 1'b1 ),

@@ -92,12 +92,14 @@ module adc_modulation (
   // comparator input
   input           comparator_val,
 
-  // modulation parameters/count limits to use
-  // rename p_clk_count_reset.
-  input [24-1:0]  clk_count_reset_n,    // useful if running stand-alone
-  input [24-1:0]  clk_count_fix_n,
-  inout [24-1:0]  clk_count_var_n,
-  input [32-1:0]  clk_count_aper_n,   // eg. clk_count_mux_sig_n
+  //
+  // rename
+  // or  just p_fix , p_var.  p indicates a control parameter, and that using is clock count.
+  // or p_clk_count_reset   and drop the _n suffix.
+  input [24-1:0]  p_clk_count_reset,    // useful if running stand-alone
+  input [24-1:0]  p_clk_count_fix,
+  inout [24-1:0]  p_clk_count_var,
+  input [32-1:0]  p_clk_count_aper,   // eg. clk_count_mux_sig_n
 
   input           use_slow_rundown,     // prefix with p_. to indicate . a modulation control parameter.
   input           use_fast_rundown,
@@ -153,7 +155,7 @@ module adc_modulation (
   output reg [24-1:0] clk_count_mux_neg_last,
   output reg [24-1:0] clk_count_mux_pos_last,
   output reg [24-1:0] clk_count_mux_rd_last,
-  output reg [32-1:0] clk_count_mux_sig_last      // should be the same as p_aperture, clk_count_aper_n,  clk_count_mux_sig_n
+  output reg [32-1:0] clk_count_mux_sig_last      // should be the same as p_aperture, p_clk_count_aper,  clk_count_mux_sig_n
 
 );
 
@@ -346,7 +348,7 @@ module adc_modulation (
           clk_count_mux_sig <= clk_count_mux_sig + 1;
 
           // have we reached end of aperture
-          if(clk_count_mux_sig >= clk_count_aper_n)
+          if(clk_count_mux_sig >= p_clk_count_aper)
             begin
               // turn off signal input
               sigmux  <= 0;
@@ -389,7 +391,7 @@ module adc_modulation (
           begin
             monitor[0]   <=  0;
 
-            if(clk_count >= clk_count_reset_n)
+            if(clk_count >= p_clk_count_reset)
               // state <= `STATE_SIG_SETTLE_START;
               // JA
               state <= `STATE_SIG_START;
@@ -414,7 +416,7 @@ module adc_modulation (
           end
 
         `STATE_SIG_SETTLE:
-          if(clk_count >= clk_count_reset_n)
+          if(clk_count >= p_clk_count_reset)
             state <= `STATE_SIG_START;
 */
 
@@ -465,10 +467,10 @@ module adc_modulation (
         `STATE_FIX_POS:
           /*
           // half way through first fix, enable the comparator
-          if(clk_count >= (clk_count_fix_n >> 1))
+          if(clk_count >= (p_clk_count_fix >> 1))
             // cmpr_latch_ctl  <= 0
           */
-          if(clk_count >= clk_count_fix_n)       // walk up.  dir = 1
+          if(clk_count >= p_clk_count_fix)       // walk up.  dir = 1
             begin
               state <= `STATE_VAR_START;
 
@@ -501,7 +503,7 @@ module adc_modulation (
         // we are confusing neg. pos. and up. down.   neg == up. pos == down.
 
         `STATE_VAR:
-          if(clk_count >= clk_count_var_n)
+          if(clk_count >= p_clk_count_var)
             state <= `STATE_FIX_NEG_START;
 
 
@@ -515,7 +517,7 @@ module adc_modulation (
 
         `STATE_FIX_NEG:
           // TODO add switch here for 3 phase modulation variation.
-          if(clk_count >= clk_count_fix_n)
+          if(clk_count >= p_clk_count_fix)
             state <= `STATE_VAR2_START;
 
         // variable direction
@@ -548,7 +550,7 @@ module adc_modulation (
 
         */
         `STATE_VAR2:
-          if(clk_count >= clk_count_var_n)
+          if(clk_count >= p_clk_count_var)
             begin
               // signal integration finished.
               if( !sig_active )
@@ -592,7 +594,7 @@ module adc_modulation (
             end
 
         `STATE_FAST_ABOVE:
-          if(clk_count >= clk_count_fix_n)
+          if(clk_count >= p_clk_count_fix)
             begin
              if( comparator_val_last) // below zero-cross
               state   <= `STATE_FAST_BELOW_START;     // go to the above
@@ -610,7 +612,7 @@ module adc_modulation (
             end
 
         `STATE_FAST_BELOW:
-          if(clk_count >= clk_count_fix_n)
+          if(clk_count >= p_clk_count_fix)
             begin
              if( ! comparator_val_last) // above zero-cross
               state   <= `STATE_PRERUNDOWN_START;   // go to prerundown
@@ -645,7 +647,7 @@ module adc_modulation (
           // EXTR. this can just keep driving up, without transitions, and testing until hit the zero cross.
           // No. i think it would actually depend on whether the last /
           // then we get
-          if(clk_count >= clk_count_fix_n)
+          if(clk_count >= p_clk_count_fix)
             state <= `STATE_RUNDOWN_START;
 
 
