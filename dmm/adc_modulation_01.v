@@ -143,7 +143,7 @@ module adc_modulation (
 
 
   // behavior/transition counts
-  output reg [24-1:0] count_up_last,
+  output reg [24-1:0] count_up_last,        // var_up. perhaps rename.
   output reg [24-1:0] count_down_last,
   output reg [24-1:0] count_trans_up_last,
   output reg [24-1:0] count_trans_down_last,

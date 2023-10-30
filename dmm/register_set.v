@@ -41,6 +41,7 @@
 
 //  add the AQUIS or SA for sample acquisition.
 `define REG_SA_ARM_TRIGGER   19
+// `define REG_SA_STAMP     19        // hi or lo. could be put on status register. too.
 
 
 `define REG_ADC_P_APERTURE 20   // clk sample time. change name aperture.
