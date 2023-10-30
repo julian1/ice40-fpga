@@ -143,8 +143,8 @@ module adc_modulation (
 
 
   // behavior/transition counts
-  output reg [24-1:0] count_up_last,        // var_up. perhaps rename.
-  output reg [24-1:0] count_down_last,
+  output reg [24-1:0] count_var_up_last,        // var_up. perhaps rename.
+  output reg [24-1:0] count_var_down_last,
   output reg [24-1:0] count_trans_up_last,
   output reg [24-1:0] count_trans_down_last,
   output reg [24-1:0] count_fix_up_last,
@@ -191,8 +191,8 @@ module adc_modulation (
   reg [31:0]  clk_count;           // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
 
   // modulation counts
-  reg [24-1:0] count_up;
-  reg [24-1:0] count_down;
+  reg [24-1:0] count_var_up;
+  reg [24-1:0] count_var_down;
   reg [24-1:0] count_trans_up;
   reg [24-1:0] count_trans_down;
   reg [24-1:0] count_fix_up;
@@ -313,8 +313,8 @@ module adc_modulation (
         it might also be more cycle accurate - given the phase transition setup, and comparator reads etc.
         but would need 32 bit values.
         - reduces spi overhead. if supported 32 byte reads.
-        - reduces littering of count_up/count_down
-        - reduces having to multiply out clk_count_var * count_up etc.
+        - reduces littering of count_var_up/count_var_down
+        - reduces having to multiply out clk_count_var * count_var_up etc.
         - enables having non standar variable periods. eg. to reduce extra cycling to get to the other side.
         ------
         the way to evaluate is to use stderr(regression).
@@ -431,8 +431,8 @@ module adc_modulation (
             clk_count       <= 0;
 
             // clear the counts
-            count_up        <= 0;
-            count_down      <= 0;
+            count_var_up        <= 0;
+            count_var_down      <= 0;
             count_fix_up    <= 0;
             count_fix_down  <= 0;
             count_trans_up  <= 0;
@@ -492,12 +492,12 @@ module adc_modulation (
             if( comparator_val_last)   // test below the zero-cross
               begin
                 refmux    <= `MUX_REF_NEG;  // add negative ref. to drive up.
-                count_up  <= count_up + 1;
+                count_var_up  <= count_var_up + 1;
               end
             else
               begin
                 refmux    <= `MUX_REF_POS;
-                count_down <= count_down + 1;
+                count_var_down <= count_var_down + 1;
               end
           end
 
@@ -538,12 +538,12 @@ module adc_modulation (
             if( comparator_val_last) // below zero-cross
               begin
                 refmux    <= `MUX_REF_NEG;
-                count_up  <= count_up + 1;
+                count_var_up  <= count_var_up + 1;
               end
             else
               begin
                 refmux    <= `MUX_REF_POS;
-                count_down <= count_down + 1;
+                count_var_down <= count_var_down + 1;
               end
           end
 
@@ -696,8 +696,8 @@ module adc_modulation (
                 // com_interupt            <= 0;   // active lo, set interupt
 
                 // record behaviior/transition counts asap. on this immeidate clk cycle.
-                count_up_last           <= count_up;
-                count_down_last         <= count_down;
+                count_var_up_last           <= count_var_up;
+                count_var_down_last         <= count_var_down;
                 count_trans_up_last     <= count_trans_up; // OK. this works.
                 count_trans_down_last   <= count_trans_down;
                 count_fix_up_last       <= count_fix_up;
@@ -782,7 +782,7 @@ module adc_modulation (
               resetmux = 1'b0;
 
               // set sample/measure period
-              clk_count_down  <= clk_sample_duration;
+              clk_count_var_down  <= clk_sample_duration;
 
 
               monitor     <=  6'b000000;
