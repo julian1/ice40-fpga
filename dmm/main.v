@@ -69,7 +69,7 @@
 `define IDX_MONITOR           14    // 14,15,16,17,  18,19,20,21   think pin 14.
 `define IDX_ADC_REF            22    // 22,23,24,25  .  change name refmux. for reference current or adcrefmux
 `define IDX_CMPR_LATCH_CTL    26
-`define IDX_MEAS_COMPLETE_CTL 27
+`define IDX_MEAS_COMPLETE_CTL 27      // perhaps change name meas_valid,  or sample_valid.  to reflect the trig,valid control interface.
 `define IDX_SPI_INTERUPT_CTL  28
 
 
