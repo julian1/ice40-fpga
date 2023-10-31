@@ -382,6 +382,82 @@ module top (
 
 
 
+
+
+  ///////////////////////////////////////////////
+
+
+  // TODO - remove _last suffix.
+  wire [24-1:0] adc2_clk_count_mux_neg_last;    // maybe add reg_ prefix. No. they are not registers, until they are in the register_bank context.
+  wire [24-1:0] adc2_clk_count_mux_pos_last;
+  wire [24-1:0] adc2_clk_count_mux_rd_last;
+  wire [32-1:0] adc2_clk_count_mux_sig_last;
+
+  wire [6-1: 0 ] adc2_monitor;
+  wire [4-1: 0 ] adc2_mux;
+  wire           adc2_cmpr_latch_ctrl;
+
+  wire          adc2_measure_trig;
+  wire          adc2_measure_valid;
+
+
+
+  adc_modulation
+  adc2(
+
+    .clk(CLK),
+    // .reset( 1'b0 ), // not needed. always interruptable.
+
+    // inputs
+    .adc_measure_trig( adc2_measure_trig),
+    .comparator_val( CMPR_P_OUT ),
+/*
+    clk_count_reset_n   =  10000;
+    // 26MHz ???
+    clk_count_var_n     = 185;    // 330pF
+    clk_count_fix_n     = 24;   // 24 is faster than 23... weird.
+
+    clk_count_aper_n    = (2 * 2000000);    // ? 200ms TODO check this.
+                                            // yes. 4000000 == 10PNLC, 5 sps.
+    use_slow_rundown    = 1;
+    use_fast_rundown    = 1;
+*/
+    // ctrl parameters
+    . p_clk_count_reset( 24'd10000 ) ,
+    . p_clk_count_fix( 24'd24 ) ,
+    . p_clk_count_var( 24'd185 ) ,
+    // . p_clk_count_aper( 2 * 2000000) ,
+    . p_clk_count_aper( reg_adc_p_aperture),
+
+    . use_slow_rundown( 1'b1 ),
+    . use_fast_rundown( 1'b1 ),
+
+
+    // outputs - ctrl
+    .adc_measure_valid( adc2_measure_valid),    // fan out.
+    .cmpr_latch_ctl( adc2_cmpr_latch_ctrl   ),
+    .monitor(  adc2_monitor  ),
+    .refmux(  { adc2_mux[  3  ],  adc2_mux[ 0 +: 2 ]   } ),           // pos, neg, reset. are on two different 4053,
+    .sigmux(    adc2_mux[  2  ] ),                                    // perhaps clearer if split into adcrefmux and adcsigmux in the wire assignment. but it would then need two vars.
+                                                                      // which isn't representative of the single synchronizer. so do it here instead.
+
+    // clk_count outputs, for currents
+    .clk_count_mux_neg_last(  adc2_clk_count_mux_neg_last),
+    .clk_count_mux_pos_last(  adc2_clk_count_mux_pos_last),
+    .clk_count_mux_rd_last(   adc2_clk_count_mux_rd_last),
+    .clk_count_mux_sig_last(  adc2_clk_count_mux_sig_last )
+
+  );
+
+  /*
+	  key insight - is that the single module adc, can fan-out its outputs into two sets of output vecs -
+      to achieve modal behavior - in more than one mode.
+  */
+
+
+
+
+
   /////////////////////
   /*
     - can have another mux deccoder. to hold/control the adc/modulation - using the reset pin. this would be quite nice.
@@ -396,21 +472,19 @@ module top (
     - the adc refmux, sig. should be very easy to wire up - under the same system.
     - we can/could also pass in a reset argument. based on mode.
   */
-  wire adc2_measure_trig;
-  wire adc2_measure_valid;
 
-  wire [ `NUM_BITS-1:0 ]  sample_acquisition_az_out ;     // beter name ... it is the sample control, and adc.
-  wire sample_acquisition_az_adc2_measure_trig;
+  wire [ `NUM_BITS-1:0 ]  sample_acquisition_az_out ;     // beter name ... _outputs_vec  .
+  wire sample_acquisition_az_adc2_measure_trig;       // perhaps
 
   sample_acquisition_az
   sample_acquisition_az (
 
-    // inputs
     .clk(CLK),
     .reset( reg_reset[ 0 ] ),   // TODO - remove. should always be interruptable.
+
+    // inputs
     .azmux_lo_val(  reg_direct[  `IDX_AZMUX +: 4 ] ),
     .adc_measure_valid(   adc2_measure_valid ),
-
 
     // outputs
     .sw_pc_ctl( sample_acquisition_az_out[ `IDX_SIG_PC_SW_CTL ]  ),
@@ -421,25 +495,29 @@ module top (
     .adc_measure_trig( sample_acquisition_az_adc2_measure_trig)
   );
 
+  // from reg_direct
   assign sample_acquisition_az_out[ `IDX_HIMUX +: 8 ]		    = reg_direct[ `IDX_HIMUX +: 8 ];        // himux and hiimux 2.
   assign sample_acquisition_az_out[ `IDX_SPI_INTERRUPT_CTL ] = reg_direct[ `IDX_SPI_INTERRUPT_CTL ];      // TODO FIXME
   assign sample_acquisition_az_out[ `IDX_MEAS_COMPLETE_CTL] = reg_direct[ `IDX_MEAS_COMPLETE_CTL ];
 
+  // fanout from adc
+  assign sample_acquisition_az_out[ `IDX_CMPR_LATCH_CTL ]      = adc2_cmpr_latch_ctrl;
+  assign sample_acquisition_az_out[ `IDX_MONITOR + 2 +: 6 ]    = adc2_monitor;
+  assign sample_acquisition_az_out[ `IDX_ADCMUX +: 4 ]         = adc2_mux;
 
 
 
 
 
-  wire [ `NUM_BITS-1:0 ]  sample_acquisition_no_az_out ;  // beter name ... it is the sample control, and adc.
+  wire [ `NUM_BITS-1:0 ]  sample_acquisition_no_az_out ;  // beter name ... _outputs_vec ?
   wire sample_acquisition_no_az_adc2_measure_trig;
 
   sample_acquisition_no_az
   sample_acquisition_no_az (
-    // inputs
     .clk(CLK),
 
+    // inputs
     .adc_measure_valid(adc2_measure_valid),
-
     .arm_trigger( reg_sa_arm_trigger[0 ]  ) ,
 
     // outputs
@@ -451,6 +529,7 @@ module top (
 
   );
 
+  // from reg_direct
   // pass control for muxes and pc switch to reg_direct
   assign sample_acquisition_no_az_out[ `IDX_SIG_PC_SW_CTL ] = reg_direct[ `IDX_SIG_PC_SW_CTL ];   // eg. azero off - `SW_PC_SIGNAL ;
   assign sample_acquisition_no_az_out[ `IDX_AZMUX +: 4]     = reg_direct[ `IDX_AZMUX +: 4];       // eg. azero off - `S1;  //  pc-out
@@ -459,6 +538,12 @@ module top (
   // we may want to keep under direct_reg control, rather than pass to sampler controller.
   // so mcu can signal after result calculation, not just after counts obtained
   assign sample_acquisition_no_az_out[ `IDX_MEAS_COMPLETE_CTL ] = reg_direct[ `IDX_MEAS_COMPLETE_CTL ];
+
+
+  // fanout from adc
+  assign sample_acquisition_no_az_out[ `IDX_CMPR_LATCH_CTL ]   = adc2_cmpr_latch_ctrl;
+  assign sample_acquisition_no_az_out[ `IDX_MONITOR + 2 +: 6 ] = adc2_monitor;
+  assign sample_acquisition_no_az_out[ `IDX_ADCMUX +: 4 ]      = adc2_mux;
 
 
 
@@ -494,81 +579,6 @@ module top (
 
 
  /////////////////////
-
-
-  // TODO - remove _last suffix.
-  wire [24-1:0] adc2_clk_count_mux_neg_last;
-  wire [24-1:0] adc2_clk_count_mux_pos_last;
-  wire [24-1:0] adc2_clk_count_mux_rd_last;
-  wire [32-1:0] adc2_clk_count_mux_sig_last;
-
-  wire [6-1: 0 ] adc2_monitor;
-  wire [4-1: 0 ] adc2_mux;
-  wire           adc2_cmpr_latch_ctrl;
-
-
-  adc_modulation
-  adc2(
-
-    .clk(CLK),
-    // .reset( 1'b0 ), // not needed. always interruptable.
-
-    // inputs
-    .adc_measure_trig( adc2_measure_trig),
-    .comparator_val( CMPR_P_OUT ),
-/*
-    clk_count_reset_n   =  10000;
-    // 26MHz ???
-    clk_count_var_n     = 185;    // 330pF
-    clk_count_fix_n     = 24;   // 24 is faster than 23... weird.
-
-    clk_count_aper_n    = (2 * 2000000);    // ? 200ms TODO check this.
-                                            // yes. 4000000 == 10PNLC, 5 sps.
-    use_slow_rundown    = 1;
-    use_fast_rundown    = 1;
-*/
-    // ctrl parameters
-
-    . p_clk_count_reset( 24'd10000 ) ,
-    . p_clk_count_fix( 24'd24 ) ,
-    . p_clk_count_var( 24'd185 ) ,
-
-    // . p_clk_count_aper( 2 * 2000000) ,
-    . p_clk_count_aper( reg_adc_p_aperture),
-
-    . use_slow_rundown( 1'b1 ),
-    . use_fast_rundown( 1'b1 ),
-
-    // outputs - ctrl
-    .adc_measure_valid( adc2_measure_valid),    // fan out.
-    .cmpr_latch_ctl( adc2_cmpr_latch_ctrl   ),
-    .monitor(  adc2_monitor  ),
-    .refmux(  { adc2_mux[  3  ],  adc2_mux[ 0 +: 2 ]   } ),           // pos, neg, reset. are on two different 4053,
-    .sigmux(    adc2_mux[  2  ] ),                                    // perhaps clearer if split into adcrefmux and adcsigmux in the wire assignment. but it would then need two vars.
-                                                                      // which isn't representative of the single synchronizer. so do it here instead.
-
-    // clk_count outputs, for currents
-    .clk_count_mux_neg_last(  adc2_clk_count_mux_neg_last),
-    .clk_count_mux_pos_last(  adc2_clk_count_mux_pos_last),
-    .clk_count_mux_rd_last(   adc2_clk_count_mux_rd_last),
-    .clk_count_mux_sig_last(  adc2_clk_count_mux_sig_last )
-
-  );
-
-  /*
-	  key insight - the single module adc can fan-out its outputs into two output vecs - to be active across two modes.
-
-    - TODO move up - to where there are all assigned.
-  */
-
-  // az out follows no-az out -
-  assign sample_acquisition_az_out[ `IDX_CMPR_LATCH_CTL ]      = adc2_cmpr_latch_ctrl;
-  assign sample_acquisition_az_out[ `IDX_MONITOR + 2 +: 6 ]    = adc2_monitor;
-  assign sample_acquisition_az_out[ `IDX_ADCMUX +: 4 ]         = adc2_mux;
-
-  assign sample_acquisition_no_az_out[ `IDX_CMPR_LATCH_CTL ]   = adc2_cmpr_latch_ctrl;
-  assign sample_acquisition_no_az_out[ `IDX_MONITOR + 2 +: 6 ] = adc2_monitor;
-  assign sample_acquisition_no_az_out[ `IDX_ADCMUX +: 4 ]      = adc2_mux;
 
 
 /*
