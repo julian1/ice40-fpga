@@ -496,9 +496,9 @@ module top (
   );
 
   // from reg_direct
-  assign sample_acquisition_az_out[ `IDX_HIMUX +: 8 ]		    = reg_direct[ `IDX_HIMUX +: 8 ];        // himux and hiimux 2.
-  assign sample_acquisition_az_out[ `IDX_SPI_INTERRUPT_CTL ] = reg_direct[ `IDX_SPI_INTERRUPT_CTL ];      // TODO FIXME - pass to the sample acquisition controller
-  assign sample_acquisition_az_out[ `IDX_MEAS_COMPLETE_CTL] = reg_direct[ `IDX_MEAS_COMPLETE_CTL ];
+  assign sample_acquisition_az_out[ `IDX_HIMUX +: 8 ]		        = reg_direct[ `IDX_HIMUX +: 8 ];        // himux and hiimux 2.
+  assign sample_acquisition_az_out[ `IDX_SPI_INTERRUPT_CTL ]    = reg_direct[ `IDX_SPI_INTERRUPT_CTL ];      // TODO FIXME - pass to the sample acquisition controller
+  assign sample_acquisition_az_out[ `IDX_MEAS_COMPLETE_CTL]     = reg_direct[ `IDX_MEAS_COMPLETE_CTL ];
 
   // fanout from adc
   assign sample_acquisition_az_out[ `IDX_CMPR_LATCH_CTL ]      = adc2_cmpr_latch_ctrl;
@@ -531,9 +531,9 @@ module top (
 
   // from reg_direct
   // pass control for muxes and pc switch to reg_direct
-  assign sample_acquisition_no_az_out[ `IDX_HIMUX +: 8 ]    = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
-  assign sample_acquisition_no_az_out[ `IDX_AZMUX +: 4]     = reg_direct[ `IDX_AZMUX +: 4];       // eg. azero off - `S1;  //  pc-out
-  assign sample_acquisition_no_az_out[ `IDX_SIG_PC_SW_CTL ] = reg_direct[ `IDX_SIG_PC_SW_CTL ];   // eg. azero off - `SW_PC_SIGNAL ;
+  assign sample_acquisition_no_az_out[ `IDX_HIMUX +: 8 ]      = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
+  assign sample_acquisition_no_az_out[ `IDX_AZMUX +: 4]       = reg_direct[ `IDX_AZMUX +: 4];       // eg. azero off - `S1;  //  pc-out
+  assign sample_acquisition_no_az_out[ `IDX_SIG_PC_SW_CTL ]   = reg_direct[ `IDX_SIG_PC_SW_CTL ];   // eg. azero off - `SW_PC_SIGNAL ;
 
   // we may want to keep under direct_reg control, rather than pass to sampler controller.
   // so mcu can signal after result calculation, not just after counts obtained
@@ -541,9 +541,9 @@ module top (
 
 
   // fanout from adc
-  assign sample_acquisition_no_az_out[ `IDX_CMPR_LATCH_CTL ]   = adc2_cmpr_latch_ctrl;
-  assign sample_acquisition_no_az_out[ `IDX_MONITOR + 2 +: 6 ] = adc2_monitor;
-  assign sample_acquisition_no_az_out[ `IDX_ADCMUX +: 4 ]      = adc2_mux;
+  assign sample_acquisition_no_az_out[ `IDX_CMPR_LATCH_CTL ]  = adc2_cmpr_latch_ctrl;
+  assign sample_acquisition_no_az_out[ `IDX_MONITOR + 2 +: 6] = adc2_monitor;
+  assign sample_acquisition_no_az_out[ `IDX_ADCMUX +: 4 ]     = adc2_mux;
 
 
 
