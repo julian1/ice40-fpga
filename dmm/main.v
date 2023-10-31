@@ -67,7 +67,7 @@
 `define IDX_SIG_PC_SW_CTL     12
 `define IDX_LED0              13
 `define IDX_MONITOR           14    // 14,15,16,17,  18,19,20,21   think pin 14.
-`define IDX_ADCMUX            22    // 22,23,24,25  .  muxes both reference currents and signal. across 2x '4053.
+`define IDX_ADCMUX            22    // 22,23,24,25  .  muxes both reference currents and signal. across 2x '4053. on one synchronizer.
 `define IDX_CMPR_LATCH_CTL    26
 `define IDX_MEAS_COMPLETE_CTL 27      // perhaps change name meas_valid,  or sample_valid.  to reflect the trig,valid control interface.
 `define IDX_SPI_INTERUPT_CTL  28
@@ -318,7 +318,7 @@ module top (
 
   wire [8-1: 0] monitor = { MON7, MON6, MON5,MON4, MON3, MON2, MON1, MON0 } ;
 
-  wire [4-1:0 ] adcmux =  { U902_SW3_CTL, U902_SW2_CTL, U902_SW1_CTL, U902_SW0_CTL };    // U902
+  wire [4-1:0 ] adcmux =  { U902_SW3_CTL, U902_SW2_CTL, U902_SW1_CTL, U902_SW0_CTL };    // U902 synchronizer
 
 
 
