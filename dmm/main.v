@@ -502,6 +502,9 @@ module top (
   wire [24-1:0] adc2_clk_count_mux_rd_last;
   wire [32-1:0] adc2_clk_count_mux_sig_last;
 
+  wire [6-1: 0 ] adc2_monitor;
+  wire [4-1: 0 ] adc2_mux;
+  wire           adc2_cmpr_latch_ctrl;
 
 
   adc_modulation
@@ -538,10 +541,11 @@ module top (
 
     // outputs - ctrl
     .adc_measure_valid( adc2_measure_valid),    // fan out.
-    .cmpr_latch_ctl(sample_acquisition_no_az_out[ `IDX_CMPR_LATCH_CTL ] ),
-    .monitor(   sample_acquisition_no_az_out[ `IDX_MONITOR + 2 +: 6 ] ),
-    .refmux(  { sample_acquisition_no_az_out[ `IDX_ADCMUX + 3  ],  sample_acquisition_no_az_out[ `IDX_ADCMUX +: 2 ]   } ),      // pos, neg, reset. on two different 4053,
-    .sigmux(    sample_acquisition_no_az_out[ `IDX_ADCMUX + 2  ] ),                                     // change name to switch perhaps?,
+    .cmpr_latch_ctl( adc2_cmpr_latch_ctrl   ),
+    .monitor(  adc2_monitor  ),
+    .refmux(  { adc2_mux[  3  ],  adc2_mux[ 0 +: 2 ]   } ),           // pos, neg, reset. are on two different 4053,
+    .sigmux(    adc2_mux[  2  ] ),                                    // perhaps clearer if split into adcrefmux and adcsigmux in the wire assignment. but it would then need two vars.
+                                                                      // which isn't representative of the single synchronizer. so do it here instead.
 
     // clk_count outputs, for currents
     .clk_count_mux_neg_last(  adc2_clk_count_mux_neg_last),
@@ -552,23 +556,19 @@ module top (
   );
 
   /*
-	key insight - the single module adc can fan-out its outputs into two output vecs - to be active across two modes.
-	-------
-    this is confusing because of naming.  it's not az_out or no_az_out. instead both follow the adc_out that is driver.
-    it's actually adc out. that gets outputed - to both both these vectors.
-    ---
-    it might be eaiser. to have another register. then assign both.
-    eg.   adc_monitor, adc_ref_mux.
+	  key insight - the single module adc can fan-out its outputs into two output vecs - to be active across two modes.
+
+    - TODO move up - to where there are all assigned.
   */
 
   // az out follows no-az out -
-  assign sample_acquisition_az_out[ `IDX_CMPR_LATCH_CTL ]    = sample_acquisition_no_az_out[ `IDX_CMPR_LATCH_CTL ] ;
-  assign sample_acquisition_az_out[ `IDX_MONITOR + 2 +: 6 ]  = sample_acquisition_no_az_out[ `IDX_MONITOR + 2 +: 6 ];
-  assign sample_acquisition_az_out[ `IDX_ADCMUX +: 4 ]   = sample_acquisition_no_az_out[ `IDX_ADCMUX +: 4 ]    ;
+  assign sample_acquisition_az_out[ `IDX_CMPR_LATCH_CTL ]      = adc2_cmpr_latch_ctrl;
+  assign sample_acquisition_az_out[ `IDX_MONITOR + 2 +: 6 ]    = adc2_monitor;
+  assign sample_acquisition_az_out[ `IDX_ADCMUX +: 4 ]         = adc2_mux;
 
-
-
-
+  assign sample_acquisition_no_az_out[ `IDX_CMPR_LATCH_CTL ]   = adc2_cmpr_latch_ctrl;
+  assign sample_acquisition_no_az_out[ `IDX_MONITOR + 2 +: 6 ] = adc2_monitor;
+  assign sample_acquisition_no_az_out[ `IDX_ADCMUX +: 4 ]      = adc2_mux;
 
 
 /*
