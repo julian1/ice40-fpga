@@ -392,8 +392,12 @@ module top (
     - the adc refmux, sig. should be very easy to wire up - under the same system.
     - we can/could also pass in a reset argument. based on mode.
   */
+  wire adc2_measure_trig;
+  wire adc2_measure_valid;
 
   wire [ `NUM_BITS-1:0 ]  sample_acquisition_az_out ;     // beter name ... it is the sample control, and adc.
+
+/*
   wire adc1_measure_trig;
   wire adc1_measure_valid;
 
@@ -407,13 +411,17 @@ module top (
 
     // outputs
     .adc_measure_valid(adc1_measure_valid),
+
     .cmpr_latch(sample_acquisition_az_out[ `IDX_CMPR_LATCH_CTL ] ),
     .monitor(   sample_acquisition_az_out[ `IDX_MONITOR + 2 +: 6 ]  ),
     .refmux(    sample_acquisition_az_out[ `IDX_ADC_REF +: 2 ]),      // reference current, better name?
     .sigmux(    sample_acquisition_az_out[ `IDX_ADC_REF + 2  ] ),      // change name to switch perhaps?,
     .resetmux(  sample_acquisition_az_out[ `IDX_ADC_REF + 3  ] )     // ang mux.
-  );
 
+  );
+*/
+
+  wire sample_acquisition_az_adc2_measure_trig;
 
   sample_acquisition_az
   sample_acquisition_az (
@@ -422,7 +430,8 @@ module top (
     .clk(CLK),
     .reset( reg_reset[ 0 ] ),   // TODO - remove. should always be interuptable.
     .azmux_lo_val(  reg_direct[  `IDX_AZMUX +: 4 ] ),
-    .adc_measure_valid(adc1_measure_valid),
+    .adc_measure_valid(   adc2_measure_valid ),
+
 
     // outputs
     .sw_pc_ctl( sample_acquisition_az_out[ `IDX_SIG_PC_SW_CTL ]  ),
@@ -430,7 +439,7 @@ module top (
     .led0(      sample_acquisition_az_out[ `IDX_LED0 ] ),
     .monitor(   sample_acquisition_az_out[ `IDX_MONITOR +: 2  ] ),    // only pass 2 bit to the az monitor
 
-    .adc_measure_trig( adc1_measure_trig)
+    .adc_measure_trig( sample_acquisition_az_adc2_measure_trig)
   );
 
   assign sample_acquisition_az_out[ `IDX_HIMUX +: 8 ]  = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
@@ -444,8 +453,6 @@ module top (
 
 
   wire [ `NUM_BITS-1:0 ]  sample_acquisition_no_az_out ;  // beter name ... it is the sample control, and adc.
-  wire adc2_measure_trig;
-  wire adc2_measure_valid;
 
   wire [24-1:0] adc2_clk_count_mux_neg_last;
   wire [24-1:0] adc2_clk_count_mux_pos_last;
@@ -520,10 +527,20 @@ module top (
 
   );
 
+  // az out follows no-az out - 
+  assign sample_acquisition_az_out[ `IDX_CMPR_LATCH_CTL ]    = sample_acquisition_no_az_out[ `IDX_CMPR_LATCH_CTL ] ;
+  assign sample_acquisition_az_out[ `IDX_MONITOR + 2 +: 6 ]  = sample_acquisition_no_az_out[ `IDX_MONITOR + 2 +: 6 ];
+  assign sample_acquisition_az_out[ `IDX_ADC_REF +: 4 ]      = sample_acquisition_no_az_out[ `IDX_ADC_REF +: 4 ]    ; 
+
+
+
+
 
   //  change name sampler_. or just sample_no_az
 
   // no. change name sample_acquisition_no_az.
+
+  wire sample_acquisition_no_az_adc2_measure_trig;
 
   sample_acquisition_no_az
   sample_acquisition_no_az (
@@ -537,7 +554,8 @@ module top (
     // outputs
     .led0(      sample_acquisition_no_az_out[ `IDX_LED0 ] ),
     .monitor(   sample_acquisition_no_az_out[ `IDX_MONITOR +: 2  ] ),    // we could pass subset of monitor if watned. eg. only 4 pins...
-    .adc_measure_trig( adc2_measure_trig),
+    // .adc_measure_trig( adc2_measure_trig),
+    .adc_measure_trig( sample_acquisition_no_az_adc2_measure_trig),
 
     .spi_interupt_ctl( sample_acquisition_no_az_out[ `IDX_SPI_INTERUPT_CTL  ] )
 
@@ -566,20 +584,20 @@ module top (
   ////////////////
 
 
-  mux_8to1_assign #( `NUM_BITS )
+  mux_8to1_assign #( `NUM_BITS + 1 )
   mux_8to1_assign_1  (
 
-    .a( { { 15 { 1'b0 } },  reg_led[ 0], { 13 { 1'b0 } } }    ),        // 0. deffault mode. 0 on all outputs, except follow reg_led, for led.
-    .b( { `NUM_BITS { 1'b1 } } ),             // 1.
-    .c( test_pattern_out ),                   // 2
-    .d( reg_direct[ `NUM_BITS - 1 :  0 ]   ), // 3.    // when we pass a hard-coded value in here...  then read/write reg_direct works.  // it is very strange.
-    .e( sample_acquisition_pc_out),                   // 4
-    .f( sample_acquisition_az_out),                   // 5
-    .g( sample_acquisition_no_az_out),                // 6
-    .h( { `NUM_BITS { 1'b1 } } ),             // 7
+    .a( { 1'b0, { 15 { 1'b0 } },  reg_led[ 0], { 13 { 1'b0 } } }    ),        // 0. deffault mode. 0 on all outputs, except follow reg_led, for led.
+    .b( { 1'b0, { `NUM_BITS { 1'b1 } } } ),             // 1.
+    .c( { 1'b0, test_pattern_out } ),                   // 2
+    .d( { 1'b0, reg_direct[ `NUM_BITS - 1 :  0 ]  } ), // 3.    // when we pass a hard-coded value in here...  then read/write reg_direct works.  // it is very strange.
+    .e( { 1'b0, sample_acquisition_pc_out} ),                   // 4
+    .f( { sample_acquisition_az_adc2_measure_trig,    sample_acquisition_az_out } ),                   // 5
+    .g( { sample_acquisition_no_az_adc2_measure_trig, sample_acquisition_no_az_out } ),                // 6
+    .h( { 1'b0, { `NUM_BITS { 1'b1 } } } ),             // 7
 
     .sel( reg_mode[ 2 : 0 ]),
-    .out( outputs_vec )
+    .out( { adc2_measure_trig,  outputs_vec }  )
   );
 
 
