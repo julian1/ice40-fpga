@@ -473,7 +473,7 @@ module top (
     - we can/could also pass in a reset argument. based on mode.
   */
 
-  wire [ `NUM_BITS-1:0 ]  sample_acquisition_az_out ;     // beter name ... _outputs_vec  .
+  wire [ `NUM_BITS-1:0 ]  sample_acquisition_az_out ;     // beter name ... sa_az_outputs_vec  .
   wire sample_acquisition_az_adc2_measure_trig;       // perhaps
 
   sample_acquisition_az
@@ -508,6 +508,7 @@ module top (
 
 
 
+  // beter name ... sa_no_az_outputs_vec  .
 
   wire [ `NUM_BITS-1:0 ]  sample_acquisition_no_az_out ;  // beter name ... _outputs_vec ?
   wire sample_acquisition_no_az_adc2_measure_trig;
