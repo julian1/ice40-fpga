@@ -449,7 +449,80 @@ module top (
 
 
 
-  /////////////////////
+ 
+
+
+
+  //  change name sampler_. or just sample_no_az
+
+  // no. change name sample_acquisition_no_az.
+
+  wire sample_acquisition_no_az_adc2_measure_trig;
+
+  sample_acquisition_no_az
+  sample_acquisition_no_az (
+    // inputs
+    .clk(CLK),
+
+    .adc_measure_valid(adc2_measure_valid),
+
+    .arm_trigger( reg_sa_arm_trigger[0 ]  ) ,
+
+    // outputs
+    .led0(      sample_acquisition_no_az_out[ `IDX_LED0 ] ),
+    .monitor(   sample_acquisition_no_az_out[ `IDX_MONITOR +: 2  ] ),    // we could pass subset of monitor if watned. eg. only 4 pins...
+    // .adc_measure_trig( adc2_measure_trig),
+    .adc_measure_trig( sample_acquisition_no_az_adc2_measure_trig),
+
+    .spi_interupt_ctl( sample_acquisition_no_az_out[ `IDX_SPI_INTERUPT_CTL  ] )
+
+  );
+
+  // pass control for muxes and pc switch to reg_direct
+  assign sample_acquisition_no_az_out[ `IDX_SIG_PC_SW_CTL ] = reg_direct[ `IDX_SIG_PC_SW_CTL ];   // eg. azero off - `SW_PC_SIGNAL ;
+  assign sample_acquisition_no_az_out[ `IDX_AZMUX +: 4]     = reg_direct[ `IDX_AZMUX +: 4];       // eg. azero off - `S1;  //  pc-out
+  assign sample_acquisition_no_az_out[ `IDX_HIMUX +: 8 ]    = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
+
+  // we may want to keep under direct_reg control, rather than pass to sampler controller.
+  // so mcu can signal after result calculation, not just after counts obtained
+  assign sample_acquisition_no_az_out[ `IDX_MEAS_COMPLETE_CTL ] = reg_direct[ `IDX_MEAS_COMPLETE_CTL ];
+
+
+
+
+  /*  use no_az for no azero and electrometer modes.
+      this pushes complexity up the stack from analog to fpga to mcu.  as soon as possible.
+      no az, and elecm. just need azmux and pc switch control given to mcu
+  */
+
+
+
+
+  ////////////////
+
+
+  mux_8to1_assign #( `NUM_BITS + 1 )
+  mux_8to1_assign_1  (
+
+    .a( { 1'b0, { 15 { 1'b0 } },  reg_led[ 0], { 13 { 1'b0 } } }    ),        // 0. deffault mode. 0 on all outputs, except follow reg_led, for led.
+    .b( { 1'b0, { `NUM_BITS { 1'b1 } } } ),             // 1.
+    .c( { 1'b0, test_pattern_out } ),                   // 2
+    .d( { 1'b0, reg_direct[ `NUM_BITS - 1 :  0 ]  } ), // 3.    // when we pass a hard-coded value in here...  then read/write reg_direct works.  // it is very strange.
+    .e( { 1'b0, sample_acquisition_pc_out} ),                   // 4
+    .f( { sample_acquisition_az_adc2_measure_trig,    sample_acquisition_az_out } ),                   // 5
+    .g( { sample_acquisition_no_az_adc2_measure_trig, sample_acquisition_no_az_out } ),                // 6
+    .h( { 1'b0, { `NUM_BITS { 1'b1 } } } ),             // 7
+
+    .sel( reg_mode[ 2 : 0 ]),
+    .out( { adc2_measure_trig,  outputs_vec }  )
+  );
+
+
+
+
+
+
+ /////////////////////
 
 
   wire [ `NUM_BITS-1:0 ]  sample_acquisition_no_az_out ;  // beter name ... it is the sample control, and adc.
@@ -531,74 +604,6 @@ module top (
   assign sample_acquisition_az_out[ `IDX_CMPR_LATCH_CTL ]    = sample_acquisition_no_az_out[ `IDX_CMPR_LATCH_CTL ] ;
   assign sample_acquisition_az_out[ `IDX_MONITOR + 2 +: 6 ]  = sample_acquisition_no_az_out[ `IDX_MONITOR + 2 +: 6 ];
   assign sample_acquisition_az_out[ `IDX_ADC_REF +: 4 ]      = sample_acquisition_no_az_out[ `IDX_ADC_REF +: 4 ]    ; 
-
-
-
-
-
-  //  change name sampler_. or just sample_no_az
-
-  // no. change name sample_acquisition_no_az.
-
-  wire sample_acquisition_no_az_adc2_measure_trig;
-
-  sample_acquisition_no_az
-  sample_acquisition_no_az (
-    // inputs
-    .clk(CLK),
-
-    .adc_measure_valid(adc2_measure_valid),
-
-    .arm_trigger( reg_sa_arm_trigger[0 ]  ) ,
-
-    // outputs
-    .led0(      sample_acquisition_no_az_out[ `IDX_LED0 ] ),
-    .monitor(   sample_acquisition_no_az_out[ `IDX_MONITOR +: 2  ] ),    // we could pass subset of monitor if watned. eg. only 4 pins...
-    // .adc_measure_trig( adc2_measure_trig),
-    .adc_measure_trig( sample_acquisition_no_az_adc2_measure_trig),
-
-    .spi_interupt_ctl( sample_acquisition_no_az_out[ `IDX_SPI_INTERUPT_CTL  ] )
-
-  );
-
-  // pass control for muxes and pc switch to reg_direct
-  assign sample_acquisition_no_az_out[ `IDX_SIG_PC_SW_CTL ] = reg_direct[ `IDX_SIG_PC_SW_CTL ];   // eg. azero off - `SW_PC_SIGNAL ;
-  assign sample_acquisition_no_az_out[ `IDX_AZMUX +: 4]     = reg_direct[ `IDX_AZMUX +: 4];       // eg. azero off - `S1;  //  pc-out
-  assign sample_acquisition_no_az_out[ `IDX_HIMUX +: 8 ]    = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
-
-  // we may want to keep under direct_reg control, rather than pass to sampler controller.
-  // so mcu can signal after result calculation, not just after counts obtained
-  assign sample_acquisition_no_az_out[ `IDX_MEAS_COMPLETE_CTL ] = reg_direct[ `IDX_MEAS_COMPLETE_CTL ];
-
-
-
-
-  /*  use no_az for no azero and electrometer modes.
-      this pushes complexity up the stack from analog to fpga to mcu.  as soon as possible.
-      no az, and elecm. just need azmux and pc switch control given to mcu
-  */
-
-
-
-
-  ////////////////
-
-
-  mux_8to1_assign #( `NUM_BITS + 1 )
-  mux_8to1_assign_1  (
-
-    .a( { 1'b0, { 15 { 1'b0 } },  reg_led[ 0], { 13 { 1'b0 } } }    ),        // 0. deffault mode. 0 on all outputs, except follow reg_led, for led.
-    .b( { 1'b0, { `NUM_BITS { 1'b1 } } } ),             // 1.
-    .c( { 1'b0, test_pattern_out } ),                   // 2
-    .d( { 1'b0, reg_direct[ `NUM_BITS - 1 :  0 ]  } ), // 3.    // when we pass a hard-coded value in here...  then read/write reg_direct works.  // it is very strange.
-    .e( { 1'b0, sample_acquisition_pc_out} ),                   // 4
-    .f( { sample_acquisition_az_adc2_measure_trig,    sample_acquisition_az_out } ),                   // 5
-    .g( { sample_acquisition_no_az_adc2_measure_trig, sample_acquisition_no_az_out } ),                // 6
-    .h( { 1'b0, { `NUM_BITS { 1'b1 } } } ),             // 7
-
-    .sel( reg_mode[ 2 : 0 ]),
-    .out( { adc2_measure_trig,  outputs_vec }  )
-  );
 
 
 
