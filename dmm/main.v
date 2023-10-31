@@ -484,7 +484,7 @@ module top (
 
     // inputs
     .azmux_lo_val(  reg_direct[  `IDX_AZMUX +: 4 ] ),
-    .adc_measure_valid(   adc2_measure_valid ),
+    .adc_measure_valid(   adc2_measure_valid ),                     // fan-in from adc
 
     // outputs
     .sw_pc_ctl( sample_acquisition_az_out[ `IDX_SIG_PC_SW_CTL ]  ),
@@ -517,7 +517,7 @@ module top (
     .clk(CLK),
 
     // inputs
-    .adc_measure_valid(adc2_measure_valid),
+    .adc_measure_valid( adc2_measure_valid ),                     // fan-in from adc
     .arm_trigger( reg_sa_arm_trigger[0 ]  ) ,
 
     // outputs
