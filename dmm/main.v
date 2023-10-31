@@ -67,7 +67,7 @@
 `define IDX_SIG_PC_SW_CTL     12
 `define IDX_LED0              13
 `define IDX_MONITOR           14    // 14,15,16,17,  18,19,20,21   think pin 14.
-`define IDX_ADC_REFMUX            22    // 22,23,24,25  .  change name refmux. for reference current or adcrefmux
+`define IDX_ADC_REFMUX            22    // 22,23,24,25  .  refmux also muxes signal.   so perhaps rename to just adcmux
 `define IDX_CMPR_LATCH_CTL    26
 `define IDX_MEAS_COMPLETE_CTL 27      // perhaps change name meas_valid,  or sample_valid.  to reflect the trig,valid control interface.
 `define IDX_SPI_INTERUPT_CTL  28
@@ -417,10 +417,9 @@ module top (
     .adc_measure_trig( sample_acquisition_az_adc2_measure_trig)
   );
 
-  assign sample_acquisition_az_out[ `IDX_HIMUX +: 8 ]  = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
-  // assign sample_acquisition_az_out[ `IDX_ADC_REFMUX +: 7 ] = reg_direct[ `IDX_ADC_REFMUX +: 7   ];  // eg. to the end.
-  assign sample_acquisition_az_out[ `IDX_MEAS_COMPLETE_CTL ] = reg_direct[ `IDX_MEAS_COMPLETE_CTL    ];  // eg. to the end.
-  assign sample_acquisition_az_out[ `IDX_SPI_INTERUPT_CTL ] = reg_direct[ `IDX_SPI_INTERUPT_CTL ];  // eg. to the end.
+  assign sample_acquisition_az_out[ `IDX_HIMUX +: 8 ]		    = reg_direct[ `IDX_HIMUX +: 8 ];        // himux and hiimux 2.
+  assign sample_acquisition_az_out[ `IDX_SPI_INTERUPT_CTL ] = reg_direct[ `IDX_SPI_INTERUPT_CTL ];      // TODO FIXME
+  assign sample_acquisition_az_out[ `IDX_MEAS_COMPLETE_CTL] = reg_direct[ `IDX_MEAS_COMPLETE_CTL ];
 
 
 
@@ -442,10 +441,9 @@ module top (
     // outputs
     .led0(      sample_acquisition_no_az_out[ `IDX_LED0 ] ),
     .monitor(   sample_acquisition_no_az_out[ `IDX_MONITOR +: 2  ] ),    // we could pass subset of monitor if watned. eg. only 4 pins...
-    // .adc_measure_trig( adc2_measure_trig),
     .adc_measure_trig( sample_acquisition_no_az_adc2_measure_trig),
 
-    .spi_interupt_ctl( sample_acquisition_no_az_out[ `IDX_SPI_INTERUPT_CTL  ] )
+    .spi_interupt_ctl( sample_acquisition_no_az_out[`IDX_SPI_INTERUPT_CTL ] )
 
   );
 
@@ -461,11 +459,9 @@ module top (
 
 
 
-  /*  use no_az for no azero and electrometer modes.
-      this pushes complexity up the stack from analog to fpga to mcu.  as soon as possible.
-      no az, and elecm. just need azmux and pc switch control given to mcu
+  /*  use no_az sample acquisition for both - no azero and electrometer modes.
+      pushes complexity up the stack from analog to fpga to mcu.  as soon as possible.
   */
-
 
 
 
@@ -552,6 +548,8 @@ module top (
   );
 
   /*
+	key insight - the single module adc can fan-out its outputs into two output vecs - to be active across two modes.
+	-------
     this is confusing because of naming.  it's not az_out or no_az_out. instead both follow the adc_out that is driver.
     it's actually adc out. that gets outputed - to both both these vectors.
     ---
