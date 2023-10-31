@@ -1,7 +1,7 @@
 
 /*
 
-  - adc is interuptable/ can be triggered to start at any time.
+  - adc is interruptable/ can be triggered to start at any time.
   - by by the az/non-az controller. so no handshake needed. so use _trig.
   - the adc when running is master/output channel. and therefore should assert valid when measurement is finished
 
@@ -16,7 +16,7 @@ module adc_test (
 
   // inputs
   input   clk,
-  input   reset,                // TODO remove. should always be interuptable.
+  input   reset,                // TODO remove. should always be interruptable.
   input [ 32-1 : 0 ] clk_sample_duration,  // 32/31 bit nice. for long sample....  wrongly named it is counter_sample_duration. not clk...
   input adc_measure_trig,         // wire. start measurement.
 
@@ -87,7 +87,7 @@ module adc_test (
 
 
 
-        // adc is interuptable/ can be triggered to start at any time.
+        // adc is interruptable/ can be triggered to start at any time.
         if(adc_measure_trig == 1)
           begin
 

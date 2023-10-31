@@ -72,7 +72,7 @@ set_io SPI_CLK          56
 set_io SPI_MOSI         60
 set_io SPI_CS2          61
 set_io SPI_MISO         62
-set_io SPI_INTERUPT_CTL   63
+set_io SPI_INTERRUPT_CTL 63
 set_io SPI_CS           64
 
 

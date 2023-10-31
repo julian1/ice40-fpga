@@ -42,7 +42,7 @@ module sample_acquisition_no_az (
   output reg led0,
   output reg [ 2-1:0]  monitor,     // but it suppresses the warning.
 
-  output reg spi_interupt_ctl
+  output reg spi_interrupt_ctl
 );
 
 
@@ -67,10 +67,10 @@ module sample_acquisition_no_az (
     begin
 
 
-      // emit spi_interupt pulse, on adc-measure valid
+      // emit spi_interrupt pulse, on adc-measure valid
       // note synchronous, has clk delay. but ok. avoid combinatorial.
       adc_valid_edge   <= { adc_valid_edge[0], adc_measure_valid };  // old, new
-      spi_interupt_ctl  <=  adc_valid_edge != 2'b01 ;
+      spi_interrupt_ctl  <=  adc_valid_edge != 2'b01 ;
       monitor[1]        <=  adc_valid_edge == 2'b01 ;
 
 
@@ -109,7 +109,7 @@ module sample_acquisition_no_az (
           begin
             state           <= 35;
 
-            // tell adc to do measure. interuptable at any time.
+            // tell adc to do measure. interruptable at any time.
             adc_measure_trig    <= 1;
             monitor[0]      <= 1;   // we could do this with a single following assignment. or tie as a wire.
           end

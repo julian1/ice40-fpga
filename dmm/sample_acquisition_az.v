@@ -118,7 +118,7 @@ module sample_acquisition_az (
             sw_pc_ctl       <= `SW_PC_SIGNAL;
             led0            <= 1;
 
-            // tell the adc to start.  adc is always interuptable
+            // tell the adc to start.  adc is always interruptable
             adc_measure_trig <= 1;
             monitor[1]      <= 1;
           end
@@ -160,7 +160,7 @@ module sample_acquisition_az (
             azmux           <= azmux_lo_val;
             led0            <= 0;
 
-            // tell the adc to start.  adc is always interuptable
+            // tell the adc to start.  adc is always interruptable
             adc_measure_trig <= 1;
             monitor[1]      <= 1;
           end

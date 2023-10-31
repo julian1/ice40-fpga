@@ -134,8 +134,8 @@ module adc_modulation (
 
 
   // both should be input wires. both are driven.
-  // input           com_interupt,
-  // output reg      com_interupt,  // JA remove.
+  // input           com_interrupt,
+  // output reg      com_interrupt,  // JA remove.
   output reg      cmpr_latch_ctl,
 
 
@@ -179,7 +179,7 @@ module adc_modulation (
   initial begin
     state           = `STATE_RESET_START;   // 0
 
-    // com_interupt    = 1; // active lo move this to an initial condition.
+    // com_interrupt    = 1; // active lo move this to an initial condition.
 
     cmpr_latch_ctl  = 1; // disable comparator,
 
@@ -263,7 +263,7 @@ module adc_modulation (
         // set up next state, for when reset goes hi.
         state           <= `STATE_RESET_START;
 
-        com_interupt  <= 1;   // active lo. turn off.
+        com_interrupt  <= 1;   // active lo. turn off.
         / *
         // keep integrator analog input, and sigmux on, to reset the integrator
         himux           <= `HIMUX_SEL_ANG;
@@ -693,7 +693,7 @@ module adc_modulation (
                 refmux                  <= `MUX_REF_NONE;
                 sigmux                  <= 0;
 
-                // com_interupt            <= 0;   // active lo, set interupt
+                // com_interrupt            <= 0;   // active lo, set interrupt
 
                 // record behaviior/transition counts asap. on this immeidate clk cycle.
                 count_var_up_last           <= count_var_up;
@@ -718,7 +718,7 @@ module adc_modulation (
               end
           end
 
-        // OK. the timing of the com_interupt is not right either - about 4uS.  too weird.
+        // OK. the timing of the com_interrupt is not right either - about 4uS.  too weird.
         // No. we were scoping CS. rather than INT.
 
         `STATE_DONE:
@@ -737,7 +737,7 @@ module adc_modulation (
 
 /*
     JA wait here.
-            // com_interupt  <= 1;   // active lo. turn off.
+            // com_interrupt  <= 1;   // active lo. turn off.
                                   // we don't really need to do this here.
                                   // it needs to be done in reset
             state         <= `STATE_RESET_START;
@@ -748,7 +748,7 @@ module adc_modulation (
       endcase
 
 
-        // adc is interuptable/ can be triggered to start at any time.
+        // adc is interruptable/ can be triggered to start at any time.
         if(adc_measure_trig == 1)
           begin
 

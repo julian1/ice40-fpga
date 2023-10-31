@@ -44,7 +44,7 @@
 
 
 /*
-      SPI_INTERUPT_CTL,
+      SPI_INTERRUPT_CTL,
       MEAS_COMPLETE_CTL,
       CMPR_LATCH_CTL,
       adcmux,                 // 23rd bit.  1<<22 = 4194304
@@ -70,7 +70,7 @@
 `define IDX_ADCMUX            22    // 22,23,24,25  .  muxes both reference currents and signal. across 2x '4053. on one synchronizer.
 `define IDX_CMPR_LATCH_CTL    26
 `define IDX_MEAS_COMPLETE_CTL 27      // perhaps change name meas_valid,  or sample_valid.  to reflect the trig,valid control interface.
-`define IDX_SPI_INTERUPT_CTL  28
+`define IDX_SPI_INTERRUPT_CTL  28
 
 
 // need prefix.  or IDX_BITS   GPO_NUM_BITS IDX_END...???  or GPO_IDX_END  main output vector
@@ -194,7 +194,7 @@ module top (
 
 
   //
-  output SPI_INTERUPT_CTL,    // should be modeal. eg. same as meas complete
+  output SPI_INTERRUPT_CTL,    // should be modeal. eg. same as meas complete
 
   output MEAS_COMPLETE_CTL,
 
@@ -326,10 +326,14 @@ module top (
 
   // 4x4=16 + 8mon + 5 = 29 bits.
 
+  /*
+    group the working set of pin outputs.
+    to make it easier to work with the muxing
+  */
 
   wire [`NUM_BITS-1:0 ] outputs_vec = {
 
-      SPI_INTERUPT_CTL,
+      SPI_INTERRUPT_CTL,
       MEAS_COMPLETE_CTL,
       CMPR_LATCH_CTL,
       adcmux,                 // 23rd bit.  1<<22 = 4194304
@@ -403,7 +407,7 @@ module top (
 
     // inputs
     .clk(CLK),
-    .reset( reg_reset[ 0 ] ),   // TODO - remove. should always be interuptable.
+    .reset( reg_reset[ 0 ] ),   // TODO - remove. should always be interruptable.
     .azmux_lo_val(  reg_direct[  `IDX_AZMUX +: 4 ] ),
     .adc_measure_valid(   adc2_measure_valid ),
 
@@ -418,7 +422,7 @@ module top (
   );
 
   assign sample_acquisition_az_out[ `IDX_HIMUX +: 8 ]		    = reg_direct[ `IDX_HIMUX +: 8 ];        // himux and hiimux 2.
-  assign sample_acquisition_az_out[ `IDX_SPI_INTERUPT_CTL ] = reg_direct[ `IDX_SPI_INTERUPT_CTL ];      // TODO FIXME
+  assign sample_acquisition_az_out[ `IDX_SPI_INTERRUPT_CTL ] = reg_direct[ `IDX_SPI_INTERRUPT_CTL ];      // TODO FIXME
   assign sample_acquisition_az_out[ `IDX_MEAS_COMPLETE_CTL] = reg_direct[ `IDX_MEAS_COMPLETE_CTL ];
 
 
@@ -443,7 +447,7 @@ module top (
     .monitor(   sample_acquisition_no_az_out[ `IDX_MONITOR +: 2  ] ),    // we could pass subset of monitor if watned. eg. only 4 pins...
     .adc_measure_trig( sample_acquisition_no_az_adc2_measure_trig),
 
-    .spi_interupt_ctl( sample_acquisition_no_az_out[`IDX_SPI_INTERUPT_CTL ] )
+    .spi_interrupt_ctl( sample_acquisition_no_az_out[`IDX_SPI_INTERRUPT_CTL ] )
 
   );
 
@@ -504,7 +508,7 @@ module top (
   adc2(
 
     .clk(CLK),
-    // .reset( 1'b0 ), // not needed. always interuptable.
+    // .reset( 1'b0 ), // not needed. always interruptable.
 
     // inputs
     .adc_measure_trig( adc2_measure_trig),
@@ -661,7 +665,7 @@ endmodule
 -  adc1 (
 -    // inputs
 -    .clk(CLK),
--    .reset( 1'b0 ),   // remove always interuptable.
+-    .reset( 1'b0 ),   // remove always interruptable.
 -    .clk_sample_duration( reg_adc_p_aperture ),
 -    .adc_measure_trig( adc1_measure_trig),
 -
