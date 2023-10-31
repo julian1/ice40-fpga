@@ -396,31 +396,6 @@ module top (
   wire adc2_measure_valid;
 
   wire [ `NUM_BITS-1:0 ]  sample_acquisition_az_out ;     // beter name ... it is the sample control, and adc.
-
-/*
-  wire adc1_measure_trig;
-  wire adc1_measure_valid;
-
-  adc_test      // this is adc-test.
-  adc1 (
-    // inputs
-    .clk(CLK),
-    .reset( 1'b0 ),   // remove always interuptable.
-    .clk_sample_duration( reg_adc_p_aperture ),
-    .adc_measure_trig( adc1_measure_trig),
-
-    // outputs
-    .adc_measure_valid(adc1_measure_valid),
-
-    .cmpr_latch(sample_acquisition_az_out[ `IDX_CMPR_LATCH_CTL ] ),
-    .monitor(   sample_acquisition_az_out[ `IDX_MONITOR + 2 +: 6 ]  ),
-    .refmux(    sample_acquisition_az_out[ `IDX_ADC_REF +: 2 ]),      // reference current, better name?
-    .sigmux(    sample_acquisition_az_out[ `IDX_ADC_REF + 2  ] ),      // change name to switch perhaps?,
-    .resetmux(  sample_acquisition_az_out[ `IDX_ADC_REF + 3  ] )     // ang mux.
-
-  );
-*/
-
   wire sample_acquisition_az_adc2_measure_trig;
 
   sample_acquisition_az
@@ -449,14 +424,10 @@ module top (
 
 
 
- 
 
 
 
-  //  change name sampler_. or just sample_no_az
-
-  // no. change name sample_acquisition_no_az.
-
+  wire [ `NUM_BITS-1:0 ]  sample_acquisition_no_az_out ;  // beter name ... it is the sample control, and adc.
   wire sample_acquisition_no_az_adc2_measure_trig;
 
   sample_acquisition_no_az
@@ -525,7 +496,6 @@ module top (
  /////////////////////
 
 
-  wire [ `NUM_BITS-1:0 ]  sample_acquisition_no_az_out ;  // beter name ... it is the sample control, and adc.
 
   wire [24-1:0] adc2_clk_count_mux_neg_last;
   wire [24-1:0] adc2_clk_count_mux_pos_last;
@@ -599,6 +569,11 @@ module top (
     .clk_count_mux_sig_last(  adc2_clk_count_mux_sig_last )
 
   );
+
+  /* 
+    this is confusinig becaus they are wrongly named.  it's not sa_out. instead it is adc_out that is driving these.
+    it's actually adc out. that gets outputed - to both both these vectors.
+  */
 
   // az out follows no-az out - 
   assign sample_acquisition_az_out[ `IDX_CMPR_LATCH_CTL ]    = sample_acquisition_no_az_out[ `IDX_CMPR_LATCH_CTL ] ;
@@ -676,7 +651,26 @@ module top (
 endmodule
 
 
+/*
 
-
+-  adc_test      // this is adc-test.
+-  adc1 (
+-    // inputs
+-    .clk(CLK),
+-    .reset( 1'b0 ),   // remove always interuptable.
+-    .clk_sample_duration( reg_adc_p_aperture ),
+-    .adc_measure_trig( adc1_measure_trig),
+-
+-    // outputs
+-    .adc_measure_valid(adc1_measure_valid),
+-
+-    .cmpr_latch(sample_acquisition_az_out[ `IDX_CMPR_LATCH_CTL ] ),
+-    .monitor(   sample_acquisition_az_out[ `IDX_MONITOR + 2 +: 6 ]  ),
+-    .refmux(    sample_acquisition_az_out[ `IDX_ADC_REF +: 2 ]),      // reference current, better name?
+-    .sigmux(    sample_acquisition_az_out[ `IDX_ADC_REF + 2  ] ),      // change name to switch perhaps?,
+-    .resetmux(  sample_acquisition_az_out[ `IDX_ADC_REF + 3  ] )     // ang mux.
+-
+-  );
+-*/
 
 
