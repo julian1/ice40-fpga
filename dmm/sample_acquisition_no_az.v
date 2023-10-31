@@ -42,7 +42,14 @@ module sample_acquisition_no_az (
   output reg led0,
   output reg [ 2-1:0]  monitor,     // but it suppresses the warning.
 
-  output reg spi_interrupt_ctl
+  output reg spi_interrupt_ctl    // TODO should rename sa_valid.  who knows
+                                  /*  EXTR. 
+                                      actually should remove entirely.  
+                                      this signal is just propagated from adc. with an edge detect.
+                                      the - mcu code - however should respond to the edge transition.
+                                      -----
+                                      so there is no reason to funnel it through here.   also monitor - might
+                                      */
 );
 
 

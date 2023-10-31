@@ -553,6 +553,91 @@ module top (
       pushes complexity up the stack from analog to fpga to mcu.  as soon as possible.
   */
 
+  ////////////////////////////////
+
+    /*  EXTR.
+spi_interrupt_ctl
+
+  should probably remove entirely. on the az controller.  - instead just let the adc communicate directly.
+  this signal is only propagated from the adc. with an edge detect.
+  the - mcu code - however should be able to handle.
+    make the monitor behavior the same. probably
+  -----
+  so there is no reason to funnel it through here.
+  */
+/*
+  EXTR.
+    think we might consider - change the interupt - to upward edge.  then the behavior
+    is the same valid signal and behavior that we expect to see.
+*/
+
+  wire [ `NUM_BITS-1:0 ]  sa_no_az_test_out ;  // beter name ... _outputs_vec ?
+  // wire sa_no_az_test_adc_measure_trig;
+
+  wire          adc_test_measure_trig;
+  wire          adc_test_measure_valid;
+
+
+
+  adc_test      // this is adc-test.
+  adc_test (
+    // inputs
+    .clk(CLK),
+    .reset( 1'b0 ),   // remove always interruptable.
+    .clk_sample_duration( reg_adc_p_aperture ),
+    .adc_measure_trig( adc_test_measure_trig ),
+
+    // outputs
+    .adc_measure_valid( adc_test_measure_valid ),
+
+    .monitor(   sa_no_az_test_out[ `IDX_MONITOR + 2 +: 6 ]  ) // ,
+/*
+    .cmpr_latch(sa_no_az_test_out[ `IDX_CMPR_LATCH_CTL ] ),
+    .refmux(    sa_no_az_test_out[ `IDX_ADCMUX +: 2 ]),      // reference current, better name?
+    .sigmux(    sa_no_az_test_out[ `IDX_ADCMUX + 2  ] ),      // change name to switch perhaps?,
+    .resetmux(  sa_no_az_test_out[ `IDX_ADCMUX + 3  ] )     // ang mux.
+*/
+  );
+
+
+/* TODO this is beetter
+    but needs mcu - spi interupt - condition changed from falling to rising.
+
+  assign sa_no_az_test_out[`IDX_SPI_INTERRUPT_CTL ] =  adc_test_measure_valid;
+  assign sa_no_az_test_out[ `IDX_MEAS_COMPLETE_CTL ] = adc_test_measure_valid;  // eg. both follow the same signal
+*/
+
+  sample_acquisition_no_az
+  sa_no_az_test (
+    .clk(CLK),
+
+    // inputs
+    .adc_measure_valid( adc_test_measure_valid),                     // fan-in from adc
+    .arm_trigger( reg_sa_arm_trigger[0 ]  ) ,
+
+    // outputs
+    .led0(      sa_no_az_test_out[ `IDX_LED0 ] ),
+    .monitor(   sa_no_az_test_out[ `IDX_MONITOR +: 2  ] ),    // we could pass subset of monitor if watned. eg. only 4 pins...
+    .adc_measure_trig( adc_test_measure_trig ),
+
+    .spi_interrupt_ctl( sa_no_az_test_out[`IDX_SPI_INTERRUPT_CTL ] )            // spi_interupt_ctl  - should be called sa_valid.
+
+  );
+
+  // from reg_direct
+  // pass control for muxes and pc switch to reg_direct
+  assign sa_no_az_test_out[ `IDX_HIMUX +: 8 ]      = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
+  assign sa_no_az_test_out[ `IDX_AZMUX +: 4]       = reg_direct[ `IDX_AZMUX +: 4];       // eg. azero off - `S1;  //  pc-out
+  assign sa_no_az_test_out[ `IDX_SIG_PC_SW_CTL ]   = reg_direct[ `IDX_SIG_PC_SW_CTL ];   // eg. azero off - `SW_PC_SIGNAL ;
+
+  // assign sa_no_az_test_out[ `IDX_MEAS_COMPLETE_CTL ] = reg_direct[ `IDX_MEAS_COMPLETE_CTL ];
+
+  assign sa_no_az_test_out[ `IDX_CMPR_LATCH_CTL ]  = reg_direct[  `IDX_CMPR_LATCH_CTL  ] ;
+  assign sa_no_az_test_out[ `IDX_ADCMUX +: 4 ]     = reg_direct[ `IDX_ADCMUX +: 4 ] ;
+
+
+
+
 
 
   ////////////////
@@ -561,14 +646,19 @@ module top (
   mux_8to1_assign #( `NUM_BITS + 1 )
   mux_8to1_assign_1  (
 
-    .a( { 1'b0, { 15 { 1'b0 } },  reg_led[ 0], { 13 { 1'b0 } } }    ),        // 0. deffault mode. 0 on all outputs, except follow reg_led, for led.
+    .a( { 1'b0, { 15 { 1'b0 } },  reg_led[ 0], { 13 { 1'b0 } } }    ),        // 0. default mode. 0 on all outputs, except follow reg_led, for led.
     .b( { 1'b0, { `NUM_BITS { 1'b1 } } } ),             // 1.
     .c( { 1'b0, test_pattern_out } ),                   // 2
-    .d( { 1'b0, reg_direct[ `NUM_BITS - 1 :  0 ]  } ), // 3.    // when we pass a hard-coded value in here...  then read/write reg_direct works.  // it is very strange.
+    .d( { 1'b0, reg_direct[ `NUM_BITS - 1 :  0 ]  } ), // 3.    // direct mode. register control.
     .e( { 1'b0, sample_acquisition_pc_out} ),                   // 4
     .f( { sample_acquisition_az_adc2_measure_trig,    sample_acquisition_az_out } ),                   // 5
     .g( { sample_acquisition_no_az_adc2_measure_trig, sample_acquisition_no_az_out } ),                // 6
-    .h( { 1'b0, { `NUM_BITS { 1'b1 } } } ),             // 7
+
+
+    // .h( { 1'b0, { `NUM_BITS { 1'b1 } } } ),             // 7
+    .h( { 1'b0, sa_no_az_test_out } ),             // 7
+
+
 
     .sel( reg_mode[ 2 : 0 ]),
     .out( { adc2_measure_trig,  outputs_vec }  )

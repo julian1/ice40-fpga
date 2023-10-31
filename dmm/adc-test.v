@@ -22,11 +22,12 @@ module adc_test (
 
 
   // outputs
+/*
   output reg  cmpr_latch,
   output reg [ 2-1:0]  refmux,     // reference current, better name?
   output reg sigmux,
   output reg resetmux,             // ang mux.
-
+*/
   output reg adc_measure_valid,     // adc is master, and asserts valid when measurement complete
 
   output reg [ 6-1:0]  monitor
@@ -58,7 +59,7 @@ module adc_test (
 
         // refmux <= refmux + 1;
         // sigmux <= sigmux + 1;
-        resetmux <= resetmux + 1;
+        // resetmux <= resetmux + 1;
 
         // always decrement clk for the current phase
         clk_count_down <= clk_count_down - 1;
@@ -97,10 +98,10 @@ module adc_test (
               adc_measure_valid <= 0;
 
               ////////////////
-              cmpr_latch      <= 0;
-              refmux = 2'b00;
-              sigmux = 1'b0;
-              resetmux = 1'b0;
+              // cmpr_latch      <= 0;
+              // refmux = 2'b00;
+              // sigmux = 1'b0;
+              // resetmux = 1'b0;
 
               // set sample/measure period
               clk_count_down  <= clk_sample_duration;
