@@ -67,7 +67,7 @@
 `define IDX_SIG_PC_SW_CTL     12
 `define IDX_LED0              13
 `define IDX_MONITOR           14    // 14,15,16,17,  18,19,20,21   think pin 14.
-`define IDX_ADC_REFMUX            22    // 22,23,24,25  .  refmux also muxes signal.   so perhaps rename to just adcmux
+`define IDX_ADCMUX            22    // 22,23,24,25  .  muxes both reference currents and signal. across 2x '4053.
 `define IDX_CMPR_LATCH_CTL    26
 `define IDX_MEAS_COMPLETE_CTL 27      // perhaps change name meas_valid,  or sample_valid.  to reflect the trig,valid control interface.
 `define IDX_SPI_INTERUPT_CTL  28
@@ -373,7 +373,7 @@ module top (
 
   assign sample_acquisition_pc_out[ `IDX_AZMUX +: 4]   = reg_direct[ `IDX_AZMUX +: 4];     // azmux
   assign sample_acquisition_pc_out[ `IDX_HIMUX +: 8 ]  = reg_direct[ `IDX_HIMUX +: 8 ];     // himux and hiimux 2.
-  assign sample_acquisition_pc_out[ `IDX_ADC_REFMUX +: 7 ] = reg_direct[ `IDX_ADC_REFMUX +: 7   ];  // eg. to the end.
+  assign sample_acquisition_pc_out[ `IDX_ADCMUX +: 7 ] = reg_direct[ `IDX_ADCMUX +: 7   ];  // eg. to the end.
 
 
 
@@ -536,8 +536,8 @@ module top (
     .adc_measure_valid( adc2_measure_valid),    // fan out.
     .cmpr_latch_ctl(sample_acquisition_no_az_out[ `IDX_CMPR_LATCH_CTL ] ),
     .monitor(   sample_acquisition_no_az_out[ `IDX_MONITOR + 2 +: 6 ] ),
-    .refmux(  { sample_acquisition_no_az_out[ `IDX_ADC_REFMUX + 3  ],  sample_acquisition_no_az_out[ `IDX_ADC_REFMUX +: 2 ]   } ),      // pos, neg, reset. on two different 4053,
-    .sigmux(    sample_acquisition_no_az_out[ `IDX_ADC_REFMUX + 2  ] ),                                     // change name to switch perhaps?,
+    .refmux(  { sample_acquisition_no_az_out[ `IDX_ADCMUX + 3  ],  sample_acquisition_no_az_out[ `IDX_ADCMUX +: 2 ]   } ),      // pos, neg, reset. on two different 4053,
+    .sigmux(    sample_acquisition_no_az_out[ `IDX_ADCMUX + 2  ] ),                                     // change name to switch perhaps?,
 
     // clk_count outputs, for currents
     .clk_count_mux_neg_last(  adc2_clk_count_mux_neg_last),
@@ -560,7 +560,7 @@ module top (
   // az out follows no-az out -
   assign sample_acquisition_az_out[ `IDX_CMPR_LATCH_CTL ]    = sample_acquisition_no_az_out[ `IDX_CMPR_LATCH_CTL ] ;
   assign sample_acquisition_az_out[ `IDX_MONITOR + 2 +: 6 ]  = sample_acquisition_no_az_out[ `IDX_MONITOR + 2 +: 6 ];
-  assign sample_acquisition_az_out[ `IDX_ADC_REFMUX +: 4 ]   = sample_acquisition_no_az_out[ `IDX_ADC_REFMUX +: 4 ]    ;
+  assign sample_acquisition_az_out[ `IDX_ADCMUX +: 4 ]   = sample_acquisition_no_az_out[ `IDX_ADCMUX +: 4 ]    ;
 
 
 
@@ -648,9 +648,9 @@ endmodule
     .adc_measure_valid(adc2_measure_valid),    // fan out.
     .cmpr_latch(sample_acquisition_no_az_out[ `IDX_CMPR_LATCH_CTL ] ),
     .monitor(   sample_acquisition_no_az_out[ `IDX_MONITOR + 2 +: 6 ] ),
-    .refmux(    sample_acquisition_no_az_out[ `IDX_ADC_REFMUX +: 2 ]),      // reference current, better name?
-    .sigmux(    sample_acquisition_no_az_out[ `IDX_ADC_REFMUX + 2  ] ),      // change name to switch perhaps?,
-    .resetmux(  sample_acquisition_no_az_out[ `IDX_ADC_REFMUX + 3  ] )     // ang mux.
+    .refmux(    sample_acquisition_no_az_out[ `IDX_ADCMUX +: 2 ]),      // reference current, better name?
+    .sigmux(    sample_acquisition_no_az_out[ `IDX_ADCMUX + 2  ] ),      // change name to switch perhaps?,
+    .resetmux(  sample_acquisition_no_az_out[ `IDX_ADCMUX + 3  ] )     // ang mux.
   );
 */
 
@@ -670,9 +670,9 @@ endmodule
 -
 -    .cmpr_latch(sample_acquisition_az_out[ `IDX_CMPR_LATCH_CTL ] ),
 -    .monitor(   sample_acquisition_az_out[ `IDX_MONITOR + 2 +: 6 ]  ),
--    .refmux(    sample_acquisition_az_out[ `IDX_ADC_REFMUX +: 2 ]),      // reference current, better name?
--    .sigmux(    sample_acquisition_az_out[ `IDX_ADC_REFMUX + 2  ] ),      // change name to switch perhaps?,
--    .resetmux(  sample_acquisition_az_out[ `IDX_ADC_REFMUX + 3  ] )     // ang mux.
+-    .refmux(    sample_acquisition_az_out[ `IDX_ADCMUX +: 2 ]),      // reference current, better name?
+-    .sigmux(    sample_acquisition_az_out[ `IDX_ADCMUX + 2  ] ),      // change name to switch perhaps?,
+-    .resetmux(  sample_acquisition_az_out[ `IDX_ADCMUX + 3  ] )     // ang mux.
 -
 -  );
 -*/
