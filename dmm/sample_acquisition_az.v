@@ -162,7 +162,7 @@ module sample_acquisition_az (
         52:
           if(clk_count_down == 0)
             begin
-              state <= 55;
+              state           <= 55;
               led0            <= 0;
               // adc start
               adc_measure_trig <= 1;
