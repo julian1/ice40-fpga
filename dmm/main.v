@@ -649,10 +649,14 @@ spi_interrupt_ctl
           - or just read from the sa acquisition module state.
 */
 
+
+
   assign reg_status = {
     8'b0 ,
     monitor,
             HW2,  HW1,  HW0 ,   4'b0,  adc2_measure_valid,
+            // HW2,  HW1,  HW0 ,   4'b0,  outputs_vec[ `IDX_SPI_INTERRUPT_CTL ] ,
+
     3'b0,   SWITCH_SENSE_OUT, DCV_OVP_OUT, OHMS_OVP_OUT, SUPPLY_SENSE_OUT, UNUSED_2
  };
 
