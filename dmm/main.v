@@ -466,6 +466,9 @@ module top (
     // .reset( reg_reset[ 0 ] ),   // TODO - remove. should always be interruptable.
 
     // inputs
+
+    .arm_trigger( reg_sa_arm_trigger[0 ]  ) ,
+
     .azmux_lo_val(  reg_direct[  `IDX_AZMUX +: 4 ] ),
     .adc_measure_valid(   adc2_measure_valid ),                     // fan-in from adc
 

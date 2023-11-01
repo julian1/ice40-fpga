@@ -23,9 +23,11 @@ module sample_acquisition_az (
   // remember hi mux is not manipulated, or passed into this module.
   // inistead the hi signal is seleced by the AZ mux, via the pre-charge switch
 
-  // inputs
   input   clk,
-  // input   reset,
+
+
+  // inputs
+  input arm_trigger,              // why doesn't this generate a warning.
   input [ 4-1 : 0 ] azmux_lo_val,
   input adc_measure_valid,
 
@@ -49,6 +51,7 @@ module sample_acquisition_az (
   // change name clk_precharge_duration_n
   reg [24-1:0]  clk_count_precharge_n = `CLK_FREQ * 500e-6 ;   // 500us.
 
+  reg [2-1: 0 ] arm_trigger_edge;
 
 
   assign monitor[0] = adc_measure_trig;
@@ -178,8 +181,24 @@ module sample_acquisition_az (
           end
 
 
+        60: // done / park
+          ;
+
 
       endcase
+
+
+
+
+      arm_trigger_edge <= { arm_trigger_edge[0], arm_trigger};  // old, new
+
+      if(arm_trigger_edge == 2'b01)        // trigger
+        state <= 0;
+      else if(arm_trigger_edge == 2'b10)   // park/arm/reset.
+        state <= 60;
+
+
+
     end
 endmodule
 
