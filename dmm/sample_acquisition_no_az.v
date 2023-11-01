@@ -40,7 +40,9 @@ module sample_acquisition_no_az (
   // output
   output reg adc_measure_trig,
   output reg led0,
-  output reg [ 2-1:0]  monitor// ,     // but it suppresses the warning.
+
+  // output reg [ 2-1:0]  monitor// ,     // but it suppresses the warning.
+  output wire [ 2-1:0]  monitor// ,     // but it suppresses the warning.
 
 );
 
@@ -53,13 +55,15 @@ module sample_acquisition_no_az (
   reg [24-1:0]  clk_count_precharge_n = `CLK_FREQ * 500e-6 ;   // 500us.
 
 
-  reg [2-1: 0 ] adc_valid_edge;
+  // reg [2-1: 0 ] adc_valid_edge;
 
   reg [2-1: 0 ] arm_trigger_edge;  //  = "10";  // start off in state. so that arm works to halt.
                                     // doesn't work. should be in state 0. anyway.
 
 
 
+  assign monitor[0] = adc_measure_trig; 
+  assign monitor[1] = adc_measure_valid; 
 
   always @(posedge clk /* or posedge reset */ )
 
@@ -68,8 +72,8 @@ module sample_acquisition_no_az (
 
       // emit spi_interrupt pulse, on adc-measure valid
       // note synchronous, has clk delay. but ok. avoid combinatorial.
-      adc_valid_edge   <= { adc_valid_edge[0], adc_measure_valid };  // old, new
-      monitor[1]        <=  adc_valid_edge == 2'b01 ;
+//      adc_valid_edge   <= { adc_valid_edge[0], adc_measure_valid };  // old, new
+//      monitor[1]        <=  adc_valid_edge == 2'b01 ;
 
 
       // always decrement clk for the current phase
@@ -109,13 +113,13 @@ module sample_acquisition_no_az (
 
             // tell adc to do measure. interruptable at any time.
             adc_measure_trig    <= 1;
-            monitor[0]      <= 1;   // we could do this with a single following assignment. or tie as a wire.
+            // monitor[0]      <= 1;   // we could do this with a single following assignment. or tie as a wire.
           end
 
         35:
           begin
             adc_measure_trig    <= 0;
-            monitor[0]          <= 0;
+            // monitor[0]          <= 0;
 
             // wait for adc.
             if( ! adc_measure_trig &&  adc_measure_valid )
