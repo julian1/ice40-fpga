@@ -1,5 +1,6 @@
 
 /*
+  - test / dummy  mocking adc.
 
   - adc is interruptable/ can be triggered to start at any time.
   - by by the az/non-az controller. so no handshake needed. so use _trig.
@@ -21,20 +22,23 @@ module adc_test (
   input adc_measure_trig,         // wire. start measurement.
 
 
-  // outputs
-/*
-  output reg  cmpr_latch,
-  output reg [ 2-1:0]  refmux,     // reference current, better name?
-  output reg sigmux,
-  output reg resetmux,             // ang mux.
-*/
+
   output reg adc_measure_valid,     // adc is master, and asserts valid when measurement complete
 
-  output reg [ 6-1:0]  monitor
+  output wire [ 6-1:0]  monitor
 );
 
   reg [7-1:0]   state = 0 ;
   reg [31:0]    clk_count_down;
+
+
+  reg [ 4-1:0]  monitor_; 
+
+
+  assign monitor[0] = adc_measure_trig;
+  assign monitor[1] = adc_measure_valid;
+  assign monitor[2 +: 4 ] = monitor_;
+
 
 
 
@@ -50,16 +54,9 @@ module adc_test (
       begin
 
 
-        // delayed by a clock cycle
-        monitor[0] <=  adc_measure_trig;
-        monitor[1] <=  adc_measure_valid;
-
 
       /////////////////
 
-        // refmux <= refmux + 1;
-        // sigmux <= sigmux + 1;
-        // resetmux <= resetmux + 1;
 
         // always decrement clk for the current phase
         clk_count_down <= clk_count_down - 1;
@@ -97,15 +94,11 @@ module adc_test (
               // adc is master.
               adc_measure_valid <= 0;
 
-              ////////////////
-              // cmpr_latch      <= 0;
-              // refmux = 2'b00;
-              // sigmux = 1'b0;
-              // resetmux = 1'b0;
 
               // set sample/measure period
               clk_count_down  <= clk_sample_duration;
 
+              monitor_ <= 4'b0;
 
               // monitor     <=  6'b000000; 
 
