@@ -561,9 +561,9 @@ spi_interrupt_ctl
 
   adc_test
   adc_test (
-    // inputs
     .clk(CLK),
-    .reset( 1'b0 ),   // TODO remove. -  remove always interruptable.
+
+    // inputs
     .clk_sample_duration( reg_adc_p_aperture ),
     .adc_measure_trig( adc_test_measure_trig ),
 
