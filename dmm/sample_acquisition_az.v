@@ -9,22 +9,13 @@
 `default_nettype none
 
 
-// note. counter freq is half clk, because increments on clk.
-`define CLK_FREQ        20000000
+// todo change name common. or macros. actually defines is ok.etc
+`include "defines.v"
 
 
 
-////////////////////
 
-
-`define SW_PC_SIGNAL    1
-`define SW_PC_BOOT      0
-
-
-// AZMUX PC-OUT select the hi
-`define S1              ((1<<3)|(1-1))
-`define AZMUX_HI_VAL    `S1     // PC-OUT
-
+`define AZMUX_HI_VAL    `S1     // signal PC-OUT
 
 
 module sample_acquisition_az (
@@ -47,7 +38,7 @@ module sample_acquisition_az (
   // output reg [ 2-1:0]  monitor,     // but it suppresses the warning.
 
   // now a wire.
-  output wire [ 2-1:0]  monitor       // 
+  output wire [ 2-1:0]  monitor       //
 );
 
   reg [7-1:0]   state = 0 ;     // should expose in module, not sure.
@@ -113,25 +104,29 @@ module sample_acquisition_az (
 
         /////////////////////////
         // switch pc-switch from BOOT to signal. and tell adc to take measurement
-        // TODO - maybe add small settle time. after switching the pc switch ..
-        // not sure.
+        // want small settle time. after switching the pc switch ..
+        // for Vos to settle.
         3:
           begin
-            state           <= 35;
+            state           <= 33;
+            clk_count_down  <= clk_count_precharge_n;  // normally pin s1
             sw_pc_ctl       <= `SW_PC_SIGNAL;
-            led0            <= 1;
-
-            // adc start
-            adc_measure_trig <= 1;
           end
-
+        33:
+          if(clk_count_down == 0)
+            begin
+              state           <= 35;
+              led0            <= 1;
+              // adc start
+              adc_measure_trig <= 1;
+            end
 
         35:
           begin
             //
             adc_measure_trig <= 0;
 
-            // another way - continue asserting trig - and then progress when both hi.  and de-assert trig in next state. 
+            // another way - continue asserting trig - and then progress when both hi.  and de-assert trig in next state.
             // wait for adc.
             if( ! adc_measure_trig && adc_measure_valid )
               state <= 4;
@@ -141,6 +136,7 @@ module sample_acquisition_az (
         //////////////////////////////
 
         // switch pre-charge switch back to boot to protect signal again
+        // pause here can be shorter. if want.
         4:
           begin
             state           <= 45;
@@ -152,22 +148,27 @@ module sample_acquisition_az (
             state <= 5;
 
         /////////////////////////
-        // switch az mux to lo.   take lo measurement
-        // TODO - need to provide a settle time. after switching lo..
+        // switch az mux to lo.  pause and take lo measurement
         5:
           begin
-            state           <= 55;
+            state           <= 52;
+            clk_count_down  <= clk_count_precharge_n; // time less important here
             azmux           <= azmux_lo_val;
-            led0            <= 0;
-
-            // adc start
-            adc_measure_trig <= 1;
           end
+
+        52:
+          if(clk_count_down == 0)
+            begin
+              state <= 55;
+              led0            <= 0;
+              // adc start
+              adc_measure_trig <= 1;
+            end
+
 
         55:
           begin
             adc_measure_trig <= 0;
-
 
             // wait for adc.
             if( ! adc_measure_trig &&  adc_measure_valid )
