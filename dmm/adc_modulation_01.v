@@ -137,7 +137,7 @@ module adc_modulation (
   // both should be input wires. both are driven.
   // input           com_interrupt,
   // output reg      com_interrupt,  // JA remove.
-  output reg      cmpr_latch_disable_ctl,
+  output reg      cmpr_disable_latch_ctl,
 
 
   ///////////
@@ -182,7 +182,7 @@ module adc_modulation (
 
     // com_interrupt    = 1; // active lo move this to an initial condition.
 
-    cmpr_latch_disable_ctl  = 1; // disable comparator,
+    cmpr_disable_latch_ctl  = 1; // disable comparator,
 
   end
 
@@ -472,20 +472,20 @@ module adc_modulation (
             refmux        <= `MUX_REF_POS; // initial direction
 
 
-            cmpr_latch_disable_ctl  <= 0; // enable comparator, // JA correct. 0 means it is transparent.
+            cmpr_disable_latch_ctl  <= 0; // enable comparator, // JA correct. 0 means it is transparent.
           end
 
         `STATE_FIX_POS:
           /*
           // half way through first fix, enable the comparator
           if(clk_count >= (p_clk_count_fix >> 1))
-            // cmpr_latch_disable_ctl  <= 0
+            // cmpr_disable_latch_ctl  <= 0
           */
           if(clk_count >= p_clk_count_fix)       // walk up.  dir = 1
             begin
               state <= `STATE_VAR_START;
 
-              // cmpr_latch_disable_ctl  <= 0; // enable comparator, we test the comparator_last value in the next clock cycle - not enough time...
+              // cmpr_disable_latch_ctl  <= 0; // enable comparator, we test the comparator_last value in the next clock cycle - not enough time...
 
             end
 
@@ -689,7 +689,7 @@ module adc_modulation (
             if(cross_any )
               begin
 
-                cmpr_latch_disable_ctl          <= 1; // disable comparator,
+                cmpr_disable_latch_ctl          <= 1; // disable comparator,
 
                 // trigger for scope
                 // transition
@@ -770,7 +770,7 @@ module adc_modulation (
             sigmux          <= 0;
             refmux          <= `MUX_REF_RESET;
 
-            cmpr_latch_disable_ctl          <= 1; // // disable comparator, enable latch
+            cmpr_disable_latch_ctl          <= 1; // // disable comparator, enable latch
 
             // monitor     <=  6'b000000;    // indicate we have started.
             monitor_     <=  4'b0;    // indicate we have started.
