@@ -653,6 +653,17 @@ spi_interrupt_ctl
 */
 
 
+  /*
+      can put a adc measure count in status register -
+        - can then read before and after reading adc counts. and if the counts are different it indicates a bad read/ val.
+        - might be more useful than reflecting the monitor. 
+
+      - EXTR. IMPROTANT - we don't need to add non-az status_flags.  or to az and non-az flags into a single set of flags ..
+          - because in mcu software - use mode first to determine if we care about the hi/lo sample captured..
+          - THIS may consider reducing the nuber of bits used to represent this.
+
+          and if want for non-az, then add non-az flags - at a separate offset.
+  */
 
   assign reg_status = {
     8'b0 ,
