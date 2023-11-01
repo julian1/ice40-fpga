@@ -40,16 +40,8 @@ module sample_acquisition_no_az (
   // output
   output reg adc_measure_trig,
   output reg led0,
-  output reg [ 2-1:0]  monitor,     // but it suppresses the warning.
+  output reg [ 2-1:0]  monitor// ,     // but it suppresses the warning.
 
-  output reg spi_interrupt_ctl    // TODO should rename sa_valid.  who knows
-                                  /*  EXTR. 
-                                      actually should remove entirely.  
-                                      this signal is just propagated from adc. with an edge detect.
-                                      the - mcu code - however should respond to the edge transition.
-                                      -----
-                                      so there is no reason to funnel it through here.   also monitor - might
-                                      */
 );
 
 
@@ -77,7 +69,6 @@ module sample_acquisition_no_az (
       // emit spi_interrupt pulse, on adc-measure valid
       // note synchronous, has clk delay. but ok. avoid combinatorial.
       adc_valid_edge   <= { adc_valid_edge[0], adc_measure_valid };  // old, new
-      spi_interrupt_ctl  <=  adc_valid_edge != 2'b01 ;
       monitor[1]        <=  adc_valid_edge == 2'b01 ;
 
 
