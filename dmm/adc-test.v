@@ -18,7 +18,8 @@ module adc_test (
   input   clk,
 
   // inputs
-  input [ 32-1 : 0 ] clk_sample_duration,  // 32/31 bit nice. for long sample....  wrongly named it is counter_sample_duration. not clk...
+
+  input [32-1:0]  p_clk_count_aper,   // eg. clk_count_mux_sig_n
   input adc_measure_trig,         // wire. start measurement.
 
   // outputs
@@ -81,7 +82,7 @@ module adc_test (
 
 
             // set sample/measure period
-            clk_count_down  <= clk_sample_duration;
+            clk_count_down  <= p_clk_count_aper;
 
             monitor_ <= 4'b0;
 

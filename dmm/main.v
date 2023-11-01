@@ -555,7 +555,6 @@ spi_interrupt_ctl
 */
 
   wire [ `NUM_BITS-1:0 ]  sa_no_az_test_out ;  // beter name ... _outputs_vec ?
-
   wire          adc_test_measure_trig;
   wire          adc_test_measure_valid;
 
@@ -564,7 +563,7 @@ spi_interrupt_ctl
     .clk(CLK),
 
     // inputs
-    .clk_sample_duration( reg_adc_p_aperture ),
+    .p_clk_count_aper( reg_adc_p_aperture ),
     .adc_measure_trig( adc_test_measure_trig ),
 
     // outputs
