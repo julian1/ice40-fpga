@@ -33,7 +33,6 @@ module adc_test (
 
   reg [ 4-1:0]  monitor_; 
 
-
   assign monitor[0] = adc_measure_trig;
   assign monitor[1] = adc_measure_valid;
   assign monitor[2 +: 4 ] = monitor_;

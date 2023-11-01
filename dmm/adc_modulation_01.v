@@ -115,7 +115,8 @@ module adc_modulation (
 
   output reg adc_measure_valid,     // adc is master, and asserts valid when measurement complete
 
-  output reg [ 6-1:0]  monitor,
+  // now a wire
+  output wire [ 6-1:0]  monitor,
 
   //output reg  cmpr_latch,
   // output reg [ 2-1:0]  refmux,     // reference current, better name?
@@ -232,6 +233,12 @@ module adc_modulation (
   reg [1:0] neg_ref_cross;
 
 
+  reg [ 4-1:0]  monitor_; 
+
+  assign monitor[0] = adc_measure_trig;
+  assign monitor[1] = adc_measure_valid;
+  assign monitor[2 +: 4 ] = monitor_;
+
 
 
 /*
@@ -281,7 +288,7 @@ module adc_modulation (
 
       // delayed by a clock cycle
       // monitor[0] <=  adc_measure_trig;
-      monitor[1] <=  adc_measure_valid;
+      // monitor[1] <=  adc_measure_valid;
 
 
 
@@ -393,7 +400,7 @@ module adc_modulation (
 
         `STATE_RESET:    // let integrator reset.
           begin
-            monitor[0]   <=  0;
+            // monitor[0]   <=  0;
 
             if(clk_count >= p_clk_count_reset)
               // state <= `STATE_SIG_SETTLE_START;
@@ -766,7 +773,7 @@ module adc_modulation (
             cmpr_latch_disable_ctl          <= 1; // // disable comparator, enable latch
 
             // monitor     <=  6'b000000;    // indicate we have started.
-            monitor     <=  6'b000001;    // indicate we have started.
+            monitor_     <=  4'b0;    // indicate we have started.
 
 
 /*
