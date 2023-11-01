@@ -59,7 +59,6 @@ module sample_acquisition_az (
   reg [24-1:0]  clk_count_precharge_n = `CLK_FREQ * 500e-6 ;   // 500us.
 
 
-  reg [ 4-1:0]  monitor_; 
 
   assign monitor[0] = adc_measure_trig;
   assign monitor[1] = adc_measure_valid;
@@ -67,16 +66,7 @@ module sample_acquisition_az (
 
 
 
-
-  always @(posedge clk  /*or posedge reset */ )
-/*
-   if(reset)
-    begin
-      // we only require to set the state here, to setup the initial conditions.
-      state           <= 0;
-    end
-    else
-*/
+  always @(posedge clk)
     begin
 
       // always decrement clk for the current phase
@@ -93,7 +83,6 @@ module sample_acquisition_az (
 
             adc_measure_trig    <= 0;
 
-            // monitor         <= { 2 { 1'b0 }   } ;
           end
 
         // switch pre-charge switch to boot to protect signal
@@ -132,22 +121,19 @@ module sample_acquisition_az (
             sw_pc_ctl       <= `SW_PC_SIGNAL;
             led0            <= 1;
 
-            // tell the adc to start.  adc is always interruptable
+            // adc start
             adc_measure_trig <= 1;
-            // monitor[1]      <= 1;
           end
+
 
         35:
           begin
             //
             adc_measure_trig <= 0;
-            // monitor[1]      <= 0;
 
-            /* block for adc complete
-              We could elevate this outside a case statement
-              */
-
-            if( ! adc_measure_trig &&  adc_measure_valid )
+            // another way - continue asserting trig - and then progress when both hi.  and de-assert trig in next state. 
+            // wait for adc.
+            if( ! adc_measure_trig && adc_measure_valid )
               state <= 4;
           end
 
@@ -174,21 +160,16 @@ module sample_acquisition_az (
             azmux           <= azmux_lo_val;
             led0            <= 0;
 
-            // tell the adc to start.  adc is always interruptable
+            // adc start
             adc_measure_trig <= 1;
-            // monitor[1]      <= 1;
           end
 
         55:
           begin
             adc_measure_trig <= 0;
-            // monitor[1]      <= 0;
 
 
-            /* block for adc complete
-              We could elevate this outside a case statement
-              */
-
+            // wait for adc.
             if( ! adc_measure_trig &&  adc_measure_valid )
               // restart sequence
               state <= 2;
