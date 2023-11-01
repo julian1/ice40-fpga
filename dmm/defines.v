@@ -23,3 +23,4 @@
 `define S7          ((1<<3)|(7-1))
 
 
+`define AZMUX_PCOUT    `S1     // signal PC-OUT

@@ -15,16 +15,14 @@
 
 
 
-`define AZMUX_HI_VAL    `S1     // signal PC-OUT
 
 
 module sample_acquisition_az (
 
-  // remember hi mux is not manipulated, or passed into this module.
+  // remember hi mux is not manipulated, or given to this module.
   // inistead the hi signal is seleced by the AZ mux, via the pre-charge switch
 
   input   clk,
-
 
   // inputs
   input arm_trigger,              // why doesn't this generate a warning.
@@ -36,11 +34,14 @@ module sample_acquisition_az (
   output reg  sw_pc_ctl,
   output reg [ 4-1:0 ] azmux,
   output reg led0,
+  // must be a register if driven synchronously.
+  output reg [3-1: 0 ] status_out,        // bit 0 - hi/lo,  bit 1 - prim/w4,   bit 2. reserved.
 
-  // output reg [ 2-1:0]  monitor,     // but it suppresses the warning.
+
 
   // now a wire.
-  output wire [ 2-1:0]  monitor       //
+  output wire [ 2-1:0]  monitor       // driven as wire/assign.
+
 );
 
   reg [7-1:0]   state = 0 ;     // should expose in module, not sure.
@@ -77,6 +78,7 @@ module sample_acquisition_az (
 
             adc_measure_trig    <= 0;
 
+
           end
 
         // switch pre-charge switch to boot to protect signal
@@ -92,13 +94,22 @@ module sample_acquisition_az (
 
 
         ////////////////////////////
-        // switch azmux from LO to PC OUT (BOOT).    (signal is currently protected by pc)  - the 'precharge phase' or settle phase
+        // switch azmux from the LO to PCOUT (SIG/BOOT).    (signal is still currently protected by pc)  - the 'precharge phase' or settle phase
         // precharge phase.
         2:
             begin
               state           <= 25;
               clk_count_down  <= clk_count_precharge_n;  // normally pin s1
-              azmux             <= `AZMUX_HI_VAL;
+              azmux           <= `AZMUX_PCOUT;
+
+              /*/ do we set the hi/lo status - at the start of adc measurement. or after complete/valid.
+                  status should be established before the adc_valid .
+                    - if after  - we risk not having correct status set, even though the adc valid interupt has been issued.
+                    - if before - then get limited time (precharge time) to read the adc registers - before the status flag changes . / can read first.
+                  ----
+                  having the status set a few clk cycles after adc_valid is asserted is ok.
+                  the data will be set correctly  during the time the the spi register is read.
+              */
             end
         25:
           if(clk_count_down == 0)
@@ -107,8 +118,7 @@ module sample_acquisition_az (
 
         /////////////////////////
         // switch pc-switch from BOOT to signal. and tell adc to take measurement
-        // want small settle time. after switching the pc switch ..
-        // for Vos to settle.
+        // also add small settle time. after switching the pc switch, for Vos between sig/boot to settle.
         3:
           begin
             state           <= 33;
@@ -132,7 +142,11 @@ module sample_acquisition_az (
             // another way - continue asserting trig - and then progress when both hi.  and de-assert trig in next state.
             // wait for adc.
             if( ! adc_measure_trig && adc_measure_valid )
-              state <= 4;
+              begin
+                state         <= 4;
+                // set status for hi sample
+                status_out    <= 3'b001;
+              end
           end
 
 
@@ -157,6 +171,7 @@ module sample_acquisition_az (
             state           <= 52;
             clk_count_down  <= clk_count_precharge_n; // time less important here
             azmux           <= azmux_lo_val;
+
           end
 
         52:
@@ -175,8 +190,12 @@ module sample_acquisition_az (
 
             // wait for adc.
             if( ! adc_measure_trig &&  adc_measure_valid )
-              // restart sequence
-              state <= 2;
+              begin
+                // restart sequence
+                state <= 2;
+                // set status for lo sample
+                status_out      <= 3'b000;
+              end
 
           end
 

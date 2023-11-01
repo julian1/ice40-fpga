@@ -457,7 +457,8 @@ module top (
 
 
   wire [ `NUM_BITS-1:0 ]  sample_acquisition_az_out ;     // beter name ... sa_az_outputs_vec  .
-  wire sample_acquisition_az_adc2_measure_trig;       // perhaps
+  wire sample_acquisition_az_adc2_measure_trig;           // trig == out.
+  wire [3-1: 0 ] sample_acquisition_az_status_out;        // bit 0 - hi/lo,  bit 1 - prim/w4,   bit 2. reserved.
 
   sample_acquisition_az
   sample_acquisition_az (
@@ -474,6 +475,8 @@ module top (
     .azmux (    sample_acquisition_az_out[ `IDX_AZMUX +: 4] ),
     .led0(      sample_acquisition_az_out[ `IDX_LED0 ] ),
     .monitor(   sample_acquisition_az_out[ `IDX_MONITOR +: 2  ] ),    // only pass 2 bit to the az monitor
+
+    .status_out(  sample_acquisition_az_status_out ),    // rename status_out.
 
     .adc_measure_trig( sample_acquisition_az_adc2_measure_trig)
   );
@@ -654,7 +657,7 @@ spi_interrupt_ctl
   assign reg_status = {
     8'b0 ,
     monitor,
-            HW2,  HW1,  HW0 ,   4'b0,  adc2_measure_valid,
+            HW2,  HW1,  HW0 ,   1'b0,  sample_acquisition_az_status_out,      adc2_measure_valid,
             // HW2,  HW1,  HW0 ,   4'b0,  outputs_vec[ `IDX_SPI_INTERRUPT_CTL ] ,
 
     3'b0,   SWITCH_SENSE_OUT, DCV_OVP_OUT, OHMS_OVP_OUT, SUPPLY_SENSE_OUT, UNUSED_2
