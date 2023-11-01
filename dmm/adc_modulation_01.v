@@ -233,7 +233,7 @@ module adc_modulation (
   reg [1:0] neg_ref_cross;
 
 
-  reg [ 4-1:0]  monitor_; 
+  reg [ 4-1:0]  monitor_;
 
   assign monitor[0] = adc_measure_trig;
   assign monitor[1] = adc_measure_valid;
@@ -356,11 +356,20 @@ module adc_modulation (
           // increment aperture clk count
           clk_count_mux_sig <= clk_count_mux_sig + 1;
 
-          // have we reached end of aperture                            // ======================================
-          // if(clk_count_mux_sig >= p_clk_count_aper)                  // aperture count termination condition.
-          if(clk_count_mux_sig >= (p_clk_count_aper - 1) )              // changed oct 30, 2023..  IMPORTANT. DIFFERENCEs MAY AFFECT calibration calculation.
-                                                                        // should be a count down
-            begin                                                       // =======================================
+          // ======================================
+          // aperture count termination condition.
+          // changed oct 30, 2023..  IMPORTANT. DIFFERENCEs MAY AFFECT calibration calculation.
+          // should be a count down
+          // now revert.
+          // NO. it may have been mcu roudinig. issue. reg_aperture. has the off-by-one. calculation
+          // NO. we have it configured differently. 
+          // =======================================
+
+          // have we reached end of aperture
+          if(clk_count_mux_sig >= p_clk_count_aper)                  // original. slope-adc-3.
+          // if(clk_count_mux_sig >= (p_clk_count_aper - 1) )              // changed oct 30, 2023..  IMPORTANT. DIFFERENCEs MAY AFFECT calibration calculation.
+
+            begin
               // turn off signal input
               sigmux  <= 0;
 
