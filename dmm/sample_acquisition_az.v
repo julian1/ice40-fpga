@@ -34,7 +34,7 @@ module sample_acquisition_az (
 
   // inputs
   input   clk,
-  input   reset,
+  // input   reset,
   input [ 4-1 : 0 ] azmux_lo_val,
   input adc_measure_valid,
 
@@ -43,7 +43,11 @@ module sample_acquisition_az (
   output reg  sw_pc_ctl,
   output reg [ 4-1:0 ] azmux,
   output reg led0,
-  output reg [ 2-1:0]  monitor,     // but it suppresses the warning.
+
+  // output reg [ 2-1:0]  monitor,     // but it suppresses the warning.
+
+  // now a wire.
+  output wire [ 2-1:0]  monitor       // 
 );
 
   reg [7-1:0]   state = 0 ;     // should expose in module, not sure.
@@ -55,14 +59,24 @@ module sample_acquisition_az (
   reg [24-1:0]  clk_count_precharge_n = `CLK_FREQ * 500e-6 ;   // 500us.
 
 
+  reg [ 4-1:0]  monitor_; 
 
-  always @(posedge clk  or posedge reset )
+  assign monitor[0] = adc_measure_trig;
+  assign monitor[1] = adc_measure_valid;
+
+
+
+
+
+  always @(posedge clk  /*or posedge reset */ )
+/*
    if(reset)
     begin
       // we only require to set the state here, to setup the initial conditions.
       state           <= 0;
     end
     else
+*/
     begin
 
       // always decrement clk for the current phase
@@ -79,7 +93,7 @@ module sample_acquisition_az (
 
             adc_measure_trig    <= 0;
 
-            monitor         <= { 2 { 1'b0 }   } ;
+            // monitor         <= { 2 { 1'b0 }   } ;
           end
 
         // switch pre-charge switch to boot to protect signal
@@ -120,14 +134,14 @@ module sample_acquisition_az (
 
             // tell the adc to start.  adc is always interruptable
             adc_measure_trig <= 1;
-            monitor[1]      <= 1;
+            // monitor[1]      <= 1;
           end
 
         35:
           begin
             //
             adc_measure_trig <= 0;
-            monitor[1]      <= 0;
+            // monitor[1]      <= 0;
 
             /* block for adc complete
               We could elevate this outside a case statement
@@ -162,13 +176,13 @@ module sample_acquisition_az (
 
             // tell the adc to start.  adc is always interruptable
             adc_measure_trig <= 1;
-            monitor[1]      <= 1;
+            // monitor[1]      <= 1;
           end
 
         55:
           begin
             adc_measure_trig <= 0;
-            monitor[1]      <= 0;
+            // monitor[1]      <= 0;
 
 
             /* block for adc complete

@@ -463,7 +463,7 @@ module top (
   sample_acquisition_az (
 
     .clk(CLK),
-    .reset( reg_reset[ 0 ] ),   // TODO - remove. should always be interruptable.
+    // .reset( reg_reset[ 0 ] ),   // TODO - remove. should always be interruptable.
 
     // inputs
     .azmux_lo_val(  reg_direct[  `IDX_AZMUX +: 4 ] ),
