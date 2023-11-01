@@ -497,10 +497,14 @@ module top (
 
   // from reg_direct
   assign sample_acquisition_az_out[ `IDX_HIMUX +: 8 ]		        = reg_direct[ `IDX_HIMUX +: 8 ];        // himux and hiimux 2.
-  assign sample_acquisition_az_out[ `IDX_SPI_INTERRUPT_CTL ]    = reg_direct[ `IDX_SPI_INTERRUPT_CTL ];      // TODO FIXME - pass to the sample acquisition controller
-  assign sample_acquisition_az_out[ `IDX_MEAS_COMPLETE_CTL]     = reg_direct[ `IDX_MEAS_COMPLETE_CTL ];
+  // assign sample_acquisition_az_out[ `IDX_SPI_INTERRUPT_CTL ]    = reg_direct[ `IDX_SPI_INTERRUPT_CTL ];      // TODO FIXME - pass to the sample acquisition controller
+  // assign sample_acquisition_az_out[ `IDX_MEAS_COMPLETE_CTL]     = reg_direct[ `IDX_MEAS_COMPLETE_CTL ];
+
 
   // fanout from adc
+  assign sample_acquisition_az_out[ `IDX_SPI_INTERRUPT_CTL ]    = adc2_measure_valid;      
+  assign sample_acquisition_az_out[ `IDX_MEAS_COMPLETE_CTL]     = adc2_measure_valid;
+
   assign sample_acquisition_az_out[ `IDX_CMPR_LATCH_CTL ]      = adc2_cmpr_latch_ctrl;
   assign sample_acquisition_az_out[ `IDX_MONITOR + 2 +: 6 ]    = adc2_monitor;
   assign sample_acquisition_az_out[ `IDX_ADCMUX +: 4 ]         = adc2_mux;
@@ -526,7 +530,7 @@ module top (
     .monitor(   sample_acquisition_no_az_out[ `IDX_MONITOR +: 2  ] ),    // we could pass subset of monitor if watned. eg. only 4 pins...
     .adc_measure_trig( sample_acquisition_no_az_adc2_measure_trig),
 
-    .spi_interrupt_ctl( sample_acquisition_no_az_out[`IDX_SPI_INTERRUPT_CTL ] )
+    // .spi_interrupt_ctl( sample_acquisition_no_az_out[`IDX_SPI_INTERRUPT_CTL ] )
 
   );
 
@@ -538,10 +542,12 @@ module top (
 
   // we may want to keep under direct_reg control, rather than pass to sampler controller.
   // so mcu can signal after result calculation, not just after counts obtained
-  assign sample_acquisition_no_az_out[ `IDX_MEAS_COMPLETE_CTL ] = reg_direct[ `IDX_MEAS_COMPLETE_CTL ];
-
+  // assign sample_acquisition_no_az_out[ `IDX_MEAS_COMPLETE_CTL ] = reg_direct[ `IDX_MEAS_COMPLETE_CTL ];
 
   // fanout from adc
+  assign sample_acquisition_no_az_out[ `IDX_SPI_INTERRUPT_CTL ] = adc2_measure_valid;      
+  assign sample_acquisition_no_az_out[ `IDX_MEAS_COMPLETE_CTL]  = adc2_measure_valid;
+
   assign sample_acquisition_no_az_out[ `IDX_CMPR_LATCH_CTL ]  = adc2_cmpr_latch_ctrl;
   assign sample_acquisition_no_az_out[ `IDX_MONITOR + 2 +: 6] = adc2_monitor;
   assign sample_acquisition_no_az_out[ `IDX_ADCMUX +: 4 ]     = adc2_mux;
@@ -600,12 +606,12 @@ spi_interrupt_ctl
   );
 
 
-/* TODO this is beetter
-    but needs mcu - spi interupt - condition changed from falling to rising.
+ // TODO this is beetter
+ //    but needs mcu - spi interupt - condition changed from falling to rising.
 
-  assign sa_no_az_test_out[`IDX_SPI_INTERRUPT_CTL ] =  adc_test_measure_valid;
+  assign sa_no_az_test_out[ `IDX_SPI_INTERRUPT_CTL ] = adc_test_measure_valid;
   assign sa_no_az_test_out[ `IDX_MEAS_COMPLETE_CTL ] = adc_test_measure_valid;  // eg. both follow the same signal
-*/
+
 
   sample_acquisition_no_az
   sa_no_az_test (
@@ -620,7 +626,7 @@ spi_interrupt_ctl
     .monitor(   sa_no_az_test_out[ `IDX_MONITOR +: 2  ] ),    // we could pass subset of monitor if watned. eg. only 4 pins...
     .adc_measure_trig( adc_test_measure_trig ),
 
-    .spi_interrupt_ctl( sa_no_az_test_out[`IDX_SPI_INTERRUPT_CTL ] )            // spi_interupt_ctl  - should be called sa_valid.
+    // .spi_interrupt_ctl( sa_no_az_test_out[`IDX_SPI_INTERRUPT_CTL ] )            // spi_interupt_ctl  - should be called sa_valid.
 
   );
 
