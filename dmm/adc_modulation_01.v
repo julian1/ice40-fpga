@@ -323,7 +323,7 @@ module adc_modulation (
         - reduces having to multiply out clk_count_var * count_var_up etc.
         - enables having non standar variable periods. eg. to reduce extra cycling to get to the other side.
         ------
-        the way to evaluate is to use stderr(regression).
+            the way to evaluate is to use stderr(regression).
       */
 
       // synchronous behavior for all states
@@ -364,6 +364,10 @@ module adc_modulation (
           // now revert.
           // NO. it may have been mcu roudinig. issue. reg_aperture. has the off-by-one. calculation
           // NO. we have it configured differently.
+          // OK. it doesn't matter whether aperture runs - for one more extra clk cycle. or one less here.  nov 3. 2023.
+          //    eg. clk termination condition doesn't matter.
+          //    instead what matters is that the count is recorded in the same way as the counts for the reference currents.
+          //    so mcu should use the returned count, rather than the aperture control parameter
           // =======================================
 
           // have we reached end of aperture
