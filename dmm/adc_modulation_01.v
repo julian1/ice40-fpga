@@ -66,7 +66,7 @@
 */
 
 // ref mux state.
-`define MUX_REF_NONE        3'b000
+`define MUX_REF_NONE        3'b000      // TODO review - not sure we ever want. instead use reset.
 `define MUX_REF_POS         3'b001
 `define MUX_REF_NEG         3'b010
 `define MUX_REF_SLOW_POS    3'b011
@@ -127,13 +127,9 @@ module adc_modulation (
   ////////////////////////////////
   // input [ 2-1:0]  refmux,     // these are being modified.can be writtern.
   // input           sigmux,
-
   // output reg [5-1:0]   state,     // not sure about exposing this like this. but we could project it on the monitor.
                                   // but this can be done internally.
-
   // output reg [4-1:0]  himux,   // JA. remove
-
-
   // both should be input wires. both are driven.
   // input           com_interrupt,
   // output reg      com_interrupt,  // JA remove.
@@ -141,7 +137,6 @@ module adc_modulation (
 
 
   ///////////
-
 
   // behavior/transition counts
   output reg [24-1:0] count_var_up_last,        // var_up. perhaps rename.
@@ -153,8 +148,11 @@ module adc_modulation (
   output reg [24-1:0] count_flip_last,
   output reg [24-1:0] clk_count_rundown_last, // change name. phase rundown.
 
+
   // TODO. change to 32 bit counts, for long integrations
   // current source clk counts
+  // these are output regs.
+  output reg [24-1:0] clk_count_mux_reset_last,
   output reg [24-1:0] clk_count_mux_neg_last,
   output reg [24-1:0] clk_count_mux_pos_last,
   output reg [24-1:0] clk_count_mux_rd_last,
@@ -202,6 +200,7 @@ module adc_modulation (
 
 
   // TODO change to 31 bits.
+  reg [24-1:0] clk_count_mux_reset;
   reg [24-1:0] clk_count_mux_neg;
   reg [24-1:0] clk_count_mux_pos;
   reg [24-1:0] clk_count_mux_rd;
@@ -342,9 +341,11 @@ module adc_modulation (
 
         `MUX_REF_NONE:
           ; // switches are turned off at start. and also at prerundown.
+            // don't really need to count this
 
         `MUX_REF_RESET:
-          ;
+            clk_count_mux_reset <= clk_count_mux_reset + 1;
+
 
       endcase
       // count_pos_on
@@ -362,7 +363,7 @@ module adc_modulation (
           // should be a count down
           // now revert.
           // NO. it may have been mcu roudinig. issue. reg_aperture. has the off-by-one. calculation
-          // NO. we have it configured differently. 
+          // NO. we have it configured differently.
           // =======================================
 
           // have we reached end of aperture
@@ -443,22 +444,23 @@ module adc_modulation (
         // beginning of signal integration
         `STATE_SIG_START:
           begin
-            state           <= `STATE_FIX_POS_START;
-            clk_count       <= 0;
+            state             <= `STATE_FIX_POS_START;
+            clk_count         <= 0;
 
             // clear the counts
-            count_var_up        <= 0;
-            count_var_down      <= 0;
-            count_fix_up    <= 0;
-            count_fix_down  <= 0;
-            count_trans_up  <= 0;
-            count_trans_down <= 0;
-            count_flip      <= 0;
+            count_var_up      <= 0;
+            count_var_down    <= 0;
+            count_fix_up      <= 0;
+            count_fix_down    <= 0;
+            count_trans_up    <= 0;
+            count_trans_down  <= 0;
+            count_flip        <= 0;
 
+            clk_count_mux_reset <= 0;
             clk_count_mux_neg <= 0;
             clk_count_mux_pos <= 0;
-            clk_count_mux_rd <= 0;
-            clk_count_mux_sig  <= 0;
+            clk_count_mux_rd  <= 0;
+            clk_count_mux_sig <= 0;
 /*
             // turn on signal input, to start signal integration
             // himux        <= himux_sel;
@@ -466,8 +468,8 @@ module adc_modulation (
             // refmux       <= `MUX_REF_NONE;
 */
             // JA
-            sigmux          <= 1;
-            refmux       <= `MUX_REF_NONE;
+            sigmux            <= 1;
+            refmux            <= `MUX_REF_NONE;
 
           end
 
@@ -722,6 +724,7 @@ module adc_modulation (
                 clk_count_rundown_last  <= clk_count;                           // why do we record this
 
                 // counts for current.
+                clk_count_mux_reset_last <= clk_count_mux_reset;
                 clk_count_mux_neg_last  <= clk_count_mux_neg;
                 clk_count_mux_pos_last  <= clk_count_mux_pos;
                 clk_count_mux_rd_last   <= clk_count_mux_rd;
