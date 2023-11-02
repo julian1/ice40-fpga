@@ -388,6 +388,8 @@ module top (
 
 
   // TODO - remove _last suffix.
+
+  wire [24-1:0] adc2_clk_count_mux_reset_last;
   wire [24-1:0] adc2_clk_count_mux_neg_last;    // maybe add reg_ prefix. No. they are not registers, until they are in the register_bank context.
   wire [24-1:0] adc2_clk_count_mux_pos_last;
   wire [24-1:0] adc2_clk_count_mux_rd_last;
@@ -439,7 +441,8 @@ module top (
     .sigmux(    adc2_mux[  2  ] ),                                    // perhaps clearer if split into adcrefmux and adcsigmux in the wire assignment. but it would then need two vars.
                                                                       // which isn't representative of the single synchronizer. so do it here instead.
 
-    // clk_count outputs, for currents
+    // adc clk counts for last sample measurement
+    .clk_count_mux_reset_last(adc2_clk_count_mux_reset_last),
     .clk_count_mux_neg_last(  adc2_clk_count_mux_neg_last),
     .clk_count_mux_pos_last(  adc2_clk_count_mux_pos_last),
     .clk_count_mux_rd_last(   adc2_clk_count_mux_rd_last),
@@ -448,8 +451,8 @@ module top (
   );
 
   /*
-	  key insight - is that the single module adc, can fan-out its outputs into two sets of output vecs -
-      to achieve modal behavior - in more than one mode.
+	  key insight - is that the single module adc, can fan-out its outputs into two muxable output vecs -
+      to achieve a modal configuration behavior - in more than one mode.
   */
 
 
@@ -656,7 +659,7 @@ spi_interrupt_ctl
   /*
       can put a adc measure count in status register -
         - can then read before and after reading adc counts. and if the counts are different it indicates a bad read/ val.
-        - might be more useful than reflecting the monitor. 
+        - might be more useful than reflecting the monitor.
 
       - EXTR. IMPROTANT - we don't need to add non-az status_flags.  or to az and non-az flags into a single set of flags ..
           - because in mcu software - use mode first to determine if we care about the hi/lo sample captured..
@@ -707,6 +710,7 @@ spi_interrupt_ctl
     .reg_sa_arm_trigger ( reg_sa_arm_trigger ),
 
     // outputs adc
+    .reg_adc_clk_count_mux_reset({{ 8 { 1'b0 } }, adc2_clk_count_mux_neg_last }  ) ,
     .reg_adc_clk_count_mux_neg( { { 8 { 1'b0 } }, adc2_clk_count_mux_neg_last }  ) ,
     .reg_adc_clk_count_mux_pos( { { 8 { 1'b0 } }, adc2_clk_count_mux_pos_last } ) ,
     .reg_adc_clk_count_mux_rd(  { { 8 { 1'b0 } }, adc2_clk_count_mux_rd_last }  ),

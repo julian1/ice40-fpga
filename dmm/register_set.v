@@ -34,26 +34,23 @@
 `define REG_DIRECT        14
 `define REG_DIRECT2       15      // don't use. deprecate .   was only for initial AZ switching test.
 
-
 `define REG_STATUS        17
 `define REG_RESET         18   // reset -> hi.  normal -> lo.
 
 
-//  add the AQUIS or SA for sample acquisition.
+//  sample acquisition.
 `define REG_SA_ARM_TRIGGER   19
-// `define REG_SA_STAMP     19        // hi or lo. could be put on status register. too.
 
 
 `define REG_ADC_P_APERTURE 20   // clk sample time. change name aperture.
 
+`define REG_ADC_CLK_COUNT_MUX_RESET 34    // TODO fix/ re-assign enum .
 `define REG_ADC_CLK_COUNT_MUX_NEG   30
 `define REG_ADC_CLK_COUNT_MUX_POS   31
 `define REG_ADC_CLK_COUNT_MUX_RD    32
 `define REG_ADC_CLK_COUNT_MUX_SIG   33
 
 
-
-// `define REG_ADC_P_APERTURE          32   // p for control parameter.
 
 
 module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,   4 bytes data.
@@ -71,6 +68,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
 
   // inputs adc
+  input wire [32-1:0] reg_adc_clk_count_mux_reset,
   input wire [32-1:0] reg_adc_clk_count_mux_neg,
   input wire [32-1:0] reg_adc_clk_count_mux_pos,
   input wire [32-1:0] reg_adc_clk_count_mux_rd,
@@ -87,15 +85,10 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   output reg [32-1:0] reg_direct2,     //  unused.
   output reg [32-1:0] reg_reset,      // unused.
 
+  // outputs signal acquisition
   output reg [32-1:0] reg_sa_arm_trigger,
 
-/*
-  TODO.
-  clk_count_reset_n,    // useful if running stand-alone
-  clk_count_fix_n,
-  clk_count_var_n,
-  clk_count_aper_n,   // eg. clk_count_mux_sig_n
-*/
+  // outputds adc
   output reg [32-1:0] reg_adc_p_aperture,    // move
 
 
@@ -198,6 +191,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
               `REG_STATUS:    out <= reg_status << 8;
               `REG_SA_ARM_TRIGGER:    out <= reg_sa_arm_trigger << 8;
 
+              `REG_ADC_CLK_COUNT_MUX_RESET: out <= reg_adc_clk_count_mux_reset << 8;
               `REG_ADC_CLK_COUNT_MUX_NEG:   out <= reg_adc_clk_count_mux_neg << 8;
               `REG_ADC_CLK_COUNT_MUX_POS:   out <= reg_adc_clk_count_mux_pos << 8;
               `REG_ADC_CLK_COUNT_MUX_RD:    out <= reg_adc_clk_count_mux_rd << 8;
