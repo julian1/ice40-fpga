@@ -152,6 +152,7 @@ module adc_modulation (
   // TODO. change to 32 bit counts, for long integrations
   // current source clk counts
   // these are output regs.
+  // having visibility over reset clk is good, given ctrl and the reset period.
   output reg [24-1:0] clk_count_mux_reset_last,
   output reg [24-1:0] clk_count_mux_neg_last,
   output reg [24-1:0] clk_count_mux_pos_last,
