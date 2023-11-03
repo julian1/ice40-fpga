@@ -709,7 +709,7 @@ spi_interrupt_ctl
     .reg_sa_arm_trigger ( reg_sa_arm_trigger ),
 
     // outputs adc
-    .reg_adc_clk_count_mux_reset({{ 8 { 1'b0 } }, adc2_clk_count_mux_neg_last }  ) ,
+    .reg_adc_clk_count_mux_reset({{ 8 { 1'b0 } }, adc2_clk_count_mux_reset_last }  ) ,
     .reg_adc_clk_count_mux_neg( { { 8 { 1'b0 } }, adc2_clk_count_mux_neg_last }  ) ,
     .reg_adc_clk_count_mux_pos( { { 8 { 1'b0 } }, adc2_clk_count_mux_pos_last } ) ,
     .reg_adc_clk_count_mux_rd(  { { 8 { 1'b0 } }, adc2_clk_count_mux_rd_last }  ),

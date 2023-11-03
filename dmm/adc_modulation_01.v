@@ -413,6 +413,9 @@ module adc_modulation (
           end
 
 
+        // state done is actually the res
+        // should make STATE_DONE == 0.
+
         `STATE_RESET:    // let integrator reset.
           begin
             // monitor[0]   <=  0;
@@ -452,6 +455,8 @@ module adc_modulation (
             state             <= `STATE_FIX_POS_START;
             clk_count         <= 0;
 
+            /////////////////////////////
+            // TODO ... all of these should be setup in the real start condition/ done.
             // clear the counts
             count_var_up      <= 0;
             count_var_down    <= 0;
@@ -461,7 +466,7 @@ module adc_modulation (
             count_trans_down  <= 0;
             count_flip        <= 0;
 
-            clk_count_mux_reset <= 0;
+            // clk_count_mux_reset <= 0;  do not overwrite... reset. in other clause.
             clk_count_mux_neg <= 0;
             clk_count_mux_pos <= 0;
             clk_count_mux_rd  <= 0;
@@ -729,7 +734,13 @@ module adc_modulation (
                 clk_count_rundown_last  <= clk_count;                           // why do we record this
 
                 // counts for current.
-                clk_count_mux_reset_last <= clk_count_mux_reset;
+
+                                                // clk_count_mux_reset;
+                // clk_count_mux_reset_last <= 456; // this works to communicate
+                // clk_count_mux_reset_last <= p_clk_count_reset;    // this works. reports 10,000
+                clk_count_mux_reset_last <= clk_count_mux_reset;    // this doesn't work. reports 0.
+
+
                 clk_count_mux_neg_last  <= clk_count_mux_neg;
                 clk_count_mux_pos_last  <= clk_count_mux_pos;
                 clk_count_mux_rd_last   <= clk_count_mux_rd;
@@ -781,6 +792,10 @@ module adc_modulation (
 
             // reset vars, and transition to runup state
             state           <= `STATE_RESET;
+
+            clk_count_mux_reset <= 0;   // clear count to start
+
+            // must be set for the reset phase.
             clk_count       <= 0;
 
             // JA
