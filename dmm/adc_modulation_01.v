@@ -233,11 +233,14 @@ module adc_modulation (
   reg [1:0] neg_ref_cross;
 
 
-  reg [ 4-1:0]  monitor_;
+  // reg [ 4-1:0]  monitor_;
 
   assign monitor[0] = adc_measure_trig;
   assign monitor[1] = adc_measure_valid;
-  assign monitor[2 +: 4 ] = monitor_;
+
+  assign monitor[ 2 +: 4]  = { sigmux, refmux };      // reference current, better name?
+  // output reg sigmux,
+ //  assign monitor[2 +: 4 ] = monitor_;
 
 
 
@@ -805,7 +808,7 @@ module adc_modulation (
             cmpr_disable_latch_ctl          <= 1; // // disable comparator, enable latch
 
             // monitor     <=  6'b000000;    // indicate we have started.
-            monitor_     <=  4'b0;    // indicate we have started.
+            // monitor_     <=  4'b0;    // indicate we have started.
 
 
 /*
