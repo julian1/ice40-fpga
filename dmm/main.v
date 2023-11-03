@@ -423,10 +423,9 @@ module top (
     use_fast_rundown    = 1;
 */
     // ctrl parameters
-    . p_clk_count_reset( 24'd10000 ) ,
+    . p_clk_count_reset( 24'd10000 ) ,  // 10000 = 500us.  10e3 / 20e6 =  0.0005
     . p_clk_count_fix( 24'd24 ) ,
     . p_clk_count_var( 24'd185 ) ,
-    // . p_clk_count_aper( 2 * 2000000) ,
     . p_clk_count_aper( reg_adc_p_aperture),
 
     . use_slow_rundown( 1'b1 ),
