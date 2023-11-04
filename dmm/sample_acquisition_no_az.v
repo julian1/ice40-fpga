@@ -17,6 +17,10 @@ module sample_acquisition_no_az (
   input adc_measure_valid,
   input arm_trigger,
 
+  // wait phase.
+  // reg [24-1:0]  p_clk_count_precharge = `CLK_FREQ * 500e-6 ;   // 500us.
+  input [24-1:0] p_clk_count_precharge ,
+
   // outputs
   output reg adc_measure_trig,
   output reg led0,
@@ -30,9 +34,6 @@ module sample_acquisition_no_az (
   ////////////////
   reg [7-1:0]   state = 0 ;
   reg [31:0]    clk_count_down;
-
-  // wait phase.
-  reg [24-1:0]  clk_count_precharge_n = `CLK_FREQ * 500e-6 ;   // 500us.
 
 
 
@@ -69,7 +70,7 @@ module sample_acquisition_no_az (
         2:
             begin
               state           <= 25;
-              clk_count_down  <= clk_count_precharge_n;  // normally pin s1
+              clk_count_down  <= p_clk_count_precharge;  // normally pin s1
 
               // blink led, on alternate sampples, keeps visually identifiable at fast sample rates. and to match az-mode frequency.
               led0            <= led0  + 1;

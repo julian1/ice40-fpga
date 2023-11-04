@@ -29,6 +29,9 @@ module sample_acquisition_az (
   input [ 4-1 : 0 ] azmux_lo_val,
   input adc_measure_valid,
 
+  // reg [24-1:0]  p_clk_count_precharge = `CLK_FREQ * 500e-6 ;   // 500us.
+  input [24-1:0] p_clk_count_precharge,
+
   // outputs.
   output reg adc_measure_trig,
   output reg  sw_pc_ctl,
@@ -49,15 +52,14 @@ module sample_acquisition_az (
   reg [31:0]    clk_count_down;           // clk_count for the current phase. using 31 bitss, gives faster timing spec.  v 24 bits. weird. ??? 36MHz v 32MHz
 
 
-  // change name clk_precharge_duration_n
-  reg [24-1:0]  clk_count_precharge_n = `CLK_FREQ * 500e-6 ;   // 500us.
 
   reg [2-1: 0 ] arm_trigger_edge;
 
 
   assign monitor[0] = adc_measure_trig;
-  assign monitor[1] = adc_measure_valid;
+  // assign monitor[1] = adc_measure_valid;
 
+  assign monitor[1] =  azmux == `AZMUX_PCOUT;   // taking a hi.
 
 
 
@@ -85,7 +87,7 @@ module sample_acquisition_az (
         1:
           begin
             state           <= 15;
-            clk_count_down  <= clk_count_precharge_n;
+            clk_count_down  <= p_clk_count_precharge;
             sw_pc_ctl       <= `SW_PC_BOOT;
           end
         15:
@@ -99,7 +101,7 @@ module sample_acquisition_az (
         2:
             begin
               state           <= 25;
-              clk_count_down  <= clk_count_precharge_n;  // normally pin s1
+              clk_count_down  <= p_clk_count_precharge;  // normally pin s1
               azmux           <= `AZMUX_PCOUT;
 
               /*/ do we set the hi/lo status - at the start of adc measurement. or after complete/valid.
@@ -122,7 +124,7 @@ module sample_acquisition_az (
         3:
           begin
             state           <= 33;
-            clk_count_down  <= clk_count_precharge_n;  // normally pin s1
+            clk_count_down  <= p_clk_count_precharge;  // normally pin s1
             sw_pc_ctl       <= `SW_PC_SIGNAL;
           end
         33:
@@ -157,7 +159,7 @@ module sample_acquisition_az (
         4:
           begin
             state           <= 45;
-            clk_count_down  <= clk_count_precharge_n; // time less important here
+            clk_count_down  <= p_clk_count_precharge; // time less important here
             sw_pc_ctl       <= `SW_PC_BOOT;
           end
         45:
@@ -169,7 +171,7 @@ module sample_acquisition_az (
         5:
           begin
             state           <= 52;
-            clk_count_down  <= clk_count_precharge_n; // time less important here
+            clk_count_down  <= p_clk_count_precharge; // time less important here
             azmux           <= azmux_lo_val;
 
           end

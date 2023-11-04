@@ -294,6 +294,8 @@ module top (
   wire [32-1 :0] reg_reset;
   wire [32-1 :0] reg_sa_arm_trigger;
 
+  wire [32 - 1 : 0 ] reg_sa_p_clk_count_precharge;
+
   // inputs
   wire [32 - 1 :0] reg_status ;
 
@@ -428,7 +430,7 @@ module top (
     // . p_clk_count_var( 24'd185 ) ,
     . p_clk_count_fix( 24'd15 ) ,         // +-15V. reduced integrator swing.
     . p_clk_count_var( 24'd100 ) ,
-    . p_clk_count_aper( reg_adc_p_aperture),
+    . p_clk_count_aper( reg_adc_p_aperture),  
 
     . use_slow_rundown( 1'b1 ),
     . use_fast_rundown( 1'b1 ),
@@ -473,6 +475,7 @@ module top (
     .arm_trigger( reg_sa_arm_trigger[0 ]  ) ,
     .azmux_lo_val(  reg_direct[  `IDX_AZMUX +: 4 ] ),
     .adc_measure_valid(   adc2_measure_valid ),                     // fan-in from adc
+    .p_clk_count_precharge( reg_sa_p_clk_count_precharge[ 24-1:0 ]),
 
     // outputs
     .sw_pc_ctl( sample_acquisition_az_out[ `IDX_SIG_PC_SW_CTL ]  ),
@@ -511,6 +514,7 @@ module top (
     // inputs
     .adc_measure_valid( adc2_measure_valid ),                     // fan-in from adc
     .arm_trigger( reg_sa_arm_trigger[0 ]  ) ,
+    .p_clk_count_precharge( reg_sa_p_clk_count_precharge[ 24-1:0 ]),
 
     // outputs
     .led0(      sample_acquisition_no_az_out[ `IDX_LED0 ] ),
@@ -589,6 +593,7 @@ spi_interrupt_ctl
     // inputs
     .adc_measure_valid( adc_test_measure_valid),                     // fan-in from adc
     .arm_trigger( reg_sa_arm_trigger[0 ]  ) ,
+    .p_clk_count_precharge( reg_sa_p_clk_count_precharge[ 24-1:0 ] ),
 
     // outputs
     .led0(      sa_no_az_test_out[ `IDX_LED0 ] ),
@@ -709,6 +714,7 @@ spi_interrupt_ctl
 
     // outputs signal acquisiation
     .reg_sa_arm_trigger ( reg_sa_arm_trigger ),
+    .reg_sa_p_clk_count_precharge( reg_sa_p_clk_count_precharge),
 
     // outputs adc
     .reg_adc_clk_count_mux_reset({{ 8 { 1'b0 } }, adc2_clk_count_mux_reset_last }  ) ,
