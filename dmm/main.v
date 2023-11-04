@@ -28,7 +28,8 @@
 `include "defines.v"
 
 // `include "adc_modulation_00.v"
-`include "adc_modulation_01.v"
+// `include "adc_modulation_01.v"
+`include "adc_modulation_02.v"
 
 
 
