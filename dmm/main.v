@@ -291,11 +291,15 @@ module top (
   wire [32-1 :0] reg_mode;     // two bits
   wire [32-1 :0] reg_direct;
   wire [32-1 :0] reg_direct2;
-  wire [32- 1 :0] reg_adc_p_aperture;  // 32/31 bit nice. for long sample.
   wire [32-1 :0] reg_reset;
-  wire [32-1 :0] reg_sa_arm_trigger;
 
-  wire [32 - 1 : 0 ] reg_sa_p_clk_count_precharge;
+  wire [32-1 :0] reg_sa_arm_trigger;
+  wire [32-1 :0] reg_sa_p_clk_count_precharge;
+
+
+  wire [32-1 :0] reg_adc_p_aperture;  // 32/31 bit nice. for long sample.
+  wire [32-1 :0] reg_adc_p_clk_count_reset;
+
 
   // inputs
   wire [32 - 1 :0] reg_status ;
@@ -417,7 +421,7 @@ module top (
 /*
     clk_count_rset_n   =  10000;
     // 26MHz ???
-    clk_count_var_n     = 185;    // 330pF
+    clk_count_var_n     = 185;    // 330pF   on +-17.5V.
     clk_count_fix_n     = 24;   // 24 is faster than 23... weird.
 
     clk_count_aper_n    = (2 * 2000000);    // ? 200ms TODO check this.
@@ -426,12 +430,15 @@ module top (
     use_fast_rundown    = 1;
 */
     // ctrl parameters
-    . p_clk_count_reset( 24'd10000 ) ,  // 10000 = 500us.  10e3 / 20e6 =  0.0005
-    // . p_clk_count_fix( 24'd24 ) ,      // +-17.5V.
+    // . p_clk_count_reset( 24'd10000 ) ,  // 10000 = 500us.  10e3 / 20e6 =  0.0005
+     // . p_clk_count_fix( 24'd24 ) ,      // +-17.5V.
     // . p_clk_count_var( 24'd185 ) ,
+   
+    . p_clk_count_aper( reg_adc_p_aperture),  
+    . p_clk_count_reset( reg_adc_p_clk_count_reset[ 24-1: 0  ]  ) ,
+
     . p_clk_count_fix( 24'd15 ) ,         // +-15V. reduced integrator swing.
     . p_clk_count_var( 24'd100 ) ,
-    . p_clk_count_aper( reg_adc_p_aperture),  
 
     . use_slow_rundown( 1'b1 ),
     . use_fast_rundown( 1'b1 ),
@@ -710,12 +717,16 @@ spi_interrupt_ctl
     . reg_mode( reg_mode ),      // ok.
     . reg_direct( reg_direct ),
     . reg_direct2( reg_direct2 ),
-    . reg_adc_p_aperture( reg_adc_p_aperture),
     . reg_reset( reg_reset),
+
 
     // outputs signal acquisiation
     .reg_sa_arm_trigger ( reg_sa_arm_trigger ),
     .reg_sa_p_clk_count_precharge( reg_sa_p_clk_count_precharge),
+
+
+    .reg_adc_p_aperture( reg_adc_p_aperture),
+    .reg_adc_p_clk_count_reset(reg_adc_p_clk_count_reset ),
 
     // outputs adc
     .reg_adc_clk_count_mux_reset({{ 8 { 1'b0 } }, adc2_clk_count_mux_reset_last }  ) ,

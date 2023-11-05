@@ -44,10 +44,12 @@
 `define REG_SA_ARM_TRIGGER   19
 `define REG_SA_P_CLK_COUNT_PRECHARGE 21
 
+// adc parameters
+`define REG_ADC_P_APERTURE          20   // clk sample time. change name aperture.  // TODO reassign.
+`define REG_ADC_P_CLK_COUNT_RESET   25
 
-`define REG_ADC_P_APERTURE 20   // clk sample time. change name aperture.
-                                  // TODO reassign.
 
+// adc counts
 `define REG_ADC_CLK_COUNT_MUX_RESET 34    // TODO fix/ re-assign enum .
 `define REG_ADC_CLK_COUNT_MUX_NEG   30
 `define REG_ADC_CLK_COUNT_MUX_POS   31
@@ -95,8 +97,8 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
 
   // outputds adc
-  output reg [32-1:0] reg_adc_p_aperture,    // move
-
+  output reg [32-1:0] reg_adc_p_aperture,
+  output reg [32-1:0] reg_adc_p_clk_count_reset,    // move
 
 );
 
@@ -127,9 +129,11 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
     reg_reset     <= 0;
 
     reg_sa_arm_trigger <= 0;
-    reg_sa_p_clk_count_precharge  <= `CLK_FREQ * 500e-6 ;   // 500us.
+    reg_sa_p_clk_count_precharge  <= `CLK_FREQ * 500e-6 ;   // == 10000 ==  500us.
 
     reg_adc_p_aperture            <= `CLK_FREQ * 0.2 ;      // 200ms.
+
+    reg_adc_p_clk_count_reset     <= 24'd10000 ;            // 20000000 * 0.5e-3 == 10000   500us.
   end
 
 
@@ -191,14 +195,15 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
               `REG_DIRECT2:   out <= reg_direct2 << 8;
               `REG_RESET:     out <= reg_reset << 8;
 
-
-              `REG_ADC_P_APERTURE:          out <= reg_adc_p_aperture << 8;     // clk_count_sample_n clk_time_sample_clksample_time ??
-
-              // inputs
-              `REG_STATUS:                  out <= reg_status << 8;
               `REG_SA_ARM_TRIGGER:          out <= reg_sa_arm_trigger << 8;
               `REG_SA_P_CLK_COUNT_PRECHARGE: out <=  reg_sa_p_clk_count_precharge << 8;
 
+              `REG_ADC_P_APERTURE:          out <= reg_adc_p_aperture << 8;     // clk_count_sample_n clk_time_sample_clksample_time ??
+              `REG_ADC_P_CLK_COUNT_RESET:   out <= reg_adc_p_clk_count_reset << 8;
+
+
+              // inputs
+              `REG_STATUS:                  out <= reg_status << 8;
 
               `REG_ADC_CLK_COUNT_MUX_RESET: out <= reg_adc_clk_count_mux_reset << 8;
               `REG_ADC_CLK_COUNT_MUX_NEG:   out <= reg_adc_clk_count_mux_neg << 8;
@@ -232,11 +237,12 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
             `REG_DIRECT2:   reg_direct2  <= bin;
             `REG_RESET:     reg_reset   <= bin;
 
-            `REG_SA_ARM_TRIGGER:  reg_sa_arm_trigger <= bin;
+            `REG_SA_ARM_TRIGGER:            reg_sa_arm_trigger <= bin;
             `REG_SA_P_CLK_COUNT_PRECHARGE:  reg_sa_p_clk_count_precharge <= bin;
 
 
-            `REG_ADC_P_APERTURE:  reg_adc_p_aperture <= bin;
+            `REG_ADC_P_APERTURE:          reg_adc_p_aperture <= bin;
+            `REG_ADC_P_CLK_COUNT_RESET:   reg_adc_p_clk_count_reset <= bin;
 
           endcase
 
