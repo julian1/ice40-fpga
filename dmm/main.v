@@ -293,7 +293,7 @@ module top (
   wire [32-1 :0] reg_direct2;
   wire [32-1 :0] reg_reset;
 
-  wire [32-1 :0] reg_sa_arm_trigger;
+  wire [32-1 :0] reg_sa_arm_trigger;              // only a bit is needed here. should be able to handle more efficiently.
   wire [32-1 :0] reg_sa_p_clk_count_precharge;
 
 
@@ -436,8 +436,8 @@ module top (
     // . p_clk_count_reset( 24'd10000 ) ,  // 10000 = 500us.  10e3 / 20e6 =  0.0005
      // . p_clk_count_fix( 24'd24 ) ,      // +-17.5V.
     // . p_clk_count_var( 24'd185 ) ,
-   
-    . p_clk_count_aper( reg_adc_p_aperture),  
+
+    . p_clk_count_aper( reg_adc_p_aperture),
     . p_clk_count_reset( reg_adc_p_clk_count_reset[ 24-1: 0  ]  ) ,
 
     . p_clk_count_fix( 24'd15 ) ,         // +-15V. reduced integrator swing.
@@ -686,12 +686,19 @@ spi_interrupt_ctl
   */
 
   assign reg_status = {
-    8'b0 ,
-    monitor,
-            HW2,  HW1,  HW0 ,   1'b0,  sample_acquisition_az_status_out,      adc2_measure_valid,
-            // HW2,  HW1,  HW0 ,   4'b0,  outputs_vec[ `IDX_SPI_INTERRUPT_CTL ] ,
 
-    3'b0,   SWITCH_SENSE_OUT, DCV_OVP_OUT, OHMS_OVP_OUT, SUPPLY_SENSE_OUT, UNUSED_2
+    8'b0 ,
+    monitor,                          // add a count, as a transactional read lock.
+
+    HW2,  HW1,  HW0,
+    reg_sa_arm_trigger[0],            // ease having to do a separate register read, to retrieve state.
+    sample_acquisition_az_status_out, // 3 bits
+    adc2_measure_valid,
+
+    // HW2,  HW1,  HW0 ,   4'b0,  outputs_vec[ `IDX_SPI_INTERRUPT_CTL ] ,
+
+    3'b0,
+    SWITCH_SENSE_OUT, DCV_OVP_OUT, OHMS_OVP_OUT, SUPPLY_SENSE_OUT, UNUSED_2
  };
 
 
