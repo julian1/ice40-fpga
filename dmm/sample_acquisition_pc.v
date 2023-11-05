@@ -41,6 +41,8 @@ module sample_acquisition_pc (
   // modulation_az hardcodes the hi_val . since does not change for normal az operation
   input [ 32-1 : 0 ] clk_sample_duration,  // 32/31 bit nice. for long sample....  wrongly named it is counter_sample_duration. not clk...
 
+  input [24-1:0]    p_clk_count_precharge,
+
   /// outputs.
   output reg  sw_pc_ctl,
   // output reg [ 4-1:0 ] azmux,
@@ -54,10 +56,6 @@ module sample_acquisition_pc (
 
   reg [31:0]    clk_count_down;           // clk_count for the current phase. using 31 bitss, gives faster timing spec.  v 24 bits. weird. ??? 36MHz v 32MHz
 
-
-  // change name clk_precharge_duration_n
-  reg [24-1:0]  clk_count_precharge_n = `CLK_FREQ * 500e-6 ;   // 500us.
-  // reg [24-1:0]  clk_count_precharge_n = `CLK_FREQ * 5e-3 ;         // 5ms
 
 
   // this would be an async signal???
@@ -87,7 +85,7 @@ module sample_acquisition_pc (
         1:
           begin
             state           <= 15;
-            clk_count_down  <= clk_count_precharge_n;
+            clk_count_down  <= p_clk_count_precharge;
             sw_pc_ctl       <= `SW_PC_BOOT;
             // azmux           <=  azmux_lo_val;       // should be defined. or set in async reset. not left over state.
             monitor         <= { 8 { 1'b0 } } ;     // reset
@@ -103,7 +101,7 @@ module sample_acquisition_pc (
         2:
             begin
               state           <= 25;
-              clk_count_down  <= clk_count_precharge_n;  // normally pin s1
+              clk_count_down  <= p_clk_count_precharge;  // normally pin s1
               // azmux          <= `AZMUX_HI_VAL;
               monitor[0]      <= 1;
             end
@@ -130,7 +128,7 @@ module sample_acquisition_pc (
         4:
           begin
             state           <= 45;
-            clk_count_down  <= clk_count_precharge_n; // time less important here
+            clk_count_down  <= p_clk_count_precharge; // time less important here
             sw_pc_ctl       <= `SW_PC_BOOT;
             monitor[1]      <= 0;
           end

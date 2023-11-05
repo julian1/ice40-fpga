@@ -375,7 +375,10 @@ module top (
     // inputs
     .clk(CLK),
     .reset( 1'b0 ), // TODO remove.
+
     .clk_sample_duration( reg_adc_p_aperture ),
+    .p_clk_count_precharge( reg_sa_p_clk_count_precharge[ 24-1:0] ),
+
     // outputs
     .sw_pc_ctl( sample_acquisition_pc_out[ `IDX_SIG_PC_SW_CTL ]  ),
     .led0(      sample_acquisition_pc_out[ `IDX_LED0 ] ),

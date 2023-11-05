@@ -129,10 +129,10 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
     reg_reset     <= 0;
 
     reg_sa_arm_trigger <= 0;
+
     reg_sa_p_clk_count_precharge  <= `CLK_FREQ * 500e-6 ;   // == 10000 ==  500us.
 
     reg_adc_p_aperture            <= `CLK_FREQ * 0.2 ;      // 200ms.
-
     reg_adc_p_clk_count_reset     <= 24'd10000 ;            // 20000000 * 0.5e-3 == 10000   500us.
   end
 
