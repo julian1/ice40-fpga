@@ -40,8 +40,6 @@
 
 
 
-`define CLK_FREQ        20000000
-
 
 
 /*
@@ -79,6 +77,7 @@
 
 
 
+// TODO move this.
 
 module test_pattern (
   input   clk,
@@ -89,14 +88,11 @@ module test_pattern (
 
   always@(posedge clk  )
       begin
-
-
         // works all monitor pins.
         // remove the himux2  reg_direct value is not working.
         // out[ 17 : 0 ]  <= out [ 17  : 0   ] + 1;
         // out  <= out  + 1;
         out  <= out  + 1;
-
       end
 
 endmodule
