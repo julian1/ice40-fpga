@@ -548,11 +548,13 @@ module adc_modulation (
            begin
             state     <= `STATE_FAST_ABOVE;
             clk_count <= 0;
+            clk_count_down    <= p_clk_count_fix;
             refmux    <= `MUX_REF_POS;
             end
 
         `STATE_FAST_ABOVE:
-          if(clk_count >= p_clk_count_fix)
+          // if(clk_count >= p_clk_count_fix)
+          if(clk_count_down == 0)
             begin
              if( comparator_val_last) // below zero-cross
               state   <= `STATE_FAST_BELOW_START;     // go to the above
@@ -566,11 +568,13 @@ module adc_modulation (
            begin
             state     <= `STATE_FAST_BELOW;
             clk_count <= 0;
+            clk_count_down    <= p_clk_count_fix;
             refmux    <= `MUX_REF_NEG;
             end
 
         `STATE_FAST_BELOW:
-          if(clk_count >= p_clk_count_fix)
+          // if(clk_count >= p_clk_count_fix)
+          if(clk_count_down == 0)
             begin
              if( ! comparator_val_last) // above zero-cross
               state   <= `STATE_PRERUNDOWN_START;   // go to prerundown
@@ -588,6 +592,7 @@ module adc_modulation (
            begin
             state     <= `STATE_PRERUNDOWN;
             clk_count <= 0;
+            clk_count_down    <= p_clk_count_fix;
             /*
                 we don't care about landing above the zero-cross. in 4 phase we care about ending on a downward var.
                 thatway we can add a up transition.  before doing the downward transition (for slow) rundown.
@@ -605,7 +610,8 @@ module adc_modulation (
           // EXTR. this can just keep driving up, without transitions, and testing until hit the zero cross.
           // No. i think it would actually depend on whether the last /
           // then we get
-          if(clk_count >= p_clk_count_fix)
+          // if(clk_count >= p_clk_count_fix)
+          if(clk_count_down == 0)
             state <= `STATE_RUNDOWN_START;
 
 
