@@ -410,26 +410,22 @@ module adc_modulation (
         // cycle +-ref currents, with/or without signal
         `STATE_FIX_POS_START:
           begin
-            state         <= `STATE_FIX_POS;
-            clk_count     <= 0;
-            count_fix_down <= count_fix_down + 1;
-            refmux        <= `MUX_REF_POS; // initial direction
+            state             <= `STATE_FIX_POS;
+            clk_count         <= 0;
+            clk_count_down    <= p_clk_count_fix;
+
+            count_fix_down    <= count_fix_down + 1;
+            refmux            <= `MUX_REF_POS; // initial direction
 
 
             cmpr_disable_latch_ctl  <= 0; // enable comparator, // JA correct. 0 means it is transparent.
           end
 
         `STATE_FIX_POS:
-          /*
-          // half way through first fix, enable the comparator
-          if(clk_count >= (p_clk_count_fix >> 1))
-            // cmpr_disable_latch_ctl  <= 0
-          */
-          if(clk_count >= p_clk_count_fix)       // walk up.  dir = 1
+          // if(clk_count >= p_clk_count_fix)       // walk up.  dir = 1
+          if(clk_count_down == 0)
             begin
               state <= `STATE_VAR_START;
-
-              // cmpr_disable_latch_ctl  <= 0; // enable comparator, we test the comparator_last value in the next clock cycle - not enough time...
 
             end
 
@@ -437,17 +433,18 @@ module adc_modulation (
         // variable direction
         `STATE_VAR_START:
           begin
-            state         <= `STATE_VAR;
-            clk_count     <= 0;
+            state             <= `STATE_VAR;
+            clk_count         <= 0;
+            clk_count_down    <= p_clk_count_var;
 
             if( comparator_val_last)   // test below the zero-cross
               begin
-                refmux    <= `MUX_REF_NEG;  // add negative ref. to drive up.
+                refmux        <= `MUX_REF_NEG;  // add negative ref. to drive up.
                 count_var_up  <= count_var_up + 1;
               end
             else
               begin
-                refmux    <= `MUX_REF_POS;
+                refmux        <= `MUX_REF_POS;
                 count_var_down <= count_var_down + 1;
               end
           end
@@ -458,7 +455,8 @@ module adc_modulation (
         // we are confusing neg. pos. and up. down.   neg == up. pos == down.
 
         `STATE_VAR:
-          if(clk_count >= p_clk_count_var)
+          // if(clk_count >= p_clk_count_var)
+          if(clk_count_down == 0)
             state <= `STATE_FIX_NEG_START;
 
 
@@ -466,13 +464,16 @@ module adc_modulation (
           begin
             state         <= `STATE_FIX_NEG;
             clk_count     <= 0;
+            clk_count_down    <= p_clk_count_fix;
+
             count_fix_up  <= count_fix_up + 1;
             refmux        <= `MUX_REF_NEG;
           end
 
         `STATE_FIX_NEG:
           // TODO add switch here for 3 phase modulation variation.
-          if(clk_count >= p_clk_count_fix)
+          // if(clk_count >= p_clk_count_fix)
+          if(clk_count_down == 0)
             state <= `STATE_VAR2_START;
 
         // variable direction
@@ -483,17 +484,18 @@ module adc_modulation (
           // so just keep running complete 4 phase cycles until we get a cross. rather than force positive vars.
           //////////
           begin
-            state         <= `STATE_VAR2;
-            clk_count     <= 0;
+            state             <= `STATE_VAR2;
+            clk_count         <= 0;
+            clk_count_down    <= p_clk_count_var;
 
             if( comparator_val_last) // below zero-cross
               begin
-                refmux    <= `MUX_REF_NEG;
+                refmux        <= `MUX_REF_NEG;
                 count_var_up  <= count_var_up + 1;
               end
             else
               begin
-                refmux    <= `MUX_REF_POS;
+                refmux        <= `MUX_REF_POS;
                 count_var_down <= count_var_down + 1;
               end
           end
@@ -505,7 +507,8 @@ module adc_modulation (
 
         */
         `STATE_VAR2:
-          if(clk_count >= p_clk_count_var)
+          // if(clk_count >= p_clk_count_var)
+          if(clk_count_down == 0)
             begin
               // signal integration finished.
               if( !sigmux)
