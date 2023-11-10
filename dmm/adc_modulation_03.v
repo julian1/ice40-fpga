@@ -144,7 +144,8 @@ module adc_modulation (
 
   // initial begin does seem to be supported.
   initial begin
-    state           = `STATE_RESET_START;   // 0
+    // state           = `STATE_RESET_START;   // 0
+    state           = `STATE_DONE ;   // 0
 
     cmpr_disable_latch_ctl  = 1; // disable comparator,
 
@@ -366,17 +367,13 @@ module adc_modulation (
           end
 
 
-        // state done is actually the res
-        // should make STATE_DONE == 0.
 
         `STATE_RESET:    // let integrator reset.
           begin
-            // monitor[0]   <=  0;
-
-            if(clk_count >= p_clk_count_reset)
-              // state <= `STATE_SIG_SETTLE_START;
-              // JA
+            // if(clk_count >= p_clk_count_reset)
+            if(clk_count_down == 0)
               state <= `STATE_SIG_START;
+
           end
 
 
@@ -402,13 +399,8 @@ module adc_modulation (
             clk_count_mux_pos <= 0;
             clk_count_mux_rd  <= 0;
             clk_count_mux_sig <= 0;
-/*
+
             // turn on signal input, to start signal integration
-            // himux        <= himux_sel;
-            sigmux          <= 1;
-            // refmux       <= `MUX_REF_NONE;
-*/
-            // JA
             sigmux            <= 1;
             refmux            <= `MUX_REF_NONE; // turn off reset.
 
