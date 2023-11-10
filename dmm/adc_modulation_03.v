@@ -18,7 +18,7 @@
 
 `define STATE_DONE          0  // initial state
 
-`define STATE_RESET_START    1    
+`define STATE_RESET_START    1
 `define STATE_RESET          2
 `define STATE_SIG_SETTLE_START 3
 `define STATE_SIG_SETTLE    4
@@ -154,8 +154,7 @@ module adc_modulation (
   //////////////////////////////////////////////////////
   // counters and settings  ...
 
-  // reg [31:0]  clk_count;           // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
-  reg [31:0]  clk_count_down; 
+  reg [31:0]  clk_count_down;
 
   // modulation counts
   reg [24-1:0] count_var_up;
@@ -201,14 +200,10 @@ module adc_modulation (
 
 
   // reg [ 4-1:0]  monitor_;
-
   assign monitor[0] = adc_measure_trig;
   assign monitor[1] = adc_measure_valid;
 
   assign monitor[ 2 +: 4]  = { sigmux, refmux };      // reference current, better name?
-  // output reg sigmux,
- //  assign monitor[2 +: 4 ] = monitor_;
-
 
 
 
@@ -219,12 +214,7 @@ module adc_modulation (
 
     begin
 
-
-      // always increment clk for the current phase
-      // clk_count     <= clk_count + 1;
-
       clk_count_down <= clk_count_down - 1;
-
 
 
       // sample/bind comparator val once on clock edge. improves speed.
@@ -310,8 +300,6 @@ module adc_modulation (
               // turn off signal input
               sigmux  <= 0;
 
-              // swith himux to ref-lo, to prevent leakage, but switching instability probably worse
-              // himux   <= `HIMUX_SEL_REF_LO;
             end
         end
 
@@ -352,9 +340,6 @@ module adc_modulation (
 
             clk_count_mux_reset <= 0;   // clear count to start
 
-            // must be set for the reset phase.
-            // clk_count       <= 0;
-
             clk_count_down   <= p_clk_count_reset;
 
             // JA
@@ -370,7 +355,6 @@ module adc_modulation (
 
         `STATE_RESET:    // let integrator reset.
           begin
-            // if(clk_count >= p_clk_count_reset)
             if(clk_count_down == 0)
               state <= `STATE_SIG_START;
 
@@ -381,7 +365,6 @@ module adc_modulation (
         `STATE_SIG_START:
           begin
             state             <= `STATE_FIX_POS_START;
-            // clk_count         <= 0;
 
             /////////////////////////////
             // TODO ... all of these should be setup in the real start condition/ done.
@@ -411,7 +394,6 @@ module adc_modulation (
         `STATE_FIX_POS_START:
           begin
             state             <= `STATE_FIX_POS;
-            // clk_count         <= 0;
             clk_count_down    <= p_clk_count_fix;
 
             count_fix_down    <= count_fix_down + 1;
@@ -422,7 +404,6 @@ module adc_modulation (
           end
 
         `STATE_FIX_POS:
-          // if(clk_count >= p_clk_count_fix)       // walk up.  dir = 1
           if(clk_count_down == 0)
             begin
               state <= `STATE_VAR_START;
@@ -434,7 +415,6 @@ module adc_modulation (
         `STATE_VAR_START:
           begin
             state             <= `STATE_VAR;
-            // clk_count         <= 0;
             clk_count_down    <= p_clk_count_var;
 
             if( comparator_val_last)   // test below the zero-cross
@@ -455,7 +435,6 @@ module adc_modulation (
         // we are confusing neg. pos. and up. down.   neg == up. pos == down.
 
         `STATE_VAR:
-          // if(clk_count >= p_clk_count_var)
           if(clk_count_down == 0)
             state <= `STATE_FIX_NEG_START;
 
@@ -463,7 +442,6 @@ module adc_modulation (
         `STATE_FIX_NEG_START:
           begin
             state         <= `STATE_FIX_NEG;
-            // clk_count     <= 0;
             clk_count_down    <= p_clk_count_fix;
 
             count_fix_up  <= count_fix_up + 1;
@@ -472,7 +450,6 @@ module adc_modulation (
 
         `STATE_FIX_NEG:
           // TODO add switch here for 3 phase modulation variation.
-          // if(clk_count >= p_clk_count_fix)
           if(clk_count_down == 0)
             state <= `STATE_VAR2_START;
 
@@ -485,7 +462,6 @@ module adc_modulation (
           //////////
           begin
             state             <= `STATE_VAR2;
-            // clk_count         <= 0;
             clk_count_down    <= p_clk_count_var;
 
             if( comparator_val_last) // below zero-cross
@@ -507,7 +483,6 @@ module adc_modulation (
 
         */
         `STATE_VAR2:
-          // if(clk_count >= p_clk_count_var)
           if(clk_count_down == 0)
             begin
               // signal integration finished.
@@ -547,13 +522,12 @@ module adc_modulation (
         `STATE_FAST_ABOVE_START:
            begin
             state     <= `STATE_FAST_ABOVE;
-            // clk_count <= 0;
             clk_count_down    <= p_clk_count_fix;
+
             refmux    <= `MUX_REF_POS;
             end
 
         `STATE_FAST_ABOVE:
-          // if(clk_count >= p_clk_count_fix)
           if(clk_count_down == 0)
             begin
              if( comparator_val_last) // below zero-cross
@@ -567,13 +541,11 @@ module adc_modulation (
         `STATE_FAST_BELOW_START:
            begin
             state     <= `STATE_FAST_BELOW;
-            // clk_count <= 0;
             clk_count_down    <= p_clk_count_fix;
             refmux    <= `MUX_REF_NEG;
             end
 
         `STATE_FAST_BELOW:
-          // if(clk_count >= p_clk_count_fix)
           if(clk_count_down == 0)
             begin
              if( ! comparator_val_last) // above zero-cross
@@ -591,7 +563,6 @@ module adc_modulation (
         `STATE_PRERUNDOWN_START:
            begin
             state     <= `STATE_PRERUNDOWN;
-            // clk_count <= 0;
             clk_count_down    <= p_clk_count_fix;
             /*
                 we don't care about landing above the zero-cross. in 4 phase we care about ending on a downward var.
@@ -610,7 +581,6 @@ module adc_modulation (
           // EXTR. this can just keep driving up, without transitions, and testing until hit the zero cross.
           // No. i think it would actually depend on whether the last /
           // then we get
-          // if(clk_count >= p_clk_count_fix)
           if(clk_count_down == 0)
             state <= `STATE_RUNDOWN_START;
 
@@ -620,7 +590,6 @@ module adc_modulation (
         `STATE_RUNDOWN_START:
           begin
             state         <= `STATE_RUNDOWN;
-            // clk_count     <= 0;
 
             /*
               IMPORTANT. we are not counting a possible switch transition here.
@@ -647,7 +616,6 @@ module adc_modulation (
                 // trigger for scope
                 // transition
                 state                   <= `STATE_DONE;
-                // clk_count               <= 0;    // ok.
 
                 // turn of sigmux, and reset integrator
                 sigmux          <= 0;
