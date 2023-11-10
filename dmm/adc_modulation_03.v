@@ -114,7 +114,7 @@ module adc_modulation (
   output reg [24-1:0] count_fix_up_last,
   output reg [24-1:0] count_fix_down_last,
   output reg [24-1:0] count_flip_last,
-  output reg [24-1:0] clk_count_rundown_last, // change name. phase rundown.
+//   output reg [24-1:0] clk_count_rundown_last, // change name. phase rundown.
 
 
   // TODO. change to 32 bit counts, for long integrations
@@ -154,7 +154,7 @@ module adc_modulation (
   //////////////////////////////////////////////////////
   // counters and settings  ...
 
-  reg [31:0]  clk_count;           // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
+  // reg [31:0]  clk_count;           // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
   reg [31:0]  clk_count_down; 
 
   // modulation counts
@@ -221,7 +221,7 @@ module adc_modulation (
 
 
       // always increment clk for the current phase
-      clk_count     <= clk_count + 1;
+      // clk_count     <= clk_count + 1;
 
       clk_count_down <= clk_count_down - 1;
 
@@ -353,7 +353,7 @@ module adc_modulation (
             clk_count_mux_reset <= 0;   // clear count to start
 
             // must be set for the reset phase.
-            clk_count       <= 0;
+            // clk_count       <= 0;
 
             clk_count_down   <= p_clk_count_reset;
 
@@ -381,7 +381,7 @@ module adc_modulation (
         `STATE_SIG_START:
           begin
             state             <= `STATE_FIX_POS_START;
-            clk_count         <= 0;
+            // clk_count         <= 0;
 
             /////////////////////////////
             // TODO ... all of these should be setup in the real start condition/ done.
@@ -411,7 +411,7 @@ module adc_modulation (
         `STATE_FIX_POS_START:
           begin
             state             <= `STATE_FIX_POS;
-            clk_count         <= 0;
+            // clk_count         <= 0;
             clk_count_down    <= p_clk_count_fix;
 
             count_fix_down    <= count_fix_down + 1;
@@ -434,7 +434,7 @@ module adc_modulation (
         `STATE_VAR_START:
           begin
             state             <= `STATE_VAR;
-            clk_count         <= 0;
+            // clk_count         <= 0;
             clk_count_down    <= p_clk_count_var;
 
             if( comparator_val_last)   // test below the zero-cross
@@ -463,7 +463,7 @@ module adc_modulation (
         `STATE_FIX_NEG_START:
           begin
             state         <= `STATE_FIX_NEG;
-            clk_count     <= 0;
+            // clk_count     <= 0;
             clk_count_down    <= p_clk_count_fix;
 
             count_fix_up  <= count_fix_up + 1;
@@ -485,7 +485,7 @@ module adc_modulation (
           //////////
           begin
             state             <= `STATE_VAR2;
-            clk_count         <= 0;
+            // clk_count         <= 0;
             clk_count_down    <= p_clk_count_var;
 
             if( comparator_val_last) // below zero-cross
@@ -547,7 +547,7 @@ module adc_modulation (
         `STATE_FAST_ABOVE_START:
            begin
             state     <= `STATE_FAST_ABOVE;
-            clk_count <= 0;
+            // clk_count <= 0;
             clk_count_down    <= p_clk_count_fix;
             refmux    <= `MUX_REF_POS;
             end
@@ -567,7 +567,7 @@ module adc_modulation (
         `STATE_FAST_BELOW_START:
            begin
             state     <= `STATE_FAST_BELOW;
-            clk_count <= 0;
+            // clk_count <= 0;
             clk_count_down    <= p_clk_count_fix;
             refmux    <= `MUX_REF_NEG;
             end
@@ -591,7 +591,7 @@ module adc_modulation (
         `STATE_PRERUNDOWN_START:
            begin
             state     <= `STATE_PRERUNDOWN;
-            clk_count <= 0;
+            // clk_count <= 0;
             clk_count_down    <= p_clk_count_fix;
             /*
                 we don't care about landing above the zero-cross. in 4 phase we care about ending on a downward var.
@@ -620,7 +620,7 @@ module adc_modulation (
         `STATE_RUNDOWN_START:
           begin
             state         <= `STATE_RUNDOWN;
-            clk_count     <= 0;
+            // clk_count     <= 0;
 
             /*
               IMPORTANT. we are not counting a possible switch transition here.
@@ -647,7 +647,7 @@ module adc_modulation (
                 // trigger for scope
                 // transition
                 state                   <= `STATE_DONE;
-                clk_count               <= 0;    // ok.
+                // clk_count               <= 0;    // ok.
 
                 // turn of sigmux, and reset integrator
                 sigmux          <= 0;
@@ -663,11 +663,11 @@ module adc_modulation (
                 count_fix_up_last       <= count_fix_up;
                 count_fix_down_last     <= count_fix_down;
                 count_flip_last         <= count_flip;
-                clk_count_rundown_last  <= clk_count;                           // why do we record this
+                // clk_count_rundown_last  <= clk_count;                           // why do we record this
 
                 // counts for current.
 
-                                                // clk_count_mux_reset;
+                // clk_count_mux_reset;
                 // clk_count_mux_reset_last <= 456; // this works to communicate
                 // clk_count_mux_reset_last <= p_clk_count_reset;    // this works. reports 10,000
                 clk_count_mux_reset_last <= clk_count_mux_reset;    // this doesn't work. reports 0.
