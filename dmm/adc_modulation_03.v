@@ -14,8 +14,12 @@
 // advantage of macros over localparam enum, is that they generate errors if not defined.
 // disdvantage is that it is easy to forget the backtick
 
-`define STATE_RESET_START    0    // initial state
-`define STATE_RESET          1
+
+
+`define STATE_DONE          0  // initial state
+
+`define STATE_RESET_START    1    
+`define STATE_RESET          2
 `define STATE_SIG_SETTLE_START 3
 `define STATE_SIG_SETTLE    4
 `define STATE_SIG_START     5
@@ -29,7 +33,6 @@
 `define STATE_VAR2          14
 `define STATE_RUNDOWN_START 15
 `define STATE_RUNDOWN       16
-`define STATE_DONE          17
 
 `define STATE_PRERUNDOWN    18
 `define STATE_PRERUNDOWN_START 19
@@ -151,6 +154,7 @@ module adc_modulation (
   // counters and settings  ...
 
   reg [31:0]  clk_count;           // clk_count for the current phase. 31 bits is faster than 24 bits. weird. ??? 36MHz v 32MHz
+  reg [31:0]  clk_count_down; 
 
   // modulation counts
   reg [24-1:0] count_var_up;
@@ -217,6 +221,10 @@ module adc_modulation (
 
       // always increment clk for the current phase
       clk_count     <= clk_count + 1;
+
+      clk_count_down <= clk_count_down - 1;
+
+
 
       // sample/bind comparator val once on clock edge. improves speed.
       comparator_val_last <=  comparator_val;
@@ -312,10 +320,48 @@ module adc_modulation (
         // IMPORTANT. might can improved performance by reducing the reset and sig-settle times
         // reset time is also used for settle time.
 
+
+        `STATE_DONE:
+          begin
+              // default resting state.
+
+              cmpr_disable_latch_ctl          <= 1; // disable comparator,
+
+              // we come here from the default start state.
+              // signal valid.
+              adc_measure_valid <= 1;
+
+              // turn of sigmux, and reset integrator
+              sigmux          <= 0;
+              refmux          <= `MUX_REF_RESET;
+
+          end
+
+
+
+
         `STATE_RESET_START:
           begin
 
-            state <= `STATE_DONE;
+            // de-assert valid measurement, since beginnging new
+            adc_measure_valid <= 0;
+
+            // reset vars, and transition to runup state
+            state           <= `STATE_RESET;
+
+            clk_count_mux_reset <= 0;   // clear count to start
+
+            // must be set for the reset phase.
+            clk_count       <= 0;
+
+            clk_count_down   <= p_clk_count_reset;
+
+            // JA
+            sigmux          <= 0;
+            refmux          <= `MUX_REF_RESET;
+
+            cmpr_disable_latch_ctl          <= 1; // // disable comparator, enable latch
+
 
           end
 
@@ -639,21 +685,6 @@ module adc_modulation (
           end
 
 
-        `STATE_DONE:
-          begin
-
-              cmpr_disable_latch_ctl          <= 1; // disable comparator,
-
-              // we come here from the default start state.
-              // signal valid.
-              adc_measure_valid <= 1;
-
-              // turn of sigmux, and reset integrator
-              sigmux          <= 0;
-              refmux          <= `MUX_REF_RESET;
-
-          end
-
 
       endcase
 
@@ -662,24 +693,7 @@ module adc_modulation (
         if(adc_measure_trig == 1)
           begin
 
-            // de-assert valid measurement
-            adc_measure_valid <= 0;
-
-            // reset vars, and transition to runup state
-            state           <= `STATE_RESET;
-
-            clk_count_mux_reset <= 0;   // clear count to start
-
-            // must be set for the reset phase.
-            clk_count       <= 0;
-
-            // JA
-            sigmux          <= 0;
-            refmux          <= `MUX_REF_RESET;
-
-            cmpr_disable_latch_ctl          <= 1; // // disable comparator, enable latch
-
-
+            state <= `STATE_RESET_START;
 
           end
 
