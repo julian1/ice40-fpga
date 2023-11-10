@@ -15,7 +15,7 @@
 // disdvantage is that it is easy to forget the backtick
 
 
-
+// change one-hot?.
 `define STATE_DONE          0  // initial state
 
 `define STATE_RESET_START    1
@@ -144,7 +144,6 @@ module adc_modulation (
 
   // initial begin does seem to be supported.
   initial begin
-    // state           = `STATE_RESET_START;   // 0
     state           = `STATE_DONE ;   // 0
 
     cmpr_disable_latch_ctl  = 1; // disable comparator,
@@ -306,23 +305,19 @@ module adc_modulation (
 
       case (state)
 
-        // IMPORTANT. might can improved performance by reducing the reset and sig-settle times
-        // reset time is also used for settle time.
-
 
         `STATE_DONE:
           begin
               // default resting state.
 
-              cmpr_disable_latch_ctl          <= 1; // disable comparator,
+              cmpr_disable_latch_ctl <= 1; // disable comparator,
 
-              // we come here from the default start state.
-              // signal valid.
+              // indicate signal valid, to indicate can interupt to perform start
               adc_measure_valid <= 1;
 
               // turn of sigmux, and reset integrator
-              sigmux          <= 0;
-              refmux          <= `MUX_REF_RESET;
+              sigmux            <= 0;
+              refmux            <= `MUX_REF_RESET;
 
           end
 
@@ -332,7 +327,7 @@ module adc_modulation (
         `STATE_RESET_START:
           begin
 
-            // de-assert valid measurement, since beginnging new
+            // de-assert valid measurement, since beginnging new run
             adc_measure_valid <= 0;
 
             // reset vars, and transition to runup state
