@@ -426,8 +426,8 @@ module top (
 
     clk_count_aper_n    = (2 * 2000000);    // ? 200ms TODO check this.
                                             // yes. 4000000 == 10PNLC, 5 sps.
-    use_slow_rundown    = 1;
-    use_fast_rundown    = 1;
+    p_use_slow_rundown    = 1;
+    p_use_fast_rundown    = 1;
 */
     // ctrl parameters
     // . p_clk_count_reset( 24'd10000 ) ,  // 10000 = 500us.  10e3 / 20e6 =  0.0005
@@ -440,8 +440,8 @@ module top (
     . p_clk_count_fix( 24'd15 ) ,         // +-15V. reduced integrator swing.
     . p_clk_count_var( 24'd100 ) ,
 
-    . use_slow_rundown( 1'b1 ),
-    . use_fast_rundown( 1'b1 ),
+    . p_use_slow_rundown( 1'b1 ),
+    . p_use_fast_rundown( 1'b1 ),
 
 
     // outputs - ctrl

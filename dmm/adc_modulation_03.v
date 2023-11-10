@@ -84,8 +84,8 @@ module adc_modulation (
                                           // names are correct. aperture is the control parameter,  and mux_sig_count is the current clk count, and should correspond.
 
 
-  input           use_slow_rundown,     // TODO prefix with p_. to indicate . an adc control parameter.
-  input           use_fast_rundown,
+  input           p_use_slow_rundown,     // TODO prefix with p_. to indicate . an adc control parameter.
+  input           p_use_fast_rundown,
 
 
   // outputs
@@ -472,7 +472,7 @@ module adc_modulation (
               // signal integration finished.
               if( !sigmux)
 
-                if(use_fast_rundown)
+                if(p_use_fast_rundown)
                   begin
                     if(  comparator_val_last) // below cross
                       state <= `STATE_FAST_BELOW_START;
@@ -579,7 +579,7 @@ module adc_modulation (
               IMPORTANT. we are not counting a possible switch transition here.
               Bug?
             */
-            if( use_slow_rundown )
+            if( p_use_slow_rundown )
               // turn on both references - to create +ve bias, to drive integrator down.
               refmux      <= `MUX_REF_SLOW_POS;
             else
