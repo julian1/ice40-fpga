@@ -50,11 +50,11 @@
   Note that this combines two 4053 switch..
 */
 
-`define MUX_REF_NONE        3'b000      // TODO review - not sure if ever wanted. use reset state as default state.
-`define MUX_REF_POS         3'b001
-`define MUX_REF_NEG         3'b010
-`define MUX_REF_SLOW_POS    3'b011
-`define MUX_REF_RESET       3'b100
+`define REFMUX_NONE        3'b000      // none - is required, because we turn off both pos-neg ref, to balance. switching.
+`define REFMUX_POS         3'b001
+`define REFMUX_NEG         3'b010
+`define REFMUX_SLOW_POS    3'b011
+`define REFMUX_RESET       3'b100
 
 
 
@@ -65,8 +65,6 @@ module adc_modulation (
 
 
   input           clk,
-
-  // inout           reset,  // JA
 
 
   // JA added
@@ -92,7 +90,6 @@ module adc_modulation (
 
 
   // outputs
-
   output reg adc_measure_valid,     // adc is master, and asserts valid when measurement complete
 
   // now a wire
@@ -107,10 +104,10 @@ module adc_modulation (
   ///////////
 
   // behavior/transition counts
-  output reg [24-1:0] count_var_up_last,        // var_up. perhaps rename.
-  output reg [24-1:0] count_var_down_last,
   output reg [24-1:0] count_mux_pos_up_last,
   output reg [24-1:0] count_mux_neg_up_last,
+  output reg [24-1:0] count_var_up_last,        // var_up. perhaps rename.
+  output reg [24-1:0] count_var_down_last,
   output reg [24-1:0] count_fix_up_last,
   output reg [24-1:0] count_fix_down_last,
   output reg [24-1:0] count_flip_last,
@@ -156,10 +153,10 @@ module adc_modulation (
   reg [31:0]  clk_count_down;
 
   // modulation counts
-  reg [24-1:0] count_var_up;
-  reg [24-1:0] count_var_down;
   reg [24-1:0] count_mux_pos_up;
   reg [24-1:0] count_mux_neg_up;
+  reg [24-1:0] count_var_up;
+  reg [24-1:0] count_var_down;
   reg [24-1:0] count_fix_up;
   reg [24-1:0] count_fix_down;
   reg [24-1:0] count_flip;
@@ -174,17 +171,12 @@ module adc_modulation (
 
 
   /////////////////////////
-  // this should be pushed into a separate module...
-  // should be possible to set latch hi immediately on any event here...
-  // change name  zero_cross.. or just cmpr_cross_
-
-  // TODO move this into the main block.
 
   // TODO  three bits, because comparator_val is not on clock boundary
   // or use comaprator_val_last
+
+  // TODO chage back to 2 bit reg.
   reg [2:0] cmpr_crossr;
-  // always @(posedge clk)
-  //   cmpr_crossr <= {cmpr_crossr[1:0], comparator_val};
 
   wire cmpr_cross_up     = (cmpr_crossr[2:1]==2'b10);  // message starts at falling edge
   wire cmpr_cross_down   = (cmpr_crossr[2:1]==2'b01);  // message stops at rising edge
@@ -204,8 +196,12 @@ module adc_modulation (
 
   assign monitor[ 2 +: 4]  = { sigmux, refmux };      // reference current, better name?
 
-
-
+  /*
+      nov 12. 2023.
+    we double flopping this.
+    for meta-stability.  eg. if read twice in same block, might be evaluated differently.
+    but perhaps review.
+  */
   reg comparator_val_last;
 
   always @(posedge clk)
@@ -216,16 +212,20 @@ module adc_modulation (
       clk_count_down <= clk_count_down - 1;
 
 
+      /* TODO nov 12. 2023.
+        review why we do this. double flopping for stability on the clock edge.
+        shouldn't matter?
+      */
       // sample/bind comparator val once on clock edge. improves speed.
       comparator_val_last <=  comparator_val;
 
 
-      cmpr_crossr <= {cmpr_crossr[1:0], comparator_val};
+      cmpr_crossr         <= {cmpr_crossr[1:0], comparator_val};
 
       // TODO change name ref_sw_pos_cross
       // instrumentation for switch transitions for both pos,neg (and both).
-      mux_pos_cross <= { mux_pos_cross[0], refmux[0] }; // old, new
-      mux_neg_cross <= { mux_neg_cross[0], refmux[1] };
+      mux_pos_cross       <= { mux_pos_cross[0], refmux[0] }; // old, new
+      mux_neg_cross       <= { mux_neg_cross[0], refmux[1] };
 
       // TODO count_pos_trans or cross pos_  or just count_pos_trans
       // TODO must rename. actually represents count of each on switch transiton = count_ref_pos_on and count_ref_neg_on.
@@ -254,30 +254,28 @@ module adc_modulation (
 
       case (refmux)
 
-        `MUX_REF_NEG:
+        `REFMUX_NEG:
             clk_count_mux_neg <= clk_count_mux_neg + 1;
 
-        `MUX_REF_POS:
+        `REFMUX_POS:
             clk_count_mux_pos <=  clk_count_mux_pos + 1;
 
-        `MUX_REF_SLOW_POS:  // TODO change name to REF_BOTH. or REF_RD slow.
+        `REFMUX_SLOW_POS:
             clk_count_mux_rd <= clk_count_mux_rd + 1;
 
-        `MUX_REF_NONE:
+        `REFMUX_NONE:
           ; // switches are turned off at start. and also at prerundown.
             // don't really need to count this
 
-        `MUX_REF_RESET:
+        `REFMUX_RESET:
             clk_count_mux_reset <= clk_count_mux_reset + 1;
 
-
       endcase
-      // count_pos_on
 
 
       if(sigmux )
-        // while integrating the signal
         begin
+          // while integrating the signal
           // increment aperture clk count
           clk_count_mux_sig <= clk_count_mux_sig + 1;
 
@@ -311,20 +309,18 @@ module adc_modulation (
 
         `STATE_DONE:
           begin
-              // default resting state.
+            // default rest state
 
-              cmpr_disable_latch_ctl <= 1; // disable comparator,
+            // disable comparator,
+            cmpr_disable_latch_ctl <= 1;
 
-              // indicate signal valid, to indicate can interupt to perform start
-              adc_measure_valid <= 1;
+            // indicate signal valid, to indicate interuptable status, to enable trigger
+            adc_measure_valid <= 1;
 
-              // turn of sigmux, and reset integrator
-              sigmux            <= 0;
-              refmux            <= `MUX_REF_RESET;
-
+            // turn of sigmux, and reset integrator
+            sigmux            <= 0;
+            refmux            <= `REFMUX_RESET;
           end
-
-
 
 
         `STATE_RESET_START:
@@ -342,11 +338,9 @@ module adc_modulation (
 
             // JA
             sigmux          <= 0;
-            refmux          <= `MUX_REF_RESET;
+            refmux          <= `REFMUX_RESET;
 
-            cmpr_disable_latch_ctl          <= 1; // // disable comparator, enable latch
-
-
+            cmpr_disable_latch_ctl          <= 1; // disable comparator, enable latch
           end
 
 
@@ -365,7 +359,7 @@ module adc_modulation (
             state             <= `STATE_FIX_POS_START;
 
             /////////////////////////////
-            // TODO ... all of these should be setup in the real start condition/ done.
+            // perhaps counts should be init in the start reset/ done.
             // clear the counts
             count_var_up      <= 0;
             count_var_down    <= 0;
@@ -383,7 +377,7 @@ module adc_modulation (
 
             // turn on signal input, to start signal integration
             sigmux            <= 1;
-            refmux            <= `MUX_REF_NONE; // turn off reset.
+            refmux            <= `REFMUX_NONE; // turn off reset.
 
           end
 
@@ -395,18 +389,15 @@ module adc_modulation (
             clk_count_down    <= p_clk_count_fix;
 
             count_fix_down    <= count_fix_down + 1;
-            refmux            <= `MUX_REF_POS; // initial direction
-
+            refmux            <= `REFMUX_POS; // initial direction
 
             cmpr_disable_latch_ctl  <= 0; // enable comparator, // JA correct. 0 means it is transparent.
           end
 
         `STATE_FIX_POS:
           if(clk_count_down == 0)
-            begin
-              state <= `STATE_VAR_START;
+            state <= `STATE_VAR_START;
 
-            end
 
 
         // variable direction
@@ -417,20 +408,17 @@ module adc_modulation (
 
             if( comparator_val_last)   // test below the zero-cross
               begin
-                refmux        <= `MUX_REF_NEG;  // add negative ref. to drive up.
+                refmux        <= `REFMUX_NEG;  // add negative ref. to drive up.
                 count_var_up  <= count_var_up + 1;
               end
             else
               begin
-                refmux        <= `MUX_REF_POS;
+                refmux        <= `REFMUX_POS;
                 count_var_down <= count_var_down + 1;
               end
           end
 
-        /*
-          should use === for equality. avoids high-z case.
-        */
-        // we are confusing neg. pos. and up. down.   neg == up. pos == down.
+
 
         `STATE_VAR:
           if(clk_count_down == 0)
@@ -443,13 +431,15 @@ module adc_modulation (
             clk_count_down    <= p_clk_count_fix;
 
             count_fix_up  <= count_fix_up + 1;
-            refmux        <= `MUX_REF_NEG;
+            refmux        <= `REFMUX_NEG;
           end
+
 
         `STATE_FIX_NEG:
           // TODO add switch here for 3 phase modulation variation.
           if(clk_count_down == 0)
             state <= `STATE_VAR2_START;
+
 
         // variable direction
         `STATE_VAR2_START:
@@ -464,12 +454,12 @@ module adc_modulation (
 
             if( comparator_val_last) // below zero-cross
               begin
-                refmux        <= `MUX_REF_NEG;
+                refmux        <= `REFMUX_NEG;
                 count_var_up  <= count_var_up + 1;
               end
             else
               begin
-                refmux        <= `MUX_REF_POS;
+                refmux        <= `REFMUX_POS;
                 count_var_down <= count_var_down + 1;
               end
           end
@@ -496,7 +486,7 @@ module adc_modulation (
                 else
                   begin
                     // above cross and last var was up phase
-                    if( refmux  == `MUX_REF_NEG && ! comparator_val_last)
+                    if( refmux  == `REFMUX_NEG && ! comparator_val_last)
                       state <= `STATE_PRERUNDOWN_START;
                     else
                       // keep cycling
@@ -515,7 +505,6 @@ module adc_modulation (
 
 
         // fast rundown.
-        // jjjjj
 
         /*
           Extr. remember there is a clk delay - for the comparator - so comparator shouldn't t
@@ -524,7 +513,7 @@ module adc_modulation (
         // advance until below zero cross.
         `STATE_FAST_ABOVE_START:
           begin
-            refmux          <= `MUX_REF_POS;
+            refmux          <= `REFMUX_POS;
 
             if( comparator_val_last)                  // below zero-cross. EXTR. note not a comparator transition test. instead an actual value .
               state   <= `STATE_FAST_BELOW_START;     // advance to below_start.
@@ -533,7 +522,7 @@ module adc_modulation (
            begin
             state           <= `STATE_FAST_ABOVE;
             clk_count_down  <= p_clk_count_fix;
-            refmux          <= `MUX_REF_POS;
+            refmux          <= `REFMUX_POS;
             end
 
 
@@ -552,7 +541,7 @@ module adc_modulation (
         // advance until above zero-cross.
         `STATE_FAST_BELOW_START:
            begin
-            refmux    <= `MUX_REF_NEG;
+            refmux    <= `REFMUX_NEG;
 
              if( ! comparator_val_last) // above zero-cross
               state   <= `STATE_PRERUNDOWN_START;   // go to pre-rundown
@@ -564,7 +553,7 @@ module adc_modulation (
            begin
             state     <= `STATE_FAST_BELOW;
             clk_count_down    <= p_clk_count_fix;
-            refmux    <= `MUX_REF_NEG;
+            refmux    <= `REFMUX_NEG;
             end
 
         `STATE_FAST_BELOW:
@@ -583,7 +572,7 @@ module adc_modulation (
             state     <= `STATE_PRERUNDOWN;
             clk_count_down    <= 1;   // advance another clock cycle above. to be sure to have something to catch.
             // KEEP THE NEG CURRENT from FAST_BELOW.   to come a little above the zero cross.
-            // refmux    <= `MUX_REF_NEG;
+            // refmux    <= `REFMUX_NEG;
           end
 
 
@@ -593,6 +582,11 @@ module adc_modulation (
 
 
 /*
+      TODO nov 12. 2023.
+        this code was used - to balance swithing transitions. by turning off both pos and neg ref currents, before switching on both together.
+        but it's not clear if it is still needed.
+        with the changes to the prerundown.
+
         ////////////////////////////////////////////
         // the end of signal integration. is different to the end of the 4 phase cycle.
         // we want a gpio pin. to hit on pre-rundown.
@@ -601,14 +595,14 @@ module adc_modulation (
            begin
             state     <= `STATE_PRERUNDOWN;
             clk_count_down    <= p_clk_count_fix;
-            
+
                 // we don't care about landing above the zero-cross. in 4 phase we care about ending on a downward var.
                 // thatway we can add a up transition.  before doing the downward transition (for slow) rundown.
                 // to balance the up/down transitions.
                 // the upward phase - then needs to be enough to push over the zero-cross.  but that is secondary.
                 ----------
-            
-            refmux    <= `MUX_REF_NONE;
+
+            refmux    <= `REFMUX_NONE;
           end
 
         // It has to be MUX_NONE
@@ -634,10 +628,10 @@ module adc_modulation (
             */
             if( p_use_slow_rundown )
               // turn on both references - to create +ve bias, to drive integrator down.
-              refmux      <= `MUX_REF_SLOW_POS;
+              refmux      <= `REFMUX_SLOW_POS;
             else
               // fast rundown
-              refmux      <= `MUX_REF_POS;
+              refmux      <= `REFMUX_POS;
           end
 
 
@@ -650,21 +644,22 @@ module adc_modulation (
 
                 cmpr_disable_latch_ctl          <= 1; // disable comparator,
 
-                // trigger for scope
-                // transition
+                // signal valid measurement.
+                adc_measure_valid <= 1;
+
+                // next transition
                 state                   <= `STATE_DONE;
 
                 // turn of sigmux, and reset integrator
-                sigmux          <= 0;
-                refmux          <= `MUX_REF_RESET;
+                sigmux                  <= 0;
+                refmux                  <= `REFMUX_RESET;
 
-                // com_interrupt            <= 0;   // active lo, set interrupt
 
                 // record behaviior/transition counts asap. on this immeidate clk cycle.
-                count_var_up_last           <= count_var_up;
-                count_var_down_last         <= count_var_down;
-                count_mux_pos_up_last     <= count_mux_pos_up; // OK. this works.
+                count_mux_pos_up_last   <= count_mux_pos_up; // OK. this works.
                 count_mux_neg_up_last   <= count_mux_neg_up;
+                count_var_up_last       <= count_var_up;
+                count_var_down_last     <= count_var_down;
                 count_fix_up_last       <= count_fix_up;
                 count_fix_down_last     <= count_fix_down;
                 count_flip_last         <= count_flip;
@@ -683,9 +678,6 @@ module adc_modulation (
                 clk_count_mux_rd_last   <= clk_count_mux_rd;
                 clk_count_mux_sig_last  <= clk_count_mux_sig;                  // aperture. is the ctrl parameter for signal introduced..
                                                                             // TODO. rename clk_count_mux_sig.
-
-                // signal valid.
-                adc_measure_valid <= 1;
 
               end
           end
