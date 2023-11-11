@@ -164,8 +164,8 @@ module adc_modulation (
 
   // TODO change to 31 bits.
   reg [24-1:0] clk_count_refmux_reset;
-  reg [24-1:0] clk_count_refmux_neg;
-  reg [24-1:0] clk_count_refmux_pos;
+  reg [32-1:0] clk_count_refmux_neg;
+  reg [32-1:0] clk_count_refmux_pos;
   reg [24-1:0] clk_count_refmux_rd;
   reg [32-1:0] clk_count_mux_sig ;      // should be the same as p_aperture.  eg. 5sec*20MHz=100m count. won't fit in 24 bit value. would need to split between read registers.
 

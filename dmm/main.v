@@ -395,11 +395,9 @@ module top (
   ///////////////////////////////////////////////
 
 
-  // TODO - remove _last suffix.
-
   wire [24-1:0] adc2_clk_count_refmux_reset_last;
-  wire [24-1:0] adc2_clk_count_refmux_neg_last;    // maybe add reg_ prefix. No. they are not registers, until they are in the register_bank context.
-  wire [24-1:0] adc2_clk_count_refmux_pos_last;
+  wire [32-1:0] adc2_clk_count_refmux_neg_last;    // maybe add reg_ prefix. No. they are not registers, until they are in the register_bank context.
+  wire [32-1:0] adc2_clk_count_refmux_pos_last;
   wire [24-1:0] adc2_clk_count_refmux_rd_last;
   wire [32-1:0] adc2_clk_count_mux_sig_last;
 
@@ -452,11 +450,7 @@ module top (
     .refmux(  { adc2_mux[  3  ],  adc2_mux[ 0 +: 2 ]   } ),           // pos, neg, reset. are on two different 4053,
     .sigmux(    adc2_mux[  2  ] ),                                    // perhaps clearer if split into adcrefmux and adcsigmux in the wire assignment. but it would then need two vars.
                                                                       // which isn't representative of the single synchronizer. so do it here instead.
-/*  reg [24-1:0] clk_count_refrefmux_reset;
-  reg [24-1:0] clk_count_refrefmux_neg;
-  reg [24-1:0] clk_count_refrefmux_pos;
-  reg [24-1:0] clk_count_refrefmux_rd;
-*/ 
+ 
     // adc clk counts for last sample measurement
     .clk_count_refmux_reset_last(adc2_clk_count_refmux_reset_last),
     .clk_count_refmux_neg_last(  adc2_clk_count_refmux_neg_last),
@@ -742,8 +736,8 @@ spi_interrupt_ctl
 
     // outputs adc
     .reg_adc_clk_count_refmux_reset({{ 8 { 1'b0 } }, adc2_clk_count_refmux_reset_last }  ) ,
-    .reg_adc_clk_count_refmux_neg( { { 8 { 1'b0 } }, adc2_clk_count_refmux_neg_last }  ) ,
-    .reg_adc_clk_count_refmux_pos( { { 8 { 1'b0 } }, adc2_clk_count_refmux_pos_last } ) ,
+    .reg_adc_clk_count_refmux_neg(  adc2_clk_count_refmux_neg_last   ) ,
+    .reg_adc_clk_count_refmux_pos(  adc2_clk_count_refmux_pos_last  ) ,
     .reg_adc_clk_count_refmux_rd(  { { 8 { 1'b0 } }, adc2_clk_count_refmux_rd_last }  ),
     .reg_adc_clk_count_mux_sig(                   adc2_clk_count_mux_sig_last   )
 
