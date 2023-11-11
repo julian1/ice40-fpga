@@ -104,8 +104,8 @@ module adc_modulation (
   ///////////
 
   // behavior/transition counts
-  output reg [24-1:0] count_mux_pos_up_last,
-  output reg [24-1:0] count_mux_neg_up_last,
+  output reg [24-1:0] count_refmux_pos_up_last,
+  output reg [24-1:0] count_refmux_neg_up_last,
   output reg [24-1:0] count_var_up_last,        // var_up. perhaps rename.
   output reg [24-1:0] count_var_down_last,
   output reg [24-1:0] count_fix_up_last,
@@ -118,10 +118,10 @@ module adc_modulation (
   // current source clk counts
   // these are output regs.
   // having visibility over reset clk is good, given ctrl and the reset period.
-  output reg [24-1:0] clk_count_mux_reset_last,
-  output reg [24-1:0] clk_count_mux_neg_last,
-  output reg [24-1:0] clk_count_mux_pos_last,
-  output reg [24-1:0] clk_count_mux_rd_last,
+  output reg [24-1:0] clk_count_refmux_reset_last,
+  output reg [24-1:0] clk_count_refmux_neg_last,
+  output reg [24-1:0] clk_count_refmux_pos_last,
+  output reg [24-1:0] clk_count_refmux_rd_last,
   output reg [32-1:0] clk_count_mux_sig_last      // names are correct. aperture is the control parameter,  and mux_sig_count is the current clk count, and should correspond.
 
 );
@@ -153,8 +153,8 @@ module adc_modulation (
   reg [31:0]  clk_count_down;
 
   // modulation counts
-  reg [24-1:0] count_mux_pos_up;
-  reg [24-1:0] count_mux_neg_up;
+  reg [24-1:0] count_refmux_pos_up;
+  reg [24-1:0] count_refmux_neg_up;
   reg [24-1:0] count_var_up;
   reg [24-1:0] count_var_down;
   reg [24-1:0] count_fix_up;
@@ -163,10 +163,10 @@ module adc_modulation (
 
 
   // TODO change to 31 bits.
-  reg [24-1:0] clk_count_mux_reset;
-  reg [24-1:0] clk_count_mux_neg;
-  reg [24-1:0] clk_count_mux_pos;
-  reg [24-1:0] clk_count_mux_rd;
+  reg [24-1:0] clk_count_refmux_reset;
+  reg [24-1:0] clk_count_refmux_neg;
+  reg [24-1:0] clk_count_refmux_pos;
+  reg [24-1:0] clk_count_refmux_rd;
   reg [32-1:0] clk_count_mux_sig ;      // should be the same as p_aperture.  eg. 5sec*20MHz=100m count. won't fit in 24 bit value. would need to split between read registers.
 
 
@@ -179,14 +179,12 @@ module adc_modulation (
   wire cmpr_cross_any    = cmpr_cross_up || cmpr_cross_down ;
 
 
-  ////////
 
-  // to check that
-  reg [2-1:0] mux_pos_cross;
-  reg [2-1:0] mux_neg_cross;
+  reg [2-1:0] refmux_pos_cross;
+  reg [2-1:0] refmux_neg_cross;
 
-  wire mux_pos_cross_up  = mux_pos_cross == 2'b01;
-  wire mux_neg_cross_up  = mux_neg_cross == 2'b01;
+  wire refmux_pos_cross_up  = refmux_pos_cross == 2'b01;
+  wire refmux_neg_cross_up  = refmux_neg_cross == 2'b01;
 
 
 
@@ -198,8 +196,8 @@ module adc_modulation (
 
   /*
       nov 12. 2023.
-    we double flopping this.
-    for meta-stability.  eg. if read twice in same block, might be evaluated differently.
+    we double flop.
+    for meta-stability.  eg. to avoid read/use twice in same block, and can be evaluated differently.
     but perhaps review.
   */
   reg comparator_val_last;
@@ -224,16 +222,16 @@ module adc_modulation (
 
       // TODO change name ref_sw_pos_cross
       // instrumentation for switch transitions for both pos,neg (and both).
-      mux_pos_cross       <= { mux_pos_cross[0], refmux[0] }; // old, new
-      mux_neg_cross       <= { mux_neg_cross[0], refmux[1] };
+      refmux_pos_cross       <= { refmux_pos_cross[0], refmux[0] }; // old, new
+      refmux_neg_cross       <= { refmux_neg_cross[0], refmux[1] };
 
       // TODO count_pos_trans or cross pos_  or just count_pos_trans
       // TODO must rename. actually represents count of each on switch transiton = count_ref_pos_on and count_ref_neg_on.
-      if(mux_pos_cross_up)
-        count_mux_pos_up <= count_mux_pos_up + 1;
+      if(refmux_pos_cross_up)
+        count_refmux_pos_up <= count_refmux_pos_up + 1;
 
-      if(mux_neg_cross_up)
-        count_mux_neg_up <= count_mux_neg_up + 1;
+      if(refmux_neg_cross_up)
+        count_refmux_neg_up <= count_refmux_neg_up + 1;
 
 
       /*
@@ -255,20 +253,20 @@ module adc_modulation (
       case (refmux)
 
         `REFMUX_NEG:
-            clk_count_mux_neg <= clk_count_mux_neg + 1;
+            clk_count_refmux_neg <= clk_count_refmux_neg + 1;
 
         `REFMUX_POS:
-            clk_count_mux_pos <=  clk_count_mux_pos + 1;
+            clk_count_refmux_pos <=  clk_count_refmux_pos + 1;
 
         `REFMUX_SLOW_POS:
-            clk_count_mux_rd <= clk_count_mux_rd + 1;
+            clk_count_refmux_rd <= clk_count_refmux_rd + 1;
 
         `REFMUX_NONE:
           ; // switches are turned off at start. and also at prerundown.
             // don't really need to count this
 
         `REFMUX_RESET:
-            clk_count_mux_reset <= clk_count_mux_reset + 1;
+            clk_count_refmux_reset <= clk_count_refmux_reset + 1;
 
       endcase
 
@@ -332,7 +330,7 @@ module adc_modulation (
             // reset vars, and transition to runup state
             state           <= `STATE_RESET;
 
-            clk_count_mux_reset <= 0;   // clear count to start
+            clk_count_refmux_reset <= 0;   // clear count to start
 
             clk_count_down   <= p_clk_count_reset;
 
@@ -365,14 +363,14 @@ module adc_modulation (
             count_var_down    <= 0;
             count_fix_up      <= 0;
             count_fix_down    <= 0;
-            count_mux_pos_up    <= 0;
-            count_mux_neg_up  <= 0;
+            count_refmux_pos_up    <= 0;
+            count_refmux_neg_up  <= 0;
             count_flip        <= 0;
 
-            // clk_count_mux_reset <= 0;  do not overwrite... reset. in other clause.
-            clk_count_mux_neg <= 0;
-            clk_count_mux_pos <= 0;
-            clk_count_mux_rd  <= 0;
+            // clk_count_refmux_reset <= 0;  do not overwrite... reset. in other clause.
+            clk_count_refmux_neg <= 0;
+            clk_count_refmux_pos <= 0;
+            clk_count_refmux_rd  <= 0;
             clk_count_mux_sig <= 0;
 
             // turn on signal input, to start signal integration
@@ -656,8 +654,8 @@ module adc_modulation (
 
 
                 // record behaviior/transition counts asap. on this immeidate clk cycle.
-                count_mux_pos_up_last   <= count_mux_pos_up; // OK. this works.
-                count_mux_neg_up_last   <= count_mux_neg_up;
+                count_refmux_pos_up_last   <= count_refmux_pos_up; // OK. this works.
+                count_refmux_neg_up_last   <= count_refmux_neg_up;
                 count_var_up_last       <= count_var_up;
                 count_var_down_last     <= count_var_down;
                 count_fix_up_last       <= count_fix_up;
@@ -667,16 +665,16 @@ module adc_modulation (
 
                 // counts for current.
 
-                // clk_count_mux_reset;
-                // clk_count_mux_reset_last <= 456; // this works to communicate
-                // clk_count_mux_reset_last <= p_clk_count_reset;    // this works. reports 10,000
-                clk_count_mux_reset_last <= clk_count_mux_reset;    // this doesn't work. reports 0.
+                // clk_count_refmux_reset;
+                // clk_count_refmux_reset_last <= 456; // this works to communicate
+                // clk_count_refmux_reset_last <= p_clk_count_reset;    // this works. reports 10,000
+                clk_count_refmux_reset_last <= clk_count_refmux_reset;    // this doesn't work. reports 0.
 
 
-                clk_count_mux_neg_last  <= clk_count_mux_neg;
-                clk_count_mux_pos_last  <= clk_count_mux_pos;
-                clk_count_mux_rd_last   <= clk_count_mux_rd;
-                clk_count_mux_sig_last  <= clk_count_mux_sig;                  // aperture. is the ctrl parameter for signal introduced..
+                clk_count_refmux_neg_last  <= clk_count_refmux_neg;
+                clk_count_refmux_pos_last  <= clk_count_refmux_pos;
+                clk_count_refmux_rd_last   <= clk_count_refmux_rd;
+                clk_count_mux_sig_last    <= clk_count_mux_sig;                  // aperture. is the ctrl parameter for signal introduced..
                                                                             // TODO. rename clk_count_mux_sig.
 
               end

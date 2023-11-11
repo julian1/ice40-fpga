@@ -50,10 +50,10 @@
 
 
 // adc counts
-`define REG_ADC_CLK_COUNT_MUX_RESET 34    // TODO fix/ re-assign enum .
-`define REG_ADC_CLK_COUNT_MUX_NEG   30
-`define REG_ADC_CLK_COUNT_MUX_POS   31
-`define REG_ADC_CLK_COUNT_MUX_RD    32
+`define REG_ADC_CLK_COUNT_REFMUX_RESET 34    // TODO fix/ re-assign enum .
+`define REG_ADC_CLK_COUNT_REFMUX_NEG   30
+`define REG_ADC_CLK_COUNT_REFMUX_POS   31
+`define REG_ADC_CLK_COUNT_REFMUX_RD    32
 `define REG_ADC_CLK_COUNT_MUX_SIG   33
 
 
@@ -74,10 +74,10 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
 
   // inputs adc
-  input wire [32-1:0] reg_adc_clk_count_mux_reset,
-  input wire [32-1:0] reg_adc_clk_count_mux_neg,
-  input wire [32-1:0] reg_adc_clk_count_mux_pos,
-  input wire [32-1:0] reg_adc_clk_count_mux_rd,
+  input wire [32-1:0] reg_adc_clk_count_refmux_reset,
+  input wire [32-1:0] reg_adc_clk_count_refmux_neg,
+  input wire [32-1:0] reg_adc_clk_count_refmux_pos,
+  input wire [32-1:0] reg_adc_clk_count_refmux_rd,
   input wire [32-1:0] reg_adc_clk_count_mux_sig,
 
 
@@ -205,10 +205,10 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
               // inputs
               `REG_STATUS:                  out <= reg_status << 8;
 
-              `REG_ADC_CLK_COUNT_MUX_RESET: out <= reg_adc_clk_count_mux_reset << 8;
-              `REG_ADC_CLK_COUNT_MUX_NEG:   out <= reg_adc_clk_count_mux_neg << 8;
-              `REG_ADC_CLK_COUNT_MUX_POS:   out <= reg_adc_clk_count_mux_pos << 8;
-              `REG_ADC_CLK_COUNT_MUX_RD:    out <= reg_adc_clk_count_mux_rd << 8;
+              `REG_ADC_CLK_COUNT_REFMUX_RESET: out <= reg_adc_clk_count_refmux_reset << 8;
+              `REG_ADC_CLK_COUNT_REFMUX_NEG:   out <= reg_adc_clk_count_refmux_neg << 8;
+              `REG_ADC_CLK_COUNT_REFMUX_POS:   out <= reg_adc_clk_count_refmux_pos << 8;
+              `REG_ADC_CLK_COUNT_REFMUX_RD:    out <= reg_adc_clk_count_refmux_rd << 8;
               `REG_ADC_CLK_COUNT_MUX_SIG:   out <= reg_adc_clk_count_mux_sig << 8;
 
 
