@@ -174,8 +174,8 @@ module adc_modulation (
 
   reg [2-1:0] cmpr_crossr;
 
-  wire cmpr_cross_up     = (cmpr_crossr == 2'b10);  // message starts at falling edge
-  wire cmpr_cross_down   = (cmpr_crossr == 2'b01);  // message stops at rising edge
+  wire cmpr_cross_up     = cmpr_crossr == 2'b10;
+  wire cmpr_cross_down   = cmpr_crossr == 2'b01;
   wire cmpr_cross_any    = cmpr_cross_up || cmpr_cross_down ;
 
 
@@ -184,6 +184,10 @@ module adc_modulation (
   // to check that
   reg [2-1:0] mux_pos_cross;
   reg [2-1:0] mux_neg_cross;
+
+  wire mux_pos_cross_up  = mux_pos_cross == 2'b01;
+  wire mux_neg_cross_up  = mux_neg_cross == 2'b01;
+
 
 
   // reg [ 4-1:0]  monitor_;
@@ -225,10 +229,10 @@ module adc_modulation (
 
       // TODO count_pos_trans or cross pos_  or just count_pos_trans
       // TODO must rename. actually represents count of each on switch transiton = count_ref_pos_on and count_ref_neg_on.
-      if(mux_pos_cross == 2'b01)
+      if(mux_pos_cross_up)
         count_mux_pos_up <= count_mux_pos_up + 1;
 
-      if(mux_neg_cross == 2'b01)
+      if(mux_neg_cross_up)
         count_mux_neg_up <= count_mux_neg_up + 1;
 
 
