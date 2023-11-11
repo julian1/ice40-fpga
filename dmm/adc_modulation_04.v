@@ -183,8 +183,8 @@ module adc_modulation (
   // TODO  three bits, because comparator_val is not on clock boundary
   // or use comaprator_val_last
   reg [2:0] cmpr_crossr;
-  always @(posedge clk)
-    cmpr_crossr <= {cmpr_crossr[1:0], comparator_val};
+  // always @(posedge clk)
+  //   cmpr_crossr <= {cmpr_crossr[1:0], comparator_val};
 
   wire cmpr_cross_up     = (cmpr_crossr[2:1]==2'b10);  // message starts at falling edge
   wire cmpr_cross_down   = (cmpr_crossr[2:1]==2'b01);  // message stops at rising edge
@@ -218,6 +218,9 @@ module adc_modulation (
 
       // sample/bind comparator val once on clock edge. improves speed.
       comparator_val_last <=  comparator_val;
+
+
+      cmpr_crossr <= {cmpr_crossr[1:0], comparator_val};
 
       // TODO change name ref_sw_pos_cross
       // instrumentation for switch transitions for both pos,neg (and both).
