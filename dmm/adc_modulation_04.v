@@ -508,30 +508,54 @@ module adc_modulation (
                   state <= `STATE_FIX_POS_START;
             end
 
+        //////////////////////////////////////////////
+
 
         // fast rundown.
-        // add small fix phases until we are in a position to do slow rundown
-        // TODO change name FAST_RD
+        // jjjjj
 
-        // add small down phases. until below
+        /*
+          Extr. remember there is a clk delay - for the comparator - so comparator shouldn't t
+        */
+        // we are somewhere above zero,
+        // advance until below zero cross.
         `STATE_FAST_ABOVE_START:
-           begin
-            state     <= `STATE_FAST_ABOVE;
-            clk_count_down    <= p_clk_count_fix;
+          begin
+            refmux          <= `MUX_REF_POS;
 
-            refmux    <= `MUX_REF_POS;
+            if( comparator_val_last)                  // below zero-cross. EXTR. note not a comparator transition test. instead an actual value .
+              state   <= `STATE_FAST_BELOW_START;     // advance to below_start.
+          end
+/*
+           begin
+            state           <= `STATE_FAST_ABOVE;
+            clk_count_down  <= p_clk_count_fix;
+            refmux          <= `MUX_REF_POS;
             end
+
 
         `STATE_FAST_ABOVE:
           if(clk_count_down == 0)
             begin
              if( comparator_val_last) // below zero-cross
-              state   <= `STATE_FAST_BELOW_START;     // go to the above
+              state   <= `STATE_FAST_BELOW_START;     //
             else
               state   <= `STATE_FAST_ABOVE_START;     // do another cycle
             end
+*/
 
 
+
+        // advance until above zero-cross.
+        `STATE_FAST_BELOW_START:
+           begin
+            refmux    <= `MUX_REF_NEG;
+
+             if( ! comparator_val_last) // above zero-cross
+              state   <= `STATE_PRERUNDOWN_START;   // go to pre-rundown
+            end
+
+/*
         // add small up phases until above
         `STATE_FAST_BELOW_START:
            begin
@@ -548,7 +572,7 @@ module adc_modulation (
             else
               state   <= `STATE_FAST_BELOW_START;   // do another cycle
             end
-
+*/
 
 
         ////////////////////////////////////////////
