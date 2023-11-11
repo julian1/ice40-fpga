@@ -714,7 +714,7 @@ spi_interrupt_ctl
 
 
 
-  register_set // #( 32 )   // register bank  . change name 'registers'
+  register_set // #( 32 )
   register_set
     (
 
