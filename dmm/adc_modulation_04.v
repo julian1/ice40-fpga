@@ -73,15 +73,11 @@ module adc_modulation (
   // comparator input
   input           comparator_val,
 
-  //
-  // rename
-  // or  just p_fix , p_var.  p indicates a control parameter, and that using is clock count.
-  // or p_clk_count_reset   and drop the _n suffix.
-  // or p_cc_reset, p_cc_fix  etc.
-  input [24-1:0]  p_clk_count_reset,    // useful if running stand-alone
+  // perhaps rename p_cc_aperture, p_cc_fix  etc.
+  input [32-1:0]  p_clk_count_aperture,
+  input [24-1:0]  p_clk_count_reset,      // useful if running stand-alone,
   input [24-1:0]  p_clk_count_fix,
   inout [24-1:0]  p_clk_count_var,
-  input [32-1:0]  p_clk_count_aperture,   // eg. clk_count_mux_sig_n
                                           // names are correct. aperture is the control parameter,  and mux_sig_count is the current clk count, and should correspond.
 
 
@@ -90,13 +86,13 @@ module adc_modulation (
 
 
   // outputs
-  output reg adc_measure_valid,     // adc is master, and asserts valid when measurement complete
+  output reg adc_measure_valid,           // to indicate/assert completion, and valid measurement
 
   // now a wire
   output wire [ 6-1:0]  monitor,
 
-  output reg [ 3-1:0]  refmux,     // reference current, better name?
-  output reg sigmux,
+  output reg [ 3-1:0]  refmux,            // reference current mux
+  output reg sigmux,                      // sample/signal input mux
 
   output reg      cmpr_disable_latch_ctl,
 
@@ -307,7 +303,7 @@ module adc_modulation (
 
         `STATE_DONE:
           begin
-            // default rest state
+            // default rest/park state
 
             // disable comparator,
             cmpr_disable_latch_ctl <= 1;
