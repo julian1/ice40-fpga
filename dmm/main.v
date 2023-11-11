@@ -299,6 +299,8 @@ module top (
   wire [32-1 :0] reg_adc_p_clk_count_reset;
 
 
+
+
   // inputs
   wire [32 - 1 :0] reg_status ;
 
@@ -394,6 +396,7 @@ module top (
 
   ///////////////////////////////////////////////
 
+  // todo perhaps remove last prefix here.
 
   wire [24-1:0] adc2_clk_count_refmux_reset_last;
   wire [32-1:0] adc2_clk_count_refmux_neg_last;    // maybe add reg_ prefix. No. they are not registers, until they are in the register_bank context.
@@ -407,6 +410,11 @@ module top (
 
   wire          adc2_measure_trig;
   wire          adc2_measure_valid;
+
+  wire [24-1 :0] adc2_stat_count_refmux_pos_up_last;
+  wire [24-1 :0] adc2_stat_count_refmux_neg_up_last;
+  wire [24-1 :0] adc2_stat_count_cmpr_cross_up_last;
+
 
   adc_modulation
   adc2(
@@ -435,7 +443,6 @@ module top (
 
     . p_clk_count_aperture( reg_adc_p_aperture),
     . p_clk_count_reset( reg_adc_p_clk_count_reset[ 24-1: 0  ]  ) ,
-
     . p_clk_count_fix( 24'd15 ) ,         // +-15V. reduced integrator swing.
     . p_clk_count_var( 24'd100 ) ,
 
@@ -450,15 +457,21 @@ module top (
     .refmux(  { adc2_mux[  3  ],  adc2_mux[ 0 +: 2 ]   } ),           // pos, neg, reset. are on two different 4053,
     .sigmux(    adc2_mux[  2  ] ),                                    // perhaps clearer if split into adcrefmux and adcsigmux in the wire assignment. but it would then need two vars.
                                                                       // which isn't representative of the single synchronizer. so do it here instead.
- 
+
     // adc clk counts for last sample measurement
     .clk_count_refmux_reset_last(adc2_clk_count_refmux_reset_last),
     .clk_count_refmux_neg_last(  adc2_clk_count_refmux_neg_last),
     .clk_count_refmux_pos_last(  adc2_clk_count_refmux_pos_last),
     .clk_count_refmux_rd_last(   adc2_clk_count_refmux_rd_last),
-    .clk_count_mux_sig_last(  adc2_clk_count_mux_sig_last )
+    .clk_count_mux_sig_last(  adc2_clk_count_mux_sig_last ),
+
+    // stats
+    .stat_count_refmux_pos_up_last( adc2_stat_count_refmux_pos_up_last),
+    .stat_count_refmux_neg_up_last( adc2_stat_count_refmux_neg_up_last),
+    .stat_count_cmpr_cross_up_last( adc2_stat_count_cmpr_cross_up_last)
 
   );
+
 
   /*
 	  key insight - is that the single module adc, can fan-out its outputs into two muxable output vecs -
@@ -738,10 +751,15 @@ spi_interrupt_ctl
     .reg_adc_clk_count_refmux_reset({{ 8 { 1'b0 } }, adc2_clk_count_refmux_reset_last }  ) ,
     .reg_adc_clk_count_refmux_neg(  adc2_clk_count_refmux_neg_last   ) ,
     .reg_adc_clk_count_refmux_pos(  adc2_clk_count_refmux_pos_last  ) ,
-    .reg_adc_clk_count_refmux_rd(  { { 8 { 1'b0 } }, adc2_clk_count_refmux_rd_last }  ),
-    .reg_adc_clk_count_mux_sig(                   adc2_clk_count_mux_sig_last   )
+    .reg_adc_clk_count_refmux_rd(  { {8{ 1'b0 }}, adc2_clk_count_refmux_rd_last }  ),
+    .reg_adc_clk_count_mux_sig(                   adc2_clk_count_mux_sig_last   ),
 
-    );
+    // adc stats
+    .reg_adc_stat_count_refmux_pos_up( { {8{ 1'b0 }},adc2_stat_count_refmux_pos_up_last } ),
+    .reg_adc_stat_count_refmux_neg_up( { {8{ 1'b0 }},adc2_stat_count_refmux_neg_up_last }),
+    .reg_adc_stat_count_cmpr_cross_up(  { {8{ 1'b0 }},adc2_stat_count_cmpr_cross_up_last} )
+
+  );
 
 
 

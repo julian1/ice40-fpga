@@ -50,13 +50,16 @@
 
 
 // adc counts
-`define REG_ADC_CLK_COUNT_REFMUX_RESET 34    // TODO fix/ re-assign enum .
-`define REG_ADC_CLK_COUNT_REFMUX_NEG   30
-`define REG_ADC_CLK_COUNT_REFMUX_POS   31
-`define REG_ADC_CLK_COUNT_REFMUX_RD    32
-`define REG_ADC_CLK_COUNT_MUX_SIG   33
+`define REG_ADC_CLK_COUNT_REFMUX_RESET  34    // TODO fix/ re-assign enum .
+`define REG_ADC_CLK_COUNT_REFMUX_NEG    30
+`define REG_ADC_CLK_COUNT_REFMUX_POS    31
+`define REG_ADC_CLK_COUNT_REFMUX_RD     32
+`define REG_ADC_CLK_COUNT_MUX_SIG       33
 
 
+`define REG_ADC_STAT_COUNT_REFMUX_POS_UP  40
+`define REG_ADC_STAT_COUNT_REFMUX_NEG_UP  41
+`define REG_ADC_STAT_COUNT_CMPR_CROSS_UP  42
 
 
 module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,   4 bytes data.
@@ -79,6 +82,12 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   input wire [32-1:0] reg_adc_clk_count_refmux_pos,
   input wire [32-1:0] reg_adc_clk_count_refmux_rd,
   input wire [32-1:0] reg_adc_clk_count_mux_sig,
+
+
+  input wire [32-1:0] reg_adc_stat_count_refmux_pos_up,
+  input wire [32-1:0] reg_adc_stat_count_refmux_neg_up,
+  input wire [32-1:0] reg_adc_stat_count_cmpr_cross_up,
+
 
 
   // outputs
@@ -209,7 +218,11 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
               `REG_ADC_CLK_COUNT_REFMUX_NEG:   out <= reg_adc_clk_count_refmux_neg << 8;
               `REG_ADC_CLK_COUNT_REFMUX_POS:   out <= reg_adc_clk_count_refmux_pos << 8;
               `REG_ADC_CLK_COUNT_REFMUX_RD:    out <= reg_adc_clk_count_refmux_rd << 8;
-              `REG_ADC_CLK_COUNT_MUX_SIG:   out <= reg_adc_clk_count_mux_sig << 8;
+              `REG_ADC_CLK_COUNT_MUX_SIG:       out <= reg_adc_clk_count_mux_sig << 8;
+
+              `REG_ADC_STAT_COUNT_REFMUX_POS_UP: out <=   reg_adc_stat_count_refmux_pos_up << 8;
+              `REG_ADC_STAT_COUNT_REFMUX_NEG_UP: out <=  reg_adc_stat_count_refmux_neg_up << 8;
+              `REG_ADC_STAT_COUNT_CMPR_CROSS_UP:   out <= reg_adc_stat_count_refmux_neg_up << 8;
 
 
 
