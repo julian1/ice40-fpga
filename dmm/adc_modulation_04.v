@@ -109,8 +109,8 @@ module adc_modulation (
   // behavior/transition counts
   output reg [24-1:0] count_var_up_last,        // var_up. perhaps rename.
   output reg [24-1:0] count_var_down_last,
-  output reg [24-1:0] count_trans_up_last,
-  output reg [24-1:0] count_trans_down_last,
+  output reg [24-1:0] count_mux_pos_up_last,
+  output reg [24-1:0] count_mux_neg_up_last,
   output reg [24-1:0] count_fix_up_last,
   output reg [24-1:0] count_fix_down_last,
   output reg [24-1:0] count_flip_last,
@@ -158,8 +158,8 @@ module adc_modulation (
   // modulation counts
   reg [24-1:0] count_var_up;
   reg [24-1:0] count_var_down;
-  reg [24-1:0] count_trans_up;
-  reg [24-1:0] count_trans_down;
+  reg [24-1:0] count_mux_pos_up;
+  reg [24-1:0] count_mux_neg_up;
   reg [24-1:0] count_fix_up;
   reg [24-1:0] count_fix_down;
   reg [24-1:0] count_flip;
@@ -194,8 +194,8 @@ module adc_modulation (
   ////////
 
   // to check that
-  reg [1:0] pos_ref_cross;
-  reg [1:0] neg_ref_cross;
+  reg [1:0] mux_pos_cross;
+  reg [1:0] mux_neg_cross;
 
 
   // reg [ 4-1:0]  monitor_;
@@ -221,16 +221,16 @@ module adc_modulation (
 
       // TODO change name ref_sw_pos_cross
       // instrumentation for switch transitions for both pos,neg (and both).
-      pos_ref_cross <= { pos_ref_cross[0], refmux[0] }; // old, new
-      neg_ref_cross <= { neg_ref_cross[0], refmux[1] };
+      mux_pos_cross <= { mux_pos_cross[0], refmux[0] }; // old, new
+      mux_neg_cross <= { mux_neg_cross[0], refmux[1] };
 
       // TODO count_pos_trans or cross pos_  or just count_pos_trans
       // TODO must rename. actually represents count of each on switch transiton = count_ref_pos_on and count_ref_neg_on.
-      if(pos_ref_cross == 2'b01)
-        count_trans_up <= count_trans_up + 1;
+      if(mux_pos_cross == 2'b01)
+        count_mux_pos_up <= count_mux_pos_up + 1;
 
-      if(neg_ref_cross == 2'b01)
-        count_trans_down <= count_trans_down + 1;
+      if(mux_neg_cross == 2'b01)
+        count_mux_neg_up <= count_mux_neg_up + 1;
 
 
       /*
@@ -368,8 +368,8 @@ module adc_modulation (
             count_var_down    <= 0;
             count_fix_up      <= 0;
             count_fix_down    <= 0;
-            count_trans_up    <= 0;
-            count_trans_down  <= 0;
+            count_mux_pos_up    <= 0;
+            count_mux_neg_up  <= 0;
             count_flip        <= 0;
 
             // clk_count_mux_reset <= 0;  do not overwrite... reset. in other clause.
@@ -660,8 +660,8 @@ module adc_modulation (
                 // record behaviior/transition counts asap. on this immeidate clk cycle.
                 count_var_up_last           <= count_var_up;
                 count_var_down_last         <= count_var_down;
-                count_trans_up_last     <= count_trans_up; // OK. this works.
-                count_trans_down_last   <= count_trans_down;
+                count_mux_pos_up_last     <= count_mux_pos_up; // OK. this works.
+                count_mux_neg_up_last   <= count_mux_neg_up;
                 count_fix_up_last       <= count_fix_up;
                 count_fix_down_last     <= count_fix_down;
                 count_flip_last         <= count_flip;
