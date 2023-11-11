@@ -176,19 +176,19 @@ module adc_modulation (
   /////////////////////////
   // this should be pushed into a separate module...
   // should be possible to set latch hi immediately on any event here...
-  // change name  zero_cross.. or just cross_
+  // change name  zero_cross.. or just cmpr_cross_
 
   // TODO move this into the main block.
 
   // TODO  three bits, because comparator_val is not on clock boundary
   // or use comaprator_val_last
-  reg [2:0] crossr;
+  reg [2:0] cmpr_crossr;
   always @(posedge clk)
-    crossr <= {crossr[1:0], comparator_val};
+    cmpr_crossr <= {cmpr_crossr[1:0], comparator_val};
 
-  wire cross_up     = (crossr[2:1]==2'b10);  // message starts at falling edge
-  wire cross_down   = (crossr[2:1]==2'b01);  // message stops at rising edge
-  wire cross_any    = cross_up || cross_down ;
+  wire cmpr_cross_up     = (cmpr_crossr[2:1]==2'b10);  // message starts at falling edge
+  wire cmpr_cross_down   = (cmpr_crossr[2:1]==2'b01);  // message stops at rising edge
+  wire cmpr_cross_any    = cmpr_cross_up || cmpr_cross_down ;
 
 
   ////////
@@ -642,7 +642,7 @@ module adc_modulation (
           begin
             // TODO change to comparator_val test.
             // zero-cross to finish. should probably change to use last_comparator
-            if(cross_any )
+            if(cmpr_cross_any )
               begin
 
                 cmpr_disable_latch_ctl          <= 1; // disable comparator,
