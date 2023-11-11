@@ -19,7 +19,7 @@ module adc_test (
 
   // inputs
 
-  input [32-1:0]  p_clk_count_aper,   // eg. clk_count_mux_sig_n
+  input [32-1:0]  p_clk_count_aperture,   // eg. clk_count_mux_sig_n
   input adc_measure_trig,         // wire. start measurement.
 
   // outputs
@@ -82,7 +82,7 @@ module adc_test (
 
 
             // set sample/measure period
-            clk_count_down  <= p_clk_count_aper;
+            clk_count_down  <= p_clk_count_aperture;
 
             monitor_ <= 4'b0;
 

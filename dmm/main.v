@@ -423,7 +423,7 @@ module top (
     clk_count_var_n     = 185;    // 330pF   on +-17.5V.
     clk_count_fix_n     = 24;   // 24 is faster than 23... weird.
 
-    clk_count_aper_n    = (2 * 2000000);    // ? 200ms TODO check this.
+    clk_count_aperture_n    = (2 * 2000000);    // ? 200ms TODO check this.
                                             // yes. 4000000 == 10PNLC, 5 sps.
     p_use_slow_rundown    = 1;
     p_use_fast_rundown    = 1;
@@ -433,7 +433,7 @@ module top (
      // . p_clk_count_fix( 24'd24 ) ,      // +-17.5V.
     // . p_clk_count_var( 24'd185 ) ,
 
-    . p_clk_count_aper( reg_adc_p_aperture),
+    . p_clk_count_aperture( reg_adc_p_aperture),
     . p_clk_count_reset( reg_adc_p_clk_count_reset[ 24-1: 0  ]  ) ,
 
     . p_clk_count_fix( 24'd15 ) ,         // +-15V. reduced integrator swing.
@@ -581,7 +581,7 @@ spi_interrupt_ctl
     .clk(CLK),
 
     // inputs
-    .p_clk_count_aper( reg_adc_p_aperture ),
+    .p_clk_count_aperture( reg_adc_p_aperture ),
     .adc_measure_trig( adc_test_measure_trig ),
 
     // outputs

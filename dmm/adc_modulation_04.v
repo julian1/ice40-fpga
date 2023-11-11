@@ -81,7 +81,7 @@ module adc_modulation (
   input [24-1:0]  p_clk_count_reset,    // useful if running stand-alone
   input [24-1:0]  p_clk_count_fix,
   inout [24-1:0]  p_clk_count_var,
-  input [32-1:0]  p_clk_count_aper,   // eg. clk_count_mux_sig_n
+  input [32-1:0]  p_clk_count_aperture,   // eg. clk_count_mux_sig_n
                                           // names are correct. aperture is the control parameter,  and mux_sig_count is the current clk count, and should correspond.
 
 
@@ -291,8 +291,8 @@ module adc_modulation (
           // =======================================
 
           // have we reached end of aperture
-          if(clk_count_mux_sig >= p_clk_count_aper)                  // original. slope-adc-3.
-          // if(clk_count_mux_sig >= (p_clk_count_aper - 1) )              // changed oct 30, 2023..  IMPORTANT. DIFFERENCEs MAY AFFECT calibration calculation.
+          if(clk_count_mux_sig >= p_clk_count_aperture)                  // original. slope-adc-3.
+          // if(clk_count_mux_sig >= (p_clk_count_aperture - 1) )              // changed oct 30, 2023..  IMPORTANT. DIFFERENCEs MAY AFFECT calibration calculation.
 
             begin
               // turn off signal input
