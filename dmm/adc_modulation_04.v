@@ -574,7 +574,22 @@ module adc_modulation (
             end
 */
 
+        // change name additional_marging for comparator.
+       `STATE_PRERUNDOWN_START:
+           begin
+            state     <= `STATE_PRERUNDOWN;
+            clk_count_down    <= 1;   // advance another clock cycle above. to be sure to have something to catch.
+            // KEEP THE NEG CURRENT from FAST_BELOW.   to come a little above the zero cross.
+            // refmux    <= `MUX_REF_NEG;
+          end
 
+
+        `STATE_PRERUNDOWN:
+          if(clk_count_down == 0)
+            state <= `STATE_RUNDOWN_START;
+
+
+/*
         ////////////////////////////////////////////
         // the end of signal integration. is different to the end of the 4 phase cycle.
         // we want a gpio pin. to hit on pre-rundown.
@@ -583,13 +598,13 @@ module adc_modulation (
            begin
             state     <= `STATE_PRERUNDOWN;
             clk_count_down    <= p_clk_count_fix;
-            /*
-                we don't care about landing above the zero-cross. in 4 phase we care about ending on a downward var.
-                thatway we can add a up transition.  before doing the downward transition (for slow) rundown.
-                to balance the up/down transitions.
-                the upward phase - then needs to be enough to push over the zero-cross.  but that is secondary.
+            
+                // we don't care about landing above the zero-cross. in 4 phase we care about ending on a downward var.
+                // thatway we can add a up transition.  before doing the downward transition (for slow) rundown.
+                // to balance the up/down transitions.
+                // the upward phase - then needs to be enough to push over the zero-cross.  but that is secondary.
                 ----------
-            */
+            
             refmux    <= `MUX_REF_NONE;
           end
 
@@ -602,7 +617,7 @@ module adc_modulation (
           // then we get
           if(clk_count_down == 0)
             state <= `STATE_RUNDOWN_START;
-
+*/
 
 
 
