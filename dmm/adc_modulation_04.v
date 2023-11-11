@@ -78,9 +78,6 @@ module adc_modulation (
   input [24-1:0]  p_clk_count_reset,      // useful if running stand-alone,
   input [24-1:0]  p_clk_count_fix,
   inout [24-1:0]  p_clk_count_var,
-                                          // names are correct. aperture is the control parameter,  and mux_sig_count is the current clk count, and should correspond.
-
-
   input           p_use_slow_rundown,     // TODO prefix with p_. to indicate . an adc control parameter.
   input           p_use_fast_rundown,
 
@@ -100,6 +97,7 @@ module adc_modulation (
   ///////////
 
   // behavior/transition counts
+  // prefix with stat_
   output reg [24-1:0] count_refmux_pos_up_last,
   output reg [24-1:0] count_refmux_neg_up_last,
   output reg [24-1:0] count_var_up_last,        // var_up. perhaps rename.
@@ -108,6 +106,7 @@ module adc_modulation (
   output reg [24-1:0] count_fix_down_last,
   output reg [24-1:0] count_flip_last,
 //   output reg [24-1:0] clk_count_rundown_last, // change name. phase rundown.
+  output reg [24-1:0]  count_cmpr_cross_up,
 
 
   // TODO. change to 32 bit counts, for long integrations
@@ -168,7 +167,7 @@ module adc_modulation (
 
   /////////////////////////
 
-  reg [2-1:0] cmpr_crossr;
+  reg [2-1:0] cmpr_crossr;              // perhaps add _transition? or cmpr_
 
   wire cmpr_cross_up     = cmpr_crossr == 2'b10;
   wire cmpr_cross_down   = cmpr_crossr == 2'b01;
@@ -214,20 +213,23 @@ module adc_modulation (
       comparator_val_last <=  comparator_val;
 
 
-      cmpr_crossr         <= {cmpr_crossr[0], comparator_val};
+      cmpr_crossr               <= {cmpr_crossr[0], comparator_val};
 
       // TODO change name ref_sw_pos_cross
       // instrumentation for switch transitions for both pos,neg (and both).
-      refmux_pos_cross       <= { refmux_pos_cross[0], refmux[0] }; // old, new
-      refmux_neg_cross       <= { refmux_neg_cross[0], refmux[1] };
+      refmux_pos_cross          <= { refmux_pos_cross[0], refmux[0] }; // old, new
+      refmux_neg_cross          <= { refmux_neg_cross[0], refmux[1] };
 
       // TODO count_pos_trans or cross pos_  or just count_pos_trans
       // TODO must rename. actually represents count of each on switch transiton = count_ref_pos_on and count_ref_neg_on.
       if(refmux_pos_cross_up)
-        count_refmux_pos_up <= count_refmux_pos_up + 1;
+        count_refmux_pos_up     <= count_refmux_pos_up + 1;
 
       if(refmux_neg_cross_up)
-        count_refmux_neg_up <= count_refmux_neg_up + 1;
+        count_refmux_neg_up     <= count_refmux_neg_up + 1;
+
+      if(cmpr_cross_up)
+        count_cmpr_cross_up     <= count_cmpr_cross_up + 1;
 
 
       /*
