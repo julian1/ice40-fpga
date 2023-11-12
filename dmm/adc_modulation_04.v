@@ -113,13 +113,14 @@ module adc_modulation (
   // prefix with stat_
   output reg [24-1:0] stat_count_refmux_pos_up_last,
   output reg [24-1:0] stat_count_refmux_neg_up_last,
-  output reg [24-1:0] stat_count_var_up_last,        // var_up. perhaps rename.
+  output reg [24-1:0] stat_count_cmpr_cross_up_last,
+
+  output reg [24-1:0] stat_count_var_up_last,
   output reg [24-1:0] stat_count_var_down_last,
   output reg [24-1:0] stat_count_fix_up_last,
   output reg [24-1:0] stat_count_fix_down_last,
-  output reg [24-1:0] stat_count_flip_last,
+  output reg [24-1:0] stat_count_flip_last
 //   output reg [24-1:0] clk_count_rundown_last, // change name. phase rundown.
-  output reg [24-1:0] stat_count_cmpr_cross_up_last
 
 
 );
@@ -151,22 +152,24 @@ module adc_modulation (
   reg [31:0]  clk_count_down;
 
   // modulation counts
-  reg [24-1:0] stat_count_refmux_pos_up;
-  reg [24-1:0] stat_count_refmux_neg_up;
-  reg [24-1:0] stat_count_var_up;
-  reg [24-1:0] stat_count_var_down;
-  reg [24-1:0] stat_count_fix_up;
-  reg [24-1:0] stat_count_fix_down;
-  reg [24-1:0] stat_count_flip;
-  reg [24-1:0] stat_count_cmpr_cross_up;
-
-
-  // TODO change to 31 bits.
   reg [24-1:0] clk_count_refmux_reset;
   reg [32-1:0] clk_count_refmux_neg;
   reg [32-1:0] clk_count_refmux_pos;
   reg [24-1:0] clk_count_refmux_rd;
   reg [32-1:0] clk_count_mux_sig ;      // should be the same as p_aperture.  eg. 5sec*20MHz=100m count. won't fit in 24 bit value. would need to split between read registers.
+
+
+  // stats
+  reg [24-1:0] stat_count_refmux_pos_up;
+  reg [24-1:0] stat_count_refmux_neg_up;
+  reg [24-1:0] stat_count_cmpr_cross_up;
+
+  reg [24-1:0] stat_count_var_up;
+  reg [24-1:0] stat_count_var_down;
+  reg [24-1:0] stat_count_fix_up;
+  reg [24-1:0] stat_count_fix_down;
+  reg [24-1:0] stat_count_flip;
+
 
 
   /////////////////////////
@@ -233,7 +236,7 @@ module adc_modulation (
         stat_count_refmux_neg_up     <= stat_count_refmux_neg_up + 1;
 
       if(cmpr_cross_up)
-        stat_count_cmpr_cross_up     <= stat_count_cmpr_cross_up + 1;
+        stat_count_cmpr_cross_up     <= stat_count_cmpr_cross_up + 2;
 
 
       /*
@@ -655,30 +658,31 @@ module adc_modulation (
                 refmux                  <= `REFMUX_RESET;
 
 
-                // record behaviior/transition counts asap. on this immeidate clk cycle.
-                stat_count_refmux_pos_up_last   <= stat_count_refmux_pos_up; // OK. this works.
-                stat_count_refmux_neg_up_last   <= stat_count_refmux_neg_up;
-                stat_count_var_up_last       <= stat_count_var_up;
-                stat_count_var_down_last     <= stat_count_var_down;
-                stat_count_fix_up_last       <= stat_count_fix_up;
-                stat_count_fix_down_last     <= stat_count_fix_down;
-                stat_count_flip_last         <= stat_count_flip;
-                // clk_count_rundown_last  <= clk_count;                           // why do we record this
-                stat_count_cmpr_cross_up_last <= stat_count_cmpr_cross_up;
-
                 // counts for current.
 
                 // clk_count_refmux_reset;
                 // clk_count_refmux_reset_last <= 456; // this works to communicate
                 // clk_count_refmux_reset_last <= p_clk_count_reset;    // this works. reports 10,000
                 clk_count_refmux_reset_last <= clk_count_refmux_reset;    // this doesn't work. reports 0.
-
-
                 clk_count_refmux_neg_last  <= clk_count_refmux_neg;
                 clk_count_refmux_pos_last  <= clk_count_refmux_pos;
                 clk_count_refmux_rd_last   <= clk_count_refmux_rd;
                 clk_count_mux_sig_last    <= clk_count_mux_sig;                  // aperture. is the ctrl parameter for signal introduced..
                                                                             // TODO. rename clk_count_mux_sig.
+
+                // stats
+                stat_count_refmux_pos_up_last   <= stat_count_refmux_pos_up ; // OK. this works.
+                stat_count_refmux_neg_up_last   <= stat_count_refmux_neg_up ;
+                stat_count_cmpr_cross_up_last <= stat_count_cmpr_cross_up ;
+
+                stat_count_var_up_last       <= stat_count_var_up;
+                stat_count_var_down_last     <= stat_count_var_down;
+                stat_count_fix_up_last       <= stat_count_fix_up;
+                stat_count_fix_down_last     <= stat_count_fix_down;
+                stat_count_flip_last         <= stat_count_flip;
+                // clk_count_rundown_last  <= clk_count;                           // why do we record this
+
+
 
               end
           end

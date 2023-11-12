@@ -218,11 +218,11 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
               `REG_ADC_CLK_COUNT_REFMUX_NEG:   out <= reg_adc_clk_count_refmux_neg << 8;
               `REG_ADC_CLK_COUNT_REFMUX_POS:   out <= reg_adc_clk_count_refmux_pos << 8;
               `REG_ADC_CLK_COUNT_REFMUX_RD:    out <= reg_adc_clk_count_refmux_rd << 8;
-              `REG_ADC_CLK_COUNT_MUX_SIG:       out <= reg_adc_clk_count_mux_sig << 8;
+              `REG_ADC_CLK_COUNT_MUX_SIG:      out <= reg_adc_clk_count_mux_sig << 8;
 
-              `REG_ADC_STAT_COUNT_REFMUX_POS_UP: out <=   reg_adc_stat_count_refmux_pos_up << 8;
-              `REG_ADC_STAT_COUNT_REFMUX_NEG_UP: out <=  reg_adc_stat_count_refmux_neg_up << 8;
-              `REG_ADC_STAT_COUNT_CMPR_CROSS_UP:   out <= reg_adc_stat_count_refmux_neg_up << 8;
+              `REG_ADC_STAT_COUNT_REFMUX_POS_UP:  out <=   reg_adc_stat_count_refmux_pos_up << 8;
+              `REG_ADC_STAT_COUNT_REFMUX_NEG_UP:  out <=  reg_adc_stat_count_refmux_neg_up << 8;
+              `REG_ADC_STAT_COUNT_CMPR_CROSS_UP:  out <= reg_adc_stat_count_cmpr_cross_up << 8;
 
 
 
