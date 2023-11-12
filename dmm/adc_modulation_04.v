@@ -120,7 +120,7 @@ module adc_modulation (
   output reg [24-1:0] stat_count_fix_up_last,
   output reg [24-1:0] stat_count_fix_down_last,
   output reg [24-1:0] stat_count_flip_last
-//   output reg [24-1:0] clk_count_rundown_last, // change name. phase rundown.
+//   output reg [24-1:0] stat_clk_count_rundown_last, // change name. phase rundown.
 
 
 );
@@ -320,7 +320,7 @@ module adc_modulation (
             // indicate signal valid, to indicate interuptable status, to enable trigger
             adc_measure_valid <= 1;
 
-            // turn of sigmux, and reset integrator
+            // turn off sigmux, and reset integrator
             sigmux            <= 0;
             refmux            <= `REFMUX_RESET;
           end
@@ -653,16 +653,11 @@ module adc_modulation (
                 // next transition
                 state                   <= `STATE_DONE;
 
-                // turn of sigmux, and reset integrator
+                // turn off sigmux, and reset integrator
                 sigmux                  <= 0;
                 refmux                  <= `REFMUX_RESET;
 
-
-                // counts for current.
-
-                // clk_count_refmux_reset;
-                // clk_count_refmux_reset_last <= 456; // this works to communicate
-                // clk_count_refmux_reset_last <= p_clk_count_reset;    // this works. reports 10,000
+                // counts
                 clk_count_refmux_reset_last <= clk_count_refmux_reset;    // this doesn't work. reports 0.
                 clk_count_refmux_neg_last  <= clk_count_refmux_neg;
                 clk_count_refmux_pos_last  <= clk_count_refmux_pos;
@@ -680,7 +675,7 @@ module adc_modulation (
                 stat_count_fix_up_last       <= stat_count_fix_up;
                 stat_count_fix_down_last     <= stat_count_fix_down;
                 stat_count_flip_last         <= stat_count_flip;
-                // clk_count_rundown_last  <= clk_count;                           // why do we record this
+                // stat_clk_count_rundown_last  <= clk_count;                           // why do we record this
 
 
 
