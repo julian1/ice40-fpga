@@ -236,7 +236,7 @@ module adc_modulation (
         stat_count_refmux_neg_up     <= stat_count_refmux_neg_up + 1;
 
       if(cmpr_cross_up)
-        stat_count_cmpr_cross_up     <= stat_count_cmpr_cross_up + 2;
+        stat_count_cmpr_cross_up     <= stat_count_cmpr_cross_up + 1;
 
 
       /*
