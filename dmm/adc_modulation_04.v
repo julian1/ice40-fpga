@@ -510,6 +510,12 @@ module adc_modulation (
         // fast rundown.
 
         /*
+        EXTR. cmpr hysteresis. affects setup for rundown.
+        means we don't have to pad small extra clk count,
+        to guarantee, we don't miss a crossing.
+        */
+
+        /*
           Extr. remember there is a clk delay - for the comparator - so comparator shouldn't t
         */
         // we are somewhere above zero,
@@ -540,7 +546,11 @@ module adc_modulation (
 */
 
 
+        /*
+          cmpr hystersis means more clk cycles, than  would need for exact cross.
+          also slope-amp will determine how many clk cycles needed to get across positive hysterisis.
 
+        */
         // advance until above zero-cross.
         `STATE_FAST_BELOW_START:
            begin
@@ -568,6 +578,11 @@ module adc_modulation (
               state   <= `STATE_FAST_BELOW_START;   // do another cycle
             end
 */
+
+        /*
+          TODO rid of this.
+            we don't need to pad because of comparator hystersis.
+        */
 
         // change name additional_marging for comparator.
        `STATE_PRERUNDOWN_START:
