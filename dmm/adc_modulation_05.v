@@ -194,6 +194,14 @@ module adc_modulation (
   assign monitor[0] = adc_measure_trig;
   assign monitor[1] = adc_measure_valid;
 
+
+  assign monitor[2] = sigmux;
+  assign monitor[3] = (state == `STATE_FAST_ABOVE_START);
+  assign monitor[4] = (state == `STATE_FAST_BELOW_START);
+  assign monitor[5] = (state == `STATE_RUNDOWN);
+
+
+/*
   // assign monitor[ 2 +: 4]  = { sigmux, refmux };      // reference current, better name?
   assign monitor[ 2 +: 4]  = {
 
@@ -202,7 +210,7 @@ module adc_modulation (
         (state == `STATE_FAST_ABOVE_START),
         sigmux
       };      // reference current, better name?
-
+*/
 
 
 
