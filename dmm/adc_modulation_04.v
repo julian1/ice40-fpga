@@ -567,8 +567,8 @@ module adc_modulation (
             refmux    <= `REFMUX_NEG;
 
              if( ! comparator_val_last) // above zero-cross
-              state   <= `STATE_PRERUNDOWN_START;   // go to pre-rundown
-              // state         <= `STATE_RUNDOWN;
+              // state   <= `STATE_PRERUNDOWN_START;   // go to pre-rundown
+              state         <= `STATE_RUNDOWN_START; // goto rundown.
             end
 
 /*
@@ -596,6 +596,7 @@ module adc_modulation (
         */
 
 
+/*
         // change name additional_marging for comparator.
        `STATE_PRERUNDOWN_START:
            begin
@@ -609,6 +610,7 @@ module adc_modulation (
         `STATE_PRERUNDOWN:
           if(clk_count_down == 0)
             state <= `STATE_RUNDOWN_START;
+*/
 
 
 /*
