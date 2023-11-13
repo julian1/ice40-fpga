@@ -194,7 +194,17 @@ module adc_modulation (
   assign monitor[0] = adc_measure_trig;
   assign monitor[1] = adc_measure_valid;
 
-  assign monitor[ 2 +: 4]  = { sigmux, refmux };      // reference current, better name?
+  // assign monitor[ 2 +: 4]  = { sigmux, refmux };      // reference current, better name?
+  assign monitor[ 2 +: 4]  = {
+
+        (state == `STATE_RUNDOWN ),
+        (state == `STATE_FAST_BELOW_START),
+        (state == `STATE_FAST_ABOVE_START),
+        sigmux
+      };      // reference current, better name?
+
+
+
 
   /*
       nov 12. 2023.
@@ -558,6 +568,7 @@ module adc_modulation (
 
              if( ! comparator_val_last) // above zero-cross
               state   <= `STATE_PRERUNDOWN_START;   // go to pre-rundown
+              // state         <= `STATE_RUNDOWN;
             end
 
 /*
@@ -583,6 +594,7 @@ module adc_modulation (
           TODO rid of this.
             we don't need to pad because of comparator hystersis.
         */
+
 
         // change name additional_marging for comparator.
        `STATE_PRERUNDOWN_START:
