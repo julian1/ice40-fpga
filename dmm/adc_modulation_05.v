@@ -67,8 +67,8 @@ module adc_modulation (
   input           clk,
 
 
-  // JA added
-  input adc_measure_trig,         // wire. start measurement.
+  // wire. trigger/start a measurement cycle.
+  input adc_measure_trig,
 
   // comparator input
   input           comparator_val,
@@ -91,21 +91,21 @@ module adc_modulation (
   output reg [ 3-1:0]  refmux,            // reference current mux
   output reg sigmux,                      // sample/signal input mux
 
+
+  // TODO need better name. hi = disable comparator and enable latch
   output reg      cmpr_disable_latch_ctl,
 
 
   ///////////
 
-
-  // TODO. change to 32 bit counts, for long integrations
-  // current source clk counts
-  // these are output regs.
-  // having visibility over reset clk is good, given ctrl and the reset period.
+  // copy of the registers, used to enable spi reading, in new measurement cycle.
+  // long registers are 32/31 bit counts, eg. (1<<31)/20e6. == 107 seconds, for long integrations
+  // having visibility over the reset clk count is also useful for check, and consistentcy.
   output reg [24-1:0] clk_count_refmux_reset_last,
   output reg [32-1:0] clk_count_refmux_neg_last,
   output reg [32-1:0] clk_count_refmux_pos_last,
   output reg [24-1:0] clk_count_refmux_rd_last,
-  output reg [32-1:0] clk_count_mux_sig_last,      // names are correct. aperture is the control parameter,  and mux_sig_count is the current clk count, and should correspond.
+  output reg [32-1:0] clk_count_mux_sig_last,      // names are correct. aperture is the control parameter,  and mux_sig_count is the current clk count for signal duration,
 
 
 
@@ -126,10 +126,6 @@ module adc_modulation (
 );
 
 
-  /*
-    we need to review all this input / output.
-    and input wire can still be driven.
-  */
 
   reg [5-1:0]   state;
 
@@ -142,6 +138,7 @@ module adc_modulation (
   initial begin
     state           = `STATE_DONE ;   // 0
 
+    // TODO remove.
     cmpr_disable_latch_ctl  = 1; // disable comparator,
 
   end
@@ -258,8 +255,8 @@ module adc_modulation (
 
 
       /*
-        EI. could actually use this strategy of reading the mux values - to count total clk times.
-        and avoid having to return count and clk to mcu separately.
+        EI. use strategy of reading and counting the mux state values across the fsm state.
+        avoids having to track for each state.
         ----
         it might also be more cycle accurate - given the phase transition setup, and comparator reads etc.
         but would need 32 bit values.
@@ -347,7 +344,7 @@ module adc_modulation (
         `STATE_RESET_START:
           begin
 
-            // de-assert valid measurement, since beginnging new run
+            // de-assert valid measurement, at start of new measurement cycle
             adc_measure_valid <= 0;
 
             // reset vars, and transition to runup state
@@ -367,21 +364,19 @@ module adc_modulation (
 
 
         `STATE_RESET:    // let integrator reset.
-          begin
             if(clk_count_down == 0)
               state <= `STATE_SIG_START;
 
-          end
 
 
-        // beginning of signal integration
+        // turn on signal integration, turn off reset, begin two phase runup
         `STATE_SIG_START:
           begin
             state             <= `STATE_FIX_POS_START;
 
             // turn on signal input, to start signal integration
             sigmux            <= 1;
-            refmux            <= `REFMUX_NONE; // turn off reset.
+            refmux            <= `REFMUX_NONE; // turn off reset.     // TODO think this is correct. we don't want to increment signal count, while refmux is held in reset.
 
             // clear counts
             clk_count_refmux_neg  <= 0;

@@ -127,6 +127,7 @@ module sample_acquisition_az (
             clk_count_down  <= p_clk_count_precharge;  // normally pin s1
             sw_pc_ctl       <= `SW_PC_SIGNAL;
           end
+
         33:
           if(clk_count_down == 0)
             begin
@@ -144,7 +145,7 @@ module sample_acquisition_az (
               state             <= 35;
               led0            <= 1;
 
-            end                                               // TODO change it back, so that it is after adc has measured. to allow reading while next measurement takes place.
+            end
 
         35:
           // wait for adc to measure
@@ -152,7 +153,7 @@ module sample_acquisition_az (
             begin
               state         <= 4;
               // set status for hi sample
-              status_out    <= 3'b001; // we moved this.      // TODO this status thing is difficult. we need to read all data.
+              status_out    <= 3'b001; // we moved this.      // set status only after measure, to enable reg reading, during next measurement cycle.
             end
 
         //////////////////////////////
@@ -203,7 +204,7 @@ module sample_acquisition_az (
         55:
           // wait for adc to measure
           if(  adc_measure_valid )
-            begin 
+            begin
               // restart sequence
               state <= 2;
 
