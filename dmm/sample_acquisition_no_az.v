@@ -78,23 +78,21 @@ module sample_acquisition_no_az (
             end
         25:
           if(clk_count_down == 0)
-            state <= 3;
+            begin
+              state <= 3;
+
+              // trigger adc measure to do measure. interruptable at any time.
+              adc_measure_trig    <= 1;
+            end
 
         /////////////////////////
         3:
-          begin
-            //state           <= 35;
-
-            // trigger adc measure to do measure. interruptable at any time.
-            adc_measure_trig    <= 1;
-
-            // wait for adc to ack, before advancing
-            if( ! adc_measure_valid )
-              begin
-                adc_measure_trig    <= 0;
-                state             <= 35;
-              end
-          end
+          // wait for adc to ack trig, before advancing
+          if( ! adc_measure_valid )
+            begin
+              adc_measure_trig    <= 0;
+              state             <= 35;
+            end
 
         35:
           // wait for adc.

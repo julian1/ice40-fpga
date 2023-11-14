@@ -159,6 +159,7 @@ module sample_acquisition_az (
 
         // switch pre-charge switch back to boot to protect signal again
         // pause here can be shorter. if want.
+        // but also nice to keep symmetrical
         4:
           begin
             state           <= 45;
@@ -172,6 +173,7 @@ module sample_acquisition_az (
 
         /////////////////////////
         // switch az mux to lo.  pause and take lo measurement
+        // but also nice to keep symmetrical
         5:
           begin
             state           <= 52;
@@ -189,7 +191,6 @@ module sample_acquisition_az (
               adc_measure_trig <= 1;
             end
 
-
         53:
           // wait for adc to ack trig, before advancing
           if( ! adc_measure_valid )
@@ -197,7 +198,6 @@ module sample_acquisition_az (
               adc_measure_trig    <= 0;
               state             <= 55;
               led0            <= 0;
-
             end
 
         55:
