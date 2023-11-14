@@ -97,18 +97,9 @@ module sample_acquisition_no_az (
           end
 
         35:
-          begin
-            // adc_measure_trig    <= 0;
-
-            // wait for adc.
-            if(  adc_measure_valid )
-              state <= 2;
-
-
-            // wait for adc.
-            //if( ! adc_measure_trig &&  adc_measure_valid )
-            //   state <= 2;
-          end
+          // wait for adc.
+          if(  adc_measure_valid )
+            state <= 2;
 
 
 

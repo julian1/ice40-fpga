@@ -137,31 +137,21 @@ module sample_acquisition_az (
 
 
         34:
-            // wait for adc to ack trig, before advancing
-            if( ! adc_measure_valid )
-              begin
-                adc_measure_trig    <= 0;
-                state             <= 35;
-                led0            <= 1;
+          // wait for adc to ack trig, before advancing
+          if( ! adc_measure_valid )
+            begin
+              adc_measure_trig    <= 0;
+              state             <= 35;
+              led0            <= 1;
 
-                // set status for hi sample
-                status_out    <= 3'b001; // we moved this.      // TODO this status thing is difficult. we need to read all data. 
-              end
-
+              // set status for hi sample
+              status_out    <= 3'b001; // we moved this.      // TODO this status thing is difficult. we need to read all data.
+            end
 
         35:
-          begin
-            //
-            // adc_measure_trig <= 0;
-
-            // another way - continue asserting trig - and then progress when both hi.  and de-assert trig in next state.
-            // wait for adc.
-            // if( ! adc_measure_trig && adc_measure_valid )
-            if( adc_measure_valid )
-              begin
-                state         <= 4;
-              end
-          end
+          // wait for adc to measure
+          if( adc_measure_valid )
+              state         <= 4;
 
 
         //////////////////////////////
@@ -174,6 +164,7 @@ module sample_acquisition_az (
             clk_count_down  <= p_clk_count_precharge; // time less important here
             sw_pc_ctl       <= `SW_PC_BOOT;
           end
+
         45:
           if(clk_count_down == 0)
             state <= 5;
@@ -199,34 +190,23 @@ module sample_acquisition_az (
 
 
         53:
-            // wait for adc to ack, before advancing
-            if( ! adc_measure_valid )
-              begin
-                adc_measure_trig    <= 0;
-                state             <= 55;
-                led0            <= 0;
+          // wait for adc to ack trig, before advancing
+          if( ! adc_measure_valid )
+            begin
+              adc_measure_trig    <= 0;
+              state             <= 55;
+              led0            <= 0;
 
-                // set status for lo sample
-                status_out      <= 3'b000;
-              end
-
-
+              // set status for lo sample
+              status_out      <= 3'b000;
+            end
 
         55:
-          begin
-            adc_measure_trig <= 0;
+          // wait for adc to measure
+          if(  adc_measure_valid )
+            // restart sequence
+            state <= 2;
 
-            // wait for adc.
-            // if( ! adc_measure_trig &&  adc_measure_valid )
-            if(  adc_measure_valid )
-              begin
-                // restart sequence
-                state <= 2;
-                // set status for lo sample
-                // status_out      <= 3'b000;
-              end
-
-          end
 
 
         60: // done / park
