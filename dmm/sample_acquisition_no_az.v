@@ -50,7 +50,7 @@ module sample_acquisition_no_az (
 
 
       // always decrement clk for the current phase
-      // keeps setup condition simpler 
+      // keeps setup condition simpler
       clk_count_down <= clk_count_down - 1;
 
       case (state)
@@ -83,20 +83,37 @@ module sample_acquisition_no_az (
         /////////////////////////
         3:
           begin
-            state           <= 35;
+            //state           <= 35;
 
-            // tell adc to do measure. interruptable at any time.
+            // trigger adc measure to do measure. interruptable at any time.
             adc_measure_trig    <= 1;
+
+            // wait for adc to ack, before advancing
+            if( ! adc_measure_valid )
+              begin
+                adc_measure_trig    <= 0;
+                state             <= 35;
+              end
           end
 
         35:
           begin
-            adc_measure_trig    <= 0;
+            // adc_measure_trig    <= 0;
 
             // wait for adc.
-            if( ! adc_measure_trig &&  adc_measure_valid )
+            if(  adc_measure_valid )
               state <= 2;
+
+
+            // wait for adc.
+            //if( ! adc_measure_trig &&  adc_measure_valid )
+            //   state <= 2;
           end
+
+
+
+
+
 
         40: // done / park
           ;

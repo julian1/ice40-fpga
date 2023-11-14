@@ -130,24 +130,36 @@ module sample_acquisition_az (
         33:
           if(clk_count_down == 0)
             begin
-              state           <= 35;
-              led0            <= 1;
+              state           <= 34;
               // adc start
               adc_measure_trig <= 1;
             end
 
+
+        34:
+            // wait for adc to ack trig, before advancing
+            if( ! adc_measure_valid )
+              begin
+                adc_measure_trig    <= 0;
+                state             <= 35;
+                led0            <= 1;
+
+                // set status for hi sample
+                status_out    <= 3'b001; // we moved this.      // TODO this status thing is difficult. we need to read all data. 
+              end
+
+
         35:
           begin
             //
-            adc_measure_trig <= 0;
+            // adc_measure_trig <= 0;
 
             // another way - continue asserting trig - and then progress when both hi.  and de-assert trig in next state.
             // wait for adc.
-            if( ! adc_measure_trig && adc_measure_valid )
+            // if( ! adc_measure_trig && adc_measure_valid )
+            if( adc_measure_valid )
               begin
                 state         <= 4;
-                // set status for hi sample
-                status_out    <= 3'b001;
               end
           end
 
@@ -179,11 +191,25 @@ module sample_acquisition_az (
         52:
           if(clk_count_down == 0)
             begin
-              state           <= 55;
+              state           <= 53;
               led0            <= 0;
               // adc start
               adc_measure_trig <= 1;
             end
+
+
+        53:
+            // wait for adc to ack, before advancing
+            if( ! adc_measure_valid )
+              begin
+                adc_measure_trig    <= 0;
+                state             <= 55;
+                led0            <= 0;
+
+                // set status for lo sample
+                status_out      <= 3'b000;
+              end
+
 
 
         55:
@@ -191,12 +217,13 @@ module sample_acquisition_az (
             adc_measure_trig <= 0;
 
             // wait for adc.
-            if( ! adc_measure_trig &&  adc_measure_valid )
+            // if( ! adc_measure_trig &&  adc_measure_valid )
+            if(  adc_measure_valid )
               begin
                 // restart sequence
                 state <= 2;
                 // set status for lo sample
-                status_out      <= 3'b000;
+                // status_out      <= 3'b000;
               end
 
           end
