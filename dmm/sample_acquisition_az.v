@@ -144,15 +144,16 @@ module sample_acquisition_az (
               state             <= 35;
               led0            <= 1;
 
-              // set status for hi sample
-              status_out    <= 3'b001; // we moved this.      // TODO this status thing is difficult. we need to read all data.
-            end
+            end                                               // TODO change it back, so that it is after adc has measured. to allow reading while next measurement takes place.
 
         35:
           // wait for adc to measure
           if( adc_measure_valid )
+            begin
               state         <= 4;
-
+              // set status for hi sample
+              status_out    <= 3'b001; // we moved this.      // TODO this status thing is difficult. we need to read all data.
+            end
 
         //////////////////////////////
 
@@ -197,15 +198,18 @@ module sample_acquisition_az (
               state             <= 55;
               led0            <= 0;
 
-              // set status for lo sample
-              status_out      <= 3'b000;
             end
 
         55:
           // wait for adc to measure
           if(  adc_measure_valid )
-            // restart sequence
-            state <= 2;
+            begin 
+              // restart sequence
+              state <= 2;
+
+              // set status for lo sample. set after measure to give time to read.
+              status_out      <= 3'b000;
+            end
 
 
 
