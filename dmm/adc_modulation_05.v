@@ -409,6 +409,10 @@ module adc_modulation (
             refmux            <= `REFMUX_POS; // initial direction
 
             cmpr_latch_ctl  <= 0; // enable comparator, // JA correct. 0 means it is transparent.
+                                  // MUST do here, after we have driven away from the zero-cross,  rather than state_sig_start.
+                                  // to reduce/ chance of comparator output oscillation
+                                  // nov 16 2023.. actually we shave oscillation at start.
+                                  // which is preturbing signal.
           end
 
         `STATE_FIX_POS:
