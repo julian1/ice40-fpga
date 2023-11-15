@@ -425,7 +425,7 @@ module top (
 
     // inputs
     .adc_measure_trig( adc2_measure_trig),
-    .comparator_val( CMPR_P_OUT ),
+    .cmpr_val( CMPR_P_OUT ),
 /*
     clk_count_rset_n   =  10000;
     // 26MHz ???

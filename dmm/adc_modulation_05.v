@@ -71,7 +71,7 @@ module adc_modulation (
   input adc_measure_trig,
 
   // comparator input
-  input           comparator_val,
+  input           cmpr_val,
 
   // perhaps rename p_cc_aperture, p_cc_fix  etc.
   input [32-1:0]  p_clk_count_aperture,
@@ -218,7 +218,7 @@ module adc_modulation (
     for meta-stability.  eg. to avoid read/use twice in same block, and can be evaluated differently.
     but perhaps review.
   */
-  reg comparator_val_last;
+  reg cmpr_val_last;
 
   always @(posedge clk)
 
@@ -233,10 +233,10 @@ module adc_modulation (
         shouldn't matter?
       */
       // sample/bind comparator val once on clock edge. improves speed.
-      comparator_val_last <=  comparator_val;
+      cmpr_val_last <=  cmpr_val;
 
 
-      cmpr_crossr               <= {cmpr_crossr[0], comparator_val};
+      cmpr_crossr               <= {cmpr_crossr[0], cmpr_val};
 
       // TODO change name ref_sw_pos_cross
       // instrumentation for switch transitions for both pos,neg (and both).
@@ -423,7 +423,7 @@ module adc_modulation (
             state             <= `STATE_VAR;
             clk_count_down    <= p_clk_count_var;
 
-            if( comparator_val_last)   // test below the zero-cross
+            if( cmpr_val_last)   // test below the zero-cross
               begin
                 refmux        <= `REFMUX_NEG;  // add negative ref. to drive up.
                 stat_count_var_up  <= stat_count_var_up + 1;
@@ -469,7 +469,7 @@ module adc_modulation (
             state             <= `STATE_VAR2;
             clk_count_down    <= p_clk_count_var;
 
-            if( comparator_val_last) // below zero-cross
+            if( cmpr_val_last) // below zero-cross
               begin
                 refmux        <= `REFMUX_NEG;
                 stat_count_var_up  <= stat_count_var_up + 1;
@@ -495,7 +495,7 @@ module adc_modulation (
 
                 if(p_use_fast_rundown)
                   begin
-                    if(  comparator_val_last) // below cross
+                    if(  cmpr_val_last) // below cross
                       state <= `STATE_FAST_BELOW_START;
                     else                      // above cross
                       state <= `STATE_FAST_ABOVE_START;
@@ -503,7 +503,7 @@ module adc_modulation (
                 else
                   begin
                     // above cross and last var was up phase
-                    if( refmux  == `REFMUX_NEG && ! comparator_val_last)
+                    if( refmux  == `REFMUX_NEG && ! cmpr_val_last)
                       state <= `STATE_PRERUNDOWN_START;
                     else
                       // keep cycling
@@ -532,7 +532,7 @@ module adc_modulation (
           begin
             refmux          <= `REFMUX_POS;
 
-            if( comparator_val_last)                  // below zero-cross. EXTR. note not a comparator transition test. instead an actual value .
+            if( cmpr_val_last)                  // below zero-cross. EXTR. note not a comparator transition test. instead an actual value .
               state   <= `STATE_FAST_BELOW_START;     // advance to below_start.
           end
 
@@ -547,7 +547,7 @@ module adc_modulation (
            begin
             refmux    <= `REFMUX_NEG;
 
-             if( ! comparator_val_last) // above zero-cross
+             if( ! cmpr_val_last) // above zero-cross
               // state   <= `STATE_PRERUNDOWN_START;   // go to pre-rundown
               state         <= `STATE_RUNDOWN_START; // goto rundown.
             end
@@ -609,7 +609,7 @@ module adc_modulation (
 
         `STATE_RUNDOWN:
           begin
-            // TODO change to comparator_val test.
+            // TODO change to cmpr_val test.
             // zero-cross to finish. should probably change to use last_comparator
             if(cmpr_cross_any )
               begin
