@@ -93,7 +93,8 @@ module adc_modulation (
 
 
   // TODO need better name. hi = disable comparator and enable latch
-  output reg      cmpr_disable_latch_ctl,
+  // corresponds to hardware.
+  output reg      cmpr_latch_ctl,
 
 
   ///////////
@@ -139,7 +140,7 @@ module adc_modulation (
     state           = `STATE_DONE ;   // 0
 
     // TODO remove.
-    cmpr_disable_latch_ctl  = 1; // disable comparator,
+    cmpr_latch_ctl  = 1; // disable comparator,
 
   end
 
@@ -330,7 +331,7 @@ module adc_modulation (
             // default rest/park state
 
             // disable comparator,
-            cmpr_disable_latch_ctl <= 1;
+            cmpr_latch_ctl <= 1;
 
             // indicate signal valid, to indicate interuptable status, to enable trigger
             adc_measure_valid <= 1;
@@ -358,7 +359,7 @@ module adc_modulation (
             sigmux          <= 0;
             refmux          <= `REFMUX_RESET;
 
-            cmpr_disable_latch_ctl          <= 1; // disable comparator, enable latch
+            cmpr_latch_ctl          <= 1; // disable comparator, enable latch
           end
 
 
@@ -407,7 +408,7 @@ module adc_modulation (
             stat_count_fix_down    <= stat_count_fix_down + 1;
             refmux            <= `REFMUX_POS; // initial direction
 
-            cmpr_disable_latch_ctl  <= 0; // enable comparator, // JA correct. 0 means it is transparent.
+            cmpr_latch_ctl  <= 0; // enable comparator, // JA correct. 0 means it is transparent.
           end
 
         `STATE_FIX_POS:
@@ -613,7 +614,7 @@ module adc_modulation (
             if(cmpr_cross_any )
               begin
 
-                cmpr_disable_latch_ctl          <= 1; // disable comparator,
+                cmpr_latch_ctl          <= 1; // disable comparator,
 
                 // signal valid measurement.
                 adc_measure_valid <= 1;

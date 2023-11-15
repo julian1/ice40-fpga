@@ -407,7 +407,7 @@ module top (
 
   wire [6-1: 0 ] adc2_monitor;
   wire [4-1: 0 ] adc2_mux;
-  wire           adc2_cmpr_disable_latch_ctl;
+  wire           adc2_cmpr_latch_ctl;
 
   wire          adc2_measure_trig;
   wire          adc2_measure_valid;
@@ -453,7 +453,7 @@ module top (
 
     // outputs - ctrl
     .adc_measure_valid( adc2_measure_valid),    // fan out.
-    .cmpr_disable_latch_ctl( adc2_cmpr_disable_latch_ctl   ),
+    .cmpr_latch_ctl( adc2_cmpr_latch_ctl   ),
     .monitor(  adc2_monitor  ),
     .refmux(  { adc2_mux[  3  ],  adc2_mux[ 0 +: 2 ]   } ),           // pos, neg, reset. are on two different 4053,
     .sigmux(    adc2_mux[  2  ] ),                                    // perhaps clearer if split into adcrefmux and adcsigmux in the wire assignment. but it would then need two vars.
@@ -516,7 +516,7 @@ module top (
   assign sample_acquisition_az_out[ `IDX_SPI_INTERRUPT_CTL ]    = adc2_measure_valid;
   assign sample_acquisition_az_out[ `IDX_MEAS_COMPLETE_CTL]     = adc2_measure_valid;
 
-  assign sample_acquisition_az_out[ `IDX_CMPR_LATCH_CTL ]      = adc2_cmpr_disable_latch_ctl;
+  assign sample_acquisition_az_out[ `IDX_CMPR_LATCH_CTL ]      = adc2_cmpr_latch_ctl;
   assign sample_acquisition_az_out[ `IDX_MONITOR + 2 +: 6 ]    = adc2_monitor;
   assign sample_acquisition_az_out[ `IDX_ADCMUX +: 4 ]         = adc2_mux;
 
@@ -557,7 +557,7 @@ module top (
   assign sample_acquisition_no_az_out[ `IDX_SPI_INTERRUPT_CTL ] = adc2_measure_valid;
   assign sample_acquisition_no_az_out[ `IDX_MEAS_COMPLETE_CTL]  = adc2_measure_valid;
 
-  assign sample_acquisition_no_az_out[ `IDX_CMPR_LATCH_CTL ]  = adc2_cmpr_disable_latch_ctl;
+  assign sample_acquisition_no_az_out[ `IDX_CMPR_LATCH_CTL ]  = adc2_cmpr_latch_ctl;
   assign sample_acquisition_no_az_out[ `IDX_MONITOR + 2 +: 6] = adc2_monitor;
   assign sample_acquisition_no_az_out[ `IDX_ADCMUX +: 4 ]     = adc2_mux;
 
