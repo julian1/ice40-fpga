@@ -558,7 +558,11 @@ module adc_modulation (
 
 
 /*
-      TODO nov 12. 2023.
+      TODO review. nov 12. 2023.
+
+        - This code should be kept. because a half-wave switch has far more charge-injection - that full-wave on/off cycle - where most will be cancelled.
+          and this applies - if the sequence is spread over two switches - for both +ref and -ref currents..
+
         this code equalized switch transitions. by turning off both pos and neg ref currents, before switching on both together.
         but it's not clear if it is still needed.
         with the changes to the prerundown.
