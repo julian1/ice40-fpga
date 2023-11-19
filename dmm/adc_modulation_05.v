@@ -552,9 +552,16 @@ module adc_modulation (
             refmux    <= `REFMUX_NEG;
 
              if( ! cmpr_val_last) // above zero-cross
-              // state   <= `STATE_PRERUNDOWN_START;   // go to pre-rundown
-              state         <= `STATE_RUNDOWN_START; // goto rundown.
+              begin
+                // state   <= `STATE_PRERUNDOWN_START;   // go to pre-rundown
+                state         <= `STATE_RUNDOWN_START; // goto rundown.
+
+                // turn off both muxes - to equalize switch counts and charge-injection - for +ve and -ve ref.
+                refmux    <= `REFMUX_NONE;
+              end
             end
+
+
 
 
 /*
