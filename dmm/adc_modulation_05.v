@@ -555,10 +555,13 @@ module adc_modulation (
               begin
                 state         <= `STATE_RUNDOWN_START; // goto rundown.
 
-                /* nov 20, 2023. make sure both +ve and -ve switches, to equalize their switch counts and charge-injection - for +ve and -ve ref.
+                /* nov 20, 2023.
+                  turn off both +ve and -ve currents, to equalize switch counts and charge-injection - for +ve and -ve ref.
                 - This code should be kept. because a half-wave switch has far more charge-injection - that full-wave on/off cycle - where most will be cancelled.
                   and this applies - if the sequence is spread over two switches - for both +ref and -ref currents..
                   reduces noise.  0.7uV to 0.6uV or lower. RMS 1nplc .
+                --
+                - remember abrupt chages in noise, are due to variations in run-up counts, between measurements due to slight thermal shifts.
                 */
                 refmux    <= `REFMUX_NONE;
               end
@@ -566,45 +569,6 @@ module adc_modulation (
 
 
 
-
-/*
-      TODO review. nov 12. 2023.
-
-        - This code should be kept. because a half-wave switch has far more charge-injection - that full-wave on/off cycle - where most will be cancelled.
-          and this applies - if the sequence is spread over two switches - for both +ref and -ref currents..
-
-        this code equalized switch transitions. by turning off both pos and neg ref currents, before switching on both together.
-        but it's not clear if it is still needed.
-        with the changes to the prerundown.
-
-        ////////////////////////////////////////////
-        // the end of signal integration. is different to the end of the 4 phase cycle.
-        // we want a gpio pin. to hit on pre-rundown.
-
-        `STATE_PRERUNDOWN_START:
-           begin
-            state     <= `STATE_PRERUNDOWN;
-            clk_count_down    <= p_clk_count_fix;
-
-                // we don't care about landing above the zero-cross. in 4 phase we care about ending on a downward var.
-                // thatway we can add a up transition.  before doing the downward transition (for slow) rundown.
-                // to balance the up/down transitions.
-                // the upward phase - then needs to be enough to push over the zero-cross.  but that is secondary.
-                ----------
-
-            refmux    <= `REFMUX_NONE;
-          end
-
-        // It has to be MUX_NONE
-
-        `STATE_PRERUNDOWN:
-          // Should drive above the cross.
-          // EXTR. this can just keep driving up, without transitions, and testing until hit the zero cross.
-          // No. i think it would actually depend on whether the last /
-          // then we get
-          if(clk_count_down == 0)
-            state <= `STATE_RUNDOWN_START;
-*/
 
 
 
