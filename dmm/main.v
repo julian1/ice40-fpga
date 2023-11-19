@@ -445,8 +445,13 @@ module top (
 
     . p_clk_count_aperture( reg_adc_p_aperture),
     . p_clk_count_reset( reg_adc_p_clk_count_reset[ 24-1: 0  ]  ) ,
-    . p_clk_count_fix( 24'd15 ) ,         // +-15V. reduced integrator swing.
-    . p_clk_count_var( 24'd100 ) ,
+    // . p_clk_count_fix( 24'd15 ) ,         // +-15V. reduced integrator swing.
+    // . p_clk_count_var( 24'd100 ) ,
+
+    . p_clk_count_fix( 24'd67 ) ,           // 1.5nF. 4x counts of 330p. oct. 2023. test.
+    . p_clk_count_var( 24'd450 ) ,
+
+
 
     . p_use_slow_rundown( 1'b1 ),
     . p_use_fast_rundown( 1'b1 ),
