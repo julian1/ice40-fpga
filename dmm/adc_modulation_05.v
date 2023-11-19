@@ -553,10 +553,13 @@ module adc_modulation (
 
              if( ! cmpr_val_last) // above zero-cross
               begin
-                // state   <= `STATE_PRERUNDOWN_START;   // go to pre-rundown
                 state         <= `STATE_RUNDOWN_START; // goto rundown.
 
-                // turn off both muxes - to equalize switch counts and charge-injection - for +ve and -ve ref.
+                /* nov 20, 2023. make sure both +ve and -ve switches, to equalize their switch counts and charge-injection - for +ve and -ve ref.
+                - This code should be kept. because a half-wave switch has far more charge-injection - that full-wave on/off cycle - where most will be cancelled.
+                  and this applies - if the sequence is spread over two switches - for both +ref and -ref currents..
+                  reduces noise.  0.7uV to 0.6uV or lower. RMS 1nplc .
+                */
                 refmux    <= `REFMUX_NONE;
               end
             end
