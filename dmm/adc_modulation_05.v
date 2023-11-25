@@ -9,6 +9,9 @@
   see,
     https://www.eevblog.com/forum/projects/multislope-design/75/
     https://patentimages.storage.googleapis.com/e2/ba/5a/ff3abe723b7230/US5200752.pdf
+
+    https://www.eevblog.com/forum/metrology/selecting-an-op-amp-for-integrator/
+    https://www.eevblog.com/forum/metrology/7-5digit-diy-voltmeter/
 */
 
 // advantage of macros over localparam enum, is that they generate errors if not defined.
@@ -34,6 +37,7 @@
 `define STATE_RUNDOWN_START 15
 `define STATE_RUNDOWN       16
 
+//  TODO fixme. nov  2023. states removed.
 `define STATE_PRERUNDOWN    18
 `define STATE_PRERUNDOWN_START 19
 
@@ -507,6 +511,9 @@ module adc_modulation (
                 else
                   begin
                     // above cross and last var was up phase
+                    /*
+                      TODO fixme. nov  2023. state removed.
+                    */
                     if( refmux  == `REFMUX_NEG && ! cmpr_val_last)
                       state <= `STATE_PRERUNDOWN_START;
                     else
