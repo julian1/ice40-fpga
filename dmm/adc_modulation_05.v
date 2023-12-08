@@ -605,7 +605,10 @@ module adc_modulation (
               we may get a cross in either direction (up/down) due to cmpr glitching.
               this applies even if usign the cmpr latch, because the latch only guarantees hold, not value, and has a delay
               So must check in both directions.
-              hysterisis is mostly a practical  solution
+              hysterisis works as a practical solution
+              --
+              - using external ff to control cmpr latch, may even hide a transition from being seen by fpga. so is not a solution.
+              - unless use the ff output.
               */
 
             if(cmpr_cross_any )
