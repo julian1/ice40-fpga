@@ -600,6 +600,14 @@ module adc_modulation (
           begin
             // TODO change to cmpr_val test.
             // zero-cross to finish. should probably change to use last_comparator
+              /*
+              EXTR. at rundown, even though we approach from same direction,
+              we may get a cross in either direction (up/down) due to cmpr glitching.
+              this applies even if usign the cmpr latch, because the latch only guarantees hold, not value, and has a delay
+              So must check in both directions.
+              hysterisis is mostly a practical  solution
+              */
+
             if(cmpr_cross_any )
               begin
 
