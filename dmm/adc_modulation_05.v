@@ -8,6 +8,7 @@
 /*
   see,
     https://www.eevblog.com/forum/projects/multislope-design/75/
+    https://www.eevblog.com/forum/metrology/diy-high-resolution-multi-slope-converter/450/
     https://patentimages.storage.googleapis.com/e2/ba/5a/ff3abe723b7230/US5200752.pdf
 
     https://www.eevblog.com/forum/metrology/selecting-an-op-amp-for-integrator/
