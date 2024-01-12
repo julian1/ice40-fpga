@@ -112,6 +112,34 @@ module top (
 
   input  CLK,
 
+  // when configured as gpio. we can assign these anyway.
+  // and ignore builtin.
+  // but must share align with spi programming mode.
+
+/*#A dual-function, serial output pin in both configuration modes.
+#iCE40 LM devices have this pin shared with hardened SPI IP
+#SPI_MISO pin. */
+output SDO,
+
+/*# A dual-function, serial input pin in both configuration modes.
+# iCE40 LM devices have this pin shared with hardened SPI IP
+# SPI_MOSI pin. */
+input SDI,
+
+
+/*#A dual-function clock signal. An output in Master mode and
+#input in Slave mode. iCE40 LM devices have this pin shared with
+# hardened SPI IP SPI_SCK pin.*/
+input SCK,
+
+
+/*#An important dual-function, active-low slave select pin. After
+#the device exits POR or CRESET_B is toggled (High-Low-High), it
+#samples the SPI_SS to select the configuration mode (an output
+#in Master mode and an input in Slave mode). iCE40 LM devices
+#have this pin shared with hardened SPI IP SPI1_CSN pin.*/
+input SS,
+
 
 
   //

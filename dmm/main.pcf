@@ -20,6 +20,36 @@ set_io MON6             33
 set_io MON7             34
 
 
+# I think 'S' indicates SPI. not slave.
+# Eg. SDO is connected to MOSI - when fpga is spi master to read spi flash for bitstream.
+# but will be connected to MISO - when fpga is spi slave when being sent a bitstream.
+
+#A dual-function, serial output pin in both configuration modes.
+#iCE40 LM devices have this pin shared with hardened SPI IP
+#SPI_MISO pin.
+set_io SDO              67
+
+# A dual-function, serial input pin in both configuration modes.
+# iCE40 LM devices have this pin shared with hardened SPI IP
+# SPI_MOSI pin.
+set_io SDI              68
+
+
+#A dual-function clock signal. An output in Master mode and
+#input in Slave mode. iCE40 LM devices have this pin shared with
+# hardened SPI IP SPI_SCK pin.
+set_io SCK              70
+
+
+#An important dual-function, active-low slave select pin. After
+#the device exits POR or CRESET_B is toggled (High-Low-High), it
+#samples the SPI_SS to select the configuration mode (an output
+#in Master mode and an input in Slave mode). iCE40 LM devices
+#have this pin shared with hardened SPI IP SPI1_CSN pin.
+set_io SS               71
+
+
+
 
 ###############################
 
