@@ -37,4 +37,25 @@ if [ "$1" = "-flash" ]; then
 fi
 
 
+################
+
+# see
+# https://stackoverflow.com/questions/9955020/how-to-write-integer-to-binary-file-using-bash
+# test
+# echo "0xfefefefe" | xxd -r -g0 | hexdump -C
+# printf "0: %.8x" 0xffffff00 | sed -E 's/0: (..)(..)(..)(..)/0: \4\3\2\1/' | xxd -r -g0 | hexdump -C
+# echo "size $size"
+
+# magic will be 0xfe00fe00 when read LE.
+# there seems to be an issue with sed, that it doesn't properly reverse when have 0x00.
+magic=0x00fe00fe
+# magic=0xfe00fe00
+size=$( stat -c "%s" ./build/main.bin )
+
+echo $magic             | sed -E 's/0: (..)(..)(..)(..)/0: \4\3\2\1/' | xxd -r -g0   >>   ./build/main.bin.hdr
+#echo $magic                                                           | xxd -r -g0   >>   ./build/main.bin.hdr
+printf "0: %.8x" $size  | sed -E 's/0: (..)(..)(..)(..)/0: \4\3\2\1/' | xxd -r -g0   >>   ./build/main.bin.hdr
+
+cat ./build/main.bin                  >>   ./build/main.bin.hdr
+
 
