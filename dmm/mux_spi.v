@@ -1,4 +1,18 @@
 
+/*
+  IMPORTANT.
+    can share lines clk,mosi, for multiple peripherals. eg. r2rdac.  AD5446.
+    and just use this mux the specific peripheral SS. or 4094.
+
+    likewise for miso. assuming peripherals behave well, and go high-z when not selected.
+    alternatively use lvc125.  etc. to kk
+
+    we would share lines - by just repeating/adding them (mosi, clk) in the vectors multiple times.
+    ---
+    should have extra cs pins on the 4094 header.
+*/
+
+
 
 `default_nettype none
 

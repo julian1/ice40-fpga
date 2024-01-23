@@ -9,6 +9,7 @@
 
 
 `include "register_set.v"
+`include "mux_spi.v"
 
 
 
@@ -57,13 +58,15 @@ module top (
   input SS,
 
 
+  input  SPI_CS2,
+
 
   // leds
   output LED0,
   output LED1,
   output LED2,
 
-  // monitor
+  // monitor - outputs
   output MON0,
   output MON1,
   output MON2,
@@ -74,12 +77,22 @@ module top (
   output MON7,
 
 
-  // hardware flags
+  // hardware flags - inputs
   input HW0,
   input HW1,
   input HW2,
 
 
+
+  // 4094
+  output GLB_4094_DATA,
+  output GLB_4094_CLK,
+  output _4094_OE_CTL,
+  output GLB_4094_STROBE_CTL,
+
+
+
+  input U1004_4094_DATA
 
 
 
@@ -117,13 +130,6 @@ module top (
 
   //////////////////////////
   // outputs
-
-  // 4094
-  output _4094_OE_CTL,
-
-  output GLB_4094_CLK,
-  output GLB_4094_DATA,
-  output GLB_4094_STROBE_CTL,
 
 
   // azmux
@@ -167,12 +173,64 @@ module top (
 
 
 
+
   ////////////////////////////////////////
   // spi muxing
 
   wire [32-1:0] reg_spi_mux ;// = 8'b00000001; // test
 
+  wire [8-1:0] vec_cs ;
+  assign {  GLB_4094_STROBE_CTL  } = vec_cs;
 
+  wire [8-1:0] vec_clk;
+  assign { GLB_4094_CLK } = vec_clk ;   // have we changed the clock polarity.
+
+  wire [8-1:0] vec_mosi;
+  assign { GLB_4094_DATA } = vec_mosi;
+
+  wire [8-1:0] vec_miso ;
+  assign  vec_miso[ 8-1 : 1] = 7'b0;
+
+  assign { U1004_4094_DATA } = vec_miso;
+
+  // a wire. since it is only used combinatorially .
+  wire w_dout ;
+
+  mux_spi #( )
+  mux_spi
+  (
+    . reg_spi_mux(reg_spi_mux[ 8-1 : 0 ] ),
+    . cs( SPI_CS2),
+    . clk( SCK /* SPI_CLK */),
+    . mosi(SDI /* SPI_MOSI */ ),
+
+    //////
+    . cs_polarity( 8'b00000001  ),  // 4094 strobe should go hi, for output
+    // . cs_polarity( 8'b01110000  ),
+    . vec_cs(vec_cs),
+    . vec_clk(vec_clk),
+    . vec_mosi(vec_mosi),
+
+    ////////////////
+
+    . dout(w_dout),                              // use when cs active
+    . vec_miso(vec_miso),                         // use when cs2 active
+    . miso( SDO /* SPI_MISO */)                              // output pin
+  );
+  ///////////////////////
+
+
+
+
+  /////////////////////////////////////////////
+  // 4094 OE 
+  wire [32-1:0] reg_4094;   // TODO rename
+  assign { _4094_OE_CTL } = reg_4094;    //  lo. start up not enabled.
+  // wire _4094_OE_CTL = 0;  // lo.
+
+
+
+  ////////////////////////////////////////
 
 
   wire [32-1:0] reg_led;
@@ -180,8 +238,6 @@ module top (
   assign { LED2, LED1, LED0 } = reg_led[ 3-1: 0 ] ;
 
 
-  // readable inputs
-  wire [32 - 1 :0] reg_status ;
 
 
 /*
@@ -205,6 +261,31 @@ module top (
 */
 
 
+  // readable inputs
+  wire [32 - 1 :0] reg_status ;
+
+  assign reg_status = {
+
+    32'b0
+/*
+    8'b0 ,
+    monitor,                          // add a count, as a transactional read lock.
+
+    HW2,  HW1,  HW0,
+    reg_sa_arm_trigger[0],            // ease having to do a separate register read, to retrieve state.
+    sample_acquisition_az_status_out, // 3 bits
+    adc2_measure_valid,
+
+    // HW2,  HW1,  HW0 ,   4'b0,  outputs_vec[ `IDX_SPI_INTERRUPT_CTL ] ,
+
+    3'b0,
+    SWITCH_SENSE_OUT, DCV_OVP_OUT, OHMS_OVP_OUT, SUPPLY_SENSE_OUT, UNUSED_2
+*/
+ };
+
+
+
+
 
   register_set // #( 32 )
   register_set
@@ -214,13 +295,16 @@ module top (
     . clk(   SCK ),
     . cs(  SS /*SPI_CS */ ),
     . din(   SDI /*SPI_MOSI */),
-    // . dout( w_dout ),            // drive miso from via muxer
-    . dout( SDO /* SPI_MISO */ ),        // drive miso output pin directly.
+    . dout( w_dout ),            // drive miso from via muxer
+    // . dout( SDO /* SPI_MISO */ ),        // drive miso output pin directly.
 
 
 
     // outputs
-    . reg_led(reg_led),        // required as test register
+    . reg_led(reg_led),        // remove. use reg_direct in mode 0. instead. 
+
+    . reg_spi_mux(reg_spi_mux),
+    . reg_4094(reg_4094 ) ,
 
       // inputs
     . reg_status( reg_status ),

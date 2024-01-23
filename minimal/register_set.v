@@ -74,7 +74,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
   // inputs - status, externally driven
   input wire [32-1:0] reg_status,
-
+/*
 
   // inputs adc
   input wire [32-1:0] reg_adc_clk_count_refmux_reset,
@@ -88,7 +88,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   input wire [32-1:0] reg_adc_stat_count_refmux_neg_up,
   input wire [32-1:0] reg_adc_stat_count_cmpr_cross_up,
 
-
+*/
 
   // outputs
   // output/writable regs, driven by this module
@@ -214,6 +214,8 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
               // inputs
               `REG_STATUS:                  out <= reg_status << 8;
 
+/*
+
               `REG_ADC_CLK_COUNT_REFMUX_RESET: out <= reg_adc_clk_count_refmux_reset << 8;
               `REG_ADC_CLK_COUNT_REFMUX_NEG:   out <= reg_adc_clk_count_refmux_neg << 8;
               `REG_ADC_CLK_COUNT_REFMUX_POS:   out <= reg_adc_clk_count_refmux_pos << 8;
@@ -224,7 +226,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
               `REG_ADC_STAT_COUNT_REFMUX_NEG_UP:  out <=  reg_adc_stat_count_refmux_neg_up << 8;
               `REG_ADC_STAT_COUNT_CMPR_CROSS_UP:  out <= reg_adc_stat_count_cmpr_cross_up << 8;
 
-
+*/
 
               default:        out <=  24'b000011110000111100001111 << 8;
               // default:     out <=  32'b00001111000011110000111100001111<< 8;     // 32 bit value appears to work.
