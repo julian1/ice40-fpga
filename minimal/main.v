@@ -62,33 +62,12 @@ module top (
   input  SPI_CS2,
 
 
-  // leds
-  output reg [ 4-1: 0 ] o_leds,    // 4 bits
-/*
-  output LED0,
-  output LED1,
-  output LED2,
-  output LED3,
-*/
+  output [ 4-1: 0 ] o_leds,    // 4 bits
+
+  output [ 8-1: 0] o_monitor,
 
 
-/*
-  // monitor - outputs
-  output MON0,
-  output MON1,
-  output MON2,
-  output MON3,
-  output MON4,
-  output MON5,
-  output MON6,
-  output MON7,
-
-
-  // hardware flags - inputs
-  input HW0,
-  input HW1,
-  input HW2,
-*/
+  input [3-1: 0] i_hw_flags,
 
 
   // 4094
@@ -272,12 +251,16 @@ module top (
 
   assign reg_status = {
 
-    32'b0
+
+    i_hw_flags,
+
+    29'b0
 /*
     8'b0 ,
-    monitor,                          // add a count, as a transactional read lock.
-
+    monitor,                          // don't see having the monitor readable through a different register is useful.   a git commit or crc would be useful.
+                                      // add a count, as a transactional read lock.
     HW2,  HW1,  HW0,
+
     reg_sa_arm_trigger[0],            // ease having to do a separate register read, to retrieve state.
     sample_acquisition_az_status_out, // 3 bits
     adc2_measure_valid,
@@ -300,22 +283,23 @@ module top (
   wire [32-1 :0] reg_mode;     // _mode or AF reg_af alternate function  two bits
 
 
-  reg [28-1:0] output_dummy ;
+  reg [20-1:0] output_dummy ;
 
 
   mux_8to1_assign #( 32  )
   mux_8to1_assign_1  (
 
 
-    .a( { 28'b0,  reg_direct[ 3: 0] }  ),        // mode/AF 0     default, follow reg_direct, for led.
-    .b( { 28'b0,  reg_direct[ 0], reg_direct[ 1], reg_direct[ 2], reg_direct[ 3]    }  ),        // this works to reverse
-    // .b( { 32'b0   }  ),                       // mode/AF  1
-    .c(  {  { 28'b0   }, { 4 { 1'b1}}  }     ),      // mode/AF  2   only sigle led is on????
-    .d( { 28'b0,  { 1, 1, 1, 1 }  }  ),        // mode/AF 3     { 1,1,1,1 } == 0b0001, not 4b1111
-    .e( { 28'b0,  { 1'b1, 1'b1, 1'b1, 1'b1 }  }  ),        // mode/AF 4
-    .f( 32'b0   ),                       // mode/AF  5
-    .g( 32'b0   ),                       // mode/AF  6
-    .h( { 32 { 1'b1 } }   ),                       // mode/AF  7
+    // .a( { 28'b0,  reg_direct[ 3: 0] }  ),       // mode/AF 0     default, follow reg_direct, for led.
+    .a( reg_direct ),       // mode/AF 0     default, follow reg_direct, for led.
+    // .b( { 28'b0,  reg_direct[ 0], reg_direct[ 1], reg_direct[ 2], reg_direct[ 3]    }  ),        // ie. reversed
+    .b(  { 28'b0,   { 4 { 1'b0}}  }     ),      // mode/AF  1   only sigle led is on????
+    .c( { 28'b0 ,  { 4 { 1'b1}}  }   ),         // mode/AF 2     { 1,1,1,1 } == 0b0001, not 4b1111
+    .d( 32'b0 ),                                // mode/AF 3
+    .e( 32'b0 ),                                // mode/AF 4
+    .f( 32'b0 ),                                // mode/AF  5
+    .g( 32'b0 ),                                // mode/AF  6
+    .h( { 32 { 1'b1 } }   ),                    // mode/AF  7
 
 /*
 
@@ -332,7 +316,9 @@ module top (
 */
 
     .sel( reg_mode[ 3-1 : 0 ]),
-    .out( { output_dummy,  o_leds  }  )
+
+    // add leds and monitor first, as the most generic
+    .out( { output_dummy, o_monitor,  o_leds  }  )
 
   );
 

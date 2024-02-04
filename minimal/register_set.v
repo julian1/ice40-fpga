@@ -27,18 +27,14 @@
 `include "defines.v"    // `CLK_FREQ for default calculation
 
 
-// `define REG_LED           7
 `define REG_SPI_MUX       8
 `define REG_4094          9
-
-
 `define REG_MODE          12  // 10000
 `define REG_DIRECT        14
-// `define REG_DIRECT2       15      // don't use. deprecate .   was only for initial AZ switching test.
-
 `define REG_STATUS        17
-// `define REG_RESET         18   // reset -> hi.  normal -> lo.
 
+
+///////////////////////
 
 //  sample acquisition.
 `define REG_SA_ARM_TRIGGER   19
@@ -198,15 +194,14 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
               // default:     out <=  in[8 - 2  : 0] << 8;
               // default:     out <=  in[8 - 1  : 0] << 8 ;     // return passed address
 
-              // `REG_LED:       out <= reg_led << 8;
 
               `REG_SPI_MUX:   out <= reg_spi_mux << 8;
               `REG_4094:      out <= reg_4094 << 8;
-
               `REG_MODE:      out <= reg_mode << 8;   // ok..
               `REG_DIRECT:    out <= reg_direct << 8;
-//              `REG_DIRECT2:   out <= reg_direct2 << 8;
-//              `REG_RESET:     out <= reg_reset << 8;
+              `REG_STATUS:    out <= reg_status << 8;
+
+               ////////
 
               `REG_SA_ARM_TRIGGER:          out <= reg_sa_arm_trigger << 8;
               `REG_SA_P_CLK_COUNT_PRECHARGE: out <=  reg_sa_p_clk_count_precharge << 8;
@@ -215,11 +210,8 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
               `REG_ADC_P_CLK_COUNT_RESET:   out <= reg_adc_p_clk_count_reset << 8;
 
 
-              // inputs
-              `REG_STATUS:                  out <= reg_status << 8;
 
 /*
-
               `REG_ADC_CLK_COUNT_REFMUX_RESET: out <= reg_adc_clk_count_refmux_reset << 8;
               `REG_ADC_CLK_COUNT_REFMUX_NEG:   out <= reg_adc_clk_count_refmux_neg << 8;
               `REG_ADC_CLK_COUNT_REFMUX_POS:   out <= reg_adc_clk_count_refmux_pos << 8;
@@ -247,14 +239,13 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
           case (  bin[MSB-2 : MSB-8 ] )
 
-            // `REG_LED:       reg_led     <= bin;
             `REG_SPI_MUX:   reg_spi_mux <= bin;
             `REG_4094:      reg_4094    <= bin;
-
             `REG_MODE:      reg_mode    <= bin;
             `REG_DIRECT:    reg_direct  <= bin;
-            // `REG_DIRECT2:   reg_direct2  <= bin;
-            // `REG_RESET:     reg_reset   <= bin;
+            // STATUS
+
+            //////////
 
             `REG_SA_ARM_TRIGGER:            reg_sa_arm_trigger <= bin;
             `REG_SA_P_CLK_COUNT_PRECHARGE:  reg_sa_p_clk_count_precharge <= bin;

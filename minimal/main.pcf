@@ -3,22 +3,6 @@
 # jul 7, 2023.
 
 
-# better name HW_FLAGS
-# put these as inputs in the status register.
-# perhaps as the first three bits.
-set_io HW0              19
-set_io HW1              20
-set_io HW2              21
-
-set_io MON0             25
-set_io MON1             26
-set_io MON2             28
-set_io MON3             29
-set_io MON4             31
-set_io MON5             32
-set_io MON6             33
-set_io MON7             34
-
 
 
 
@@ -58,16 +42,34 @@ set_io SPI_INTERRUPT_CTL 62
 
 ###############################
 
-#set_io LED0             47
-#set_io LED1             48
-#set_io LED2             49
-#set_io LED3             52
 
 
 set_io o_leds[0]        47
 set_io o_leds[1]        48
 set_io o_leds[2]        49
 set_io o_leds[3]        52
+
+
+
+set_io o_monitor[0]     25
+set_io o_monitor[1]     26
+set_io o_monitor[2]     28
+set_io o_monitor[3]     29
+set_io o_monitor[4]     31
+set_io o_monitor[5]     32
+set_io o_monitor[6]     33
+set_io o_monitor[7]     34
+
+
+
+# better name HW_FLAGS
+# put these as inputs in the status register.
+# perhaps as the first three bits.
+set_io i_hw_flags[0]      19
+set_io i_hw_flags[1]      20
+set_io i_hw_flags[2]      21
+
+
 
 
 
