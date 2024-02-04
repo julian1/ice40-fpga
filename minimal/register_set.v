@@ -127,11 +127,15 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
   // To use in an inout. the initial block is a driver. so must be placed here.
   initial begin
-    // reg_led       = 24'b101010101010101010101010; // magic, keep. useful test vector
-    reg_led       = 24'b101010101010101010101111; // magic, keep. useful test vector
+
+    // reg_mode      = 0;
+    reg_mode      = 0;
+
+    // todo remove reg_led.
+    // reg_led       = 24'b101010101010101010101111; // magic, keep. useful test vector
+    reg_led       = 24'b101010101010101010101010; // magic, keep. useful test vector
     reg_spi_mux   = 0;          // no spi device active
     reg_4094      = 0;
-    reg_mode      = 0;
     reg_direct    = 0  ;
     reg_direct2    = 0  ;
 

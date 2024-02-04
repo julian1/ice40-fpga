@@ -61,6 +61,7 @@ set_io SPI_INTERRUPT_CTL 62
 set_io LED0             47
 set_io LED1             48
 set_io LED2             49
+set_io LED3             52 
 
 
 

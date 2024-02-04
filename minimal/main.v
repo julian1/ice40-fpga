@@ -11,6 +11,7 @@
 `include "register_set.v"
 `include "mux_spi.v"
 
+`include "mux_assign.v"
 
 
 
@@ -65,6 +66,7 @@ module top (
   output LED0,
   output LED1,
   output LED2,
+  output LED3,
 
   // monitor - outputs
   output MON0,
@@ -223,7 +225,7 @@ module top (
 
 
   /////////////////////////////////////////////
-  // 4094 OE 
+  // 4094 OE
   wire [32-1:0] reg_4094;   // TODO rename
   assign { _4094_OE_CTL } = reg_4094;    //  lo. start up not enabled.
   // wire _4094_OE_CTL = 0;  // lo.
@@ -235,7 +237,7 @@ module top (
 
   wire [32-1:0] reg_led;
 
-  assign { LED2, LED1, LED0 } = reg_led[ 3-1: 0 ] ;
+  // assign { LED2, LED1, LED0 } = reg_led[ 3-1: 0 ] ;
 
 
 
@@ -287,6 +289,52 @@ module top (
 
 
 
+
+  wire [32-1 :0] reg_mode;     // _mode or AF reg_af alternate function  two bits
+
+// `define NUM_BITS        29    //
+
+
+  reg [28-1:0] output_dummy ;
+
+  // mux_8to1_assign #( `NUM_BITS + 1 )
+  mux_8to1_assign #( 32  )
+  mux_8to1_assign_1  (
+
+
+    .a( { 28'b0,  reg_led[ 3: 0] }  ),        // mode/AF 0     follow reg_led, for led.
+    .b( { 32'b0   }  ),                       // mode/AF  1
+    .c( { 32'b0   }  ),                       // mode/AF  1
+    .d( { 32'b0   }  ),                       // mode/AF  1
+    .e( { 32'b0   }  ),                       // mode/AF  1
+    .f( { 32'b0   }  ),                       // mode/AF  1
+    .g( { 32'b0   }  ),                       // mode/AF  1
+    .h( { 32'b0   }  ),                       // mode/AF  1
+
+/*
+
+    .a( { 1'b0, { 15 { 1'b0 } },  reg_led[ 0], { 13 { 1'b0 } } }    ),        // 0. default mode. 0 on all outputs, except follow reg_led, for led.
+    .b( { 1'b0, { `NUM_BITS { 1'b1 } } } ),             // 1.
+    .c( { 1'b0, test_pattern_out } ),                   // 2
+    .d( { 1'b0, reg_direct[ `NUM_BITS - 1 :  0 ]  } ), // 3.    // direct mode. register control.
+    .e( { 1'b0, sample_acquisition_pc_out} ),                   // 4
+    .f( { sample_acquisition_az_adc2_measure_trig,    sample_acquisition_az_out } ),                   // 5
+    .g( { sample_acquisition_no_az_adc2_measure_trig, sample_acquisition_no_az_out } ),                // 6
+
+
+    // .h( { 1'b0, { `NUM_BITS { 1'b1 } } } ),             // 7
+    .h( { 1'b0, sa_no_az_test_out } ),             // 7
+
+*/
+
+    .sel( reg_mode[ 2 : 0 ]),
+    .out( { output_dummy,  {  LED3, LED2, LED1, LED0 } }  )
+  );
+
+
+
+
+
   register_set // #( 32 )
   register_set
     (
@@ -301,7 +349,8 @@ module top (
 
 
     // outputs
-    . reg_led(reg_led),        // remove. use reg_direct in mode 0. instead. 
+    . reg_mode(reg_mode),
+    . reg_led(reg_led),        // remove. use reg_direct in mode 0. instead.
 
     . reg_spi_mux(reg_spi_mux),
     . reg_4094(reg_4094 ) ,
