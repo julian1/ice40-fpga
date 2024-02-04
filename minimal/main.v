@@ -240,9 +240,8 @@ module top (
   ////////////////////////////////////////
 
 
-  wire [32-1:0] reg_led;
 
-  // assign { LED2, LED1, LED0 } = reg_led[ 3-1: 0 ] ;
+  wire [32-1:0] reg_direct;
 
 
 
@@ -308,8 +307,9 @@ module top (
   mux_8to1_assign_1  (
 
 
-    .a( { 28'b0,  reg_led[ 3: 0] }  ),        // mode/AF 0     default, follow reg_led, for led.
-    .b( { 32'b0   }  ),                       // mode/AF  1
+    .a( { 28'b0,  reg_direct[ 3: 0] }  ),        // mode/AF 0     default, follow reg_direct, for led.
+    .b( { 28'b0,  reg_direct[ 0], reg_direct[ 1], reg_direct[ 2], reg_direct[ 3]    }  ),        // this works to reverse
+    // .b( { 32'b0   }  ),                       // mode/AF  1
     .c(  {  { 28'b0   }, { 4 { 1'b1}}  }     ),      // mode/AF  2   only sigle led is on????
     .d( { 28'b0,  { 1, 1, 1, 1 }  }  ),        // mode/AF 3     { 1,1,1,1 } == 0b0001, not 4b1111
     .e( { 28'b0,  { 1'b1, 1'b1, 1'b1, 1'b1 }  }  ),        // mode/AF 4
@@ -352,13 +352,14 @@ module top (
     // . dout( SDO /* SPI_MISO */ ),        // drive miso output pin directly.
 
 
-
     // outputs
-    . reg_mode(reg_mode),
-    . reg_led(reg_led),        // remove. use reg_direct in mode 0. instead.
-
     . reg_spi_mux(reg_spi_mux),
     . reg_4094(reg_4094 ) ,
+
+    . reg_mode(reg_mode),
+    . reg_direct(reg_direct),
+
+
 
       // inputs
     . reg_status( reg_status ),
