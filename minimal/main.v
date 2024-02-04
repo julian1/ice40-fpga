@@ -63,10 +63,13 @@ module top (
 
 
   // leds
+  output wire [ 4-1: 0 ] o_leds,    // 4 bits
+/*
   output LED0,
   output LED1,
   output LED2,
   output LED3,
+*/
 
   // monitor - outputs
   output MON0,
@@ -328,7 +331,9 @@ module top (
 */
 
     .sel( reg_mode[ 2 : 0 ]),
-    .out( { output_dummy,  {  LED3, LED2, LED1, LED0 } }  )
+    // .out( { output_dummy,  {  LED3, LED2, LED1, LED0 } }  )
+    .out( { output_dummy,  o_leds  }  )
+
   );
 
 
