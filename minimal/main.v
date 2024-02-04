@@ -63,7 +63,7 @@ module top (
 
 
   // leds
-  output wire [ 4-1: 0 ] o_leds,    // 4 bits
+  output reg [ 4-1: 0 ] o_leds,    // 4 bits
 /*
   output LED0,
   output LED1,
@@ -71,6 +71,8 @@ module top (
   output LED3,
 */
 
+
+/*
   // monitor - outputs
   output MON0,
   output MON1,
@@ -86,7 +88,7 @@ module top (
   input HW0,
   input HW1,
   input HW2,
-
+*/
 
 
   // 4094
@@ -289,30 +291,31 @@ module top (
  };
 
 
-
-
-
+  // verilog literals are hard!.
+  // 4'b1                         == 0001
+  // { 1,1,1,1}                   == 0001
+  // { 1'b1, 1'b1, 1'b1, 1'b1 }   == 1111
+  // 4 { 1'b1 }                   == 1111
+  // 4'b1111                      == 1111
 
   wire [32-1 :0] reg_mode;     // _mode or AF reg_af alternate function  two bits
-
-// `define NUM_BITS        29    //
 
 
   reg [28-1:0] output_dummy ;
 
-  // mux_8to1_assign #( `NUM_BITS + 1 )
+
   mux_8to1_assign #( 32  )
   mux_8to1_assign_1  (
 
 
-    .a( { 28'b0,  reg_led[ 3: 0] }  ),        // mode/AF 0     follow reg_led, for led.
+    .a( { 28'b0,  reg_led[ 3: 0] }  ),        // mode/AF 0     default, follow reg_led, for led.
     .b( { 32'b0   }  ),                       // mode/AF  1
-    .c( { 32'b0   }  ),                       // mode/AF  1
-    .d( { 32'b0   }  ),                       // mode/AF  1
-    .e( { 32'b0   }  ),                       // mode/AF  1
-    .f( { 32'b0   }  ),                       // mode/AF  1
-    .g( { 32'b0   }  ),                       // mode/AF  1
-    .h( { 32'b0   }  ),                       // mode/AF  1
+    .c(  {  { 28'b0   }, { 4 { 1'b1}}  }     ),      // mode/AF  2   only sigle led is on????
+    .d( { 28'b0,  { 1, 1, 1, 1 }  }  ),        // mode/AF 3     { 1,1,1,1 } == 0b0001, not 4b1111
+    .e( { 28'b0,  { 1'b1, 1'b1, 1'b1, 1'b1 }  }  ),        // mode/AF 4
+    .f( 32'b0   ),                       // mode/AF  5
+    .g( 32'b0   ),                       // mode/AF  6
+    .h( { 32 { 1'b1 } }   ),                       // mode/AF  7
 
 /*
 
@@ -323,15 +326,12 @@ module top (
     .e( { 1'b0, sample_acquisition_pc_out} ),                   // 4
     .f( { sample_acquisition_az_adc2_measure_trig,    sample_acquisition_az_out } ),                   // 5
     .g( { sample_acquisition_no_az_adc2_measure_trig, sample_acquisition_no_az_out } ),                // 6
-
-
     // .h( { 1'b0, { `NUM_BITS { 1'b1 } } } ),             // 7
     .h( { 1'b0, sa_no_az_test_out } ),             // 7
 
 */
 
-    .sel( reg_mode[ 2 : 0 ]),
-    // .out( { output_dummy,  {  LED3, LED2, LED1, LED0 } }  )
+    .sel( reg_mode[ 3-1 : 0 ]),
     .out( { output_dummy,  o_leds  }  )
 
   );
