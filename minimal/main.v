@@ -1,5 +1,5 @@
 
-// change name top.v
+// consider, change name top.v
 
 // - can have heartbeat timer. over spi.
 // - if have more than one dac. then just create another register. very clean.
@@ -252,9 +252,12 @@ module top (
   assign reg_status = {
 
 
+
+    21'b0,
+
     i_hw_flags,
 
-    29'b0
+    { 8'b10101010 }  // magic
 /*
     8'b0 ,
     monitor,                          // don't see having the monitor readable through a different register is useful.   a git commit or crc would be useful.
