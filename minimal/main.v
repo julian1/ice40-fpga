@@ -41,7 +41,8 @@ module test_pattern #(parameter BITS=32 ) (
 
 endmodule
 
-
+// rename this file. top.v, and top.pcf.
+// move old projects into dir.
 
 
 module top (
@@ -294,6 +295,8 @@ module top (
 
   reg [32-25- 1:0] output_dummy ;
 
+
+  // TODO drop the _out suffix. because any wire is a driver in the context of the top module.
   // should prefix o_test_pattern ?  or just on module names?
   wire [32-1 :0] test_pattern_out;
 
@@ -312,7 +315,7 @@ module top (
   ////////
   // rename sa_simple_ ?
   // sa_pc_test
-  // or test_sa_pc 
+  // or test_sa_pc
 
   wire sample_acquisition_pc_sw_pc_ctl;
   wire sample_acquisition_pc_led0;
@@ -330,8 +333,8 @@ module top (
     .p_clk_count_precharge( reg_sa_p_clk_count_precharge[ 24-1:0] ),
 
     // outputs
-    .sw_pc_ctl( sample_acquisition_pc_sw_pc_ctl   ),
-    .led0(      sample_acquisition_pc_led0 ),
+    .sw_pc_ctl( sample_acquisition_pc_sw_pc_ctl   ),          // should pass in both. and a register like a mask. to indicate which to use. similar to register for az mux.  might encode in same register.
+    .led0(      sample_acquisition_pc_led0 ),                 // EXTR. just use the bits of reg_direct for azmux and which pc switch to use.  add back reg_direc2 for the ratiometric.
     .monitor(   sample_acquisition_pc_monitor  )
   );
 
@@ -351,9 +354,9 @@ module top (
     .e( {  { 32 - 15 { 'b0 }},                  // mode/AF 4
                                             // 15
           sample_acquisition_pc_sw_pc_ctl,  // 14
-          2'b0,                             // 12
+          2'b0,                             // 12   - should be reg_direct
           sample_acquisition_pc_monitor,    // 4
-          3'b0,                             // 1
+          3'b0,                             // 1    - should be reg_direct.
           sample_acquisition_pc_led0        // 0
         } ),
 

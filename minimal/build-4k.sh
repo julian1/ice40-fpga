@@ -46,6 +46,8 @@ fi
 # printf "0: %.8x" 0xffffff00 | sed -E 's/0: (..)(..)(..)(..)/0: \4\3\2\1/' | xxd -r -g0 | hexdump -C
 # echo "size $size"
 
+# add crc also
+#  rhash --crc32 ./bus
 
 magic=0xfe00fe00
 size=$( stat -c "%s" ./build/main.bin )
