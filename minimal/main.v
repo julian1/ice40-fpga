@@ -14,12 +14,32 @@
 `include "mux_assign.v"
 
 
+`include "sample_acquisition_pc.v"
 
 `default_nettype none
 
 
 
 
+
+
+module test_pattern #(parameter BITS=32 ) (
+  input   clk,
+
+
+  output reg  [ BITS -1:0 ] out   // wire.kk
+);
+
+  always@(posedge clk  )
+      begin
+        // works all monitor pins.
+        // remove the himux2  reg_direct value is not working.
+        // out[ 17 : 0 ]  <= out [ 17  : 0   ] + 1;
+        // out  <= out  + 1;
+        out  <= out  + 1;
+      end
+
+endmodule
 
 
 
@@ -44,12 +64,10 @@ module top (
   # SPI_MOSI pin. */
   input SDI,
 
-
   /*#A dual-function clock signal. An output in Master mode and
   #input in Slave mode. iCE40 LM devices have this pin shared with
   # hardened SPI IP SPI_SCK pin.*/
   input SCK,
-
 
   /*#An important dual-function, active-low slave select pin. After
   #the device exits POR or CRESET_B is toggled (High-Low-High), it
@@ -62,25 +80,47 @@ module top (
   input  SPI_CS2,
 
 
-  output [ 4-1: 0 ] o_leds,    // 4 bits
+  output [ 4-1: 0 ] o_leds,
 
-  output [ 8-1: 0] o_monitor,
+  output [ 8-1: 0]  o_monitor,
+
+  input [3-1: 0]    i_hw_flags,
 
 
-  input [3-1: 0] i_hw_flags,
+
+  input  CLK,
+
+
 
 
   // 4094
   output GLB_4094_DATA,
   output GLB_4094_CLK,
-  output _4094_OE_CTL,
+  output GLB_4094_OE_CTL,
   output GLB_4094_STROBE_CTL,
 
+  input U1004_4094_DATA,
 
 
-  input U1004_4094_DATA
+
+  output o_spi_interrupt_ctl,
+
+  output o_meas_complete,
 
 
+  output o_sig_pc1_sw,
+  output o_sig_pc2_sw ,
+
+
+  // az mux
+  output [ 4-1: 0 ] o_u410,
+
+
+  // adc comparator
+  output o_cmpr_latch,
+
+  // adc ref current mux
+  output [ 4-1: 0 ] o_u902,
 
 /*
 
@@ -107,42 +147,8 @@ module top (
   // input  U1004_4094_DATA,   // this is unused. but it's an input
 
 
-
-  // or OUT_P and OUT_N ?
-  input CMPR_P_OUT,
-  input CMPR_N_OUT,
-
-
-
-  //////////////////////////
-  // outputs
-
-
-  // azmux
-  output U414_A0_CTL,
-  output U414_A1_CTL,
-  output U414_A2_CTL,
-  output U414_EN_CTL,
-
-  // himux
-  output U413_A0_CTL,
-  output U413_A1_CTL,
-  output U413_A2_CTL,
-  output U413_EN_CTL,
-
-  // himux 2.
-  output U402_A0_CTL,
-  output U402_A1_CTL,
-  output U402_A2_CTL,
-  output U402_EN_CTL,
-
-  // pre-charge
-  output SIG_PC_SW_CTL,
-
-
   //
   output SPI_INTERRUPT_CTL,    // should be modeal. eg. same as meas complete
-
   output MEAS_COMPLETE_CTL,
 
   //  adc current switches
@@ -211,8 +217,8 @@ module top (
   /////////////////////////////////////////////
   // 4094 OE
   wire [32-1:0] reg_4094;   // TODO rename
-  assign { _4094_OE_CTL } = reg_4094;    //  lo. start up not enabled.
-  // wire _4094_OE_CTL = 0;  // lo.
+  assign { GLB_4094_OE_CTL } = reg_4094;    //  lo. start up not enabled.
+  // wire GLB_4094_OE_CTL = 0;  // lo.
 
 
 
@@ -228,8 +234,8 @@ module top (
 /*
   wire [32-1:0] reg_4094;   // TODO remove
 
-  assign { _4094_OE_CTL } = reg_4094;    //  lo. start up not enabled.
-  // assign { _4094_OE_CTL } = 1;    //  on for test.  should defer to mcu control. after check supplies.
+  assign { GLB_4094_OE_CTL } = reg_4094;    //  lo. start up not enabled.
+  // assign { GLB_4094_OE_CTL } = 1;    //  on for test.  should defer to mcu control. after check supplies.
 
   wire [32-1 :0] reg_mode;     // two bits
   wire [32-1 :0] reg_direct;
@@ -286,23 +292,76 @@ module top (
   wire [32-1 :0] reg_mode;     // _mode or AF reg_af alternate function  two bits
 
 
-  reg [20-1:0] output_dummy ;
+  reg [32-25- 1:0] output_dummy ;
+
+  // should prefix o_test_pattern ?  or just on module names?
+  wire [32-1 :0] test_pattern_out;
+
+  test_pattern  test_pattern_1 (
+    . clk( CLK),
+    . out( test_pattern_out)
+  );
 
 
+
+
+  wire [32-1 :0] reg_adc_p_aperture;  // 32/31 bit nice. for long sample.
+  wire [32-1:0]  reg_sa_p_clk_count_precharge;
+
+
+  ////////
+  // rename sa_simple_ ?
+  // sa_pc_test
+  // or test_sa_pc 
+
+  wire sample_acquisition_pc_sw_pc_ctl;
+  wire sample_acquisition_pc_led0;
+  wire [8-1 : 0] sample_acquisition_pc_monitor;
+
+  sample_acquisition_pc
+  sample_acquisition_pc (
+    // inputs
+    .clk(CLK),
+    .reset( 1'b0 ), // TODO remove.
+
+    // TODO - rename   , and prefix p_ .  p_clk_sample_duration
+    // inputs
+    .clk_sample_duration(   reg_adc_p_aperture ),
+    .p_clk_count_precharge( reg_sa_p_clk_count_precharge[ 24-1:0] ),
+
+    // outputs
+    .sw_pc_ctl( sample_acquisition_pc_sw_pc_ctl   ),
+    .led0(      sample_acquisition_pc_led0 ),
+    .monitor(   sample_acquisition_pc_monitor  )
+  );
+
+
+
+
+
+  // mode, alternative function selection
   mux_8to1_assign #( 32  )
   mux_8to1_assign_1  (
 
+    .a( reg_direct ),                           // mode/AF 0     default, follow reg_direct, for led.
+    .b(  32'b0  ),                              // mode/AF  1   only sigle led is on????
+    .c( { 32 { 1'b1 } }    ),                   // mode/AF 2     { 1,1,1,1 } == 0b0001, not 4b1111
+    .d( test_pattern_out ),                     // mode/AF 3
 
-    // .a( { 28'b0,  reg_direct[ 3: 0] }  ),       // mode/AF 0     default, follow reg_direct, for led.
-    .a( reg_direct ),       // mode/AF 0     default, follow reg_direct, for led.
-    // .b( { 28'b0,  reg_direct[ 0], reg_direct[ 1], reg_direct[ 2], reg_direct[ 3]    }  ),        // ie. reversed
-    .b(  { 28'b0,   { 4 { 1'b0}}  }     ),      // mode/AF  1   only sigle led is on????
-    .c( { 28'b0 ,  { 4 { 1'b1}}  }   ),         // mode/AF 2     { 1,1,1,1 } == 0b0001, not 4b1111
-    .d( 32'b0 ),                                // mode/AF 3
-    .e( 32'b0 ),                                // mode/AF 4
+    .e( {  { 32 - 15 { 'b0 }},                  // mode/AF 4
+                                            // 15
+          sample_acquisition_pc_sw_pc_ctl,  // 14
+          2'b0,                             // 12
+          sample_acquisition_pc_monitor,    // 4
+          3'b0,                             // 1
+          sample_acquisition_pc_led0        // 0
+        } ),
+
+
+
     .f( 32'b0 ),                                // mode/AF  5
     .g( 32'b0 ),                                // mode/AF  6
-    .h( { 32 { 1'b1 } }   ),                    // mode/AF  7
+    .h( 32'b0 ),                                // mode/AF  7
 
 /*
 
@@ -315,15 +374,28 @@ module top (
     .g( { sample_acquisition_no_az_adc2_measure_trig, sample_acquisition_no_az_out } ),                // 6
     // .h( { 1'b0, { `NUM_BITS { 1'b1 } } } ),             // 7
     .h( { 1'b0, sa_no_az_test_out } ),             // 7
-
 */
 
     .sel( reg_mode[ 3-1 : 0 ]),
 
     // add leds and monitor first, as the most generic
-    .out( { output_dummy, o_monitor,  o_leds  }  )
+
+    .out( { output_dummy,               // 32
+                                        // 25
+              o_u902,                   // 21
+              o_cmpr_latch,             // 20
+              o_u410,                   // 16
+              o_sig_pc2_sw,             // 15
+              o_sig_pc1_sw,             // 14
+              o_meas_complete,          // 13
+              o_spi_interrupt_ctl,      // 12
+              o_monitor,                // 4
+              o_leds                    // 0
+            }  )
 
   );
+
+
 
 
 
@@ -335,7 +407,7 @@ module top (
 
     // should prefix fields with spi_
     . clk(   SCK ),
-    . cs(  SS /*SPI_CS */ ),
+    . cs_n(  SS /*SPI_CS */ ),        // rename cs_n
     . din(   SDI /*SPI_MOSI */),
     . dout( w_dout ),            // drive miso from via muxer
     // . dout( SDO /* SPI_MISO */ ),        // drive miso output pin directly.
@@ -344,14 +416,18 @@ module top (
     // outputs
     . reg_spi_mux(reg_spi_mux),
     . reg_4094(reg_4094 ) ,
-
     . reg_mode(reg_mode),
     . reg_direct(reg_direct),
 
 
 
-      // inputs
+    // inputs
     . reg_status( reg_status ),
+
+    // outputs - sample acquisition
+    . reg_adc_p_aperture( reg_adc_p_aperture),
+    . reg_sa_p_clk_count_precharge( reg_sa_p_clk_count_precharge),
+
 
 
 /*
@@ -366,10 +442,8 @@ module top (
 /*
     // outputs signal acquisiation
     .reg_sa_arm_trigger ( reg_sa_arm_trigger ),
-    .reg_sa_p_clk_count_precharge( reg_sa_p_clk_count_precharge),
 
 
-    .reg_adc_p_aperture( reg_adc_p_aperture),
     .reg_adc_p_clk_count_reset(reg_adc_p_clk_count_reset ),
 
     // outputs adc

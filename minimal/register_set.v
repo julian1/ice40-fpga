@@ -63,7 +63,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   // inputs
   // spi
   input  clk,
-  input  cs,
+  input  cs_n,
   input  din,       // sdi
   output dout,      // sdo - NO. we assign it to last bit of the output.
 
@@ -145,9 +145,9 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   end
 
 
-  always @ (negedge clk or posedge cs)
+  always @ (negedge clk or posedge cs_n)
   begin
-    if(cs)
+    if(cs_n)
       // cs not asserted (active lo), so reset regs
       begin
 
