@@ -327,9 +327,9 @@ module top (
     .clk(CLK),
     .reset( 1'b0 ), // TODO remove.
 
-    // TODO - rename   , and prefix p_ .  p_clk_sample_duration
+    // TODO - rename   , and prefix p_ .  p_p_clk_sample_duration
     // inputs
-    .clk_sample_duration(   reg_adc_p_aperture ),
+    .p_clk_sample_duration(   reg_adc_p_aperture ),
     .p_clk_count_precharge( reg_sa_p_clk_count_precharge[ 24-1:0] ),
 
     // outputs
