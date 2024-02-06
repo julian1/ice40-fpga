@@ -1,11 +1,11 @@
 
-// consider, change name top.v
+/*
+  - can have heartbeat timer. over spi.
+      but don't want to spew spi tranmsission during acquisition.
 
-// - can have heartbeat timer. over spi.
-// - if have more than one dac. then just create another register. very clean.
-// - we can actually handle a toggle. if both set and clear bit are hi then toggle
-// - instead of !cs or !cs2.  would be good if can write asserted(cs)  asserted(cs2)
-
+  - if have more than one dac. then just create another register. very clean.
+   - perhaps instead of !cs or !cs2.  could write macro  or asserted_n(cs ) etc
+*/
 
 
 `include "register_set.v"
@@ -23,9 +23,6 @@
 
 
 
-
-// rename this file. top.v, and top.pcf.
-// move old projects into dir.
 
 
 module top (
