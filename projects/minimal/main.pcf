@@ -43,38 +43,40 @@ set_io SS               71
 set_io SPI_CS2          61
 
 # should use lower case.
-set_io o_spi_interrupt_ctl 62
+# TODO drop the ctl. because _ctl==_o ??
+set_io spi_interrupt_ctl_o 62
 
-set_io o_meas_complete    41 
+# ctl_o or drop
+set_io meas_complete_o    41 
 
 ###############################
 
 
 
-set_io o_leds[0]        47
-set_io o_leds[1]        48
-set_io o_leds[2]        49
-set_io o_leds[3]        52
+set_io leds_o[0]        47
+set_io leds_o[1]        48
+set_io leds_o[2]        49
+set_io leds_o[3]        52
 
 
 
-set_io o_monitor[0]     25
-set_io o_monitor[1]     26
-set_io o_monitor[2]     28
-set_io o_monitor[3]     29
-set_io o_monitor[4]     31
-set_io o_monitor[5]     32
-set_io o_monitor[6]     33
-set_io o_monitor[7]     34
+set_io monitor_o[0]     25
+set_io monitor_o[1]     26
+set_io monitor_o[2]     28
+set_io monitor_o[3]     29
+set_io monitor_o[4]     31
+set_io monitor_o[5]     32
+set_io monitor_o[6]     33
+set_io monitor_o[7]     34
 
 
 
 # better name HW_FLAGS
 # put these as inputs in the status register.
 # perhaps as the first three bits.
-set_io i_hw_flags[0]      19
-set_io i_hw_flags[1]      20
-set_io i_hw_flags[2]      21
+set_io hw_flags_i[0]      19
+set_io hw_flags_i[1]      20
+set_io hw_flags_i[2]      21
 
 
 # outputs
@@ -94,25 +96,27 @@ set_io U1004_4094_DATA  98
 set_io CLK              129
 
 
-set_io o_sig_pc1_sw     78
-set_io o_sig_pc2_sw     79
+set_io sig_pc1_sw_o     78
+set_io sig_pc2_sw_o     79
 
 
 # az mux
-set_io o_u410[0]      80
-set_io o_u410[1]      81
-set_io o_u410[2]      87
-set_io o_u410[3]      88
+# TODO rename  azmux_o
+set_io azmux_o[0]      80
+set_io azmux_o[1]      81
+set_io azmux_o[2]      87
+set_io azmux_o[3]      88
 
 
 # adc comparator
-set_io o_cmpr_latch   138
+set_io cmpr_latch_o   138
 
 # adc ref current mux
-set_io o_u902[0]      141
-set_io o_u902[1]      142
-set_io o_u902[2]      143
-set_io o_u902[3]      144
+# TODO refmux_o
+set_io refmux_o[0]      141
+set_io refmux_o[1]      142
+set_io refmux_o[2]      143
+set_io refmux_o[3]      144
 
 
 

@@ -61,11 +61,11 @@ module top (
   input  SPI_CS2,
 
 
-  output [ 4-1: 0 ] o_leds,
+  output [ 4-1: 0 ] leds_o,
 
-  output [ 8-1: 0]  o_monitor,
+  output [ 8-1: 0]  monitor_o,
 
-  input [3-1: 0]    i_hw_flags,
+  input [3-1: 0]    hw_flags_i,
 
 
 
@@ -84,24 +84,26 @@ module top (
 
 
 
-  output o_spi_interrupt_ctl,
+  output spi_interrupt_ctl_o,
 
-  output o_meas_complete,
+  output meas_complete_o,
 
 
-  output o_sig_pc1_sw,
-  output o_sig_pc2_sw ,
+  output sig_pc1_sw_o,
+  output sig_pc2_sw_o ,
 
 
   // az mux
-  output [ 4-1: 0 ] o_u410,
+  // u410
+  output [ 4-1: 0 ] azmux_o,
 
 
-  // adc comparator
-  output o_cmpr_latch,
+  // adc comparator latch ctl.
+  // should be cmpr_latch_ctl
+  output cmpr_latch_o,
 
-  // adc ref current mux
-  output [ 4-1: 0 ] o_u902,
+  // U902. adc ref current mux
+  output [ 4-1: 0 ] refmux_o,
 
 /*
 
@@ -242,7 +244,7 @@ module top (
 
     21'b0,
 
-    i_hw_flags,
+    hw_flags_i,
 
     { 8'b10101010 }  // magic
 /*
@@ -365,15 +367,15 @@ module top (
 
     .out( { output_dummy,               // 32
                                         // 25
-              o_u902,                   // 21
-              o_cmpr_latch,             // 20
-              o_u410,                   // 16
-              o_sig_pc2_sw,             // 15
-              o_sig_pc1_sw,             // 14
-              o_meas_complete,          // 13
-              o_spi_interrupt_ctl,      // 12
-              o_monitor,                // 4
-              o_leds                    // 0
+              refmux_o,                   // 21
+              cmpr_latch_o,             // 20
+              azmux_o,                   // 16
+              sig_pc2_sw_o,             // 15
+              sig_pc1_sw_o,             // 14
+              meas_complete_o,          // 13
+              spi_interrupt_ctl_o,      // 12
+              monitor_o,                // 4
+              leds_o                    // 0
             }  )
 
   );
