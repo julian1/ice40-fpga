@@ -33,7 +33,7 @@ module sample_acquisition_pc (
   // inistead the hi signal is seleced by the AZ mux, via the pre-charge switch
 
   input   clk,
-  input   reset,
+  input   reset_n,
 
   // lo mux input to use.
   // input [  4-1 : 0 ] azmux_lo_val,
@@ -61,8 +61,8 @@ module sample_acquisition_pc (
   // this would be an async signal???
   wire run = 1;
 
-  always @(posedge clk  or posedge reset )
-   if(reset)
+  always @(posedge clk  or posedge reset_n )
+   if(reset_n)
     begin
       // set up next state, for when reset goes hi.
       state           <= 0;

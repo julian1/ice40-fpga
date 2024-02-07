@@ -307,7 +307,7 @@ module top (
   sample_acquisition_pc (
     // inputs
     .clk(CLK),
-    .reset( 1'b0 ), // TODO remove.
+    .reset_n( 1'b0 ), // TODO remove.
 
     // TODO - rename   , and prefix p_ .  p_p_clk_sample_duration
     // inputs
