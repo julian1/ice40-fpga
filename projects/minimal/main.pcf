@@ -1,4 +1,6 @@
 
+# decent style guide,
+# https://github.com/lowRISC/style-guides/blob/master/VerilogCodingStyle.md#naming
 
 # jul 7, 2023.
 
@@ -8,8 +10,8 @@
 
 
 # suspect 'S' indicates 'SPI' or 'serial' in this contet. not slave.
-# Eg. SDO is connected to MOSI - when fpga is spi master to read spi flash for bitstream.
-# but will be connected to MISO - when fpga is spi slave when being sent a bitstream.
+# Eg. SDO is to MOSI - in context where fpga is spi master, when reading flash bitstream.
+# but is MISO - when fpga is spi slave when receiving bitstream.
 
 #A dual-function, serial output pin in both configuration modes.
 #iCE40 LM devices have this pin shared with hardened SPI IP
@@ -47,7 +49,7 @@ set_io SPI_CS2          61
 set_io spi_interrupt_ctl_o 62
 
 # ctl_o or drop
-set_io meas_complete_o    41 
+set_io meas_complete_o    41
 
 ###############################
 
