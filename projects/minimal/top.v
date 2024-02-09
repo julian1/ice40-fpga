@@ -24,6 +24,35 @@
 
 
 
+module timed_latch  #(parameter HOLD= 20000000 / 20 ) (
+  /* latch the state state of the trigger for a period.
+    should pass the period as a configuration variable.
+    --
+    rename latch_hold?
+    --
+    // rather than parametize hold time, perhaps should just pass the period?.
+  */
+  input       clk,
+  input       trig_i,   // active hi
+  output reg  out
+);
+  reg [ 32-1:0 ] counter ;
+
+  always@(posedge clk  )
+    begin
+      out <= counter != 0;
+
+      if( counter)
+        counter <= counter - 1;
+
+      if(trig_i)
+        counter  <= HOLD ; // 20000000 / 10;    // 10th of second
+    end
+endmodule
+
+
+
+
 
 module top (
 
@@ -275,7 +304,6 @@ module top (
   wire [32-1 :0] reg_mode;     // _mode or AF reg_af alternate function  two bits
 
 
-  reg [32-25- 1:0] output_dummy ;
 
 
   // TODO drop the _out suffix. because any wire is a driver in the context of the top module.
@@ -323,12 +351,29 @@ module top (
 
 
 
+  /////////////////////////
+  // We could do one led, for SS, and one for CS2 (4094,etc). 
+  // rename timed_latch_hold
+  wire led0;
+  timed_latch timed_latch (
+    . clk(CLK),
+    . trig_i( !SS || !SPI_CS2 ),      // rename set?
+    . out( led0 )
+  );
+
+
+
+
+
+  ////////////////////////////
+  reg [32-25- 1:0] output_dummy ;
+  reg  output_led_dummy ;
 
   // mode, alternative function selection
   mux_8to1_assign #( 32  )
   mux_8to1_assign_1  (
 
-    .a( reg_direct ),                           // mode/AF 0     default, follow reg_direct, for led.
+    .a( { reg_direct[ 32 - 1 : 1 ] ,  led0 } ),                           // mode/AF 0     default, follow reg_direct, for led.
     .b(  32'b0  ),                              // mode/AF  1   only sigle led is on????
     .c( { 32 { 1'b1 } }    ),                   // mode/AF 2     { 1,1,1,1 } == 0b0001, not 4b1111
     .d( test_pattern_out ),                     // mode/AF 3
