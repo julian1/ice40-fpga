@@ -8,49 +8,17 @@
 */
 
 
+
+`include "../../common/mux_spi.v"
+`include "../../common/mux_assign.v"
+`include "../../common/test_pattern.v"
+`include "../../common/timed_latch.v"
+
 `include "register_set.v"
-`include "mux_spi.v"
-
-`include "mux_assign.v"
-
-
 `include "sample_acquisition_pc.v"
 
-`include "test_pattern.v"
 
 `default_nettype none
-
-
-
-
-
-module timed_latch  #(parameter HOLD= 20000000 / 20 ) (
-  /* latch the state state of the trigger for a period.
-    should pass the period as a configuration variable.
-    --
-    rename latch_hold?
-    --
-    // rather than parametize hold time, perhaps should just pass the period?.
-  */
-  input       clk,
-  input       trig_i,   // active hi
-  output reg  out
-);
-  reg [ 32-1:0 ] counter ;
-
-  always@(posedge clk  )
-    begin
-      out <= counter != 0;
-
-      if( counter)
-        counter <= counter - 1;
-
-      if(trig_i)
-        counter  <= HOLD ; // 20000000 / 10;    // 10th of second
-    end
-endmodule
-
-
 
 
 
@@ -352,7 +320,7 @@ module top (
 
 
   /////////////////////////
-  // We could do one led, for SS, and one for CS2 (4094,etc). 
+  // We could do one led, for SS, and one for CS2 (4094,etc).
   // rename timed_latch_hold
   wire led0;
   timed_latch timed_latch (

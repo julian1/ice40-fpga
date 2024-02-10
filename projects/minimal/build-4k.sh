@@ -14,7 +14,17 @@ mkdir ./build
 # yosys -p "synth_ice40  -top top  -blif ./build/main.blif" top.v
 # arachne-pnr -d 5k -P sg48 -p main.pcf  ./build/main.blif -o ./build/main.asc
 
-yosys -p "synth_ice40  -top top  -json ./build/main.json" top.v  2>&1 | tee ./build/yosys.txt
+yosys -p "synth_ice40  -top top  -json ./build/main.json  " top.v  2>&1 | tee ./build/yosys.txt
+# yosys -p "synth_ice40 -top top      -json ./build/main.json  -I../../common " top.v  2>&1 | tee ./build/yosys.txt
+
+
+# https://stackoverflow.com/questions/33380477/yosys-cant-open-include-file
+# https://www.reddit.com/r/yosys/comments/277kh0/include_directory_syntax_in_read_verilog_command/
+# https://github.com/YosysHQ/yosys/issues/331
+
+# yosys -p '  synth_ice40 -top top -json ./build/main.json  read_verilog -I ../../common test_pattern.v '  top.v  # 2>&1 | tee ./build/yosys.txt
+yosys -p '  synth_ice40 -top top -json ./build/main.json'  top.v  2>&1 | tee ./build/yosys.txt
+
 
 egrep -i 'warning|error' ./build/yosys.txt  > ./build/yosys-errors.txt
 
