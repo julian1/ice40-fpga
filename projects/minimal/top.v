@@ -149,21 +149,35 @@ module top (
   ////////////////////////////////////////
   // spi muxing
 
+  /*
+    TODO. rather than pulling all these out in vectors.
+          we should combine in line/place. the same way we do mux align.
+          eg.
+
+
+      . vec_cs(  {  dummy,  GLB_4094_STROBE_CTL  }   ),
+
+      ote. we are already doing this for polarity
+  */
+
   wire [32-1:0] reg_spi_mux ;// = 8'b00000001; // test
 
   wire [8-1:0] vec_cs ;
-  assign {  GLB_4094_STROBE_CTL  } = vec_cs;
+  assign { monitor_o[2], GLB_4094_STROBE_CTL  } = vec_cs;
 
   wire [8-1:0] vec_clk;
-  assign { GLB_4094_CLK } = vec_clk ;   // have we changed the clock polarity.
+  assign { monitor_o[0], GLB_4094_CLK } = vec_clk ;   // have we changed the clock polarity.
 
   wire [8-1:0] vec_mosi;
-  assign { GLB_4094_DATA } = vec_mosi;
+  assign { monitor_o[1], GLB_4094_DATA } = vec_mosi;
 
   wire [8-1:0] vec_miso ;
   assign  vec_miso[ 8-1 : 1] = 7'b0;
 
   assign { U1004_4094_DATA } = vec_miso;
+
+  // unused.
+  assign monitor_o[8-1: 3] = 0;
 
   // a wire. since it is only used combinatorially .
   wire w_dout ;
@@ -337,6 +351,10 @@ module top (
   reg [32-25- 1:0] output_dummy ;
   reg  output_led_dummy ;
 
+
+  reg [8-1: 0 ] monitor_dummy;
+
+
   // mode, alternative function selection
   mux_8to1_assign #( 32  )
   mux_8to1_assign_1  (
@@ -387,7 +405,8 @@ module top (
               sig_pc1_sw_o,             // 14
               meas_complete_o,          // 13
               spi_interrupt_ctl_o,      // 12
-              monitor_o,                // 4
+              // monitor_o,                // 4
+              monitor_dummy,
               leds_o                    // 0
             }  )
 
