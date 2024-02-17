@@ -165,6 +165,8 @@ module top (
   wire [8-1:0] vec_cs ;
   assign { monitor_o[2], GLB_4094_STROBE_CTL  } = vec_cs;
 
+  // reg [6-1:0] vec_cs_dummy ;
+
   wire [8-1:0] vec_clk;
   assign { monitor_o[0], GLB_4094_CLK } = vec_clk ;   // have we changed the clock polarity.
 
@@ -192,8 +194,8 @@ module top (
 
     //////
     . cs_polarity( 8'b00000001  ),  // 4094 strobe should go hi, for output
-    // . cs_polarity( 8'b01110000  ),
-    . vec_cs(vec_cs),
+    // . vec_cs(   { vec_cs_dummy,  monitor_o[2], GLB_4094_STROBE_CTL  }  ),    // why doesn't this work?
+    . vec_cs(   vec_cs   ),
     . vec_clk(vec_clk),
     . vec_mosi(vec_mosi),
 
@@ -207,6 +209,7 @@ module top (
 
 
 
+    // . cs_polarity( 8'b01110000  ),
 
   /////////////////////////////////////////////
   // 4094 OE
