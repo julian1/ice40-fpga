@@ -82,10 +82,12 @@ set_io hw_flags_i[2]      21
 
 
 # outputs
-set_io GLB_4094_DATA    73
-set_io GLB_4094_CLK     74
-set_io GLB_4094_OE_CTL     75
-set_io GLB_4094_STROBE_CTL 76
+set_io GLB_4094_DATA      91      # GLB_SPI_MOSI
+set_io GLB_4094_STROBE_CTL 93
+set_io GLB_4094_OE_CTL     94
+set_io GLB_4094_CLK       95      # GLB_SPI_CLK
+
+set_io SPI_DAC_SS         96      #
 
 
 set_io U1004_4094_DATA  98
