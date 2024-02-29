@@ -76,16 +76,19 @@ set_io monitor_o[7]     34
 # better name HW_FLAGS
 # put these as inputs in the status register.
 # perhaps as the first three bits.
-set_io hw_flags_i[0]      19
-set_io hw_flags_i[1]      20
-set_io hw_flags_i[2]      21
+
+set_io hw_flags_i[0]      12
+set_io hw_flags_i[1]      19
+set_io hw_flags_i[2]      20
+set_io hw_flags_i[3]      21
 
 
 # outputs
-set_io GLB_4094_DATA      91      # GLB_SPI_MOSI
+set_io GLB_SPI_MOSI      91      # GLB_SPI_MOSI
+set_io GLB_SPI_CLK       95      # GLB_SPI_CLK
+
 set_io GLB_4094_STROBE_CTL 93
 set_io GLB_4094_OE_CTL     94
-set_io GLB_4094_CLK       95      # GLB_SPI_CLK
 
 set_io SPI_DAC_SS         96      #
 

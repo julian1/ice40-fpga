@@ -62,7 +62,7 @@ module top (
 
   output [ 8-1: 0]  monitor_o,
 
-  input [3-1: 0]    hw_flags_i,
+  input [4-1: 0]    hw_flags_i,
 
 
 
@@ -72,8 +72,8 @@ module top (
 
 
   // 4094
-  output GLB_4094_DATA,
-  output GLB_4094_CLK,
+  output GLB_SPI_MOSI,
+  output GLB_SPI_CLK,
   output GLB_4094_OE_CTL,
   output GLB_4094_STROBE_CTL,
 
@@ -181,12 +181,12 @@ module top (
   */
 
   wire [8-1:0] vec_clk;
-  // assign { GLB_4094_CLK } = vec_clk ;   // have we changed the clock polarity.
-  assign GLB_4094_CLK =  SCK;
+  // assign { GLB_SPI_CLK } = vec_clk ;   // have we changed the clock polarity.
+  assign GLB_SPI_CLK =  SCK;
 
   wire [8-1:0] vec_mosi;
-  // assign { GLB_4094_DATA } = vec_mosi;
-  assign GLB_4094_DATA = SDI;
+  // assign { GLB_SPI_MOSI } = vec_mosi;
+  assign GLB_SPI_MOSI = SDI;
 
 
 
@@ -225,8 +225,8 @@ module top (
   ///////////////////////
 
 
-  assign monitor_o[0]  = GLB_4094_CLK;
-  assign monitor_o[1]  = GLB_4094_DATA;
+  assign monitor_o[0]  = GLB_SPI_CLK;
+  assign monitor_o[1]  = GLB_SPI_MOSI;
   assign monitor_o[2]  = SPI_DAC_SS     ;
 
 
