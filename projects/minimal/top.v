@@ -77,6 +77,8 @@ module top (
   output GLB_4094_OE_CTL,
   output GLB_4094_STROBE_CTL,
 
+  output SPI_DAC_SS,
+
   input U1004_4094_DATA,
 
 
@@ -154,24 +156,36 @@ module top (
           we should combine in line/place. the same way we do mux align.
           eg.
 
-
       . vec_cs(  {  dummy,  GLB_4094_STROBE_CTL  }   ),
-
       ote. we are already doing this for polarity
   */
 
   wire [32-1:0] reg_spi_mux ;// = 8'b00000001; // test
 
   wire [8-1:0] vec_cs ;
-  assign { monitor_o[2], GLB_4094_STROBE_CTL  } = vec_cs;
+  // assign { monitor_o[2], GLB_4094_STROBE_CTL  } = vec_cs;
+  assign { SPI_DAC_SS, GLB_4094_STROBE_CTL  } = vec_cs;
+
 
   // reg [6-1:0] vec_cs_dummy ;
 
+  /*
+    OK. there's a problem,   that each spi output is driven eg. high, even if unused.
+    so if use same wire, then there are two drivers for the same output.
+
+    - OK. way to fix is to remove the clk, and mosi.  entirely from muxer. and not mux them.
+    - we only mux the strobe.
+    - so the muxer only muxes the strobe.
+    - and we could use a different control line anyway. - eg. UNUSED1_OUT.
+    hmmmm.
+  */
+
   wire [8-1:0] vec_clk;
-  assign { monitor_o[0], GLB_4094_CLK } = vec_clk ;   // have we changed the clock polarity.
+  assign { GLB_4094_CLK, GLB_4094_CLK } = vec_clk ;   // have we changed the clock polarity.
 
   wire [8-1:0] vec_mosi;
-  assign { monitor_o[1], GLB_4094_DATA } = vec_mosi;
+  assign { GLB_4094_DATA, GLB_4094_DATA } = vec_mosi;
+
 
   wire [8-1:0] vec_miso ;
   assign  vec_miso[ 8-1 : 1] = 7'b0;
