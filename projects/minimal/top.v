@@ -181,10 +181,13 @@ module top (
   */
 
   wire [8-1:0] vec_clk;
-  assign { GLB_4094_CLK, GLB_4094_CLK } = vec_clk ;   // have we changed the clock polarity.
+  // assign { GLB_4094_CLK } = vec_clk ;   // have we changed the clock polarity.
+  assign GLB_4094_CLK =  SCK;
 
   wire [8-1:0] vec_mosi;
-  assign { GLB_4094_DATA, GLB_4094_DATA } = vec_mosi;
+  // assign { GLB_4094_DATA } = vec_mosi;
+  assign GLB_4094_DATA = SDI;
+
 
 
   wire [8-1:0] vec_miso ;
@@ -193,7 +196,7 @@ module top (
   assign { U1004_4094_DATA } = vec_miso;
 
   // unused.
-  assign monitor_o[8-1: 3] = 0;
+  // assign monitor_o[8-1: 3] = 0;
 
   // a wire. since it is only used combinatorially .
   wire w_dout ;
@@ -203,8 +206,8 @@ module top (
   (
     . reg_spi_mux(reg_spi_mux[ 8-1 : 0 ] ),
     . cs( SPI_CS2),
-    . clk( SCK /* SPI_CLK */),
-    . mosi(SDI /* SPI_MOSI */ ),
+    . clk( SCK /* SPI_CLK */),      // UNUSED
+    . mosi(SDI /* SPI_MOSI */ ),    // UNUSED
 
     //////
     . cs_polarity( 8'b00000001  ),  // 4094 strobe should go hi, for output
@@ -220,6 +223,15 @@ module top (
     . miso( SDO /* SPI_MISO */)                              // output pin
   );
   ///////////////////////
+
+
+  assign monitor_o[0]  = GLB_4094_CLK;
+  assign monitor_o[1]  = GLB_4094_DATA;
+  assign monitor_o[2]  = SPI_DAC_SS     ;
+
+
+
+
 
 
 
