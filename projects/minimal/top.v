@@ -183,7 +183,7 @@ module top (
   /*
       NO. we need to fix this - we don't want signal propagation, for normal operation when just readin adc registers.
       easy way.  is to add a vector. controlling whether to drive. if not selected.
-      But it cannot be left undefined - else - it will probably propagate, because that's 
+      But it cannot be left undefined - else - it will probably propagate, because that's
 
       Just express the logic, specificially.
 
@@ -192,12 +192,15 @@ module top (
 
   wire [8-1:0] vec_clk;
   // assign { GLB_SPI_CLK } = vec_clk ;   // have we changed the clock polarity.
-  assign GLB_SPI_CLK =  SCK;
+  // assign GLB_SPI_CLK =  SCK;
+
+  assign GLB_SPI_CLK  =  reg_spi_mux == 8'b0 ? 1 : SCK;
 
   wire [8-1:0] vec_mosi;
   // assign { GLB_SPI_MOSI } = vec_mosi;
-  assign GLB_SPI_MOSI = SDI;
+  // assign GLB_SPI_MOSI = SDI;
 
+  assign GLB_SPI_MOSI =  reg_spi_mux == 8'b0 ? 1 : SDI;
 
 
   wire [8-1:0] vec_miso ;
