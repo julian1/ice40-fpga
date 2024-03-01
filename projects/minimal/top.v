@@ -196,6 +196,8 @@ module top (
   // assign { GLB_SPI_CLK } = vec_clk ;   // have we changed the clock polarity.
   // assign GLB_SPI_CLK =  SCK;
 
+  // TODO add defines,  SPI_MUX_NONE, SPI_MUX_4094, SPI_MUX_DAC etc.
+
   assign GLB_SPI_CLK          = reg_spi_mux == 8'b0 ? 1 : SCK;      // park hi
 
   // wire [8-1:0] vec_mosi;
