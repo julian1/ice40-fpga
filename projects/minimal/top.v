@@ -9,7 +9,7 @@
 
 
 
-`include "../../common/mux_spi.v"
+// `include "../../common/mux_spi.v"
 `include "../../common/mux_assign.v"
 `include "../../common/test_pattern.v"
 `include "../../common/timed_latch.v"
@@ -162,10 +162,12 @@ module top (
 
   wire [32-1:0] reg_spi_mux ;// = 8'b00000001; // test
 
+
+/*
   wire [8-1:0] vec_cs ;
   // assign { monitor_o[2], GLB_4094_STROBE_CTL  } = vec_cs;
   assign { SPI_DAC_SS, GLB_4094_STROBE_CTL  } = vec_cs;
-
+*/
 
   // reg [6-1:0] vec_cs_dummy ;
 
@@ -190,18 +192,36 @@ module top (
       assign GLB_SPI_CLK  =  reg_mux == 0 ? 0 : ...
   */
 
-  wire [8-1:0] vec_clk;
+  // wire [8-1:0] vec_clk;
   // assign { GLB_SPI_CLK } = vec_clk ;   // have we changed the clock polarity.
   // assign GLB_SPI_CLK =  SCK;
 
-  assign GLB_SPI_CLK  =  reg_spi_mux == 8'b0 ? 1 : SCK;
+  assign GLB_SPI_CLK          = reg_spi_mux == 8'b0 ? 1 : SCK;      // park hi
 
-  wire [8-1:0] vec_mosi;
+  // wire [8-1:0] vec_mosi;
   // assign { GLB_SPI_MOSI } = vec_mosi;
   // assign GLB_SPI_MOSI = SDI;
 
-  assign GLB_SPI_MOSI =  reg_spi_mux == 8'b0 ? 1 : SDI;
+  assign GLB_SPI_MOSI         = reg_spi_mux == 8'b0 ? 1 : SDI;      // park hi
 
+
+
+
+  // wire  cs_active =  reg_spi_mux & {8 {  ~cs } } ;   // cs is active lo.
+  // assign vec_cs  = ~(cs_active ^ cs_polarity );    // works for active hi strobe 4094.   Think that it works for spi.
+
+
+
+  assign GLB_4094_STROBE_CTL  = reg_spi_mux == 8'b01 ?  (~ SPI_CS2)  : 0;     // active hi
+
+  assign SPI_DAC_SS           = reg_spi_mux == 8'b10 ?  SPI_CS2 : 1;     // active lo
+
+
+  wire w_dout ;
+
+  assign w_dout = SDO;
+
+/*
 
   wire [8-1:0] vec_miso ;
   assign  vec_miso[ 8-1 : 1] = 7'b0;
@@ -219,8 +239,8 @@ module top (
   (
     . reg_spi_mux(reg_spi_mux[ 8-1 : 0 ] ),
     . cs( SPI_CS2),
-    . clk( SCK /* SPI_CLK */),      // UNUSED
-    . mosi(SDI /* SPI_MOSI */ ),    // UNUSED
+    . clk( SCK ),      // UNUSED
+    . mosi(SDI  ),    // UNUSED
 
     //////
     . cs_polarity( 8'b00000001  ),  // 4094 strobe should go hi, for output
@@ -233,10 +253,10 @@ module top (
 
     . dout(w_dout),                              // use when cs active
     . vec_miso(vec_miso),                         // use when cs2 active
-    . miso( SDO /* SPI_MISO */)                              // output pin
+    . miso( SDO  )                              // output pin
   );
   ///////////////////////
-
+*/
 
   assign monitor_o[0]  = GLB_SPI_CLK;
   assign monitor_o[1]  = GLB_SPI_MOSI;
@@ -468,6 +488,8 @@ module top (
     . clk(   SCK ),
     . cs_n(  SS /*SPI_CS */ ),        // rename cs_n
     . din(   SDI /*SPI_MOSI */),
+
+
     . dout( w_dout ),            // drive miso from via muxer
     // . dout( SDO /* SPI_MISO */ ),        // drive miso output pin directly.
 
