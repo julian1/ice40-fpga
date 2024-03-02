@@ -335,7 +335,7 @@ module top (
   mux_8to1_assign #( 32  )
   mux_8to1_assign_1  (
 
-    .a( { reg_direct[ 32 - 1 : 1 ] ,  led0 } ),                           // mode/AF 0     default, follow reg_direct, for led.
+    .a( { reg_direct[ 32 - 1 : 1 ] ,  led0 } ), // mode/AF 0     could project the the spi signals on the monitor.
     .b(  32'b0  ),                              // mode/AF  1   all outputs low.
     .c( { 32 { 1'b1 } }    ),                   // mode/AF 2    all outputs hi.
     .d( test_pattern_out ),                     // mode/AF 3    pattern. needs xtal.
@@ -348,8 +348,6 @@ module top (
           3'b0,                             // 1    - should be reg_direct.
           sample_acquisition_pc_led0        // 0
         } ),
-
-
 
     .f( 32'b0 ),                                // mode/AF  5
     .g( 32'b0 ),                                // mode/AF  6
