@@ -99,10 +99,10 @@ module top (
 
   // adc comparator latch ctl.
   // should be cmpr_latch_ctl
-  output cmpr_latch_o,
+  output adc_cmpr_latch_o,
 
   // U902. adc ref current mux
-  output [ 4-1: 0 ] refmux_o,
+  output [ 4-1: 0 ] adc_refmux_o,
 
 /*
 
@@ -326,8 +326,8 @@ module top (
 
 
   ////////////////////////////
-  reg [32-25- 1:0] output_dummy ;
-  reg  output_led_dummy ;
+  reg [32-25- 1:0] dummy_bits_o ;
+  // reg  output_led_dummy ;
 
 
 
@@ -370,14 +370,14 @@ module top (
 
     // add leds and monitor first, as this is the most generic functionality
 
-    .out( {   output_dummy,               // 32
-              refmux_o,                   // 21
-              cmpr_latch_o,             // 20
+    .out( {   dummy_bits_o,               // 32
+              adc_refmux_o,                   // 21     // better name adc_refmux   adc_cmpr_latch
+              adc_cmpr_latch_o,             // 20
               azmux_o,                   // 16
               sig_pc2_sw_o,             // 15
               sig_pc1_sw_o,             // 14
               meas_complete_o,          // 13
-              spi_interrupt_ctl_o,      // 12
+              spi_interrupt_ctl_o,      // 12     todo rename. drop the 'ctl'.
               monitor_o,                // 4
               leds_o                    // 0
             }  )
