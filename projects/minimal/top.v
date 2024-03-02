@@ -178,12 +178,13 @@ module top (
 
 
 
-
+/*
+  // would be nice perhaps to have these controlled in mode0.
 
   assign monitor_o[0]  = GLB_SPI_CLK;
   assign monitor_o[1]  = GLB_SPI_MOSI;
   assign monitor_o[2]  = SPI_DAC_SS     ;
-
+*/
 
 
 
@@ -329,17 +330,15 @@ module top (
   reg  output_led_dummy ;
 
 
-  reg [8-1: 0 ] monitor_dummy;
-
 
   // mode, alternative function selection
   mux_8to1_assign #( 32  )
   mux_8to1_assign_1  (
 
     .a( { reg_direct[ 32 - 1 : 1 ] ,  led0 } ),                           // mode/AF 0     default, follow reg_direct, for led.
-    .b(  32'b0  ),                              // mode/AF  1   only sigle led is on????
-    .c( { 32 { 1'b1 } }    ),                   // mode/AF 2     { 1,1,1,1 } == 0b0001, not 4b1111
-    .d( test_pattern_out ),                     // mode/AF 3
+    .b(  32'b0  ),                              // mode/AF  1   all outputs low.
+    .c( { 32 { 1'b1 } }    ),                   // mode/AF 2    all outputs hi.
+    .d( test_pattern_out ),                     // mode/AF 3    pattern. needs xtal.
 
     .e( {  { 32 - 15 { 'b0 }},                  // mode/AF 4
                                             // 15
@@ -371,10 +370,9 @@ module top (
 
     .sel( reg_mode[ 3-1 : 0 ]),
 
-    // add leds and monitor first, as the most generic
+    // add leds and monitor first, as this is the most generic functionality
 
-    .out( { output_dummy,               // 32
-                                        // 25
+    .out( {   output_dummy,               // 32
               refmux_o,                   // 21
               cmpr_latch_o,             // 20
               azmux_o,                   // 16
@@ -382,8 +380,7 @@ module top (
               sig_pc1_sw_o,             // 14
               meas_complete_o,          // 13
               spi_interrupt_ctl_o,      // 12
-              // monitor_o,                // 4
-              monitor_dummy,
+              monitor_o,                // 4
               leds_o                    // 0
             }  )
 
