@@ -162,57 +162,9 @@ module top (
 
   wire [32-1:0] reg_spi_mux ;// = 8'b00000001; // test
 
-
-/*
-  wire [8-1:0] vec_cs ;
-  // assign { monitor_o[2], GLB_4094_STROBE_CTL  } = vec_cs;
-  assign { SPI_DAC_SS, GLB_4094_STROBE_CTL  } = vec_cs;
-*/
-
-  // reg [6-1:0] vec_cs_dummy ;
-
-  /*
-    OK. there's a problem,   that each spi output is driven eg. high, even if unused.
-    so if use same wire, then there are two drivers for the same output.
-
-    - OK. way to fix is to remove the clk, and mosi.  entirely from muxer. and not mux them.
-    - we only mux the strobe.
-    - so the muxer only muxes the strobe.
-    - and we could use a different control line anyway. - eg. UNUSED1_OUT.
-    hmmmm.
-  */
-
-  /*
-      NO. we need to fix this - we don't want signal propagation, for normal operation when just readin adc registers.
-      easy way.  is to add a vector. controlling whether to drive. if not selected.
-      But it cannot be left undefined - else - it will probably propagate, because that's
-
-      Just express the logic, specificially.
-
-      assign GLB_SPI_CLK  =  reg_mux == 0 ? 0 : ...
-  */
-
-  // wire [8-1:0] vec_clk;
-  // assign { GLB_SPI_CLK } = vec_clk ;   // have we changed the clock polarity.
-  // assign GLB_SPI_CLK =  SCK;
-
-  // TODO add defines,  SPI_MUX_NONE, SPI_MUX_4094, SPI_MUX_DAC etc.
-
   assign GLB_SPI_CLK          = reg_spi_mux == 8'b0 ? 1 : SCK;      // park hi
 
-  // wire [8-1:0] vec_mosi;
-  // assign { GLB_SPI_MOSI } = vec_mosi;
-  // assign GLB_SPI_MOSI = SDI;
-
   assign GLB_SPI_MOSI         = reg_spi_mux == 8'b0 ? 1 : SDI;      // park hi
-
-
-
-
-  // wire  cs_active =  reg_spi_mux & {8 {  ~cs } } ;   // cs is active lo.
-  // assign vec_cs  = ~(cs_active ^ cs_polarity );    // works for active hi strobe 4094.   Think that it works for spi.
-
-
 
   assign GLB_4094_STROBE_CTL  = reg_spi_mux == 8'b01 ?  (~ SPI_CS2)  : 0;     // active hi
 
@@ -223,42 +175,10 @@ module top (
 
   assign w_dout = SDO;
 
-/*
 
-  wire [8-1:0] vec_miso ;
-  assign  vec_miso[ 8-1 : 1] = 7'b0;
 
-  assign { U1004_4094_DATA } = vec_miso;
 
-  // unused.
-  // assign monitor_o[8-1: 3] = 0;
 
-  // a wire. since it is only used combinatorially .
-  wire w_dout ;
-
-  mux_spi #( )
-  mux_spi
-  (
-    . reg_spi_mux(reg_spi_mux[ 8-1 : 0 ] ),
-    . cs( SPI_CS2),
-    . clk( SCK ),      // UNUSED
-    . mosi(SDI  ),    // UNUSED
-
-    //////
-    . cs_polarity( 8'b00000001  ),  // 4094 strobe should go hi, for output
-    // . vec_cs(   { vec_cs_dummy,  monitor_o[2], GLB_4094_STROBE_CTL  }  ),    // why doesn't this work?
-    . vec_cs(   vec_cs   ),
-    . vec_clk(vec_clk),
-    . vec_mosi(vec_mosi),
-
-    ////////////////
-
-    . dout(w_dout),                              // use when cs active
-    . vec_miso(vec_miso),                         // use when cs2 active
-    . miso( SDO  )                              // output pin
-  );
-  ///////////////////////
-*/
 
   assign monitor_o[0]  = GLB_SPI_CLK;
   assign monitor_o[1]  = GLB_SPI_MOSI;
@@ -268,17 +188,10 @@ module top (
 
 
 
-
-
-    // . cs_polarity( 8'b01110000  ),
-
   /////////////////////////////////////////////
   // 4094 OE
   wire [32-1:0] reg_4094;   // TODO rename
   assign { GLB_4094_OE_CTL } = reg_4094;    //  lo. start up not enabled.
-  // wire GLB_4094_OE_CTL = 0;  // lo.
-
-
 
   ////////////////////////////////////////
 
