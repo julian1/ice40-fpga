@@ -370,13 +370,13 @@ module top (
 
     // add leds and monitor first, as this is the most generic functionality
 
-    .out( {   dummy_bits_o,               // 32
+    .out( {   dummy_bits_o,               // 25
               adc_refmux_o,                   // 21     // better name adc_refmux   adc_cmpr_latch
               adc_cmpr_latch_o,             // 20
               azmux_o,                   // 16
               sig_pc2_sw_o,             // 15
               sig_pc1_sw_o,             // 14
-              meas_complete_o,          // 13
+              meas_complete_o,          // 13     // interupt_ctl *IS* generic so should be at start, and connects straight to adum. so place at beginning. same argument for meas_complete
               spi_interrupt_ctl_o,      // 12     todo rename. drop the 'ctl'.
               monitor_o,                // 4
               leds_o                    // 0
