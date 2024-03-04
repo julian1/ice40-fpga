@@ -215,7 +215,7 @@ module top (
   wire [32-1 :0] reg_reset;
 
   wire [32-1 :0] reg_sa_arm_trigger;              // only a bit is needed here. should be able to handle more efficiently.
-  wire [32-1 :0] reg_sa_p_clk_count_precharge;
+  wire [32-1 :0] reg_sa_p_clk_count_precharge_i;
 
 
   wire [32-1 :0] reg_adc_p_aperture;  // 32/31 bit nice. for long sample.
@@ -297,15 +297,15 @@ module top (
     .clk(CLK),
     .reset_n( 1'b0 ), // TODO remove.
 
-    // TODO - rename   , and prefix p_ .  p_p_clk_sample_duration
+    // TODO - rename   , and prefix p_ .  p_p_clk_sample_duration_i
     // inputs
-    .p_clk_sample_duration(   reg_adc_p_aperture ),
-    .p_clk_count_precharge( reg_sa_p_clk_count_precharge[ 24-1:0] ),
+    .p_clk_sample_duration_i( reg_adc_p_aperture ),
+    .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0] ),
 
     // outputs
-    .sw_pc_ctl( sample_acquisition_pc_sw_pc_ctl   ),          // should pass in both. and a register like a mask. to indicate which to use. similar to register for az mux.  might encode in same register.
-    .led0(      sample_acquisition_pc_led0 ),                 // EXTR. just use the bits of reg_direct for azmux and which pc switch to use.  add back reg_direc2 for the ratiometric.
-    .monitor(   sample_acquisition_pc_monitor  )
+    .sw_pc_ctl_o( sample_acquisition_pc_sw_pc_ctl   ),          // should pass in both. and a register like a mask. to indicate which to use. similar to register for az mux.  might encode in same register.
+    .led0_o(      sample_acquisition_pc_led0 ),                 // EXTR. just use the bits of reg_direct for azmux and which pc switch to use.  add back reg_direc2 for the ratiometric.
+    .monitor_o(   sample_acquisition_pc_monitor  )
   );
 
 
@@ -329,7 +329,9 @@ module top (
   reg [32-25- 1:0] dummy_bits_o ;
   // reg  output_led_dummy ;
 
-
+  /*
+      note that we can still hook this up to the adc. for measurement.
+  */
 
   // mode, alternative function selection
   mux_8to1_assign #( 32  )

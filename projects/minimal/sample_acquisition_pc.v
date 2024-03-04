@@ -1,6 +1,7 @@
 /*
 
-  only switch the pc switch. not the azmux. for charge testing.
+  - only switch the pc switch. not the azmux. for charge testing.
+  - code is quite similar to the az mux. sample acquisition.
 
 */
 
@@ -38,17 +39,26 @@ module sample_acquisition_pc (
   // lo mux input to use.
   // input [  4-1 : 0 ] azmux_lo_val,
 
-  // modulation_az hardcodes the hi_val . since does not change for normal az operation
-  input [ 32-1 : 0 ] p_clk_sample_duration,  // 32/31 bit nice. for long sample....  wrongly named it is counter_sample_duration. not clk...
 
-  input [24-1:0]    p_clk_count_precharge,
+/*
+    TODO - mar 2024. rename these with module prefix
+      sa_p_clk_sample_duration_i_i
+      or
+      sa_clk_sample_duration_i_i
+      actually not sure.
+*/
+
+  // modulation_az hardcodes the hi_val . since does not change for normal az operation
+  input [ 32-1 : 0 ] p_clk_sample_duration_i,  // 32/31 bit nice. for long sample....  wrongly named it is counter_sample_duration_i. not clk...
+
+  input [24-1:0]    p_clk_count_precharge_i,
 
   /// outputs.
-  output reg  sw_pc_ctl,
+  output reg  sw_pc_ctl_o,
   // output reg [ 4-1:0 ] azmux,
 
-  output reg led0,
-  output reg [ 8-1:0]  monitor,
+  output reg led0_o,
+  output reg [ 8-1:0]  monitor_o,
 
 );
 
@@ -78,17 +88,17 @@ module sample_acquisition_pc (
 
         // precharge switch - protects the signal. from the charge-injection of the AZ switch.
           0:
-          // having a state like, this may be useful for debuggin, because can put a pulse on the monitor.
+          // having a state like, this may be useful for debuggin, because can put a pulse on the monitor_o.
           state <= 1;
 
         // switch pre-charge switch to boot to protect signal
         1:
           begin
             state           <= 15;
-            clk_count_down  <= p_clk_count_precharge;
-            sw_pc_ctl       <= `SW_PC_BOOT;
+            clk_count_down  <= p_clk_count_precharge_i;
+            sw_pc_ctl_o       <= `SW_PC_BOOT;
             // azmux           <=  azmux_lo_val;       // should be defined. or set in async reset. not left over state.
-            monitor         <= { 8 { 1'b0 } } ;     // reset
+            monitor_o         <= { 8 { 1'b0 } } ;     // reset
           end
         15:
           if(clk_count_down == 0)
@@ -101,9 +111,9 @@ module sample_acquisition_pc (
         2:
             begin
               state           <= 25;
-              clk_count_down  <= p_clk_count_precharge;  // normally pin s1
+              clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
               // azmux          <= `AZMUX_HI_VAL;
-              monitor[0]      <= 1;
+              monitor_o[0]      <= 1;
             end
         25:
           if(clk_count_down == 0)
@@ -115,10 +125,10 @@ module sample_acquisition_pc (
         3:
           begin
             state           <= 35;
-            clk_count_down  <= p_clk_sample_duration;
-            sw_pc_ctl       <= `SW_PC_SIGNAL;
-            led0            <= 1;
-            monitor[1]      <= 1;
+            clk_count_down  <= p_clk_sample_duration_i;
+            sw_pc_ctl_o       <= `SW_PC_SIGNAL;
+            led0_o            <= 1;
+            monitor_o[1]      <= 1;
           end
         35:
           if(clk_count_down == 0)
@@ -128,9 +138,9 @@ module sample_acquisition_pc (
         4:
           begin
             state           <= 45;
-            clk_count_down  <= p_clk_count_precharge; // time less important here
-            sw_pc_ctl       <= `SW_PC_BOOT;
-            monitor[1]      <= 0;
+            clk_count_down  <= p_clk_count_precharge_i; // time less important here
+            sw_pc_ctl_o       <= `SW_PC_BOOT;
+            monitor_o[1]      <= 0;
           end
         45:
           if(clk_count_down == 0)
@@ -141,10 +151,10 @@ module sample_acquisition_pc (
         5:
           begin
             state           <= 55;
-            clk_count_down  <= p_clk_sample_duration;
+            clk_count_down  <= p_clk_sample_duration_i;
             // azmux           <= azmux_lo_val;
-            led0            <= 0;
-            monitor[0]      <= 0;
+            led0_o            <= 0;
+            monitor_o[0]      <= 0;
           end
         55:
           if(clk_count_down == 0)
