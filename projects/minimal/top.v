@@ -287,6 +287,10 @@ module top (
   // sa_pc_test
   // or test_sa_pc
 
+  /*
+      note that we can still hook this up to the adc. for measurement.
+  */
+
   wire sample_acquisition_pc_sw_pc_ctl;
   wire sample_acquisition_pc_led0;
   wire [8-1 : 0] sample_acquisition_pc_monitor;
@@ -329,9 +333,6 @@ module top (
   reg [32-25- 1:0] dummy_bits_o ;
   // reg  output_led_dummy ;
 
-  /*
-      note that we can still hook this up to the adc. for measurement.
-  */
 
   // mode, alternative function selection
   mux_8to1_assign #( 32  )

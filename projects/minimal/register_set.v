@@ -53,6 +53,7 @@
 `define REG_ADC_CLK_COUNT_MUX_SIG       33
 
 
+// extra stat counts.
 `define REG_ADC_STAT_COUNT_REFMUX_POS_UP  40
 `define REG_ADC_STAT_COUNT_REFMUX_NEG_UP  41
 `define REG_ADC_STAT_COUNT_CMPR_CROSS_UP  42
