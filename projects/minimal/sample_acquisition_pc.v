@@ -10,8 +10,8 @@
 `default_nettype none
 
 
-// note. counter freq is half clk, because increments on clk.
-`define CLK_FREQ        20000000
+
+// `include "defines.v"
 
 
 
