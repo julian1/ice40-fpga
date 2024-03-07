@@ -88,9 +88,10 @@ module top (
   output meas_complete_o,
 
 
-  output sig_pc1_sw_o,
-  output sig_pc2_sw_o ,
+  // output sig_pc1_sw_o,
+  // output sig_pc2_sw_o ,
 
+  output [ 2-1: 0 ] sig_pc_sw_o,
 
   // az mux
   // u410
@@ -379,8 +380,9 @@ module top (
               adc_refmux_o,                   // 21     // better name adc_refmux   adc_cmpr_latch
               adc_cmpr_latch_o,             // 20
               azmux_o,                   // 16
-              sig_pc2_sw_o,             // 15
-              sig_pc1_sw_o,             // 14
+              sig_pc_sw_o,
+              // sig_pc2_sw_o,             // 15
+              // sig_pc1_sw_o,             // 14
               meas_complete_o,          // 13     // interupt_ctl *IS* generic so should be at start, and connects straight to adum. so place at beginning. same argument for meas_complete
               spi_interrupt_ctl_o,      // 12     todo rename. drop the 'ctl'.
               monitor_o,                // 4
