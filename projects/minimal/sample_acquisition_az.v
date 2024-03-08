@@ -25,25 +25,25 @@ module sample_acquisition_az (
   input   clk,
 
   // inputs
-  input arm_trigger,              // why doesn't this generate a warning.
-  input [ 4-1 : 0 ] azmux_lo_val,
-  input adc_measure_valid,
+  input arm_trigger_i,              // why doesn't this generate a warning.
+  input [ 4-1 : 0 ] azmux_o_lo_val_i,
+  input adc_measure_valid_i,
 
-  // reg [24-1:0]  p_clk_count_precharge = `CLK_FREQ * 500e-6 ;   // 500us.
-  input [24-1:0] p_clk_count_precharge,
+  // reg [24-1:0]  p_clk_count_precharge_i = `CLK_FREQ * 500e-6 ;   // 500us.
+  input [24-1:0] p_clk_count_precharge_i,
 
   // outputs.
-  output reg adc_measure_trig,
-  output reg  sw_pc_ctl,
-  output reg [ 4-1:0 ] azmux,
-  output reg led0,
+  output reg adc_measure_trig_o,
+  output reg  sw_pc_ctl_o,
+  output reg [ 4-1:0 ] azmux_o,
+  output reg led0_o,
   // must be a register if driven synchronously.
-  output reg [3-1: 0 ] status_out,        // bit 0 - hi/lo,  bit 1 - prim/w4,   bit 2. reserved.
+  output reg [3-1: 0 ] status_o,        // bit 0 - hi/lo,  bit 1 - prim/w4,   bit 2. reserved.
 
 
 
   // now a wire.
-  output wire [ 2-1:0]  monitor       // driven as wire/assign.
+  output wire [ 2-1:0]  monitor_o       // driven as wire/assign.
 
 );
 
@@ -53,13 +53,13 @@ module sample_acquisition_az (
 
 
 
-  reg [2-1: 0 ] arm_trigger_edge;
+  reg [2-1: 0 ] arm_trigger_i_edge;
 
 
-  assign monitor[0] = adc_measure_trig;
-  // assign monitor[1] = adc_measure_valid;
+  assign monitor_o[0] = adc_measure_trig_o;
+  // assign monitor_o[1] = adc_measure_valid_i;
 
-  assign monitor[1] =  azmux == `AZMUX_PCOUT;   // taking a hi.
+  assign monitor_o[1] =  azmux_o == `AZMUX_PCOUT;   // taking a hi.
 
 
 
@@ -75,10 +75,10 @@ module sample_acquisition_az (
         // precharge switch - protects the signal. from the charge-injection of the AZ switch.
         0:
           begin
-            // having a state like, this may be useful for debuggin, because can put a pulse on the monitor.
+            // having a state like, this may be useful for debuggin, because can put a pulse on the monitor_o.
             state <= 1;
 
-            adc_measure_trig    <= 0;
+            adc_measure_trig_o    <= 0;
 
 
           end
@@ -87,8 +87,8 @@ module sample_acquisition_az (
         1:
           begin
             state           <= 15;
-            clk_count_down  <= p_clk_count_precharge;
-            sw_pc_ctl       <= `SW_PC_BOOT;
+            clk_count_down  <= p_clk_count_precharge_i;
+            sw_pc_ctl_o       <= `SW_PC_BOOT;
           end
         15:
           if(clk_count_down == 0)
@@ -96,13 +96,13 @@ module sample_acquisition_az (
 
 
         ////////////////////////////
-        // switch azmux from the LO to PCOUT (SIG/BOOT).    (signal is still currently protected by pc)  - the 'precharge phase' or settle phase
+        // switch azmux_o from the LO to PCOUT (SIG/BOOT).    (signal is still currently protected by pc)  - the 'precharge phase' or settle phase
         // precharge phase.
         2:
             begin
               state           <= 25;
-              clk_count_down  <= p_clk_count_precharge;  // normally pin s1
-              azmux           <= `AZMUX_PCOUT;
+              clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
+              azmux_o           <= `AZMUX_PCOUT;
 
               /*/ do we set the hi/lo status - at the start of adc measurement. or after complete/valid.
                   status should be established before the adc_valid .
@@ -124,8 +124,8 @@ module sample_acquisition_az (
         3:
           begin
             state           <= 33;
-            clk_count_down  <= p_clk_count_precharge;  // normally pin s1
-            sw_pc_ctl       <= `SW_PC_SIGNAL;
+            clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
+            sw_pc_ctl_o       <= `SW_PC_SIGNAL;
           end
 
         33:
@@ -133,27 +133,27 @@ module sample_acquisition_az (
             begin
               state           <= 34;
               // adc start
-              adc_measure_trig <= 1;
+              adc_measure_trig_o <= 1;
             end
 
 
         34:
           // wait for adc to ack trig, before advancing
-          if( ! adc_measure_valid )
+          if( ! adc_measure_valid_i )
             begin
-              adc_measure_trig    <= 0;
+              adc_measure_trig_o    <= 0;
               state             <= 35;
-              led0            <= 1;
+              led0_o            <= 1;
 
             end
 
         35:
           // wait for adc to measure
-          if( adc_measure_valid )
+          if( adc_measure_valid_i )
             begin
               state         <= 4;
               // set status for hi sample
-              status_out    <= 3'b001; // we moved this.      // set status only after measure, to enable reg reading, during next measurement cycle.
+              status_o    <= 3'b001; // we moved this.      // set status only after measure, to enable reg reading, during next measurement cycle.
             end
 
         //////////////////////////////
@@ -164,8 +164,8 @@ module sample_acquisition_az (
         4:
           begin
             state           <= 45;
-            clk_count_down  <= p_clk_count_precharge; // time less important here
-            sw_pc_ctl       <= `SW_PC_BOOT;
+            clk_count_down  <= p_clk_count_precharge_i; // time less important here
+            sw_pc_ctl_o       <= `SW_PC_BOOT;
           end
 
         45:
@@ -178,8 +178,8 @@ module sample_acquisition_az (
         5:
           begin
             state           <= 52;
-            clk_count_down  <= p_clk_count_precharge; // time less important here
-            azmux           <= azmux_lo_val;
+            clk_count_down  <= p_clk_count_precharge_i; // time less important here
+            azmux_o           <= azmux_o_lo_val_i;
 
           end
 
@@ -187,29 +187,29 @@ module sample_acquisition_az (
           if(clk_count_down == 0)
             begin
               state           <= 53;
-              led0            <= 0;
+              led0_o            <= 0;
               // adc start
-              adc_measure_trig <= 1;
+              adc_measure_trig_o <= 1;
             end
 
         53:
           // wait for adc to ack trig, before advancing
-          if( ! adc_measure_valid )
+          if( ! adc_measure_valid_i )
             begin
-              adc_measure_trig    <= 0;
+              adc_measure_trig_o    <= 0;
               state             <= 55;
-              led0            <= 0;
+              led0_o            <= 0;
             end
 
         55:
           // wait for adc to measure
-          if(  adc_measure_valid )
+          if(  adc_measure_valid_i )
             begin
               // restart sequence
               state <= 2;
 
               // set status for lo sample. set after measure to give time to read.
-              status_out      <= 3'b000;
+              status_o      <= 3'b000;
             end
 
 
@@ -223,11 +223,11 @@ module sample_acquisition_az (
 
 
 
-      arm_trigger_edge <= { arm_trigger_edge[0], arm_trigger};  // old, new
+      arm_trigger_i_edge <= { arm_trigger_i_edge[0], arm_trigger_i};  // old, new
 
-      if(arm_trigger_edge == 2'b01)        // trigger
+      if(arm_trigger_i_edge == 2'b01)        // trigger
         state <= 0;
-      else if(arm_trigger_edge == 2'b10)   // park/arm/reset.
+      else if(arm_trigger_i_edge == 2'b10)   // park/arm/reset.
         state <= 60;
 
 
