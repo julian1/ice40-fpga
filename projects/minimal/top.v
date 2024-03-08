@@ -19,6 +19,7 @@
 
 `include "sample_acquisition_az.v"
 
+`include "adc-test.v"
 
 
 `default_nettype none
@@ -317,6 +318,33 @@ module top (
     .monitor_o(   sample_acquisition_pc_monitor  )
   );
 
+
+
+
+
+
+  ////////////////////////
+
+  // wire [ `NUM_BITS-1:0 ]  sa_no_az_test_out ;  // beter name ... _outputs_vec ?
+  wire          adc_test_measure_trig;
+  wire          adc_test_measure_valid;
+  wire [6-1:0 ] adc_test_monitor;
+
+  adc_test
+  adc_test (
+    .clk(CLK),
+
+    // inputs
+    .p_clk_count_aperture_i( reg_adc_p_aperture ),
+    .adc_measure_trig_i( adc_test_measure_trig ),
+
+    // outputs
+    .adc_measure_valid_o( adc_test_measure_valid ),
+    .monitor_o(  adc_test_monitor )
+  );
+
+
+
 /*
   // outputs.
   output reg adc_measure_trig_o,
@@ -335,10 +363,10 @@ module top (
 
 
   wire          sample_acquisition_az_sw_pc_ctl;
-  wire [4-1: 0] sample_acquisition_az_azmux;
+  wire [4-1:0]  sample_acquisition_az_azmux;
   wire          sample_acquisition_az_led0;
-  wire [ 2-1:0] sample_acquisition_az_monitor;
-  wire [3-1: 0] sample_acquisition_az_status;
+  wire [2-1:0]  sample_acquisition_az_monitor;
+  wire [3-1:0]  sample_acquisition_az_status;
   wire          sample_acquisition_az_adc_measure_trig;
 
   sample_acquisition_az

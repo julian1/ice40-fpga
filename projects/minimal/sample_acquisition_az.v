@@ -227,7 +227,8 @@ module sample_acquisition_az (
 
         - but why not just handle as clock synchronous reset. that overrides the other behavior?
         - send a pulse to start?
-        - and has extra capability that can hold in reset.
+        - and has extra capability that can hold in reset. or hold freerunning.
+        - just need a single extra reg - to control if single shot or continuous.
 
         if(arm_trigger_i)
           state <= 0;
