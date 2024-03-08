@@ -424,7 +424,8 @@ module top (
     .c( { 32 { 1'b1 } }    ),                   // mode/AF 2  MODE_HI           all outputs hi.
     .d( test_pattern_out ),                     // mode/AF 3  MODE_PATTERN      pattern. needs xtal.
 
-    .e( {  { 32 - 15 { 'b0 }},                  // mode/AF 4 MODE_PC
+    // mode/AF 4 MODE_PC
+    .e( {  { 32 - 15 { 'b0 }},
                                             // 15
           sample_acquisition_pc_sw_pc_ctl,  // 14
           2'b0,                             // 12   - should be reg_direct
@@ -433,12 +434,7 @@ module top (
           sample_acquisition_pc_led0        // 0
         } ),
 
-    .f( 32'b0 ),                                // mode/AF  5
-    .g( 32'b0 ),                                // mode/AF  6
-    .h( 32'b0 ),                                // mode/AF  7
-
 /*
-
     .a( { 1'b0, { 15 { 1'b0 } },  reg_led[ 0], { 13 { 1'b0 } } }    ),        // 0. default mode. 0 on all outputs, except follow reg_led, for led.
     .b( { 1'b0, { `NUM_BITS { 1'b1 } } } ),             // 1.
     .c( { 1'b0, test_pattern_out } ),                   // 2
@@ -451,7 +447,8 @@ module top (
 */
 
 
-    .e( {  { 32 - 25 { 'b0 }},                  // 25
+    // mode/AF  5
+    .f( {  { 32 - 25 { 'b0 }},                  // 25
           4'b0,                               // 21  adc ref mux
           1'b0,                               // 20
           sample_acquisition_az_azmux,        // 16
@@ -462,8 +459,6 @@ module top (
           3'b0,                             // 1    - should be reg_direct.
           sample_acquisition_az_led0        // 0
         } ),
-
-
 /*
   wire          sample_acquisition_az_sw_pc_ctl;  done
   wire [4-1:0]  sample_acquisition_az_azmux;      done
@@ -471,6 +466,12 @@ module top (
   wire [2-1:0]  sample_acquisition_az_monitor;    done
   wire [3-1:0]  sample_acquisition_az_status;
 */
+
+
+
+    .g( 32'b0 ),                                // mode/AF  6
+    .h( 32'b0 ),                                // mode/AF  7
+
 
 
 
