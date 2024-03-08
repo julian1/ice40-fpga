@@ -14,7 +14,7 @@
 
 
 
-`define AZMUX_PCOUT    `S3     // 2024.  FIXME 
+`define AZMUX_PCOUT    `S3     // 2024.  FIXME
 
 
 
@@ -225,6 +225,15 @@ module sample_acquisition_az (
       /*
         reason to do it this way, is to make it interuptable/triggerable regardless of current state.
 
+        - but why not just handle as clock synchronous reset. that overrides the other behavior?
+        - send a pulse to start?
+        - and has extra capability that can hold in reset.
+
+        if(arm_trigger_i)
+          state <= 0;
+        -----
+        - but the advantage is triggers on the leading edge - and the user/ external trigger - doesn't have to cycle
+        - but can still do with reset_n like behavior.  hold lo is reset, then just pull hi.
       */
 
       arm_trigger_i_edge <= { arm_trigger_i_edge[0], arm_trigger_i};  // old, new
