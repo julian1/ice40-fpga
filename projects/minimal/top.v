@@ -398,6 +398,9 @@ module top (
   /////////////////////////
   // We could do one led, for SS, and one for CS2 (4094,etc).
   // rename timed_latch_hold
+  /*
+    change name. this is more stretching the signal.
+  */
   wire led0;
   timed_latch timed_latch (
     . clk(CLK),
