@@ -357,8 +357,8 @@ module top (
   // now a wire.  output wire [ 2-1:0]  monitor_o       // driven as wire/assign.
   output reg [ 2-1:0]  monitor_o
 */
-  wire          adc2_measure_trig;
-  wire          adc2_measure_valid;
+  // wire          adc2_measure_trig;
+  // wire          adc2_measure_valid;
 
 
 
@@ -367,7 +367,7 @@ module top (
   wire          sample_acquisition_az_led0;
   wire [2-1:0]  sample_acquisition_az_monitor;
   wire [3-1:0]  sample_acquisition_az_status;
-  wire          sample_acquisition_az_adc_measure_trig;
+  // wire          sample_acquisition_az_adc_measure_trig;
 
   sample_acquisition_az
   sample_acquisition_az (
@@ -377,7 +377,7 @@ module top (
     // inputs
     .arm_trigger_i( reg_sa_arm_trigger[0 ]  ) ,
     .azmux_lo_val_i(  `S7  ),                       // TODO change to register
-    .adc_measure_valid_i(   adc2_measure_valid ),                     // fan-in from adc
+    .adc_measure_valid_i(   adc_test_measure_valid ),                     // fan-in from adc
     .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]  ),     // done
 
     // outputs
@@ -386,7 +386,7 @@ module top (
     .led0_o(      sample_acquisition_az_led0  ),
     .monitor_o(   sample_acquisition_az_monitor  ),    // only pass 2 bit to the az monitor
     .status_o(  sample_acquisition_az_status ),
-    .adc_measure_trig_o( sample_acquisition_az_adc_measure_trig)
+    .adc_measure_trig_o(  adc_test_measure_trig  )
   );
 
 
