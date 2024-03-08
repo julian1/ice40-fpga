@@ -17,10 +17,11 @@
 
 
 // AZMUX PC-OUT select the hi
-`define S1              ((1<<3)|(1-1))
+`define S1          ((1<<3)|(1-1))
 `define S2          ((1<<3)|(2-1))
+`define S3          ((1<<3)|(3-1))
 
 `define S7          ((1<<3)|(7-1))
 
 
-`define AZMUX_PCOUT    `S1     // signal PC-OUT
+// `define AZMUX_PCOUT    `S1     // signal PC-OUT

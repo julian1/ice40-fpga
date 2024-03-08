@@ -14,6 +14,7 @@
 
 
 
+`define AZMUX_PCOUT    `S3     // 2024.  FIXME 
 
 
 
@@ -26,7 +27,7 @@ module sample_acquisition_az (
 
   // inputs
   input arm_trigger_i,              // why doesn't this generate a warning.
-  input [ 4-1 : 0 ] azmux_o_lo_val_i,
+  input [ 4-1 : 0 ] azmux_lo_val_i,
   input adc_measure_valid_i,
 
   // reg [24-1:0]  p_clk_count_precharge_i = `CLK_FREQ * 500e-6 ;   // 500us.
@@ -40,10 +41,10 @@ module sample_acquisition_az (
   // must be a register if driven synchronously.
   output reg [3-1: 0 ] status_o,        // bit 0 - hi/lo,  bit 1 - prim/w4,   bit 2. reserved.
 
-
-
-  // now a wire.
-  output wire [ 2-1:0]  monitor_o       // driven as wire/assign.
+  /*/ now a wire.  output wire [ 2-1:0]  monitor_o       // driven as wire/assign.
+  // think it is ok to be a combinatory logic - wire output - although may slow things down.
+  */
+  output wire [ 2-1:0]  monitor_o
 
 );
 
@@ -179,7 +180,7 @@ module sample_acquisition_az (
           begin
             state           <= 52;
             clk_count_down  <= p_clk_count_precharge_i; // time less important here
-            azmux_o           <= azmux_o_lo_val_i;
+            azmux_o           <= azmux_lo_val_i;
 
           end
 
@@ -221,7 +222,10 @@ module sample_acquisition_az (
       endcase
 
 
+      /*
+        reason to do it this way, is to make it interuptable/triggerable regardless of current state.
 
+      */
 
       arm_trigger_i_edge <= { arm_trigger_i_edge[0], arm_trigger_i};  // old, new
 

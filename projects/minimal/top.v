@@ -204,6 +204,7 @@ module top (
 
   wire [32-1:0] reg_direct;
 
+  wire [32-1 :0] reg_sa_arm_trigger;              // only a single bit is needed here. should be able to write to handle more efficiently.
 
 
 
@@ -218,7 +219,6 @@ module top (
   wire [32-1 :0] reg_direct2;
   wire [32-1 :0] reg_reset;
 
-  wire [32-1 :0] reg_sa_arm_trigger;              // only a bit is needed here. should be able to handle more efficiently.
   wire [32-1 :0] reg_sa_p_clk_count_precharge_i;
 
 
@@ -316,6 +316,53 @@ module top (
     .led0_o(      sample_acquisition_pc_led0 ),                 // EXTR. just use the bits of reg_direct for azmux and which pc switch to use.  add back reg_direc2 for the ratiometric.
     .monitor_o(   sample_acquisition_pc_monitor  )
   );
+
+/*
+  // outputs.
+  output reg adc_measure_trig_o,
+  output reg  sw_pc_ctl_o,
+  output reg [ 4-1:0 ] azmux_o,
+  output reg led0_o,
+  // must be a register if driven synchronously.
+  output reg [3-1: 0 ] status_o,        // bit 0 - hi/lo,  bit 1 - prim/w4,   bit 2. reserved.
+
+  // now a wire.  output wire [ 2-1:0]  monitor_o       // driven as wire/assign.
+  output reg [ 2-1:0]  monitor_o
+*/
+  wire          adc2_measure_trig;
+  wire          adc2_measure_valid;
+
+
+
+  wire          sample_acquisition_az_sw_pc_ctl;
+  wire [4-1: 0] sample_acquisition_az_azmux;
+  wire          sample_acquisition_az_led0;
+  wire [ 2-1:0] sample_acquisition_az_monitor;
+  wire [3-1: 0] sample_acquisition_az_status;
+  wire          sample_acquisition_az_adc_measure_trig;
+
+  sample_acquisition_az
+  sample_acquisition_az (
+
+    .clk(CLK),
+
+    // inputs
+    .arm_trigger_i( reg_sa_arm_trigger[0 ]  ) ,
+    .azmux_lo_val_i(  `S7  ),                       // TODO change to register
+    .adc_measure_valid_i(   adc2_measure_valid ),                     // fan-in from adc
+    .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]  ),     // done
+
+    // outputs
+    .sw_pc_ctl_o( sample_acquisition_az_sw_pc_ctl  ),
+    .azmux_o (    sample_acquisition_az_azmux  ),
+    .led0_o(      sample_acquisition_az_led0  ),
+    .monitor_o(   sample_acquisition_az_monitor  ),    // only pass 2 bit to the az monitor
+    .status_o(  sample_acquisition_az_status ),
+    .adc_measure_trig_o( sample_acquisition_az_adc_measure_trig)
+  );
+
+
+
 
 
 
@@ -420,6 +467,7 @@ module top (
     . reg_mode(reg_mode),
     . reg_direct(reg_direct),
 
+    . reg_sa_arm_trigger ( reg_sa_arm_trigger ),
 
 
     // inputs
@@ -441,8 +489,6 @@ module top (
 */
 
 /*
-    // outputs signal acquisiation
-    .reg_sa_arm_trigger ( reg_sa_arm_trigger ),
 
 
     .reg_adc_p_clk_count_reset(reg_adc_p_clk_count_reset ),
