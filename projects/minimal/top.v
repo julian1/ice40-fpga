@@ -357,9 +357,6 @@ module top (
   // now a wire.  output wire [ 2-1:0]  monitor_o       // driven as wire/assign.
   output reg [ 2-1:0]  monitor_o
 */
-  // wire          adc2_measure_trig;
-  // wire          adc2_measure_valid;
-
 
 
   wire          sample_acquisition_az_sw_pc_ctl;
@@ -453,6 +450,30 @@ module top (
     .h( { 1'b0, sa_no_az_test_out } ),             // 7
 */
 
+
+    .e( {  { 32 - 25 { 'b0 }},                  // 25
+          4'b0,                               // 21  adc ref mux
+          1'b0,                               // 20
+          sample_acquisition_az_azmux,        // 16
+          1'b0,                             // 15   - should be reg_direct
+          sample_acquisition_az_sw_pc_ctl,   // 14
+          2'b0,                             // 12    - should be reg_direct.
+          adc_test_monitor, sample_acquisition_az_monitor,    // 4
+          3'b0,                             // 1    - should be reg_direct.
+          sample_acquisition_az_led0        // 0
+        } ),
+
+
+/*
+  wire          sample_acquisition_az_sw_pc_ctl;  done
+  wire [4-1:0]  sample_acquisition_az_azmux;      done
+  wire          sample_acquisition_az_led0;       done.
+  wire [2-1:0]  sample_acquisition_az_monitor;    done
+  wire [3-1:0]  sample_acquisition_az_status;
+*/
+
+
+
     .sel( reg_mode[ 3-1 : 0 ]),
 
     // add leds and monitor first, as this is the most generic functionality
@@ -461,9 +482,7 @@ module top (
               adc_refmux_o,                   // 21     // better name adc_refmux   adc_cmpr_latch
               adc_cmpr_latch_o,             // 20
               azmux_o,                   // 16
-              sig_pc_sw_o,
-              // sig_pc2_sw_o,             // 15
-              // sig_pc1_sw_o,             // 14
+              sig_pc_sw_o,                // 14
               meas_complete_o,          // 13     // interupt_ctl *IS* generic so should be at start, and connects straight to adum. so place at beginning. same argument for meas_complete
               spi_interrupt_ctl_o,      // 12     todo rename. drop the 'ctl'.
               monitor_o,                // 4
