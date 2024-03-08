@@ -17,6 +17,9 @@
 `include "register_set.v"
 `include "sample_acquisition_pc.v"
 
+`include "sample_acquisition_az.v"
+
+
 
 `default_nettype none
 
