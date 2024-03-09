@@ -213,25 +213,6 @@ module top (
 
 
 
-/*
-  wire [32-1:0] reg_4094;   // TODO remove
-
-  assign { GLB_4094_OE_CTL } = reg_4094;    //  lo. start up not enabled.
-  // assign { GLB_4094_OE_CTL } = 1;    //  on for test.  should defer to mcu control. after check supplies.
-
-  wire [32-1 :0] reg_mode;     // two bits
-  wire [32-1 :0] reg_direct;
-  wire [32-1 :0] reg_direct2;
-  wire [32-1 :0] reg_reset;
-
-  wire [32-1 :0] reg_sa_p_clk_count_precharge_i;
-
-
-  wire [32-1 :0] reg_adc_p_clk_count_aperture;  // 32/31 bit nice. for long sample.
-  wire [32-1 :0] reg_adc_p_clk_count_reset;
-
-*/
-
 
   // readable inputs
   wire [32 - 1 :0] reg_status ;
@@ -353,18 +334,8 @@ module top (
 
 
 
-/*
-  // outputs.
-  output reg adc_measure_trig_o,
-  output reg  sw_pc_ctl_o,
-  output reg [ 4-1:0 ] azmux_o,
-  output reg led0_o,
-  // must be a register if driven synchronously.
-  output reg [3-1: 0 ] status_o,        // bit 0 - hi/lo,  bit 1 - prim/w4,   bit 2. reserved.
 
-  // now a wire.  output wire [ 2-1:0]  monitor_o       // driven as wire/assign.
-  output reg [ 2-1:0]  monitor_o
-*/
+
 
 
   wire [2-1:0]  sample_acquisition_az_sw_pc_ctl;
@@ -373,12 +344,6 @@ module top (
   wire [2-1:0]  sample_acquisition_az_monitor;
   wire [3-1:0]  sample_acquisition_az_status;
   // wire          sample_acquisition_az_adc_measure_trig;
-
-/*
-  output reg [32-1:0] reg_sa_p_azmux_lo_val,
-  output reg [32-1:0] reg_sa_p_azmux_hi_val,
-  output reg [32-1:0] reg_sa_p_sw_pc_ctl_hi_val,
-*/
 
 
   sample_acquisition_az
