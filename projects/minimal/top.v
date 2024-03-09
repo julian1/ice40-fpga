@@ -460,6 +460,11 @@ module top (
           sample_acquisition_az_led0        // 0
         } ),
 /*
+  wire          adc_test_measure_trig;
+  wire          adc_test_measure_valid;
+  wire [6-1:0 ] adc_test_monitor;
+
+
   wire          sample_acquisition_az_sw_pc_ctl;  done
   wire [4-1:0]  sample_acquisition_az_azmux;      done
   wire          sample_acquisition_az_led0;       done.
