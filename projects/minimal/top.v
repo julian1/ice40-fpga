@@ -373,8 +373,11 @@ module top (
 
     // inputs
     .arm_trigger_i( reg_sa_arm_trigger[0 ]  ) ,
-    .azmux_lo_val_i(  `S7  ),                       // TODO change to register
     .adc_measure_valid_i(   adc_test_measure_valid ),                     // fan-in from adc
+
+    // TODO move to registers
+    .p_azmux_lo_val_i(  `S7  ),
+    .p_azmux_hi_val_i(  `S3  ),
     .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]  ),     // done
 
     // outputs

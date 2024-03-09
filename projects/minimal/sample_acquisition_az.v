@@ -14,7 +14,7 @@
 
 
 
-`define AZMUX_PCOUT    `S3     // 2024.  FIXME
+// `define AZMUX_PCOUT    `S3     // 2024.  FIXME
 
 
 
@@ -27,7 +27,11 @@ module sample_acquisition_az (
 
   // inputs
   input arm_trigger_i,              // why doesn't this generate a warning.
-  input [ 4-1 : 0 ] azmux_lo_val_i,
+
+  input [ 4-1 : 0 ] p_azmux_lo_val_i,
+  input [ 4-1 : 0 ] p_azmux_hi_val_i,
+
+
   input adc_measure_valid_i,
 
   // reg [24-1:0]  p_clk_count_precharge_i = `CLK_FREQ * 500e-6 ;   // 500us.
@@ -60,7 +64,7 @@ module sample_acquisition_az (
   assign monitor_o[0] = adc_measure_trig_o;
   // assign monitor_o[1] = adc_measure_valid_i;
 
-  assign monitor_o[1] =  azmux_o == `AZMUX_PCOUT;   // taking a hi.
+  assign monitor_o[1] =  azmux_o == p_azmux_hi_val_i ; // `AZMUX_PCOUT;
 
 
 
@@ -103,7 +107,7 @@ module sample_acquisition_az (
             begin
               state           <= 25;
               clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
-              azmux_o           <= `AZMUX_PCOUT;
+              azmux_o           <= p_azmux_hi_val_i;
 
               /*/ do we set the hi/lo status - at the start of adc measurement. or after complete/valid.
                   status should be established before the adc_valid .
@@ -180,7 +184,7 @@ module sample_acquisition_az (
           begin
             state           <= 52;
             clk_count_down  <= p_clk_count_precharge_i; // time less important here
-            azmux_o           <= azmux_lo_val_i;
+            azmux_o           <= p_azmux_lo_val_i;
 
           end
 
