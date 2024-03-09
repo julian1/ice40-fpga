@@ -62,6 +62,7 @@ module top (
   input  SPI_CS2,
 
 
+  ///////////
   output [ 4-1: 0 ] leds_o,
 
   output [ 8-1: 0]  monitor_o,
@@ -86,9 +87,12 @@ module top (
   input U1004_4094_DATA,
 
 
+  input trigger_source_external_o,   // trigger_ext_out   - need to re
+  input trigger_source_internal_o,   // trigger_int_out 38
+  input unused1_o,                    // 39
+
 
   output spi_interrupt_ctl_o,
-
   output meas_complete_o,
 
 

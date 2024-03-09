@@ -48,8 +48,14 @@ set_io SPI_CS2          61
 # TODO drop the ctl. because _ctl==_o ??
 set_io spi_interrupt_ctl_o 62
 
-# ctl_o or drop
+#
+
+set_io trigger_source_external_o   37      # // trigger_ext_out   - need to re
+set_io trigger_source_internal_o   38     #// trigger_int_out 38
+set_io unused1_o          39
 set_io meas_complete_o    41
+
+
 
 ###############################
 
@@ -106,8 +112,6 @@ set_io CLK              129
 set_io sig_pc_sw_o[0]     78
 set_io sig_pc_sw_o[1]     79
 
-#set_io sig_pc1_sw_o     78
-#set_io sig_pc2_sw_o     79
 
 
 # az mux
@@ -133,7 +137,6 @@ set_io adc_refmux_o[3]      144
 
 
 
-# set_io UNUSED_1         78  # this is unconnected.  but aligns with level-shift ic. .  rename RESERVED.
 
 
 # set_io LINE_SENSE_OUT   80
@@ -142,39 +145,6 @@ set_io adc_refmux_o[3]      144
 # set_io OHMS_OVP_OUT     88
 # set_io SUPPLY_SENSE_OUT 90
 # set_io UNUSED_2         91    # connects to level-shift.  but level-shift unconnected. rename RESERVED.
-
-
-# set_io SIG_PC_SW_CTL    93
-
-# set_io U402_EN_CTL      94
-# set_io U402_A0_CTL      95
-# set_io U402_A1_CTL      96
-# set_io U402_A2_CTL      97
-
-# set_io U414_EN_CTL      104
-# set_io U414_A0_CTL      105
-# set_io U414_A1_CTL      106
-# set_io U414_A2_CTL      107
-
-# set_io U413_EN_CTL      98
-# set_io U413_A0_CTL      99
-# set_io U413_A1_CTL      101
-# set_io U413_A2_CTL      102
-
-
-
-###############################
-
-# set_io TRIGGER_EXT_OUT  38
-# set_io TRIGGER_INT_OUT  39
-# set_io ISO_UNUSED_OUT   41
-# set_io MEAS_COMPLETE_CTL 42
-
-
-# set_io SPI_CLK          56
-# set_io SPI_MOSI         60
-# set_io SPI_MISO         62
-# set_io SPI_CS           64
 
 
 ###############################
