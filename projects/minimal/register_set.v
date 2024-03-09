@@ -37,12 +37,21 @@
 ///////////////////////
 
 //  sample acquisition.
-`define REG_SA_ARM_TRIGGER   19
-`define REG_SA_P_CLK_COUNT_PRECHARGE 21
+`define REG_SA_ARM_TRIGGER              19                               // TODO reassign.  conflict with aperture
+`define REG_SA_P_CLK_COUNT_PRECHARGE    21
+`define REG_SA_P_AZMUX_LO_VAL           22
+`define REG_SA_P_AZMUX_HI_VAL           23
+`define REG_SA_P_SW_PC_CTL_HI_VAL       24
+
+
+
+
 
 // adc parameters
-`define REG_ADC_P_APERTURE          20   // clk sample time. change name aperture.  // TODO reassign.
-`define REG_ADC_P_CLK_COUNT_RESET   25
+`define REG_ADC_P_APERTURE              20   // clk sample time. change name aperture.  // TODO reassign. conflict with trigger.
+`define REG_ADC_P_CLK_COUNT_RESET       25
+
+
 
 
 // adc counts
@@ -94,12 +103,19 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   output reg [32-1:0] reg_4094,     // TODO change name it's a state register for OE. status .  or SR. reg_4094_.   or SR_4094,   sr_4094.
   output reg [32-1:0] reg_mode,
   output reg [32-1:0] reg_direct,
-  output reg [32-1:0] reg_direct2,     //  unused.
-  output reg [32-1:0] reg_reset,      // unused.
+  // output reg [32-1:0] reg_direct2,     //  unused.
+  // output reg [32-1:0] reg_reset,      // unused.
+
 
   // outputs signal acquisition
   output reg [32-1:0] reg_sa_arm_trigger,
   output reg [32-1:0] reg_sa_p_clk_count_precharge,
+  output reg [32-1:0] reg_sa_p_azmux_lo_val,
+  output reg [32-1:0] reg_sa_p_azmux_hi_val,
+  output reg [32-1:0] reg_sa_p_sw_pc_ctl_hi_val,
+
+
+
 
 
   // outputds adc
@@ -128,7 +144,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
     // reg_mode      = 0;
     reg_mode      = 0;
 
-    // todo remove reg_led.
+    // TODO remove this
     // reg_led       = 24'b101010101010101010101111; // magic, keep. useful test vector
     // reg_led       = 24'b101010101010101010101010; // magic, keep. useful test vector
     reg_spi_mux   = 0;          // no spi device active
@@ -138,8 +154,12 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
     // reg_reset     <= 0;
 
     reg_sa_arm_trigger <= 0;
-
     reg_sa_p_clk_count_precharge  <= `CLK_FREQ * 500e-6 ;   // == 10000 ==  500us.
+    reg_sa_p_azmux_lo_val <= `S7 ;
+    reg_sa_p_azmux_hi_val <= `S3 ;
+    reg_sa_p_sw_pc_ctl_hi_val <= 2'b01 ;
+
+
 
     reg_adc_p_aperture            <= `CLK_FREQ * 0.2 ;      // 200ms.
     reg_adc_p_clk_count_reset     <= 24'd10000 ;            // 20000000 * 0.5e-3 == 10000   500us.
@@ -204,8 +224,14 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
                ////////
 
-              `REG_SA_ARM_TRIGGER:          out <= reg_sa_arm_trigger << 8;
-              `REG_SA_P_CLK_COUNT_PRECHARGE: out <=  reg_sa_p_clk_count_precharge << 8;
+              `REG_SA_ARM_TRIGGER:            out <= reg_sa_arm_trigger << 8;
+              `REG_SA_P_CLK_COUNT_PRECHARGE:  out <= reg_sa_p_clk_count_precharge << 8;
+              `REG_SA_P_AZMUX_LO_VAL:         out <= reg_sa_p_azmux_lo_val << 8;
+              `REG_SA_P_AZMUX_HI_VAL:         out <= reg_sa_p_azmux_hi_val << 8;
+              `REG_SA_P_SW_PC_CTL_HI_VAL:     out <= reg_sa_p_sw_pc_ctl_hi_val << 8;
+
+
+              /////
 
               `REG_ADC_P_APERTURE:          out <= reg_adc_p_aperture << 8;     // clk_count_sample_n clk_time_sample_clksample_time ??
               `REG_ADC_P_CLK_COUNT_RESET:   out <= reg_adc_p_clk_count_reset << 8;
@@ -250,6 +276,11 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
             `REG_SA_ARM_TRIGGER:            reg_sa_arm_trigger <= bin;
             `REG_SA_P_CLK_COUNT_PRECHARGE:  reg_sa_p_clk_count_precharge <= bin;
+            `REG_SA_P_AZMUX_LO_VAL:         reg_sa_p_azmux_lo_val <= bin;
+            `REG_SA_P_AZMUX_HI_VAL:         reg_sa_p_azmux_hi_val <= bin;
+            `REG_SA_P_SW_PC_CTL_HI_VAL:     reg_sa_p_sw_pc_ctl_hi_val <= bin;
+
+              ////
 
 
             `REG_ADC_P_APERTURE:          reg_adc_p_aperture <= bin;
