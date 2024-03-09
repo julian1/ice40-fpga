@@ -12,8 +12,10 @@
 // TODO move these to common file.
 
 // TODO - add these in mcu code also.  it gets too confusing otherwise.
-`define SW_PC_SIGNAL    1
-`define SW_PC_BOOT      0
+
+// should be removed.
+// `define SW_PC_SIGNAL    1
+// `define SW_PC_BOOT      0
 
 
 // AZMUX PC-OUT select the hi
