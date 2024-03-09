@@ -223,7 +223,7 @@ module top (
   wire [32-1 :0] reg_sa_p_clk_count_precharge_i;
 
 
-  wire [32-1 :0] reg_adc_p_aperture;  // 32/31 bit nice. for long sample.
+  wire [32-1 :0] reg_adc_p_clk_count_aperture;  // 32/31 bit nice. for long sample.
   wire [32-1 :0] reg_adc_p_clk_count_reset;
 
 */
@@ -283,7 +283,7 @@ module top (
 
 
 
-  wire [32-1 :0] reg_adc_p_aperture;  // 32/31 bit nice. for long sample.
+  wire [32-1 :0] reg_adc_p_clk_count_aperture;  // 32/31 bit nice. for long sample.
   wire [32-1:0]  reg_sa_p_clk_count_precharge;
 
 
@@ -309,7 +309,7 @@ module top (
 
     // TODO - rename   , and prefix p_ .  p_p_clk_sample_duration_i
     // inputs
-    .p_clk_sample_duration_i( reg_adc_p_aperture ),
+    .p_clk_sample_duration_i( reg_adc_p_clk_count_aperture ),
     .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0] ),
 
     // outputs
@@ -335,7 +335,7 @@ module top (
     .clk(CLK),
 
     // inputs
-    .p_clk_count_aperture_i( reg_adc_p_aperture ),
+    .p_clk_count_aperture_i( reg_adc_p_clk_count_aperture ),
     .adc_measure_trig_i( adc_test_measure_trig ),
 
     // outputs
@@ -533,7 +533,7 @@ module top (
     . reg_status( reg_status ),
 
     // outputs - sample acquisition
-    . reg_adc_p_aperture( reg_adc_p_aperture),
+    . reg_adc_p_clk_count_aperture( reg_adc_p_clk_count_aperture),
     . reg_sa_p_clk_count_precharge( reg_sa_p_clk_count_precharge),
 
 
