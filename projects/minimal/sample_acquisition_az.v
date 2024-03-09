@@ -39,7 +39,7 @@ module sample_acquisition_az (
 
   // outputs.
   output reg adc_measure_trig_o,
-  output reg  sw_pc_ctl_o,
+  output reg [ 2-1: 0]  sw_pc_ctl_o,
   output reg [ 4-1:0 ] azmux_o,
   output reg led0_o,
   // must be a register if driven synchronously.
@@ -93,7 +93,7 @@ module sample_acquisition_az (
           begin
             state           <= 15;
             clk_count_down  <= p_clk_count_precharge_i;
-            sw_pc_ctl_o       <= `SW_PC_BOOT;
+            sw_pc_ctl_o       <= 2'b00 ; // `SW_PC_BOOT;
           end
         15:
           if(clk_count_down == 0)
@@ -130,7 +130,7 @@ module sample_acquisition_az (
           begin
             state           <= 33;
             clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
-            sw_pc_ctl_o       <= `SW_PC_SIGNAL;
+            sw_pc_ctl_o       <= 2'b10 ; // SW_PC_SIGNAL;
           end
 
         33:
@@ -170,7 +170,7 @@ module sample_acquisition_az (
           begin
             state           <= 45;
             clk_count_down  <= p_clk_count_precharge_i; // time less important here
-            sw_pc_ctl_o       <= `SW_PC_BOOT;
+            sw_pc_ctl_o       <= 2'b00; // `SW_PC_BOOT;
           end
 
         45:

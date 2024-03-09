@@ -359,7 +359,7 @@ module top (
 */
 
 
-  wire          sample_acquisition_az_sw_pc_ctl;
+  wire [2-1:0]  sample_acquisition_az_sw_pc_ctl;
   wire [4-1:0]  sample_acquisition_az_azmux;
   wire          sample_acquisition_az_led0;
   wire [2-1:0]  sample_acquisition_az_monitor;
@@ -455,7 +455,6 @@ module top (
           4'b0,                               // 21  adc ref mux
           1'b0,                               // 20
           sample_acquisition_az_azmux,        // 16
-          1'b0,                             // 15   - should be reg_direct
           sample_acquisition_az_sw_pc_ctl,   // 14
           2'b0,                             // 12    - should be reg_direct.
           adc_test_monitor, sample_acquisition_az_monitor,    // 4
