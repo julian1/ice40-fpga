@@ -141,19 +141,13 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   // To use in an inout. the initial block is a driver. so must be placed here.
   initial begin
 
-    // reg_mode      = 0;
-    reg_mode      = 0;
-
-    // TODO remove this
-    // reg_led       = 24'b101010101010101010101111; // magic, keep. useful test vector
-    // reg_led       = 24'b101010101010101010101010; // magic, keep. useful test vector
+    // control
     reg_spi_mux   = 0;          // no spi device active
     reg_4094      = 0;
+    reg_mode      = 0;
     reg_direct    = 0  ;
-    // reg_direct2    = 0  ;
-    // reg_reset     <= 0;
 
-
+    // signal acquisition
     // it is nice to have sa defaults...
     // so can just put in az mode, and have something working.
     reg_sa_arm_trigger <= 0;
@@ -162,8 +156,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
     reg_sa_p_azmux_hi_val <= `S3 ;
     reg_sa_p_sw_pc_ctl_hi_val <= 2'b01 ;
 
-
-
+    // adc
     reg_adc_p_aperture            <= `CLK_FREQ * 0.2 ;      // 200ms.
     reg_adc_p_clk_count_reset     <= 24'd10000 ;            // 20000000 * 0.5e-3 == 10000   500us.
   end
