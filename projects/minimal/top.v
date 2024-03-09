@@ -87,9 +87,9 @@ module top (
   input U1004_4094_DATA,
 
 
-  input trigger_source_external_o,   // trigger_ext_out   - need to re
-  input trigger_source_internal_o,   // trigger_int_out 38
-  input unused1_o,                    // 39
+  input trigger_source_external_i,   // trigger_ext_out   - need to re
+  input trigger_source_internal_i,   // trigger_int_out 38
+  input unused1_i,                    // 39
 
 
   output spi_interrupt_ctl_o,
