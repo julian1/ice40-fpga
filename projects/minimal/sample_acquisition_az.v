@@ -26,16 +26,16 @@ module sample_acquisition_az (
   input   clk,
 
   // inputs
-  input arm_trigger_i,              // why doesn't this generate a warning.
 
   input [ 4-1 : 0 ] p_azmux_lo_val_i,
   input [ 4-1 : 0 ] p_azmux_hi_val_i,
-
-
-  input adc_measure_valid_i,
-
+  input [ 2-1 : 0 ] p_sw_pc_ctl_hi_val_i,
   // reg [24-1:0]  p_clk_count_precharge_i = `CLK_FREQ * 500e-6 ;   // 500us.
   input [24-1:0] p_clk_count_precharge_i,
+
+
+  input arm_trigger_i,              // why doesn't this generate a warning.
+  input adc_measure_valid_i,
 
   // outputs.
   output reg adc_measure_trig_o,
@@ -130,7 +130,7 @@ module sample_acquisition_az (
           begin
             state           <= 33;
             clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
-            sw_pc_ctl_o       <= 2'b10 ; // SW_PC_SIGNAL;
+            sw_pc_ctl_o     <= p_sw_pc_ctl_hi_val_i; // 2'b01 ; // SW_PC_SIGNAL;
           end
 
         33:

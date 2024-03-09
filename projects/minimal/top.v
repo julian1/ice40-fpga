@@ -378,6 +378,7 @@ module top (
     // TODO move to registers
     .p_azmux_lo_val_i(  `S7  ),
     .p_azmux_hi_val_i(  `S3  ),
+    .p_sw_pc_ctl_hi_val_i( 2'b01 ),
     .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]  ),     // done
 
     // outputs
