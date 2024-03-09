@@ -283,9 +283,13 @@ module top (
 
 
 
-  wire [32-1 :0] reg_adc_p_clk_count_aperture;  // 32/31 bit nice. for long sample.
-  wire [32-1:0]  reg_sa_p_clk_count_precharge;
+  wire [32-1:0] reg_sa_p_clk_count_precharge;
+  wire [32-1:0] reg_sa_p_azmux_lo_val;
+  wire [32-1:0] reg_sa_p_azmux_hi_val;
+  wire [32-1:0] reg_sa_p_sw_pc_ctl_hi_val;
 
+
+  wire [32-1 :0] reg_adc_p_clk_count_aperture;  // 32/31 bit nice. for long sample.
 
   ////////
   // rename sa_simple_ ?
@@ -366,6 +370,13 @@ module top (
   wire [3-1:0]  sample_acquisition_az_status;
   // wire          sample_acquisition_az_adc_measure_trig;
 
+/*
+  output reg [32-1:0] reg_sa_p_azmux_lo_val,
+  output reg [32-1:0] reg_sa_p_azmux_hi_val,
+  output reg [32-1:0] reg_sa_p_sw_pc_ctl_hi_val,
+*/
+
+
   sample_acquisition_az
   sample_acquisition_az (
 
@@ -376,9 +387,9 @@ module top (
     .adc_measure_valid_i(   adc_test_measure_valid ),                     // fan-in from adc
 
     // TODO move to registers
-    .p_azmux_lo_val_i(  `S7  ),
-    .p_azmux_hi_val_i(  `S3  ),
-    .p_sw_pc_ctl_hi_val_i( 2'b01 ),
+    .p_azmux_lo_val_i( reg_sa_p_azmux_lo_val[ 4-1:0]  ),
+    .p_azmux_hi_val_i( reg_sa_p_azmux_hi_val[ 4-1:0]  ),
+    .p_sw_pc_ctl_hi_val_i( reg_sa_p_sw_pc_ctl_hi_val[ 2-1:0] ),
     .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]  ),     // done
 
     // outputs
@@ -526,26 +537,23 @@ module top (
     . reg_mode(reg_mode),
     . reg_direct(reg_direct),
 
-    . reg_sa_arm_trigger ( reg_sa_arm_trigger ),
-
-
     // inputs
     . reg_status( reg_status ),
 
+
+    . reg_sa_arm_trigger ( reg_sa_arm_trigger ),
+
+    . reg_sa_p_clk_count_precharge( reg_sa_p_clk_count_precharge),
+    . reg_sa_p_azmux_lo_val( reg_sa_p_azmux_lo_val),
+    . reg_sa_p_azmux_hi_val( reg_sa_p_azmux_hi_val),
+    . reg_sa_p_sw_pc_ctl_hi_val( reg_sa_p_sw_pc_ctl_hi_val),
+
+
     // outputs - sample acquisition
     . reg_adc_p_clk_count_aperture( reg_adc_p_clk_count_aperture),
-    . reg_sa_p_clk_count_precharge( reg_sa_p_clk_count_precharge),
 
 
 
-/*
-    . reg_spi_mux(reg_spi_mux),
-    . reg_4094(reg_4094 ) ,
-    . reg_mode( reg_mode ),      // ok.
-    . reg_direct( reg_direct ),
-    . reg_direct2( reg_direct2 ),
-    . reg_reset( reg_reset),
-*/
 
 /*
 

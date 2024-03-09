@@ -95,13 +95,10 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
   // outputs
   // output/writable regs, driven by this module
-  // output reg [32-1:0] reg_led ,
   output reg [32-1:0] reg_spi_mux,
   output reg [32-1:0] reg_4094,     // TODO change name it's a state register for OE. status .  or SR. reg_4094_.   or SR_4094,   sr_4094.
   output reg [32-1:0] reg_mode,
   output reg [32-1:0] reg_direct,
-  // output reg [32-1:0] reg_direct2,     //  unused.
-  // output reg [32-1:0] reg_reset,      // unused.
 
 
   // outputs signal acquisition
