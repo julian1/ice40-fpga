@@ -153,6 +153,9 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
     // reg_direct2    = 0  ;
     // reg_reset     <= 0;
 
+
+    // it is nice to have sa defaults...
+    // so can just put in az mode, and have something working.
     reg_sa_arm_trigger <= 0;
     reg_sa_p_clk_count_precharge  <= `CLK_FREQ * 500e-6 ;   // == 10000 ==  500us.
     reg_sa_p_azmux_lo_val <= `S7 ;

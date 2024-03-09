@@ -450,8 +450,8 @@ module top (
     .h( { 1'b0, sa_no_az_test_out } ),             // 7
 */
 
-
     // mode/AF  5
+    // keep this mode, even when add the real adc. supports tests/testing without the adc
     .f( {  { 32 - 25 { 'b0 }},                  // 25
           4'b0,                               // 21  adc ref mux
           1'b0,                               // 20
