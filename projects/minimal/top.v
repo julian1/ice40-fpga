@@ -408,7 +408,7 @@ module top (
     .c( { 32 { 1'b1 } }    ),                   // mode/AF 2  MODE_HI           all outputs hi.
     .d( test_pattern_out ),                     // mode/AF 3  MODE_PATTERN      pattern. needs xtal.
 
-    // mode/AF 4 MODE_PC
+    // mode/AF 4 MODE_PC_TEST
     .e( {  { 32 - 15 { 'b0 }},
                                             // 15
           sample_acquisition_pc_sw_pc_ctl,  // 14
@@ -430,7 +430,7 @@ module top (
     .h( { 1'b0, sa_no_az_test_out } ),             // 7
 */
 
-    // mode/AF  5
+    // mode/AF  5  MODE_AZ_TEST
     // keep this mode, even when add the real adc. supports tests/testing without the adc
     .f( {  { 32 - 25 { 'b0 }},                  // 25
           4'b0,                               // 21  adc ref mux
