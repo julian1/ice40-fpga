@@ -37,7 +37,8 @@
 ///////////////////////
 
 //  sample acquisition.
-`define REG_SA_ARM_TRIGGER              20
+`define REG_SA_ARM_TRIGGER              20      // probably change reg to be a maskable source trigger.
+
 `define REG_SA_P_CLK_COUNT_PRECHARGE    21
 `define REG_SA_P_AZMUX_LO_VAL           22
 `define REG_SA_P_AZMUX_HI_VAL           23
