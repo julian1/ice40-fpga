@@ -128,7 +128,7 @@ set_io azmux_o[3]      80   # EN_CTL
 set_io adc_cmpr_latch_o   138
 
 # adc ref current mux
-# TODO adc_refmux_o
+# note - pin order on ic is counter-clockwise
 set_io adc_refmux_o[0]      141
 set_io adc_refmux_o[1]      142
 set_io adc_refmux_o[2]      143
