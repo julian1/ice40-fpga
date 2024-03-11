@@ -404,6 +404,8 @@ module top (
 
     // .a( { reg_direct[ 32 - 1 : 1 ] ,  led0 } ), // mode/AF 0                 could also project the the spi signals on the monitor.
     .a(  reg_direct  ),                         // mode/AF 0  MODE_DIRECT       note, could change to project the the spi signals on the monitor, for easier ddebuggin. no. because want direct to control all outputs for test.
+
+    // set all outputs lo, and all hi. are not really needed. just use reg_direct 0xffffffff ; and 0x00000000; etc
     .b(  32'b0  ),                              // mode/AF  1 MODE_LO           all outputs low.
     .c( { 32 { 1'b1 } }    ),                   // mode/AF 2  MODE_HI           all outputs hi.
     .d( test_pattern_out ),                     // mode/AF 3  MODE_PATTERN      pattern. needs xtal.
@@ -431,7 +433,7 @@ module top (
 */
 
     // mode/AF  5  MODE_AZ_TEST
-    // keep this mode, even when add the real adc. supports tests/testing without the adc
+    // very useful - allows testing precharge/az switching, even if don't have adc populated
     .f( {  { 32 - 25 { 'b0 }},                  // 25
           4'b0,                               // 21  adc ref mux
           1'b0,                               // 20
