@@ -411,13 +411,12 @@ module top (
     .d( test_pattern_out ),                     // mode/AF 3  MODE_PATTERN      pattern. needs xtal.
 
     // mode/AF 4 MODE_PC_TEST
-    .e( {  { 32 - 15 { 'b0 }},
-                                            // 15
-          sample_acquisition_pc_sw_pc_ctl,  // 14
-          2'b0,                             // 12   - should be reg_direct
-          sample_acquisition_pc_monitor,    // 4
-          3'b0,                             // 1    - should be reg_direct.
-          sample_acquisition_pc_led0        // 0
+    .e( {  { 32 - 14 { 'b0 }},
+                                             // 14
+          sample_acquisition_pc_sw_pc_ctl,  // 12+2
+          sample_acquisition_pc_monitor,    // 4+8
+          3'b0,                             // 1+3    - should be reg_direct.
+          sample_acquisition_pc_led0        // 0+1
         } ),
 
 /*
@@ -434,29 +433,18 @@ module top (
 
     // mode/AF  5  MODE_AZ_TEST
     // very useful - allows testing precharge/az switching, even if don't have adc populated
-    .f( {  { 32 - 25 { 'b0 }},                  // 25
-          4'b0,                               // 21  adc ref mux
-          1'b0,                               // 20
-          sample_acquisition_az_azmux,        // 16
-          sample_acquisition_az_sw_pc_ctl,   // 14
-          2'b0,                             // 12    - should be reg_direct.
-          adc_test_monitor, sample_acquisition_az_monitor,    // 4
-          3'b0,                             // 1    - should be reg_direct.
-          sample_acquisition_az_led0        // 0
+    .f( {  { 32 - 25 { 'b0 }},
+                                                // 25
+          1'b0, // meas_complete              // 24+1
+          1'b0,   // spi_interupt             // 23 + 1
+          1'b0,  // adc_cmpr_latch            // 22+1
+          4'b0,  // adc_refmux               // 18+4
+          sample_acquisition_az_azmux,        // 14+4
+          sample_acquisition_az_sw_pc_ctl,   // 12+2
+          adc_test_monitor, sample_acquisition_az_monitor,    // 4+8
+          3'b0,                             // 1+3    - should be reg_direct.
+          sample_acquisition_az_led0        // 0+1
         } ),
-/*
-  wire          adc_test_measure_trig;
-  wire          adc_test_measure_valid;
-  wire [6-1:0 ] adc_test_monitor;
-
-
-  wire          sample_acquisition_az_sw_pc_ctl;  done
-  wire [4-1:0]  sample_acquisition_az_azmux;      done
-  wire          sample_acquisition_az_led0;       done.
-  wire [2-1:0]  sample_acquisition_az_monitor;    done
-  wire [3-1:0]  sample_acquisition_az_status;
-*/
-
 
 
     .g( 32'b0 ),                                // mode/AF  6
@@ -464,11 +452,11 @@ module top (
 
 
 
-
     .sel( reg_mode[ 3-1 : 0 ]),
 
     // add leds and monitor first, as this is the most generic functionality
 
+/*
     .out( {   dummy_bits_o,               // 25
               adc_refmux_o,                   // 21     // better name adc_refmux   adc_cmpr_latch
               adc_cmpr_latch_o,             // 20
@@ -478,6 +466,17 @@ module top (
               spi_interrupt_ctl_o,      // 12     todo rename. drop the 'ctl'.
               monitor_o,                // 4
               leds_o                    // 0
+            }  )
+*/
+    .out( {   dummy_bits_o,               // 25
+              meas_complete_o,          // 24+1     // interupt_ctl *IS* generic so should be at start, and connects straight to adum. so place at beginning. same argument for meas_complete
+              spi_interrupt_ctl_o,      // 23+1     todo rename. drop the 'ctl'.
+              adc_cmpr_latch_o,         // 22+1
+              adc_refmux_o,             // 18+4     // better name adc_refmux   adc_cmpr_latch
+              azmux_o,                  // 14+4
+              sig_pc_sw_o,              // 12+2
+              monitor_o,                // 4+8
+              leds_o                    // 0+4
             }  )
 
   );
