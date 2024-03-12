@@ -125,7 +125,13 @@ set_io azmux_o[3]      80   # EN_CTL
 
 
 # adc comparator
-set_io adc_cmpr_latch_o   138
+set_io adc_cmpr_latch_ctl_o   138
+
+# 5V tolerant input pin.  # better name?
+set_io adc_cmpr_p_i       135
+
+
+
 
 # adc ref current mux
 # note - pin order on ic is counter-clockwise

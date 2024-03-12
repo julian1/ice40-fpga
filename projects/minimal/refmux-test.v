@@ -3,6 +3,8 @@
   simple modulation, to test the refmux
   slope-amp and comparator does not need to be fitted.
   but should add the comparator output to the monitor.
+  --
+  we have written this several times already as a test, so should keep it.
 */
 
 `default_nettype none
@@ -36,7 +38,6 @@
 
 
 
-// module refmux_test_modulation (
 
 module refmux_test (
 
@@ -45,22 +46,38 @@ module refmux_test (
   input [24-1:0]  p_clk_count_reset_i,      // useful if running stand-alone,
   input [24-1:0]  p_clk_count_fix_i,
 
+  // comparator input
+  input           cmpr_val_i,
 
-  output reg [ 6-1:0]  monitor_o,
+
+	// now a wire. again.
+  output wire [ 6-1:0]  monitor_o,
+
   output reg [ 3-1:0]  refmux_o,            // reference current mux
   output reg sigmux_o,                      // unused
+
+	output reg cmpr_latch_ctl_o
 );
 
 
-  reg [5-1:0]   state;
+  reg [5-1:0]   state ;
 
-  // initial begin does seem to be supported.
-  // TODO remove
+  // odd, this seems to be needed...
   initial begin
     state           = `STATE_RESET_START;   // 0
 
 
   end
+
+
+
+  // eg. ccombinatorial logic driven off the output of the regs/state/dff.
+  assign monitor_o[0] = (state == `STATE_FIX_POS);
+  assign monitor_o[1] = (state == `STATE_FIX_NEG);
+  assign monitor_o[2] = cmpr_val_i;
+
+  assign monitor_o[6-1: 3] = 3'b000 ;
+
 
   //////////////////////////////////////////////////////
   // counters and settings  ...
@@ -88,13 +105,12 @@ module refmux_test (
 
             clk_count_down   <= p_clk_count_reset_i;
 
-            monitor_o       <= 0;
 
             // JA
             sigmux_o          <= 0;
             refmux_o          <= `REFMUX_RESET;
 
-            // cmpr_latch_ctl          <= 1; // disable comparator, enable latch
+            cmpr_latch_ctl_o   <= 1; // disable comparator, enable latch
           end
 
 
@@ -111,7 +127,6 @@ module refmux_test (
             state             <= `STATE_FIX_POS;
             clk_count_down    <= p_clk_count_fix_i;
 
-            monitor_o[2-1:0]    <= 2'b01 ;
             refmux_o            <= `REFMUX_POS; // initial direction
 
           end
@@ -121,14 +136,11 @@ module refmux_test (
             state <= `STATE_FIX_NEG_START;
 
 
-
-
         `STATE_FIX_NEG_START:
           begin
             state         <= `STATE_FIX_NEG;
             clk_count_down    <= p_clk_count_fix_i;
 
-            monitor_o[2-1:0]    <= 2'b10 ;
             refmux_o        <= `REFMUX_NEG;
           end
 
@@ -139,14 +151,8 @@ module refmux_test (
             state <= `STATE_FIX_POS_START;
 
 
-
-
-
       endcase
-
-
     end
-
 
 endmodule
 

@@ -109,7 +109,10 @@ module top (
 
   // adc comparator latch ctl.
   // should be cmpr_latch_ctl
-  output adc_cmpr_latch_o,
+  output adc_cmpr_latch_ctl_o,
+
+  input adc_cmpr_p_i,
+
 
   // U902. adc ref current mux
   output [ 4-1: 0 ] adc_refmux_o,
@@ -402,10 +405,11 @@ module top (
     . p_clk_count_reset_i( $rtoi(  `CLK_FREQ * 500e-6 )  ), // 500us.
     . p_clk_count_fix_i(   $rtoi( `CLK_FREQ * 100e-6 )) ,  // 100us. initial but too long
 
+    . cmpr_val_i( adc_cmpr_p_i ),
+
     .monitor_o( refmux_test_monitor_o),
     /* ie. refmux order pos,neg,source,reset.
-      do we want to change this in main.pcf.
-    */
+      do we want to change this in main.pcf.. no keep ic sw pinout order.  */
     .refmux_o ( { refmux_test_refmux_o[  3  ],  refmux_test_refmux_o[ 0 +: 2 ]   }  ),
     .sigmux_o( refmux_test_refmux_o[ 2] )
   );
@@ -417,8 +421,8 @@ module top (
 
 
   ////////////////////////////
+  // unused. should be able to be wire?
   reg [32-25- 1:0] dummy_bits_o ;
-  // reg  output_led_dummy ;
 
 
   // mode, alternative function selection
@@ -467,19 +471,20 @@ module top (
           sample_acquisition_az_azmux,        // 14+4
           sample_acquisition_az_sw_pc_ctl,   // 12+2
           adc_test_monitor, sample_acquisition_az_monitor,    // 4+8
-          3'b0,                             // 1+3    - should be reg_direct.
+          3'b0,                             // 1+3
           sample_acquisition_az_led0        // 0+1
         } ),
 
 
     // mode  6. adc refmux test
+    // useful, when populating pcb,
     .g( {  { 32 - 22 { 'b0 }},
                                               // 22
           refmux_test_refmux_o,                // 18+4
           4'b0,    // azmux                  // 14+4
           2'b0 ,  // precharge               // 12+2
           2'b0, refmux_test_monitor_o,       // 4+8
-          4'b0   // leds                   // 0+4    - should be reg_direct.
+          4'b0   // leds                   // 0+4
         } ),
 
 
@@ -495,7 +500,7 @@ module top (
     .out( {   dummy_bits_o,               // 25
               meas_complete_o,          // 24+1     // interupt_ctl *IS* generic so should be at start, and connects straight to adum. so place at beginning. same argument for meas_complete
               spi_interrupt_ctl_o,      // 23+1     todo rename. drop the 'ctl'.
-              adc_cmpr_latch_o,         // 22+1
+              adc_cmpr_latch_ctl_o,         // 22+1
               adc_refmux_o,             // 18+4     // better name adc_refmux   adc_cmpr_latch
               azmux_o,                  // 14+4
               sig_pc_sw_o,              // 12+2
