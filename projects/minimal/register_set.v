@@ -146,13 +146,13 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
     // it is nice to have sa defaults...
     // so can just put in az mode, and have something working.
     reg_sa_arm_trigger <= 0;
-    reg_sa_p_clk_count_precharge  <= `CLK_FREQ * 500e-6 ;   // == 10000 ==  500us.
+    reg_sa_p_clk_count_precharge  <= $rtoi( `CLK_FREQ * 500e-6 );   // == 10000 ==  500us.
     reg_sa_p_azmux_lo_val <= `S7 ;
     reg_sa_p_azmux_hi_val <= `S3 ;
     reg_sa_p_sw_pc_ctl_hi_val <= 2'b01 ;
 
     // adc
-    reg_adc_p_clk_count_aperture            <= `CLK_FREQ * 0.2 ;      // 200ms.
+    reg_adc_p_clk_count_aperture  <=  $rtoi( `CLK_FREQ * 0.2 );      // 200ms.
     reg_adc_p_clk_count_reset     <= 24'd10000 ;            // 20000000 * 0.5e-3 == 10000   500us.
   end
 

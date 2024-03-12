@@ -19,7 +19,8 @@
 
 `include "sample_acquisition_az.v"
 
-`include "adc-test.v"
+`include "adc-test.v"       // change name adc-mock.
+`include "refmux-test.v"
 
 
 `default_nettype none
@@ -392,6 +393,28 @@ module top (
 
 
 
+  wire [6-1:0] refmux_test_monitor_o;
+  wire [4-1:0] refmux_test_refmux_o;
+
+  refmux_test refmux_test (
+
+    .clk(CLK),
+    . p_clk_count_reset_i( $rtoi(  `CLK_FREQ * 500e-6 )  ), // 500us.
+    . p_clk_count_fix_i(   $rtoi( `CLK_FREQ * 100e-6 )) ,  // 100us. initial but too long
+
+    .monitor_o( refmux_test_monitor_o),
+    /* ie. refmux order pos,neg,source,reset.
+      do we want to change this in main.pcf.
+    */
+    .refmux_o ( { refmux_test_refmux_o[  3  ],  refmux_test_refmux_o[ 0 +: 2 ]   }  ),
+    .sigmux_o( refmux_test_refmux_o[ 2] )
+  );
+
+
+
+
+
+
 
   ////////////////////////////
   reg [32-25- 1:0] dummy_bits_o ;
@@ -449,27 +472,26 @@ module top (
         } ),
 
 
-    .g( 32'b0 ),                                // mode/AF  6
+    // mode  6. adc refmux test
+    .g( {  { 32 - 22 { 'b0 }},
+                                              // 22
+          refmux_test_refmux_o,                // 18+4
+          4'b0,    // azmux                  // 14+4
+          2'b0 ,  // precharge               // 12+2
+          2'b0, refmux_test_monitor_o,       // 4+8
+          4'b0   // leds                   // 0+4    - should be reg_direct.
+        } ),
+
+
+
     .h( 32'b0 ),                                // mode/AF  7
 
 
 
     .sel( reg_mode[ 3-1 : 0 ]),
 
-    // add leds and monitor first, as this is the most generic functionality
+    // leds and monitor go first, since they are the most generic functionality
 
-/*
-    .out( {   dummy_bits_o,               // 25
-              adc_refmux_o,                   // 21     // better name adc_refmux   adc_cmpr_latch
-              adc_cmpr_latch_o,             // 20
-              azmux_o,                   // 16
-              sig_pc_sw_o,                // 14
-              meas_complete_o,          // 13     // interupt_ctl *IS* generic so should be at start, and connects straight to adum. so place at beginning. same argument for meas_complete
-              spi_interrupt_ctl_o,      // 12     todo rename. drop the 'ctl'.
-              monitor_o,                // 4
-              leds_o                    // 0
-            }  )
-*/
     .out( {   dummy_bits_o,               // 25
               meas_complete_o,          // 24+1     // interupt_ctl *IS* generic so should be at start, and connects straight to adum. so place at beginning. same argument for meas_complete
               spi_interrupt_ctl_o,      // 23+1     todo rename. drop the 'ctl'.
