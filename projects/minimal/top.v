@@ -19,7 +19,7 @@
 
 `include "sample_acquisition_az.v"
 
-`include "adc-test.v"       // change name adc-mock.
+`include "adc-mock.v"       // change name adc-mock.
 `include "refmux-test.v"
 
 
@@ -318,22 +318,21 @@ module top (
 
   ////////////////////////
 
-  // wire [ `NUM_BITS-1:0 ]  sa_no_az_test_out ;  // beter name ... _outputs_vec ?
-  wire          adc_test_measure_trig;
-  wire          adc_test_measure_valid;
-  wire [6-1:0 ] adc_test_monitor;
+  wire          adc_mock_measure_trig;
+  wire          adc_mock_measure_valid;
+  wire [6-1:0 ] adc_mock_monitor;
 
-  adc_test
-  adc_test (
+  adc_mock
+  adc_mock (
     .clk(CLK),
 
     // inputs
     .p_clk_count_aperture_i( reg_adc_p_clk_count_aperture ),
-    .adc_measure_trig_i( adc_test_measure_trig ),
+    .adc_measure_trig_i( adc_mock_measure_trig ),
 
     // outputs
-    .adc_measure_valid_o( adc_test_measure_valid ),
-    .monitor_o(  adc_test_monitor )
+    .adc_measure_valid_o( adc_mock_measure_valid ),
+    .monitor_o(  adc_mock_monitor )
   );
 
 
@@ -357,7 +356,7 @@ module top (
 
     // inputs
     .arm_trigger_i( reg_sa_arm_trigger[0 ]  ) ,
-    .adc_measure_valid_i(   adc_test_measure_valid ),                     // fan-in from adc
+    .adc_measure_valid_i(   adc_mock_measure_valid ),                     // fan-in from adc
 
     // TODO move to registers
     .p_azmux_lo_val_i( reg_sa_p_azmux_lo_val[ 4-1:0]  ),
@@ -371,7 +370,7 @@ module top (
     .led0_o(      sample_acquisition_az_led0  ),
     .monitor_o(   sample_acquisition_az_monitor  ),    // only pass 2 bit to the az monitor
     .status_o(  sample_acquisition_az_status ),
-    .adc_measure_trig_o(  adc_test_measure_trig  )
+    .adc_measure_trig_o(  adc_mock_measure_trig  )
   );
 
 
@@ -470,7 +469,7 @@ module top (
           4'b0,  // adc_refmux               // 18+4
           sample_acquisition_az_azmux,        // 14+4
           sample_acquisition_az_sw_pc_ctl,   // 12+2
-          adc_test_monitor, sample_acquisition_az_monitor,    // 4+8
+          adc_mock_monitor, sample_acquisition_az_monitor,    // 4+8
           3'b0,                             // 1+3
           sample_acquisition_az_led0        // 0+1
         } ),

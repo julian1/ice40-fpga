@@ -13,7 +13,7 @@
 `default_nettype none
 
 
-module adc_test (
+module adc_mock (
 
   input   clk,
 
