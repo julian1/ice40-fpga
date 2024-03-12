@@ -402,12 +402,11 @@ module top (
   mux_8to1_assign #( 32  )
   mux_8to1_assign_1  (
 
-    // .a( { reg_direct[ 32 - 1 : 1 ] ,  led0 } ), // mode/AF 0                 could also project the the spi signals on the monitor.
     .a(  reg_direct  ),                         // mode/AF 0  MODE_DIRECT       note, could change to project the the spi signals on the monitor, for easier ddebuggin. no. because want direct to control all outputs for test.
 
     /* TODO remove.
-        the modes for output lo, and output hi - are not really needed. just use reg_direct 0xffffffff ; and 0x00000000; etc.
-        and there is chance of damage, if parts are populated
+        the modes for output lo, and output hi - are not really needed. eg. mode 0; direct 0xffffffff ; or 0x00000000; etc.
+        and there maybe chance of damage, if parts are populated
       */
     .b(  32'b0  ),                              // mode/AF  1 MODE_LO           all outputs low.
     .c( { 32 { 1'b1 } }    ),                   // mode/AF 2  MODE_HI           all outputs hi.
