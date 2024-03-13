@@ -102,7 +102,7 @@ module top (
   // output sig_pc1_sw_o,
   // output sig_pc2_sw_o ,
 
-  output [ 2-1: 0 ] sig_pc_sw_o,
+  output [ 2-1: 0 ] pc_sw_o,
 
   // az mux
   // u410
@@ -291,6 +291,8 @@ module top (
   /*
     - note that we can still hook this up to the adc. for measurement.
     - slightly different from a direct mode. where there is no pc switching.
+
+    TODO. rename include test in name. it's actually sample acquisition.
   */
 
   wire sample_acquisition_pc_sw_pc_ctl;
@@ -323,7 +325,7 @@ module top (
 
   wire          adc_mock_measure_trig;
   wire          adc_mock_measure_valid;
-  wire [6-1:0 ] adc_mock_monitor;
+  wire [6-1:0 ] adc_mock_monitor6;
 
   adc_mock
   adc_mock (
@@ -335,19 +337,14 @@ module top (
 
     // outputs
     .adc_measure_valid_o( adc_mock_measure_valid ),
-    .monitor_o(  adc_mock_monitor )
+    .monitor_o(  adc_mock_monitor6 )
   );
-
-
-
-
-
 
 
   wire [2-1:0]  sample_acquisition_az_sw_pc_ctl;
   wire [4-1:0]  sample_acquisition_az_azmux;
   wire          sample_acquisition_az_led0;
-  wire [2-1:0]  sample_acquisition_az_monitor;
+  wire [2-1:0]  sample_acquisition_az_monitor2;
   wire [3-1:0]  sample_acquisition_az_status;
   // wire          sample_acquisition_az_adc_measure_trig;
 
@@ -371,13 +368,13 @@ module top (
     .sw_pc_ctl_o( sample_acquisition_az_sw_pc_ctl  ),
     .azmux_o (    sample_acquisition_az_azmux  ),
     .led0_o(      sample_acquisition_az_led0  ),
-    .monitor_o(   sample_acquisition_az_monitor  ),    // only pass 2 bit to the az monitor
+    .monitor_o(   sample_acquisition_az_monitor2  ),    // only pass 2 bit to the az monitor
     .status_o(  sample_acquisition_az_status ),
     .adc_measure_trig_o(  adc_mock_measure_trig  )
   );
 
 
-
+  ////////////////////
 
 
 
@@ -428,7 +425,7 @@ module top (
   // do the no_az first. as the simplest.
 
   // TODO rename adc
-  wire [6-1: 0 ] adc2_monitor;
+  wire [6-1: 0 ] adc2_monitor6;
   wire [4-1: 0 ] adc2_mux;
   wire           adc2_cmpr_latch_ctl;
 
@@ -470,7 +467,7 @@ module top (
     // outputs - ctrl
     .adc_measure_valid( adc2_measure_valid),    // OK, fan out back to the sa controllers
     .cmpr_latch_ctl( adc2_cmpr_latch_ctl   ),
-    .monitor(  adc2_monitor  ),
+    .monitor(  adc2_monitor6  ),
     .refmux(  { adc2_mux[  3  ],  adc2_mux[ 0 +: 2 ]   } ),           // pos, neg, reset. are on two different 4053,
     .sigmux(    adc2_mux[  2  ] ),                                    // perhaps clearer if split into adcrefmux and adcsigmux in the wire assignment. but it would then need two vars.
                                                                       // which isn't representative of the single synchronizer. so do it here instead.
@@ -492,7 +489,7 @@ module top (
   // wire [ `NUM_BITS-1:0 ]  sample_acquisition_no_az_out ;  // beter name ... _outputs_vec ?
   wire sample_acquisition_no_az_adc2_measure_trig;
   wire sample_acquisition_no_az_led0 ;
-  wire [2-1:0] sample_acquisition_no_az_monitor;
+  wire [2-1:0] sample_acquisition_no_az_monitor2;
 
   sample_acquisition_no_az
   sample_acquisition_no_az (
@@ -505,7 +502,7 @@ module top (
 
     // outputs
     .led0(      sample_acquisition_no_az_led0  ),
-    .monitor(   sample_acquisition_no_az_monitor  ),    // we could pass subset of monitor if watned. eg. only 4 pins...
+    .monitor(   sample_acquisition_no_az_monitor2  ),    // we could pass subset of monitor if watned. eg. only 4 pins...
     .adc_measure_trig( sample_acquisition_no_az_adc2_measure_trig),
   );
 
@@ -570,7 +567,7 @@ module top (
           4'b0,  // adc_refmux               // 18+4
           sample_acquisition_az_azmux,        // 14+4
           sample_acquisition_az_sw_pc_ctl,   // 12+2
-          adc_mock_monitor, sample_acquisition_az_monitor,    // 4+8
+          adc_mock_monitor6, sample_acquisition_az_monitor2,    // 4+8
           3'b0,                             // 1+3
           sample_acquisition_az_led0        // 0+1
         } ),
@@ -598,12 +595,12 @@ module top (
           adc2_mux,             // adc_refmux     // 18+4
           reg_sa_p_azmux_hi_val[4-1: 0 ],        // 14+4      // can use azmux hi-val
           2'b0 ,                  // precharge    // 12+2     // TODO fixme. samples boot only.  use reg_sa_p_pc.
-          adc2_monitor, sample_acquisition_no_az_monitor,    // 4+8
+          adc2_monitor6, sample_acquisition_no_az_monitor2,    // 4+8
           3'b0,                             // 1+3
           sample_acquisition_az_led0        // 0+1
         } ),
 /*
-  wire [6-1: 0 ] adc2_monitor;
+  wire [6-1: 0 ] adc2_monitor6;
   wire [4-1: 0 ] adc2_mux;
   wire           adc2_cmpr_latch_ctl;
 
@@ -627,7 +624,7 @@ module top (
               adc_cmpr_latch_ctl_o,         // 22+1
               adc_refmux_o,             // 18+4     // better name adc_refmux   adc_cmpr_latch
               azmux_o,                  // 14+4
-              sig_pc_sw_o,              // 12+2
+              pc_sw_o,              // 12+2
               monitor_o,                // 4+8
               leds_o                    // 0+4
             }  )

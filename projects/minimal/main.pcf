@@ -110,8 +110,9 @@ set_io U1004_4094_DATA  98
 set_io CLK              129
 
 
-set_io sig_pc_sw_o[0]     78
-set_io sig_pc_sw_o[1]     79
+# TODO -  consider rename just 'pc switch'.  not 'sig pc switch'.
+set_io pc_sw_o[0]     78
+set_io pc_sw_o[1]     79
 
 
 
