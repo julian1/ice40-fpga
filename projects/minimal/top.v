@@ -331,9 +331,7 @@ module top (
   adc_mock (
 
     .clk(CLK),
-
     .reset_n( adc_mock_reset_n ),
-    // .adc_measure_trig_i( adc_mock_reset_n ),  // n implies input
 
     // inputs
     .p_clk_count_aperture_i( reg_adc_p_clk_count_aperture ),
