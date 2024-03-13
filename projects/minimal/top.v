@@ -323,17 +323,20 @@ module top (
 
   ////////////////////////
 
-  wire          adc_mock_measure_trig;
+  wire          adc_mock_reset_n;
   wire          adc_mock_measure_valid;
   wire [6-1:0 ] adc_mock_monitor6;
 
   adc_mock
   adc_mock (
+
     .clk(CLK),
+
+    .reset_n( adc_mock_reset_n ),
+    // .adc_measure_trig_i( adc_mock_reset_n ),  // n implies input
 
     // inputs
     .p_clk_count_aperture_i( reg_adc_p_clk_count_aperture ),
-    .adc_measure_trig_i( adc_mock_measure_trig ),
 
     // outputs
     .adc_measure_valid_o( adc_mock_measure_valid ),
@@ -341,6 +344,8 @@ module top (
   );
 
 
+  // fucking hell it's getting a bit complicated. 
+  // we need to rename this.   sa_az_adc_mock_sw_pc_ctl.
   wire [2-1:0]  sample_acquisition_az_sw_pc_ctl;
   wire [4-1:0]  sample_acquisition_az_azmux;
   wire          sample_acquisition_az_led0;
@@ -370,7 +375,10 @@ module top (
     .led0_o(      sample_acquisition_az_led0  ),
     .monitor_o(   sample_acquisition_az_monitor2  ),    // only pass 2 bit to the az monitor
     .status_o(  sample_acquisition_az_status ),
-    .adc_measure_trig_o(  adc_mock_measure_trig  )
+
+
+    // .adc_measure_trig_o(  adc_mock_reset_n  )
+    .adc_reset_no(  adc_mock_reset_n  )
   );
 
 
@@ -425,12 +433,13 @@ module top (
   // do the no_az first. as the simplest.
 
   // TODO rename adc
+  wire          adc2_reset_n;
+  wire          adc2_measure_valid;
+
   wire [6-1: 0 ] adc2_monitor6;
   wire [4-1: 0 ] adc2_mux;
   wire           adc2_cmpr_latch_ctl;
 
-  wire          adc2_measure_trig;
-  wire          adc2_measure_valid;
 
   wire [24-1:0] adc2_clk_count_refmux_reset_last;
   wire [32-1:0] adc2_clk_count_refmux_neg_last;    // maybe add reg_ prefix. No. they are not registers, until they are in the register_bank context.
@@ -447,10 +456,9 @@ module top (
   adc2(
 
     .clk(CLK),
-    // .reset( 1'b0 ), // not needed. always interruptable.
+    .reset_n( adc2_reset_n),      // OK.
 
-    // inputs
-    .adc_measure_trig( adc2_measure_trig),      // OK.
+
     .cmpr_val( adc_cmpr_p_i ),                  // OK.  fan in-  rename top_adc_cmpr_p_i ?
 
     . p_clk_count_aperture( reg_adc_p_clk_count_aperture /*reg_adc_p_aperture */),
@@ -487,7 +495,7 @@ module top (
 
 
   // wire [ `NUM_BITS-1:0 ]  sample_acquisition_no_az_out ;  // beter name ... _outputs_vec ?
-  wire sample_acquisition_no_az_adc2_measure_trig;
+  wire sample_acquisition_no_az_adc2_reset_n;
   wire sample_acquisition_no_az_led0 ;
   wire [2-1:0] sample_acquisition_no_az_monitor2;
 
@@ -503,7 +511,8 @@ module top (
     // outputs
     .led0(      sample_acquisition_no_az_led0  ),
     .monitor(   sample_acquisition_no_az_monitor2  ),    // we could pass subset of monitor if watned. eg. only 4 pins...
-    .adc_measure_trig( sample_acquisition_no_az_adc2_measure_trig),
+    // .adc_measure_trig( sample_acquisition_no_az_adc2_reset_n),
+    .adc_reset_no ( sample_acquisition_no_az_adc2_reset_n),
   );
 
 
@@ -550,8 +559,8 @@ module top (
     .c( { 1'b0, test_pattern_out } ),                   // 2
     .d( { 1'b0, reg_direct[ `NUM_BITS - 1 :  0 ]  } ), // 3.    // direct mode. register control.
     .e( { 1'b0, sample_acquisition_pc_out} ),                   // 4
-    .f( { sample_acquisition_az_adc2_measure_trig,    sample_acquisition_az_out } ),                   // 5
-    .g( { sample_acquisition_no_az_adc2_measure_trig, sample_acquisition_no_az_out } ),                // 6
+    .f( { sample_acquisition_az_adc2_reset_n,    sample_acquisition_az_out } ),                   // 5
+    .g( { sample_acquisition_no_az_adc2_reset_n, sample_acquisition_no_az_out } ),                // 6
     // .h( { 1'b0, { `NUM_BITS { 1'b1 } } } ),             // 7
     .h( { 1'b0, sa_no_az_test_out } ),             // 7
 */
@@ -560,7 +569,7 @@ module top (
     // very useful - allows testing precharge/az switching, even if don't have adc populated
     .f( {  { 32 - 26 { 'b0 }},
                                                 // 26
-          1'b0, // adc2_measure_trig         // 25 + 1
+          1'b0, // adc2_reset_n         // 25 + 1
           1'b0, // meas_complete              // 24+1
           1'b0,   // spi_interupt             // 23 + 1
           1'b0,  // adc_cmpr_latch            // 22+1
@@ -588,7 +597,7 @@ module top (
 
     .h( {  { 32 - 26 { 'b0 }},
                                                 // 26
-          sample_acquisition_no_az_adc2_measure_trig,        // 25 + 1
+          sample_acquisition_no_az_adc2_reset_n,        // 25 + 1
           adc2_measure_valid,   // meas_complete              // 24+1
           adc2_measure_valid,   // spi_interupt   // 23 + 1
           adc2_cmpr_latch_ctl,  // adc_cmpr_latch   // 22+1
@@ -604,7 +613,7 @@ module top (
   wire [4-1: 0 ] adc2_mux;
   wire           adc2_cmpr_latch_ctl;
 
-  wire          adc2_measure_trig;
+  wire          adc2_reset_n;
   wire          adc2_measure_valid;
 */
 
@@ -617,7 +626,7 @@ module top (
 
     .out( {   dummy_bits_o,               // 26
 
-              adc2_measure_trig,        // 25 + 1
+              adc2_reset_n,        // 25 + 1
 
               meas_complete_o,          // 24+1     // interupt_ctl *IS* generic so should be at start, and connects straight to adum. so place at beginning. same argument for meas_complete
               spi_interrupt_ctl_o,      // 23+1     todo rename. drop the 'ctl'.

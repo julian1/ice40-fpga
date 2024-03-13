@@ -20,9 +20,12 @@
 
 
 // change one-hot?.
-`define STATE_DONE          0  // initial state
 
-`define STATE_RESET_START    1
+// JA
+// `define STATE_DONE          0  // initial state
+
+`define STATE_RESET_START    0
+
 `define STATE_RESET          2
 `define STATE_SIG_SETTLE_START 3
 `define STATE_SIG_SETTLE    4
@@ -70,10 +73,9 @@ module adc_modulation (
 
 
   input           clk,
+  input           reset_n ,
 
 
-  // wire. trigger/start a measurement cycle.
-  input adc_measure_trig,
 
   // comparator input
   input           cmpr_val,
@@ -133,21 +135,25 @@ module adc_modulation (
 
 
 
-  reg [5-1:0]   state;
+  reg [5-1:0]   state = 0; // RESET_START;
 
   /*
      EXTR. could be useful to spi query the current state
     - could then determine that were updated during the reset period. and we don't have to call reset again.
   */
 
+
+/*
   // initial begin does seem to be supported.
   initial begin
-    state           = `STATE_DONE ;   // 0
+    // state           = `STATE_DONE ;   // 0
+    state           = 0 ;   // 0
 
     // TODO remove.
     cmpr_latch_ctl  = 1; // disable comparator,
 
   end
+*/
 
   //////////////////////////////////////////////////////
   // counters and settings  ...
@@ -194,7 +200,7 @@ module adc_modulation (
 
 
   // reg [ 4-1:0]  monitor_;
-  assign monitor[0] = adc_measure_trig;
+  assign monitor[0] = reset_n;
   assign monitor[1] = adc_measure_valid;
 
 
@@ -329,7 +335,7 @@ module adc_modulation (
 
 
       case (state)
-
+/*
 
         `STATE_DONE:
           begin
@@ -345,16 +351,18 @@ module adc_modulation (
             sigmux            <= 0;
             refmux            <= `REFMUX_RESET;
           end
-
+*/
 
         `STATE_RESET_START:
+
+          // reset state
           begin
 
-            // de-assert valid measurement, at start of new measurement cycle
-            adc_measure_valid <= 0;
-
-            // reset vars, and transition to runup state
+            // setup next state to advance to if reset_n not asserted
             state           <= `STATE_RESET;
+
+            // indicate no measurement available
+            adc_measure_valid <= 0;
 
             clk_count_refmux_reset <= 0;   // clear count to start
 
@@ -621,7 +629,9 @@ module adc_modulation (
                 adc_measure_valid <= 1;
 
                 // next transition
-                state                   <= `STATE_DONE;
+                // state                   <= `STATE_DONE;
+                state                   <= `STATE_RESET_START;
+
 
                 // turn off sigmux, and reset integrator
                 sigmux                  <= 0;
@@ -650,11 +660,22 @@ module adc_modulation (
               end
           end
 
-
-
       endcase
 
 
+
+      // override all states - if reset_n enabled, then don't advance out-of reset state.
+      if(reset_n == 0)      // in reset
+        begin
+
+            state <= 0;
+        end
+
+
+
+
+
+/*
         // adc is always interruptable/ can be triggered to start at any time.
         if(adc_measure_trig == 1)
           begin
@@ -662,7 +683,7 @@ module adc_modulation (
             state <= `STATE_RESET_START;
 
           end
-
+*/
     end
 
 

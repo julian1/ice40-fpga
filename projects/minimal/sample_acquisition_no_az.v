@@ -22,7 +22,7 @@ module sample_acquisition_no_az (
   input [24-1:0] p_clk_count_precharge ,
 
   // outputs
-  output reg adc_measure_trig,
+  output reg adc_reset_no,
   output reg led0,
 
   // now a wire.
@@ -41,7 +41,7 @@ module sample_acquisition_no_az (
                                     // doesn't work. should be in state 0. anyway.
 
 
-  assign monitor[0] = adc_measure_trig;
+  assign monitor[0] = adc_reset_no;
   assign monitor[1] = adc_measure_valid;
 
   always @(posedge clk )
@@ -60,7 +60,8 @@ module sample_acquisition_no_az (
           begin
             // having a state like, this may be useful for debuggin, because can put a pulse on the monitor.
             state <= 2;
-            // state <= 40;   // start at park/done/ - then require a trigger - to start.
+
+            adc_reset_no    <= 0;
 
           end
 
@@ -79,36 +80,46 @@ module sample_acquisition_no_az (
         25:
           if(clk_count_down == 0)
             begin
-              state <= 3;
+              state <= 35;
 
               // trigger adc measure to do measure. interruptable at any time.
-              adc_measure_trig    <= 1;
+              adc_reset_no    <= 1;
             end
 
+/*
         /////////////////////////
         3:
           // wait for adc to ack trig, before advancing
           if( ! adc_measure_valid )
             begin
-              adc_measure_trig    <= 0;
+              adc_reset_no    <= 0;
               state             <= 35;
             end
+*/
 
         35:
           // wait for adc.
           if(  adc_measure_valid )
-            state <= 2;
+            begin
 
+              // restart sequence
+              state <= 2;
 
+              // set status for lo sample. set after measure to give time to read.
+              // status_o      <= 3'b000;
 
+              // JA added. put adc in reset again
+              adc_reset_no <= 0;
 
-
-
-        40: // done / park
-          ;
-
+            end
 
       endcase
+
+
+
+
+
+
 
      /*
         // aquire.
