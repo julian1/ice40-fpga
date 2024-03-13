@@ -38,7 +38,8 @@ module sample_acquisition_az (
   input adc_measure_valid_i,
 
   // outputs.
-  output reg adc_measure_trig_o,
+  output reg adc_reset_no,  // rename _n_o. perhaps or trig. is even ok.
+
   output reg [ 2-1: 0]  sw_pc_ctl_o,
   output reg [ 4-1:0 ] azmux_o,
   output reg led0_o,
@@ -61,10 +62,10 @@ module sample_acquisition_az (
   reg [2-1: 0 ] arm_trigger_i_edge;
 
 
-  assign monitor_o[0] = adc_measure_trig_o;
-  // assign monitor_o[1] = adc_measure_valid_i;
+  assign monitor_o[0] = adc_reset_no;
+  assign monitor_o[1] = adc_measure_valid_i;
 
-  assign monitor_o[1] =  azmux_o == p_azmux_hi_val_i ; // `AZMUX_PCOUT;
+  // assign monitor_o[1] =  azmux_o == p_azmux_hi_val_i ; // `AZMUX_PCOUT;
 
 
 
@@ -83,7 +84,7 @@ module sample_acquisition_az (
             // having a state like, this may be useful for debuggin, because can put a pulse on the monitor_o.
             state <= 1;
 
-            adc_measure_trig_o    <= 0;
+            adc_reset_no    <= 0;
 
 
           end
@@ -136,21 +137,22 @@ module sample_acquisition_az (
         33:
           if(clk_count_down == 0)
             begin
-              state           <= 34;
+              state           <= 35;
               // adc start
-              adc_measure_trig_o <= 1;
+              adc_reset_no <= 1;
             end
 
-
+/*
         34:
           // wait for adc to ack trig, before advancing
           if( ! adc_measure_valid_i )
             begin
-              adc_measure_trig_o    <= 0;
+              adc_reset_no    <= 0;
               state             <= 35;
               led0_o            <= 1;
 
             end
+*/
 
         35:
           // wait for adc to measure
@@ -159,6 +161,9 @@ module sample_acquisition_az (
               state         <= 4;
               // set status for hi sample
               status_o    <= 3'b001; // we moved this.      // set status only after measure, to enable reg reading, during next measurement cycle.
+
+              // JA added. put adc in reset again
+              adc_reset_no <= 0;
             end
 
         //////////////////////////////
@@ -191,21 +196,22 @@ module sample_acquisition_az (
         52:
           if(clk_count_down == 0)
             begin
-              state           <= 53;
+              state           <= 55;
               led0_o            <= 0;
               // adc start
-              adc_measure_trig_o <= 1;
+              adc_reset_no <= 1;
             end
 
+/*
         53:
           // wait for adc to ack trig, before advancing
           if( ! adc_measure_valid_i )
             begin
-              adc_measure_trig_o    <= 0;
+              adc_reset_no    <= 0;
               state             <= 55;
               led0_o            <= 0;
             end
-
+*/
         55:
           // wait for adc to measure
           if(  adc_measure_valid_i )
@@ -215,6 +221,9 @@ module sample_acquisition_az (
 
               // set status for lo sample. set after measure to give time to read.
               status_o      <= 3'b000;
+
+              // JA added. put adc in reset again
+              adc_reset_no <= 0;
             end
 
 
