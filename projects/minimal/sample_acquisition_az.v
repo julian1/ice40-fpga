@@ -34,7 +34,6 @@ module sample_acquisition_az (
   input [24-1:0]    p_clk_count_precharge_i,
 
 
-  input arm_trigger_i,              // why doesn't this generate a warning.
   input adc_measure_valid_i,
 
   // outputs.
@@ -57,9 +56,6 @@ module sample_acquisition_az (
 
   reg [31:0]    clk_count_down;           // clk_count for the current phase. using 31 bitss, gives faster timing spec.  v 24 bits. weird. ??? 36MHz v 32MHz
 
-
-
-  // reg [2-1: 0 ] arm_trigger_i_edge;
 
 
   assign monitor_o[0] = adc_reset_no;
@@ -228,9 +224,6 @@ module sample_acquisition_az (
 
 
 
-        // 60: // done / park
-        //   ;
-
 
       endcase
 
@@ -252,27 +245,3 @@ endmodule
 
 
 
-      /*
-        reason to do it this way, is to make it interuptable/triggerable regardless of current state.
-
-        - but why not just handle as clock synchronous reset. that overrides the other behavior?
-        - send a pulse to start?
-        - and has extra capability that can hold in reset. or hold freerunning.
-        - just need a single extra reg - to control if single shot or continuous.
-
-        if(arm_trigger_i)
-          state <= 0;
-        -----
-        - but the advantage is triggers on the leading edge - and the user/ external trigger - doesn't have to cycle
-        - but can still do with reset_n like behavior.  hold lo is reset, then just pull hi.
-      */
-
-/*
-      arm_trigger_i_edge <= { arm_trigger_i_edge[0], arm_trigger_i};  // old, new
-
-      if(arm_trigger_i_edge == 2'b01)        // trigger
-        state <= 0;
-      else if(arm_trigger_i_edge == 2'b10)   // park/arm/reset.
-        state <= 60;
-
-*/

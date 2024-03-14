@@ -215,7 +215,7 @@ module top (
 
   wire [32-1:0] reg_direct;
 
-  wire [32-1 :0] reg_sa_arm_trigger;              // only a single bit is needed here. should be able to write to handle more efficiently.
+  // wire [32-1 :0] reg_sa_arm_trigger;              // only a single bit is needed here. should be able to write to handle more efficiently.
 
 
 
@@ -359,7 +359,6 @@ module top (
     .reset_n( trigger_source_internal_i ),    // we want this to remove. the old edge triggered stuff.
 
     // inputs
-    .arm_trigger_i( reg_sa_arm_trigger[0 ]  ) ,
     .adc_measure_valid_i( adc_mock_measure_valid ),                     // fan-in from adc
 
     // TODO move to registers
@@ -509,7 +508,7 @@ module top (
 
     // inputs
     .adc_measure_valid( adc2_measure_valid ),                     // fan-in from adc
-    // .arm_trigger( reg_sa_arm_trigger[0 ]  ) ,
+
     .p_clk_count_precharge( reg_sa_p_clk_count_precharge[ 24-1:0 ]),
 
     // outputs
@@ -674,7 +673,7 @@ module top (
     . reg_status( reg_status ),
 
 
-    . reg_sa_arm_trigger ( reg_sa_arm_trigger ),
+    // . reg_sa_arm_trigger ( reg_sa_arm_trigger ),
 
     . reg_sa_p_clk_count_precharge( reg_sa_p_clk_count_precharge),
     . reg_sa_p_azmux_lo_val( reg_sa_p_azmux_lo_val),
