@@ -586,7 +586,7 @@ module top (
 
 
     // mode  6. adc refmux test
-    // useful, when populating pcb,
+    // limited modulation of ref currents, useful when populating pcb, don't need slope-amp/comparator etc.
     .g( {  { 32 - 22 { 'b0 }},
                                               // 22
           refmux_test_refmux_o,                // 18+4
@@ -596,8 +596,8 @@ module top (
           4'b0   // leds                   // 0+4
         } ),
 
-    // when we add this the timing analysis fails.
 
+    // mode 7. full adc/ no az.
     .h( {  { 32 - 26 { 'b0 }},
                                                 // 26
           sample_acquisition_no_az_adc2_reset_n,        // 25 + 1
@@ -611,15 +611,6 @@ module top (
           3'b0,                             // 1+3
           sample_acquisition_az_led0        // 0+1
         } ),
-/*
-  wire [6-1: 0 ] adc2_monitor6;
-  wire [4-1: 0 ] adc2_mux;
-  wire           adc2_cmpr_latch_ctl;
-
-  wire          adc2_reset_n;
-  wire          adc2_measure_valid;
-*/
-
 
 
 
