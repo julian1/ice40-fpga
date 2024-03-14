@@ -342,7 +342,7 @@ module top (
   );
 
 
-  // fucking hell it's getting a bit complicated. 
+  // fucking hell it's getting a bit complicated.
   // we need to rename this.   sa_az_adc_mock_sw_pc_ctl.
   wire [2-1:0]  sample_acquisition_az_sw_pc_ctl;
   wire [4-1:0]  sample_acquisition_az_azmux;
@@ -356,10 +356,11 @@ module top (
   sample_acquisition_az (
 
     .clk(CLK),
+    .reset_n( trigger_source_internal_i ),    // we want this to remove. the old edge triggered stuff.
 
     // inputs
     .arm_trigger_i( reg_sa_arm_trigger[0 ]  ) ,
-    .adc_measure_valid_i(   adc_mock_measure_valid ),                     // fan-in from adc
+    .adc_measure_valid_i( adc_mock_measure_valid ),                     // fan-in from adc
 
     // TODO move to registers
     .p_azmux_lo_val_i( reg_sa_p_azmux_lo_val[ 4-1:0]  ),
@@ -374,8 +375,6 @@ module top (
     .monitor_o(   sample_acquisition_az_monitor2  ),    // only pass 2 bit to the az monitor
     .status_o(  sample_acquisition_az_status ),
 
-
-    // .adc_measure_trig_o(  adc_mock_reset_n  )
     .adc_reset_no(  adc_mock_reset_n  )
   );
 
@@ -407,6 +406,8 @@ module top (
   refmux_test refmux_test (
 
     .clk(CLK),
+    // we don't care about reset here
+
     . p_clk_count_reset_i( $rtoi(  `CLK_FREQ * 500e-6 )  ), // 500us.
     . p_clk_count_fix_i(   $rtoi( `CLK_FREQ * 100e-6 )) ,  // 100us. initial but too long
 
@@ -493,17 +494,22 @@ module top (
 
 
   // wire [ `NUM_BITS-1:0 ]  sample_acquisition_no_az_out ;  // beter name ... _outputs_vec ?
+
+  // wire sample_acquisition_no_az_reset_n;
+
   wire sample_acquisition_no_az_adc2_reset_n;
   wire sample_acquisition_no_az_led0 ;
   wire [2-1:0] sample_acquisition_no_az_monitor2;
 
   sample_acquisition_no_az
   sample_acquisition_no_az (
+
     .clk(CLK),
+    .reset_n( trigger_source_internal_i ),
 
     // inputs
     .adc_measure_valid( adc2_measure_valid ),                     // fan-in from adc
-    .arm_trigger( reg_sa_arm_trigger[0 ]  ) ,
+    // .arm_trigger( reg_sa_arm_trigger[0 ]  ) ,
     .p_clk_count_precharge( reg_sa_p_clk_count_precharge[ 24-1:0 ]),
 
     // outputs

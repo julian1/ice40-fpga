@@ -24,14 +24,14 @@ module sample_acquisition_az (
   // inistead the hi signal is seleced by the AZ mux, via the pre-charge switch
 
   input   clk,
+  input   reset_n,
 
   // inputs
 
   input [ 4-1 : 0 ] p_azmux_lo_val_i,
   input [ 4-1 : 0 ] p_azmux_hi_val_i,
   input [ 2-1 : 0 ] p_sw_pc_ctl_hi_val_i,
-  // reg [24-1:0]  p_clk_count_precharge_i = `CLK_FREQ * 500e-6 ;   // 500us.
-  input [24-1:0] p_clk_count_precharge_i,
+  input [24-1:0]    p_clk_count_precharge_i,
 
 
   input arm_trigger_i,              // why doesn't this generate a warning.
@@ -59,7 +59,7 @@ module sample_acquisition_az (
 
 
 
-  reg [2-1: 0 ] arm_trigger_i_edge;
+  // reg [2-1: 0 ] arm_trigger_i_edge;
 
 
   assign monitor_o[0] = adc_reset_no;
@@ -228,11 +228,28 @@ module sample_acquisition_az (
 
 
 
-        60: // done / park
-          ;
+        // 60: // done / park
+        //   ;
 
 
       endcase
+
+
+
+      // override all states - if reset_n enabled, then don't advance out-of reset state.
+      if(reset_n == 0)      // in reset
+        begin
+
+            state <= 0;
+        end
+
+
+
+    end
+endmodule
+
+
+
 
 
       /*
@@ -250,6 +267,7 @@ module sample_acquisition_az (
         - but can still do with reset_n like behavior.  hold lo is reset, then just pull hi.
       */
 
+/*
       arm_trigger_i_edge <= { arm_trigger_i_edge[0], arm_trigger_i};  // old, new
 
       if(arm_trigger_i_edge == 2'b01)        // trigger
@@ -257,11 +275,4 @@ module sample_acquisition_az (
       else if(arm_trigger_i_edge == 2'b10)   // park/arm/reset.
         state <= 60;
 
-
-
-    end
-endmodule
-
-
-
-
+*/

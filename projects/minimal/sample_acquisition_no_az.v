@@ -12,13 +12,12 @@
 module sample_acquisition_no_az (
 
   input   clk,
+  input   reset_n,
 
   // inputs
   input adc_measure_valid,
-  input arm_trigger,
 
   // wait phase.
-  // reg [24-1:0]  p_clk_count_precharge = `CLK_FREQ * 500e-6 ;   // 500us.
   input [24-1:0] p_clk_count_precharge ,
 
   // outputs
@@ -36,10 +35,10 @@ module sample_acquisition_no_az (
   reg [31:0]    clk_count_down;
 
 
-
+/*
   reg [2-1: 0 ] arm_trigger_edge;  //  = "10";  // start off in state. so that arm works to halt.
                                     // doesn't work. should be in state 0. anyway.
-
+*/
 
   assign monitor[0] = adc_reset_no;
   assign monitor[1] = adc_measure_valid;
@@ -117,7 +116,28 @@ module sample_acquisition_no_az (
 
 
 
+      // override all states - if reset_n enabled, then don't advance out-of reset state.
+      if(reset_n == 0)      // in reset
+        begin
 
+            state <= 0;
+        end
+
+    end
+endmodule
+
+
+
+
+
+/*
+      arm_trigger_edge <= { arm_trigger_edge[0], arm_trigger};  // old, new
+
+      if(arm_trigger_edge == 2'b01)        // trigger
+        state <= 2;
+      else if(arm_trigger_edge == 2'b10)   // park/arm/reset.
+        state <= 40;
+*/
 
 
 
@@ -134,18 +154,5 @@ module sample_acquisition_no_az (
         starting up in a default run state could be nice.
         and can be overriden by writting trigger, then arm.
       */
-
-
-      arm_trigger_edge <= { arm_trigger_edge[0], arm_trigger};  // old, new
-
-      if(arm_trigger_edge == 2'b01)        // trigger
-        state <= 2;
-      else if(arm_trigger_edge == 2'b10)   // park/arm/reset.
-        state <= 40;
-
-
-
-    end
-endmodule
 
 
