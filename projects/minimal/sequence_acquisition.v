@@ -1,7 +1,24 @@
 /*
+  remember also.
+    we need a way to communicate back to the mcu which sample is the one in the sequence.
+    so the sample_i is good.
+    and can be encoded in the status regsiter.
+    ----
+    - think we may want the count. so that the receiver of data. can handle more easily.
+    - eg. doesn't have to say   if(mode == modeA &&  count == 0 || count == 2)
+    - not sure, it's not that complicated to interpret.
+    ------
 
-  normal az
+    EXTR. if we didn't want the pre-charge to switch in in non-AZ mode,
+        then could this with another bitvector.   eg. in the two hi bits.
+        -----
+        that eliminates the need to have a separate no_az controller.
 
+    { wheether to switch pc switch, value of pc switch, azmux val }
+    ------
+
+    if we use a count . it might be easier to use registers.  eg.  reg_sa_sample_0  reg_sa_sample_1  etc.
+    and just pack the bits.
 */
 
 
@@ -14,9 +31,8 @@
 
 
 
-// `define AZMUX_PCOUT    `S3     // 2024.  FIXME
 
-
+// rename sample_sequence_acquisition
 
 module sequence_acquisition (
 
@@ -35,7 +51,7 @@ module sequence_acquisition (
   // outputs.
   output reg adc_reset_no,  // rename _n_o. perhaps or trig. is even ok.
 
-  output reg [ 2-1: 0]  sw_pc_ctl_o,
+  output reg [ 2-1: 0]  sw_pc_ctl_o,      // TODO  fix rename pc_sw_o
   output reg [ 4-1:0 ] azmux_o,
   output reg led0_o,
 
@@ -54,9 +70,8 @@ module sequence_acquisition (
   reg [31:0]    clk_count_down;           // clk_count for the current phase. using 31 bitss, gives faster timing spec.  v 24 bits. weird. ??? 36MHz v 32MHz
 
 
-  // reg [2-1:0]  sample_i = 0;    // one of 4
-  // reg [1:0]  sample_i = 0;    // one of 4
-  reg  sample_i = 0;    // one of 4
+  // reg [2-1:0]  sample_i = 0;     // 4-cycle acquision.
+  reg  sample_i = 0;                // 2-cycle acquisition
 
 
   reg [ 4-1 : 0 ] azmux_sample_val;
@@ -74,11 +89,6 @@ module sequence_acquisition (
 
   assign monitor_o[6] = adc_reset_no;
   assign monitor_o[7] = adc_measure_valid_i;
-
-
-
-  // assign monitor_o[2 +: 6 ] = 0;
-
 
 
 
@@ -134,25 +144,24 @@ module sequence_acquisition (
 
 
         ////////////////////////////
-        // switch azmux_o to the signal of interrest, which may be a low.  and pause
+        // switch azmux_o to the signal of interest, which may be a low. and pause
         // precharge phase.
         2:
             begin
               state           <= 25;
               clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
               azmux_o           <= azmux_sample_val;
-
-
             end
         25:
           if(clk_count_down == 0)
             state <= 3;
 
 
+
         /////////////////////////
-        // switch pc-switch from BOOT to the signal (which may be a ground), and pause.
-        // if we are sampling a ground, we could skip this.
-        // we now it's a gnd because pc_sw_sample_val will be 2b'00.
+        // switch pc-switch from BOOT to the signal input (which may be a ground), and pause.
+        // if we are sampling a ground, and pc_val = 0, then this does nothing.
+        // and we could skip it, but probably not unreasonable to keep timing the same.
         3:
           begin
             state           <= 33;
@@ -177,6 +186,7 @@ module sequence_acquisition (
               state         <= 1;
 
               // set up the next sample
+              // if( sample_i >= sample_n ) sample_i <= 0;   else sample_i <= sample_i + 1;
               sample_i <= sample_i + 1;
 
               // set status for hi sample
