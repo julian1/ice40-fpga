@@ -107,6 +107,11 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   // outputs signal acquisition
   output reg [32-1:0] reg_sa_p_seq_n,
   output reg [32-1:0] reg_sa_p_clk_count_precharge,
+
+  /* encode azmux value 4 bits, and precharge switch 2 bits.
+    could use higher bits to encode other control eg. to not change/leave the precharge from previous value. etc.
+    better than creating a separate controller module
+  */
   output reg [32-1:0] reg_sa_p_seq0,
   output reg [32-1:0] reg_sa_p_seq1,
   output reg [32-1:0] reg_sa_p_seq2,

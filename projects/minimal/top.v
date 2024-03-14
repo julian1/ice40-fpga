@@ -300,17 +300,34 @@ module top (
     TODO. rename include test in name. it's actually sample acquisition.
   */
 
+
+/*
+      ================
+    - EXTR.  NOT clear we even need the sample_acquisition_pc   - because can just use the sequence-acquisition.
+          and keep the azmux held off.
+        or even the non mocked.
+      eg.  i think the sample sequence controller - can manage to encode the pc  switching test.  also. by just holding the azmux off.
+    ================
+*/
+
   wire sample_acquisition_pc_sw_pc_ctl;
   wire sample_acquisition_pc_led0;
   wire [8-1 : 0] sample_acquisition_pc_monitor;
+
+
+  // rename this doesn't do sample acquisition. it just switches the pre-charge
+  // we will switch to another mode  - before and after - in order to measure charge contribution
 
   sample_acquisition_pc
   sample_acquisition_pc (
     // inputs
     .clk(CLK),
-    .reset_n( 1'b0 ), // TODO remove.
+    .reset_n( 1'b0 ),                       // JA. EXTR. consider placing the bit in output reg. so that it can be enabled in the corresponding mode.
+                                            // likewise should be able to activate the adc in direct mode, by flipping the bit.  except won't work. because doesn't have control over refmux, comparator etc.
+                                            // But may be useful to create a direct mode (with no sequence), but with the adc.
+                                            // ---
+                                            // or connect to the trigger. because the behavior is much the same - as the sequence controller.
 
-    // TODO - rename   , and prefix p_ .  p_p_clk_sample_duration_i
     // inputs
     .p_clk_sample_duration_i( reg_adc_p_clk_count_aperture ),
     .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0] ),
@@ -383,7 +400,7 @@ module top (
   );
 */
 
-  // sample_acquisition_sequence 
+  // rename sample_acquisition_sequence
   sequence_acquisition
   sequence_acquisition (
 
@@ -393,7 +410,7 @@ module top (
     // inputs
     .adc_measure_valid_i( adc_mock_measure_valid ),                     // fan-in from adc
 
-    
+
     // TODO move to registers
 
     .p_seq_n_i( reg_sa_p_seq_n[ 2-1: 0]  ),
@@ -402,7 +419,7 @@ module top (
     .p_seq2_i( reg_sa_p_seq2[ 6-1: 0] ),
     .p_seq3_i( reg_sa_p_seq2[ 6-1: 0] ),
 
-   
+
     .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]  ),     // done
 
     // outputs
@@ -441,7 +458,7 @@ module top (
   // We could do one led, for SS, and one for CS2 (4094,etc).
   // rename timed_latch_hold
   /*
-    change name. this is more stretching the signal.
+    change name. this delay stretch the signal over longer clk duration.
   */
   wire led0;
   timed_latch timed_latch (
@@ -459,6 +476,7 @@ module top (
   refmux_test refmux_test (
 
     .clk(CLK),
+    // JA.   add a reset_n.  and only activate in the corresponding mode.
     // we don't care about reset here
 
     . p_clk_count_reset_i( $rtoi(  `CLK_FREQ * 500e-6 )  ), // 500us.
@@ -554,6 +572,9 @@ module top (
   wire sample_acquisition_no_az_led0 ;
   wire [8-1:0] sample_acquisition_no_az_monitor;
 
+
+  // JA remove
+  // new sequence controller should be able to handle,  by only sampling hi, with or without precharge switching, controlled with flags
   sample_acquisition_no_az
   sample_acquisition_no_az (
 

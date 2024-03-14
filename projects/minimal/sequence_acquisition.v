@@ -38,6 +38,7 @@
 
 
 // rename sample_sequence_acquisition
+// or sample_acquisition_sequence
 
 module sequence_acquisition (
 
@@ -91,7 +92,7 @@ module sequence_acquisition (
 
 
 
-  assign monitor_o[0] = (azmux_o == `S3);
+  assign monitor_o[0] = (azmux_o == `S3);   // (count == 0 ) etc.
   assign monitor_o[1] = (azmux_o == `S7);
   assign monitor_o[2] = (azmux_o == `S1);
   assign monitor_o[3] = (azmux_o == `S8);
