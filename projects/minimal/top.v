@@ -568,7 +568,7 @@ module top (
     .h( { 1'b0, sa_no_az_test_out } ),             // 7
 */
 
-    // mode/AF  5  MODE_AZ_TEST
+    // mode/AF  5  MODE_AZ_TEST with a mocked adc.  useful. for timing/ control tests
     // very useful - allows testing precharge/az switching, even if don't have adc populated
     .f( {  { 32 - 26 { 'b0 }},
                                                 // 26
@@ -605,7 +605,8 @@ module top (
           adc2_measure_valid,   // spi_interupt   // 23 + 1
           adc2_cmpr_latch_ctl,  // adc_cmpr_latch   // 22+1
           adc2_mux,             // adc_refmux     // 18+4
-          reg_sa_p_azmux_hi_val[4-1: 0 ],        // 14+4      // can use azmux hi-val
+          // use reg_direct to control the azmux
+          reg_direct [ 14 +: 4 ],  // azmux      // 14+4
           2'b0 ,                  // precharge    // 12+2     // TODO fixme. samples boot only.  use reg_sa_p_pc.
           adc2_monitor6, sample_acquisition_no_az_monitor2,    // 4+8
           3'b0,                             // 1+3
