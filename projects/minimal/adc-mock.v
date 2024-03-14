@@ -21,7 +21,7 @@ module adc_mock (
 
   // outputs
   output reg adc_measure_valid_o,     // adc is master, and asserts valid when measurement complete
-  output wire [ 6-1:0]  monitor_o
+  output wire [ 8-1:0]  monitor_o
 );
 
 
@@ -29,12 +29,12 @@ module adc_mock (
   reg [31:0]    clk_count_down;
 
 
-  reg [ 4-1:0]  monitor; 
+  reg [ 6-1:0]  monitor; 
 
   // combinatorial logic
   assign monitor_o[0] = reset_n;
   assign monitor_o[1] = adc_measure_valid_o;
-  assign monitor_o[2 +: 4 ] = monitor;
+  assign monitor_o[2 +: 6 ] = monitor;
 
 
 
@@ -61,7 +61,7 @@ module adc_mock (
             // set sample/measure period
             clk_count_down  <= p_clk_count_aperture_i;
 
-            monitor <= 4'b0;
+            monitor <= 6'b0;
           end
 
 

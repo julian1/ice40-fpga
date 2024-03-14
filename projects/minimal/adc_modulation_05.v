@@ -93,7 +93,7 @@ module adc_modulation (
   output reg adc_measure_valid,           // to indicate/assert completion, and valid measurement
 
   // now a wire
-  output wire [ 6-1:0]  monitor,
+  output wire [ 8-1:0]  monitor,
 
   output reg [ 3-1:0]  refmux,            // reference current mux
   output reg sigmux,                      // sample/signal input mux
@@ -200,15 +200,28 @@ module adc_modulation (
 
 
   // reg [ 4-1:0]  monitor_;
+
   assign monitor[0] = reset_n;
   assign monitor[1] = adc_measure_valid;
-
 
   assign monitor[2] = sigmux;
   assign monitor[3] = (state == `STATE_FAST_ABOVE_START);
   assign monitor[4] = (state == `STATE_FAST_BELOW_START);
   assign monitor[5] = (state == `STATE_RUNDOWN);
 
+  assign monitor[6] = 1'b0;
+  assign monitor[7] = 1'b0;
+
+  /*
+    EXTR.
+    this line restores the timing analysis.  but what does the ':+' operator do. distinct from '+:'
+    assigning at pos 2?
+  */
+  // assign monitor[6 :+ 2 ]  = 2'b0;
+  // assign monitor  = 6'b0;
+
+  //
+  // assign monitor[6 +: 2 ]  = 2'b0;
 
 /*
   // assign monitor[ 2 +: 4]  = { sigmux, refmux };      // reference current, better name?

@@ -194,7 +194,8 @@ module top (
 
 
 /*
-  // would be nice perhaps to have these controlled in mode0.
+  // would be nice to project these in a mode,
+  // but if there's a spi problem - we are unlikely to get it into a mode.
 
   assign monitor_o[0]  = GLB_SPI_CLK;
   assign monitor_o[1]  = GLB_SPI_MOSI;
@@ -325,7 +326,7 @@ module top (
 
   wire          adc_mock_reset_n;
   wire          adc_mock_measure_valid;
-  wire [6-1:0 ] adc_mock_monitor6;
+  wire [8-1:0 ] adc_mock_monitor;
 
   adc_mock
   adc_mock (
@@ -338,7 +339,7 @@ module top (
 
     // outputs
     .adc_measure_valid_o( adc_mock_measure_valid ),
-    .monitor_o(  adc_mock_monitor6 )
+    .monitor_o(  adc_mock_monitor )
   );
 
 
@@ -434,7 +435,7 @@ module top (
   wire          adc2_reset_n;
   wire          adc2_measure_valid;
 
-  wire [6-1: 0 ] adc2_monitor6;
+  wire [8-1: 0 ] adc2_monitor;
   wire [4-1: 0 ] adc2_mux;
   wire           adc2_cmpr_latch_ctl;
 
@@ -473,7 +474,7 @@ module top (
     // outputs - ctrl
     .adc_measure_valid( adc2_measure_valid),    // OK, fan out back to the sa controllers
     .cmpr_latch_ctl( adc2_cmpr_latch_ctl   ),
-    .monitor(  adc2_monitor6  ),
+    .monitor(  adc2_monitor  ),
     .refmux(  { adc2_mux[  3  ],  adc2_mux[ 0 +: 2 ]   } ),           // pos, neg, reset. are on two different 4053,
     .sigmux(    adc2_mux[  2  ] ),                                    // perhaps clearer if split into adcrefmux and adcsigmux in the wire assignment. but it would then need two vars.
                                                                       // which isn't representative of the single synchronizer. so do it here instead.
@@ -579,7 +580,7 @@ module top (
           4'b0,  // adc_refmux               // 18+4
           sample_acquisition_az_azmux,        // 14+4
           sample_acquisition_az_sw_pc_ctl,   // 12+2
-          adc_mock_monitor6, sample_acquisition_az_monitor2,    // 4+8
+          adc_mock_monitor[0 +: 6] , sample_acquisition_az_monitor2,    // 4+8
           3'b0,                             // 1+3
           sample_acquisition_az_led0        // 0+1
         } ),
@@ -608,7 +609,7 @@ module top (
           // use reg_direct to control the azmux
           reg_direct [ 14 +: 4 ],  // azmux      // 14+4
           2'b0 ,                  // precharge    // 12+2     // TODO fixme. samples boot only.  use reg_sa_p_pc.
-          adc2_monitor6, sample_acquisition_no_az_monitor2,    // 4+8
+          adc2_monitor[ 0 +: 6], sample_acquisition_no_az_monitor2,    // 4+8
           3'b0,                             // 1+3
           sample_acquisition_az_led0        // 0+1
         } ),
