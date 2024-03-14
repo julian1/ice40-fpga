@@ -154,8 +154,9 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
     // reg_sa_p_seq0 <= { 2'b01, ((4'd1<<3)|(3-1))   };  //  `S3
 
     reg_sa_p_seq_n <= 2;
-    reg_sa_p_seq0 <= { 2'b01, 4'd10   };  //  ((1<<3)|(3-1)) =  10          // S3
-    reg_sa_p_seq1 <= { 2'b00, 4'd14    };   // ((1<<3)|(7-1)) =  14       // S7
+    reg_sa_p_seq0 <= { 2'b01, 4'd10   };  //  ((1<<3)|(3-1)) =  10          // S3 dcv
+    reg_sa_p_seq1 <= { 2'b00, 4'd14    };   // ((1<<3)|(7-1)) =  14       // S7  start-gnd.
+    // reg_sa_p_seq1 <= { 2'b01, 4'd10   };  //  ((1<<3)|(3-1)) =  10          // S3 dcv
     reg_sa_p_seq2 <= 0 ;
     reg_sa_p_seq3 <= 0 ;
 
