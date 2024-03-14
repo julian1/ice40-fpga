@@ -277,9 +277,12 @@ module top (
 
 
   wire [32-1:0] reg_sa_p_clk_count_precharge;
-  wire [32-1:0] reg_sa_p_azmux_lo_val;
-  wire [32-1:0] reg_sa_p_azmux_hi_val;
-  wire [32-1:0] reg_sa_p_sw_pc_ctl_hi_val;
+
+  wire [32-1:0] reg_sa_p_seq_n;
+  wire [32-1:0] reg_sa_p_seq0;
+  wire [32-1:0] reg_sa_p_seq1;
+  wire [32-1:0] reg_sa_p_seq2;
+  wire [32-1:0] reg_sa_p_seq3;
 
 
   wire [32-1 :0] reg_adc_p_clk_count_aperture;  // 32/31 bit nice. for long sample.
@@ -364,9 +367,9 @@ module top (
     .adc_measure_valid_i( adc_mock_measure_valid ),                     // fan-in from adc
 
     // TODO move to registers
-    .p_azmux_lo_val_i( reg_sa_p_azmux_lo_val[ 4-1:0]  ),
-    .p_azmux_hi_val_i( reg_sa_p_azmux_hi_val[ 4-1:0]  ),
-    .p_sw_pc_ctl_hi_val_i( reg_sa_p_sw_pc_ctl_hi_val[ 2-1:0] ),
+    .p_seq0_i( reg_sa_p_seq0[ 4-1:0]  ),
+    .p_seq1_i( reg_sa_p_seq1[ 4-1:0]  ),
+    .p_seq2_i( reg_sa_p_seq2[ 2-1:0] ),
     .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]  ),     // done
 
     // outputs
@@ -390,12 +393,16 @@ module top (
     // inputs
     .adc_measure_valid_i( adc_mock_measure_valid ),                     // fan-in from adc
 
-    /*
+    
     // TODO move to registers
-    .p_azmux_lo_val_i( reg_sa_p_azmux_lo_val[ 4-1:0]  ),
-    .p_azmux_hi_val_i( reg_sa_p_azmux_hi_val[ 4-1:0]  ),
-    .p_sw_pc_ctl_hi_val_i( reg_sa_p_sw_pc_ctl_hi_val[ 2-1:0] ),
-    */
+
+    .p_seq_n_i( reg_sa_p_seq_n[ 2-1: 0]  ),
+    .p_seq0_i( reg_sa_p_seq0[ 6-1: 0]  ),
+    .p_seq1_i( reg_sa_p_seq1[ 6-1: 0]  ),
+    .p_seq2_i( reg_sa_p_seq2[ 6-1: 0] ),
+    .p_seq3_i( reg_sa_p_seq2[ 6-1: 0] ),
+
+   
     .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]  ),     // done
 
     // outputs
@@ -711,13 +718,13 @@ module top (
     // inputs
     . reg_status( reg_status ),
 
-
-    // . reg_sa_arm_trigger ( reg_sa_arm_trigger ),
-
     . reg_sa_p_clk_count_precharge( reg_sa_p_clk_count_precharge),
-    . reg_sa_p_azmux_lo_val( reg_sa_p_azmux_lo_val),
-    . reg_sa_p_azmux_hi_val( reg_sa_p_azmux_hi_val),
-    . reg_sa_p_sw_pc_ctl_hi_val( reg_sa_p_sw_pc_ctl_hi_val),
+
+    . reg_sa_p_seq_n( reg_sa_p_seq_n),
+    . reg_sa_p_seq0( reg_sa_p_seq0),
+    . reg_sa_p_seq1( reg_sa_p_seq1),
+    . reg_sa_p_seq2( reg_sa_p_seq2),
+    . reg_sa_p_seq3( reg_sa_p_seq3),
 
 
     // outputs - sample acquisition

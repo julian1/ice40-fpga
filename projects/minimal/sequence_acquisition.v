@@ -16,9 +16,14 @@
 
     { wheether to switch pc switch, value of pc switch, azmux val }
     ------
-
     if we use a count . it might be easier to use registers.  eg.  reg_sa_sample_0  reg_sa_sample_1  etc.
     and just pack the bits.
+    simple azcase is just write two registers, and sequence n.
+
+    sample_seq0
+    sample_seq1
+    sample_seq2
+    sample_seq3
 */
 
 
@@ -44,6 +49,13 @@ module sequence_acquisition (
 
   // inputs
   input [24-1:0]    p_clk_count_precharge_i,
+
+  input [ 2-1: 0 ]  p_seq_n_i, 
+  input [ 6-1 : 0 ] p_seq0_i,
+  input [ 6-1 : 0 ] p_seq1_i,
+  input [ 6-1 : 0 ] p_seq2_i,
+  input [ 6-1 : 0 ] p_seq3_i,
+ 
 
 
   input adc_measure_valid_i,
