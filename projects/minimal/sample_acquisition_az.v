@@ -48,7 +48,7 @@ module sample_acquisition_az (
   /*/ now a wire.  output wire [ 2-1:0]  monitor_o       // driven as wire/assign.
   // think it is ok to be a combinatory logic - wire output - although may slow things down.
   */
-  output wire [ 2-1:0]  monitor_o
+  output wire [ 8-1:0]  monitor_o
 
 );
 
@@ -60,6 +60,7 @@ module sample_acquisition_az (
 
   assign monitor_o[0] = adc_reset_no;
   assign monitor_o[1] = adc_measure_valid_i;
+  assign monitor_o[2 +: 6 ] = 0;
 
   // assign monitor_o[1] =  azmux_o == p_azmux_hi_val_i ; // `AZMUX_PCOUT;
 

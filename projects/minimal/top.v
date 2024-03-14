@@ -348,7 +348,7 @@ module top (
   wire [2-1:0]  sample_acquisition_az_sw_pc_ctl;
   wire [4-1:0]  sample_acquisition_az_azmux;
   wire          sample_acquisition_az_led0;
-  wire [2-1:0]  sample_acquisition_az_monitor2;
+  wire [8-1:0]  sample_acquisition_az_monitor;
   wire [3-1:0]  sample_acquisition_az_status;
   // wire          sample_acquisition_az_adc_measure_trig;
 
@@ -372,7 +372,7 @@ module top (
     .sw_pc_ctl_o( sample_acquisition_az_sw_pc_ctl  ),
     .azmux_o (    sample_acquisition_az_azmux  ),
     .led0_o(      sample_acquisition_az_led0  ),
-    .monitor_o(   sample_acquisition_az_monitor2  ),    // only pass 2 bit to the az monitor
+    .monitor_o(   sample_acquisition_az_monitor  ),    // only pass 2 bit to the az monitor
     .status_o(  sample_acquisition_az_status ),
 
     .adc_reset_no(  adc_mock_reset_n  )
@@ -499,7 +499,7 @@ module top (
 
   wire sample_acquisition_no_az_adc2_reset_n;
   wire sample_acquisition_no_az_led0 ;
-  wire [2-1:0] sample_acquisition_no_az_monitor2;
+  wire [8-1:0] sample_acquisition_no_az_monitor;
 
   sample_acquisition_no_az
   sample_acquisition_no_az (
@@ -514,8 +514,7 @@ module top (
 
     // outputs
     .led0(      sample_acquisition_no_az_led0  ),
-    .monitor(   sample_acquisition_no_az_monitor2  ),    // we could pass subset of monitor if watned. eg. only 4 pins...
-    // .adc_measure_trig( sample_acquisition_no_az_adc2_reset_n),
+    .monitor(   sample_acquisition_no_az_monitor  ),    // we could pass subset of monitor if watned. eg. only 4 pins...
     .adc_reset_no ( sample_acquisition_no_az_adc2_reset_n),
   );
 
@@ -580,7 +579,7 @@ module top (
           4'b0,  // adc_refmux               // 18+4
           sample_acquisition_az_azmux,        // 14+4
           sample_acquisition_az_sw_pc_ctl,   // 12+2
-          adc_mock_monitor[0 +: 6] , sample_acquisition_az_monitor2,    // 4+8
+          adc_mock_monitor[0 +: 6] , sample_acquisition_az_monitor[ 0 +: 2],    // 4+8
           3'b0,                             // 1+3
           sample_acquisition_az_led0        // 0+1
         } ),
@@ -609,7 +608,7 @@ module top (
           // use reg_direct to control the azmux
           reg_direct [ 14 +: 4 ],  // azmux      // 14+4
           2'b0 ,                  // precharge    // 12+2     // TODO fixme. samples boot only.  use reg_sa_p_pc.
-          adc2_monitor[ 0 +: 6], sample_acquisition_no_az_monitor2,    // 4+8
+          adc2_monitor[ 0 +: 6], sample_acquisition_no_az_monitor[ 0 +: 2],    // 4+8
           3'b0,                             // 1+3
           sample_acquisition_az_led0        // 0+1
         } ),

@@ -25,7 +25,7 @@ module sample_acquisition_no_az (
   output reg led0,
 
   // now a wire.
-  output wire [ 2-1:0]  monitor
+  output wire [ 8-1:0]  monitor
 
 );
 
@@ -42,6 +42,7 @@ module sample_acquisition_no_az (
 
   assign monitor[0] = adc_reset_no;
   assign monitor[1] = adc_measure_valid;
+  assign monitor[2 +: 6 ] = 0;
 
   always @(posedge clk )
 
