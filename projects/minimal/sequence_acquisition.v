@@ -50,12 +50,12 @@ module sequence_acquisition (
   // inputs
   input [24-1:0]    p_clk_count_precharge_i,
 
-  input [ 2-1: 0 ]  p_seq_n_i, 
+  input [ 2-1: 0 ]  p_seq_n_i,
   input [ 6-1 : 0 ] p_seq0_i,
   input [ 6-1 : 0 ] p_seq1_i,
   input [ 6-1 : 0 ] p_seq2_i,
   input [ 6-1 : 0 ] p_seq3_i,
- 
+
 
 
   input adc_measure_valid_i,
@@ -86,8 +86,8 @@ module sequence_acquisition (
   reg  sample_i = 0;                // 2-cycle acquisition
 
 
-  reg [ 4-1 : 0 ] azmux_sample_val;
-  reg [ 4-1 : 0 ] pc_sw_sample_val;
+  // reg [ 4-1 : 0 ] azmux_sample_val;
+  // reg [ 4-1 : 0 ] pc_sw_sample_val;
 
 
 
@@ -133,7 +133,7 @@ module sequence_acquisition (
             ////
 
             led0_o            <= ! led0_o ;
-
+/*
             case(sample_i)
               0: begin
                 azmux_sample_val <= `S3;
@@ -145,7 +145,7 @@ module sequence_acquisition (
                 pc_sw_sample_val <= 2'b00; // it wouldn't even matter if we lifted the pre-charge switch.. here.
               end
             endcase
-
+*/
           end
 
         15:
@@ -159,11 +159,16 @@ module sequence_acquisition (
         // switch azmux_o to the signal of interest, which may be a low. and pause
         // precharge phase.
         2:
-            begin
-              state           <= 25;
-              clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
-              azmux_o           <= azmux_sample_val;
-            end
+          begin
+            state           <= 25;
+            clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
+
+            // azmux_o           <= azmux_sample_val;
+            case(sample_i)
+              0: azmux_o   <= p_seq0_i[ 0 +: 4 ];
+              1: azmux_o   <= p_seq1_i[ 0 +: 4];
+            endcase
+          end
         25:
           if(clk_count_down == 0)
             state <= 3;
@@ -178,9 +183,13 @@ module sequence_acquisition (
           begin
             state           <= 33;
             clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
-            sw_pc_ctl_o     <= pc_sw_sample_val;
-          end
 
+            // sw_pc_ctl_o     <= pc_sw_sample_val;
+            case(sample_i)
+              0: sw_pc_ctl_o <= p_seq0_i[4 +: 2];
+              1: sw_pc_ctl_o <= p_seq1_i[4 +: 2];
+            endcase
+          end
         33:
           if(clk_count_down == 0)
             begin
@@ -198,7 +207,8 @@ module sequence_acquisition (
               state         <= 1;
 
               // set up the next sample
-              // if( sample_i >= sample_n ) sample_i <= 0;   else sample_i <= sample_i + 1;
+              // if( sample_i >= sample_n  - 1 ) sample_i <= 0;   else sample_i <= sample_i + 1;
+
               sample_i <= sample_i + 1;
 
               // set status for hi sample
