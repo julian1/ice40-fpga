@@ -51,7 +51,7 @@ module refmux_test (
 
 
 	// now a wire. again.
-  output wire [ 6-1:0]  monitor_o,
+  output wire [ 8-1:0]  monitor_o,
 
   output reg [ 3-1:0]  refmux_o,            // reference current mux
   output reg sigmux_o,                      // unused
@@ -76,7 +76,8 @@ module refmux_test (
   assign monitor_o[1] = (state == `STATE_FIX_NEG);
   assign monitor_o[2] = cmpr_val_i;
 
-  assign monitor_o[6-1: 3] = 3'b000 ;
+  // assign monitor_o[6-1: 3] = 3'b000 ;
+  assign monitor_o[ 3 +: 5 ] = 0 ;
 
 
   //////////////////////////////////////////////////////

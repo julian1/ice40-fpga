@@ -400,8 +400,8 @@ module top (
 
 
   // TODO consider rename adc_refmux_test.
-  wire [6-1:0] refmux_test_monitor_o;
-  wire [4-1:0] refmux_test_refmux_o;
+  wire [8-1:0] refmux_test_monitor;
+  wire [4-1:0] refmux_test_refmux;
 
   refmux_test refmux_test (
 
@@ -413,11 +413,11 @@ module top (
 
     . cmpr_val_i( adc_cmpr_p_i ),
 
-    .monitor_o( refmux_test_monitor_o),
+    .monitor_o( refmux_test_monitor),
     /* ie. refmux order pos,neg,source,reset.
       do we want to change this in main.pcf.. no keep ic sw pinout order.  */
-    .refmux_o ( { refmux_test_refmux_o[  3  ],  refmux_test_refmux_o[ 0 +: 2 ]   }  ),
-    .sigmux_o( refmux_test_refmux_o[ 2] )
+    .refmux_o ( { refmux_test_refmux[  3  ],  refmux_test_refmux[ 0 +: 2 ]   }  ),
+    .sigmux_o( refmux_test_refmux[ 2] )
   );
 
 
@@ -589,10 +589,10 @@ module top (
     // limited modulation of ref currents, useful when populating pcb, don't need slope-amp/comparator etc.
     .g( {  { 32 - 22 { 'b0 }},
                                               // 22
-          refmux_test_refmux_o,                // 18+4
+          refmux_test_refmux,                // 18+4
           4'b0,    // azmux                  // 14+4
           2'b0 ,  // precharge               // 12+2
-          2'b0, refmux_test_monitor_o,       // 4+8
+          refmux_test_monitor,            //     4+8
           4'b0   // leds                   // 0+4
         } ),
 
