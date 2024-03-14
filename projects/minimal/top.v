@@ -24,6 +24,7 @@
 
 `include "adc_modulation_05.v"
 `include "sample_acquisition_no_az.v"
+`include "sequence_acquisition.v"
 
 `default_nettype none
 
@@ -352,7 +353,7 @@ module top (
   wire [3-1:0]  sample_acquisition_az_status;
   // wire          sample_acquisition_az_adc_measure_trig;
 
-
+/*
   sample_acquisition_az
   sample_acquisition_az (
 
@@ -377,9 +378,54 @@ module top (
 
     .adc_reset_no(  adc_mock_reset_n  )
   );
+*/
+
+  // sample_acquisition_sequence 
+  sequence_acquisition
+  sequence_acquisition (
+
+    .clk(CLK),
+    .reset_n( trigger_source_internal_i ),    // we want this to remove. the old edge triggered stuff.
+
+    // inputs
+    .adc_measure_valid_i( adc_mock_measure_valid ),                     // fan-in from adc
+
+    /*
+    // TODO move to registers
+    .p_azmux_lo_val_i( reg_sa_p_azmux_lo_val[ 4-1:0]  ),
+    .p_azmux_hi_val_i( reg_sa_p_azmux_hi_val[ 4-1:0]  ),
+    .p_sw_pc_ctl_hi_val_i( reg_sa_p_sw_pc_ctl_hi_val[ 2-1:0] ),
+    */
+    .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]  ),     // done
+
+    // outputs
+    .sw_pc_ctl_o( sample_acquisition_az_sw_pc_ctl  ),
+    .azmux_o (    sample_acquisition_az_azmux  ),
+    .led0_o(      sample_acquisition_az_led0  ),
+    .monitor_o(   sample_acquisition_az_monitor  ),    // only pass 2 bit to the az monitor
+    .status_o(  sample_acquisition_az_status ),
+
+    .adc_reset_no(  adc_mock_reset_n  )
+  );
 
 
   ////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -579,7 +625,8 @@ module top (
           4'b0,  // adc_refmux               // 18+4
           sample_acquisition_az_azmux,        // 14+4
           sample_acquisition_az_sw_pc_ctl,   // 12+2
-          adc_mock_monitor[0 +: 6] , sample_acquisition_az_monitor[ 0 +: 2],    // 4+8
+          // adc_mock_monitor[0 +: 6] , sample_acquisition_az_monitor[ 0 +: 2],    // 4+8
+          sample_acquisition_az_monitor[ 0 +: 8],    // 4+8
           3'b0,                             // 1+3
           sample_acquisition_az_led0        // 0+1
         } ),

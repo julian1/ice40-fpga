@@ -24,6 +24,7 @@
 `define S3          ((1<<3)|(3-1))
 
 `define S7          ((1<<3)|(7-1))
+`define S8          ((1<<3)|(8-1))
 
 
 // `define AZMUX_PCOUT    `S1     // signal PC-OUT
