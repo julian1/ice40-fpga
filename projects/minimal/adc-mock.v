@@ -28,14 +28,18 @@ module adc_mock (
   reg [7-1:0]   state = 0 ;
   reg [31:0]    clk_count_down;
 
+  /*
+    there's a very strange bug lurking here, if we remove this register allocation , that is not even used.
+    then get spurious signals on adc_measure_valid in the real adc mode.
 
-  reg [ 6-1:0]  monitor; 
+  */
+  reg [ 6-1:0]  monitor_xxx;
 
   // combinatorial logic
   assign monitor_o[0] = reset_n;
   assign monitor_o[1] = adc_measure_valid_o;
-  assign monitor_o[2 +: 6 ] = monitor;
 
+  assign monitor_o[2 +: 6 ] = 0;
 
 
 
@@ -61,7 +65,6 @@ module adc_mock (
             // set sample/measure period
             clk_count_down  <= p_clk_count_aperture_i;
 
-            monitor <= 6'b0;
           end
 
 
