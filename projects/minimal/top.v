@@ -348,7 +348,7 @@ module top (
 
   wire [4-1:0]  sequence_acquisition_leds;
   wire [8-1:0]  sequence_acquisition_monitor;
-  wire [3-1:0]  sequence_acquisition_status;
+  wire [4-1:0]  sequence_acquisition_status;
 
 
   // perhaps rename sequence_acquisition_with_adc_mock
@@ -361,9 +361,6 @@ module top (
 
     // inputs
     .adc_measure_valid_i( adc_mock_measure_valid ),                     // fan-in from adc
-
-
-    // TODO move to registers
 
     .p_seq_n_i( reg_sa_p_seq_n[ 2-1: 0]  ),
     .p_seq0_i( reg_sa_p_seq0[ 6-1: 0]  ),
@@ -380,7 +377,7 @@ module top (
 
     .leds_o(      sequence_acquisition_leds  ),
     .monitor_o(   sequence_acquisition_monitor  ),    // only pass 2 bit to the az monitor
-    .status_o(  sequence_acquisition_status ),
+    .status_last_o(  sequence_acquisition_status ),
 
     .adc_reset_no(  adc_mock_reset_n  )
   );
@@ -403,6 +400,9 @@ module top (
   wire          adc_measure_valid;
 
   wire [8-1: 0 ] adc_monitor;
+  // wire [4-1:0]  adc_status;      // TODO
+
+
   wire [4-1: 0 ] adc_mux;
   wire           adc_cmpr_latch_ctl;
 
@@ -461,8 +461,12 @@ module top (
 
 
 
-
-
+  /*
+    status_o should be treated/managed generically - just like monitor_o and leds_o.  for each controller (sequence,adc etc).
+      like a generic service to a module
+    eg. try to conform to same/standard bit width.
+    - call it status_last ... because it is for the completed measurement, not current.
+  */
 
   //////////////////
 
@@ -471,7 +475,7 @@ module top (
 
   wire [4-1:0]  sequence_acquisition2_leds;
   wire [8-1:0]  sequence_acquisition2_monitor;
-  wire [3-1:0]  sequence_acquisition2_status;
+  wire [4-1:0]  sequence_acquisition2_status;
 
 
   wire  sequence_acquisition2_adc_reset_n;
@@ -505,7 +509,7 @@ module top (
 
     .leds_o(      sequence_acquisition2_leds  ),
     .monitor_o(   sequence_acquisition2_monitor  ),    // only pass 2 bit to the az monitor
-    .status_o(  sequence_acquisition2_status ),
+    .status_last_o(  sequence_acquisition2_status ),
 
     .adc_reset_no(  sequence_acquisition2_adc_reset_n )        // JA
   );

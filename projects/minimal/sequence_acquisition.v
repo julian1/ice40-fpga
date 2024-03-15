@@ -1,4 +1,6 @@
 /*
+   keep the precharge time the same, when taking a low  measurement - for symmetry and to be more generic.
+
   remember also.
     we need a way to communicate back to the mcu which sample is the one in the sequence.
     so the sample_i is good.
@@ -68,8 +70,10 @@ module sequence_acquisition (
   output reg [ 4-1:0 ] azmux_o,
 
 
-  // must be a register if driven synchronously.
-  output reg [3-1: 0 ] status_o,
+  //  - status_o should be treated generically.  just like monitor_o and leds_o.
+  // 4 bits or 8 bits.
+  // encode idx, or seq azval, or both?
+  output reg [4-1: 0 ] status_last_o,
 
 
 
@@ -221,7 +225,7 @@ module sequence_acquisition (
               sample_i <= sample_i + 1;
 
               // set status for hi sample
-              status_o    <= 3'b001; // we moved this.      // set status only after measure, to enable reg reading, during next measurement cycle.
+              status_last_o    <= 4'b001; // we moved this.      // set status only after measure, to enable reg reading, during next measurement cycle.
 
               // JA added. put adc in reset again
               adc_reset_no <= 0;
