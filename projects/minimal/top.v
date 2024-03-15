@@ -618,9 +618,21 @@ module top (
         } ),
 
 
-    // mode/AF  5  MODE_AZ_TEST with a mocked adc.  useful. for timing/ control tests
+    // mode  5. adc refmux test
+    // limited modulation of ref currents, useful when populating pcb, don't need slope-amp/comparator etc.
+    .f( {  { 32 - 22 { 'b0 }},
+                                              // 22
+          refmux_test_refmux,                // 18+4
+          4'b0,    // azmux                  // 14+4
+          2'b0 ,  // precharge               // 12+2
+          refmux_test_monitor,            //     4+8
+          4'b0   // leds                   // 0+4
+        } ),
+
+
+    // mode  6  sequence acquisition with mocked adc.  and better monitor
     // very useful - allows testing precharge/az switching, even if don't have adc populated
-    .f( {  { 32 - 26 { 'b0 }},
+    .g( {  { 32 - 26 { 'b0 }},
                                                 // 26
           1'b0, // adc_reset_n         // 25 + 1
           1'b0, // meas_complete              // 24+1
@@ -629,22 +641,10 @@ module top (
           4'b0,  // adc_refmux               // 18+4
           sequence_acquisition_azmux,        // 14+4
           sequence_acquisition_sw_pc_ctl,   // 12+2
-          // adc_mock_monitor[0 +: 6] , sequence_acquisition_monitor[ 0 +: 2],    // 4+8
           sequence_acquisition_monitor[ 0 +: 8],    // 4+8
           sequence_acquisition_leds        // 0+1
         } ),
 
-
-    // mode  6. adc refmux test
-    // limited modulation of ref currents, useful when populating pcb, don't need slope-amp/comparator etc.
-    .g( {  { 32 - 22 { 'b0 }},
-                                              // 22
-          refmux_test_refmux,                // 18+4
-          4'b0,    // azmux                  // 14+4
-          2'b0 ,  // precharge               // 12+2
-          refmux_test_monitor,            //     4+8
-          4'b0   // leds                   // 0+4
-        } ),
 
 
     // mode 7. adc using sequence acquisition controller.
