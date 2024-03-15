@@ -37,12 +37,14 @@
 ///////////////////////
 
 //  sample acquisition.
-`define REG_SA_ARM_TRIGGER              20      // probably change reg to be a maskable source trigger.
+`define REG_SA_P_SEQ_N              20      // probably change reg to be a maskable source trigger.
 
 `define REG_SA_P_CLK_COUNT_PRECHARGE    21
-`define REG_SA_P_AZMUX_LO_VAL           22
-`define REG_SA_P_AZMUX_HI_VAL           23
-`define REG_SA_P_SW_PC_CTL_HI_VAL       24
+
+`define REG_SA_P_SEQ0           22
+`define REG_SA_P_SEQ1           23
+`define REG_SA_P_SEQ2           24
+`define REG_SA_P_SEQ3           25
 
 
 
@@ -103,11 +105,17 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
 
   // outputs signal acquisition
-  output reg [32-1:0] reg_sa_arm_trigger,
+  output reg [32-1:0] reg_sa_p_seq_n,
   output reg [32-1:0] reg_sa_p_clk_count_precharge,
-  output reg [32-1:0] reg_sa_p_azmux_lo_val,
-  output reg [32-1:0] reg_sa_p_azmux_hi_val,
-  output reg [32-1:0] reg_sa_p_sw_pc_ctl_hi_val,
+
+  /* encode azmux value 4 bits, and precharge switch 2 bits.
+    could use higher bits to encode other control eg. to not change/leave the precharge from previous value. etc.
+    better than creating a separate controller module
+  */
+  output reg [32-1:0] reg_sa_p_seq0,
+  output reg [32-1:0] reg_sa_p_seq1,
+  output reg [32-1:0] reg_sa_p_seq2,
+  output reg [32-1:0] reg_sa_p_seq3,
 
 
 
@@ -145,11 +153,17 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
     // signal acquisition
     // it is nice to have sa defaults...
     // so can just put in az mode, and have something working.
-    reg_sa_arm_trigger <= 0;
     reg_sa_p_clk_count_precharge  <= $rtoi( `CLK_FREQ * 500e-6 );   // == 10000 ==  500us.
-    reg_sa_p_azmux_lo_val <= `S7 ;
-    reg_sa_p_azmux_hi_val <= `S3 ;
-    reg_sa_p_sw_pc_ctl_hi_val <= 2'b01 ;
+
+    // how can express macro constant. of fixed width? does this work?
+    // reg_sa_p_seq0 <= { 2'b01, ((4'd1<<3)|(3-1))   };  //  `S3
+
+    reg_sa_p_seq_n <= 2;
+    reg_sa_p_seq0 <= { 2'b01, 4'd10   };  //  ((1<<3)|(3-1)) =  10          // S3 dcv
+    reg_sa_p_seq1 <= { 2'b00, 4'd14    };   // ((1<<3)|(7-1)) =  14       // S7  start-gnd.
+    // reg_sa_p_seq1 <= { 2'b01, 4'd10   };  //  ((1<<3)|(3-1)) =  10          // S3 dcv
+    reg_sa_p_seq2 <= 0 ;
+    reg_sa_p_seq3 <= 0 ;
 
     // adc
     reg_adc_p_clk_count_aperture  <=  $rtoi( `CLK_FREQ * 0.2 );      // 200ms.
@@ -215,11 +229,12 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
                ////////
 
-              `REG_SA_ARM_TRIGGER:            out <= reg_sa_arm_trigger << 8;
+              `REG_SA_P_SEQ_N:            out <= reg_sa_p_seq_n << 8;
               `REG_SA_P_CLK_COUNT_PRECHARGE:  out <= reg_sa_p_clk_count_precharge << 8;
-              `REG_SA_P_AZMUX_LO_VAL:         out <= reg_sa_p_azmux_lo_val << 8;
-              `REG_SA_P_AZMUX_HI_VAL:         out <= reg_sa_p_azmux_hi_val << 8;
-              `REG_SA_P_SW_PC_CTL_HI_VAL:     out <= reg_sa_p_sw_pc_ctl_hi_val << 8;
+              `REG_SA_P_SEQ0:         out <= reg_sa_p_seq0 << 8;
+              `REG_SA_P_SEQ1:         out <= reg_sa_p_seq1 << 8;
+              `REG_SA_P_SEQ2:         out <= reg_sa_p_seq2 << 8;
+              `REG_SA_P_SEQ3:         out <= reg_sa_p_seq3 << 8;
 
 
               /////
@@ -265,11 +280,13 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
             //////////
 
-            `REG_SA_ARM_TRIGGER:            reg_sa_arm_trigger <= bin;
+            `REG_SA_P_SEQ_N:                reg_sa_p_seq_n <= bin;
             `REG_SA_P_CLK_COUNT_PRECHARGE:  reg_sa_p_clk_count_precharge <= bin;
-            `REG_SA_P_AZMUX_LO_VAL:         reg_sa_p_azmux_lo_val <= bin;
-            `REG_SA_P_AZMUX_HI_VAL:         reg_sa_p_azmux_hi_val <= bin;
-            `REG_SA_P_SW_PC_CTL_HI_VAL:     reg_sa_p_sw_pc_ctl_hi_val <= bin;
+
+            `REG_SA_P_SEQ0:                 reg_sa_p_seq0 <= bin;
+            `REG_SA_P_SEQ1:                 reg_sa_p_seq1 <= bin;
+            `REG_SA_P_SEQ2:                 reg_sa_p_seq2 <= bin;
+            `REG_SA_P_SEQ3:                 reg_sa_p_seq3 <= bin;
 
               ////
 

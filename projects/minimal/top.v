@@ -15,15 +15,16 @@
 `include "../../common/timed_latch.v"
 
 `include "register_set.v"
-`include "sample_acquisition_pc.v"
+// `include "sample_acquisition_pc.v"
 
-`include "sample_acquisition_az.v"
+// `include "sample_acquisition_az.v"
 
 `include "adc-mock.v"       // change name adc-mock.
 `include "refmux-test.v"
 
 `include "adc_modulation_05.v"
-`include "sample_acquisition_no_az.v"
+// `include "sample_acquisition_no_az.v"
+`include "sequence_acquisition.v"
 
 `default_nettype none
 
@@ -240,8 +241,8 @@ module top (
     HW2,  HW1,  HW0,
 
     reg_sa_arm_trigger[0],            // ease having to do a separate register read, to retrieve state.
-    sample_acquisition_az_status_out, // 3 bits
-    adc2_measure_valid,
+    sequence_acquisition_status_out, // 3 bits
+    adc_measure_valid,
 
     // HW2,  HW1,  HW0 ,   4'b0,  outputs_vec[ `IDX_SPI_INTERRUPT_CTL ] ,
 
@@ -276,46 +277,56 @@ module top (
 
 
   wire [32-1:0] reg_sa_p_clk_count_precharge;
-  wire [32-1:0] reg_sa_p_azmux_lo_val;
-  wire [32-1:0] reg_sa_p_azmux_hi_val;
-  wire [32-1:0] reg_sa_p_sw_pc_ctl_hi_val;
+
+  wire [32-1:0] reg_sa_p_seq_n;
+  wire [32-1:0] reg_sa_p_seq0;
+  wire [32-1:0] reg_sa_p_seq1;
+  wire [32-1:0] reg_sa_p_seq2;
+  wire [32-1:0] reg_sa_p_seq3;
 
 
   wire [32-1 :0] reg_adc_p_clk_count_aperture;  // 32/31 bit nice. for long sample.
   wire [32-1 :0] reg_adc_p_clk_count_reset;
 
-  ////////
-  // rename sa_simple_ ?
-  // sa_pc_test
-  // or test_sa_pc
 
+
+  /////////////////////////
+  // We could do one led, for SS, and one for CS2 (4094,etc).
+  // rename timed_latch_hold
   /*
-    - note that we can still hook this up to the adc. for measurement.
-    - slightly different from a direct mode. where there is no pc switching.
-
-    TODO. rename include test in name. it's actually sample acquisition.
+    change name. this delay stretch the signal over longer clk duration.
   */
-
-  wire sample_acquisition_pc_sw_pc_ctl;
-  wire sample_acquisition_pc_led0;
-  wire [8-1 : 0] sample_acquisition_pc_monitor;
-
-  sample_acquisition_pc
-  sample_acquisition_pc (
-    // inputs
-    .clk(CLK),
-    .reset_n( 1'b0 ), // TODO remove.
-
-    // TODO - rename   , and prefix p_ .  p_p_clk_sample_duration_i
-    // inputs
-    .p_clk_sample_duration_i( reg_adc_p_clk_count_aperture ),
-    .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0] ),
-
-    // outputs
-    .sw_pc_ctl_o( sample_acquisition_pc_sw_pc_ctl   ),          // should pass in both. and a register like a mask. to indicate which to use. similar to register for az mux.  might encode in same register.
-    .led0_o(      sample_acquisition_pc_led0 ),                 // EXTR. just use the bits of reg_direct for azmux and which pc switch to use.  add back reg_direc2 for the ratiometric.
-    .monitor_o(   sample_acquisition_pc_monitor  )
+  wire led0;
+  timed_latch timed_latch (
+    . clk(CLK),
+    . trig_i( !SS || !SPI_CS2 ),      // rename set?
+    . out( led0 )
   );
+
+
+
+  // TODO consider rename adc_refmux_test.
+  wire [8-1:0] refmux_test_monitor;
+  wire [4-1:0] refmux_test_refmux;
+
+  refmux_test refmux_test (
+
+    .clk(CLK),
+    // JA.   add a reset_n.  and only activate in the corresponding mode.
+    // we don't care about reset here
+
+    . p_clk_count_reset_i( $rtoi(  `CLK_FREQ * 500e-6 )  ), // 500us.
+    . p_clk_count_fix_i(   $rtoi( `CLK_FREQ * 100e-6 )) ,  // 100us. initial but too long
+
+    . cmpr_val_i( adc_cmpr_p_i ),
+
+    .monitor_o( refmux_test_monitor),
+    /* ie. refmux order pos,neg,source,reset.
+      do we want to change this in main.pcf.. no keep ic sw pinout order.  */
+    .refmux_o ( { refmux_test_refmux[  3  ],  refmux_test_refmux[ 0 +: 2 ]   }  ),
+    .sigmux_o( refmux_test_refmux[ 2] )
+  );
+
 
 
 
@@ -342,19 +353,18 @@ module top (
     .monitor_o(  adc_mock_monitor )
   );
 
+  wire [2-1:0]  sequence_acquisition_sw_pc_ctl; // TODO fixme rename  pc_sw not sw_pc
+  wire [4-1:0]  sequence_acquisition_azmux;
 
-  // fucking hell it's getting a bit complicated.
-  // we need to rename this.   sa_az_adc_mock_sw_pc_ctl.
-  wire [2-1:0]  sample_acquisition_az_sw_pc_ctl;
-  wire [4-1:0]  sample_acquisition_az_azmux;
-  wire          sample_acquisition_az_led0;
-  wire [8-1:0]  sample_acquisition_az_monitor;
-  wire [3-1:0]  sample_acquisition_az_status;
-  // wire          sample_acquisition_az_adc_measure_trig;
+  wire [4-1:0]  sequence_acquisition_leds;
+  wire [8-1:0]  sequence_acquisition_monitor;
+  wire [3-1:0]  sequence_acquisition_status;
 
 
-  sample_acquisition_az
-  sample_acquisition_az (
+  // perhaps rename sequence_acquisition_with_adc_mock
+
+  sequence_acquisition
+  sequence_acquisition (
 
     .clk(CLK),
     .reset_n( trigger_source_internal_i ),    // we want this to remove. the old edge triggered stuff.
@@ -362,18 +372,25 @@ module top (
     // inputs
     .adc_measure_valid_i( adc_mock_measure_valid ),                     // fan-in from adc
 
+
     // TODO move to registers
-    .p_azmux_lo_val_i( reg_sa_p_azmux_lo_val[ 4-1:0]  ),
-    .p_azmux_hi_val_i( reg_sa_p_azmux_hi_val[ 4-1:0]  ),
-    .p_sw_pc_ctl_hi_val_i( reg_sa_p_sw_pc_ctl_hi_val[ 2-1:0] ),
+
+    .p_seq_n_i( reg_sa_p_seq_n[ 2-1: 0]  ),
+    .p_seq0_i( reg_sa_p_seq0[ 6-1: 0]  ),
+    .p_seq1_i( reg_sa_p_seq1[ 6-1: 0]  ),
+    .p_seq2_i( reg_sa_p_seq2[ 6-1: 0] ),
+    .p_seq3_i( reg_sa_p_seq2[ 6-1: 0] ),
+
+
     .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]  ),     // done
 
     // outputs
-    .sw_pc_ctl_o( sample_acquisition_az_sw_pc_ctl  ),
-    .azmux_o (    sample_acquisition_az_azmux  ),
-    .led0_o(      sample_acquisition_az_led0  ),
-    .monitor_o(   sample_acquisition_az_monitor  ),    // only pass 2 bit to the az monitor
-    .status_o(  sample_acquisition_az_status ),
+    .sw_pc_ctl_o( sequence_acquisition_sw_pc_ctl  ),
+    .azmux_o (    sequence_acquisition_azmux  ),
+
+    .leds_o(      sequence_acquisition_leds  ),
+    .monitor_o(   sequence_acquisition_monitor  ),    // only pass 2 bit to the az monitor
+    .status_o(  sequence_acquisition_status ),
 
     .adc_reset_no(  adc_mock_reset_n  )
   );
@@ -384,78 +401,40 @@ module top (
 
 
 
-  /////////////////////////
-  // We could do one led, for SS, and one for CS2 (4094,etc).
-  // rename timed_latch_hold
-  /*
-    change name. this is more stretching the signal.
-  */
-  wire led0;
-  timed_latch timed_latch (
-    . clk(CLK),
-    . trig_i( !SS || !SPI_CS2 ),      // rename set?
-    . out( led0 )
-  );
-
-
-
-  // TODO consider rename adc_refmux_test.
-  wire [8-1:0] refmux_test_monitor;
-  wire [4-1:0] refmux_test_refmux;
-
-  refmux_test refmux_test (
-
-    .clk(CLK),
-    // we don't care about reset here
-
-    . p_clk_count_reset_i( $rtoi(  `CLK_FREQ * 500e-6 )  ), // 500us.
-    . p_clk_count_fix_i(   $rtoi( `CLK_FREQ * 100e-6 )) ,  // 100us. initial but too long
-
-    . cmpr_val_i( adc_cmpr_p_i ),
-
-    .monitor_o( refmux_test_monitor),
-    /* ie. refmux order pos,neg,source,reset.
-      do we want to change this in main.pcf.. no keep ic sw pinout order.  */
-    .refmux_o ( { refmux_test_refmux[  3  ],  refmux_test_refmux[ 0 +: 2 ]   }  ),
-    .sigmux_o( refmux_test_refmux[ 2] )
-  );
-
-
-
 
 
 
 
   ////////////////////////////
 
-  // adc gets instantiated once, so should be called adc. not adc2.
+  // adc gets instantiated once, so should be called adc. not adc.
   // do the no_az first. as the simplest.
 
   // TODO rename adc
-  wire          adc2_reset_n;
-  wire          adc2_measure_valid;
+  wire          adc_reset_n;
+  wire          adc_measure_valid;
 
-  wire [8-1: 0 ] adc2_monitor;
-  wire [4-1: 0 ] adc2_mux;
-  wire           adc2_cmpr_latch_ctl;
+  wire [8-1: 0 ] adc_monitor;
+  wire [4-1: 0 ] adc_mux;
+  wire           adc_cmpr_latch_ctl;
 
 
-  wire [24-1:0] adc2_clk_count_refmux_reset_last;
-  wire [32-1:0] adc2_clk_count_refmux_neg_last;    // maybe add reg_ prefix. No. they are not registers, until they are in the register_bank context.
-  wire [32-1:0] adc2_clk_count_refmux_pos_last;
-  wire [24-1:0] adc2_clk_count_refmux_rd_last;
-  wire [32-1:0] adc2_clk_count_mux_sig_last;
+  wire [24-1:0] adc_clk_count_refmux_reset_last;
+  wire [32-1:0] adc_clk_count_refmux_neg_last;    // maybe add reg_ prefix. No. they are not registers, until they are in the register_bank context.
+  wire [32-1:0] adc_clk_count_refmux_pos_last;
+  wire [24-1:0] adc_clk_count_refmux_rd_last;
+  wire [32-1:0] adc_clk_count_mux_sig_last;
 
-  wire [24-1 :0] adc2_stat_count_refmux_pos_up_last;
-  wire [24-1 :0] adc2_stat_count_refmux_neg_up_last;
-  wire [24-1 :0] adc2_stat_count_cmpr_cross_up_last;
+  wire [24-1 :0] adc_stat_count_refmux_pos_up_last;
+  wire [24-1 :0] adc_stat_count_refmux_neg_up_last;
+  wire [24-1 :0] adc_stat_count_cmpr_cross_up_last;
 
 
   adc_modulation
-  adc2(
+  adc(
 
     .clk(CLK),
-    .reset_n( adc2_reset_n),      // OK.
+    .reset_n( adc_reset_n),      // OK.
 
 
     .cmpr_val( adc_cmpr_p_i ),                  // OK.  fan in-  rename top_adc_cmpr_p_i ?
@@ -472,60 +451,80 @@ module top (
     . p_use_fast_rundown( 1'b1 ),
 
     // outputs - ctrl
-    .adc_measure_valid( adc2_measure_valid),    // OK, fan out back to the sa controllers
-    .cmpr_latch_ctl( adc2_cmpr_latch_ctl   ),
-    .monitor(  adc2_monitor  ),
-    .refmux(  { adc2_mux[  3  ],  adc2_mux[ 0 +: 2 ]   } ),           // pos, neg, reset. are on two different 4053,
-    .sigmux(    adc2_mux[  2  ] ),                                    // perhaps clearer if split into adcrefmux and adcsigmux in the wire assignment. but it would then need two vars.
+    .adc_measure_valid( adc_measure_valid),    // OK, fan out back to the sa controllers
+    .cmpr_latch_ctl( adc_cmpr_latch_ctl   ),
+    .monitor(  adc_monitor  ),
+    .refmux(  { adc_mux[  3  ],  adc_mux[ 0 +: 2 ]   } ),           // pos, neg, reset. are on two different 4053,
+    .sigmux(    adc_mux[  2  ] ),                                    // perhaps clearer if split into adcrefmux and adcsigmux in the wire assignment. but it would then need two vars.
                                                                       // which isn't representative of the single synchronizer. so do it here instead.
     // adc clk counts for last sample measurement
-    .clk_count_refmux_reset_last(adc2_clk_count_refmux_reset_last),
-    .clk_count_refmux_neg_last(  adc2_clk_count_refmux_neg_last),
-    .clk_count_refmux_pos_last(  adc2_clk_count_refmux_pos_last),
-    .clk_count_refmux_rd_last(   adc2_clk_count_refmux_rd_last),
-    .clk_count_mux_sig_last(  adc2_clk_count_mux_sig_last ),
+    .clk_count_refmux_reset_last(adc_clk_count_refmux_reset_last),
+    .clk_count_refmux_neg_last(  adc_clk_count_refmux_neg_last),
+    .clk_count_refmux_pos_last(  adc_clk_count_refmux_pos_last),
+    .clk_count_refmux_rd_last(   adc_clk_count_refmux_rd_last),
+    .clk_count_mux_sig_last(  adc_clk_count_mux_sig_last ),
 
     // stats
-    .stat_count_refmux_pos_up_last( adc2_stat_count_refmux_pos_up_last),
-    .stat_count_refmux_neg_up_last( adc2_stat_count_refmux_neg_up_last),
-    .stat_count_cmpr_cross_up_last( adc2_stat_count_cmpr_cross_up_last)
+    .stat_count_refmux_pos_up_last( adc_stat_count_refmux_pos_up_last),
+    .stat_count_refmux_neg_up_last( adc_stat_count_refmux_neg_up_last),
+    .stat_count_cmpr_cross_up_last( adc_stat_count_cmpr_cross_up_last)
   );
 
 
 
-  // wire [ `NUM_BITS-1:0 ]  sample_acquisition_no_az_out ;  // beter name ... _outputs_vec ?
 
-  // wire sample_acquisition_no_az_reset_n;
 
-  wire sample_acquisition_no_az_adc2_reset_n;
-  wire sample_acquisition_no_az_led0 ;
-  wire [8-1:0] sample_acquisition_no_az_monitor;
 
-  sample_acquisition_no_az
-  sample_acquisition_no_az (
+
+  //////////////////
+
+  wire [2-1:0]  sequence_acquisition2_sw_pc_ctl;
+  wire [4-1:0]  sequence_acquisition2_azmux;
+
+  wire [4-1:0]  sequence_acquisition2_leds;
+  wire [8-1:0]  sequence_acquisition2_monitor;
+  wire [3-1:0]  sequence_acquisition2_status;
+
+
+  wire  sequence_acquisition2_adc_reset_n;
+
+
+  sequence_acquisition
+  sequence_acquisition2 (
 
     .clk(CLK),
-    .reset_n( trigger_source_internal_i ),
+    .reset_n( trigger_source_internal_i ),    // we want this to remove. the old edge triggered stuff.
 
     // inputs
-    .adc_measure_valid( adc2_measure_valid ),                     // fan-in from adc
+    // .adc_measure_valid_i( adc_mock_measure_valid ),                     // JA
+    .adc_measure_valid_i( adc_measure_valid ),                     // JA the real adc. from adc
 
-    .p_clk_count_precharge( reg_sa_p_clk_count_precharge[ 24-1:0 ]),
+
+    // TODO move to registers
+
+    .p_seq_n_i( reg_sa_p_seq_n[ 2-1: 0]  ),
+    .p_seq0_i( reg_sa_p_seq0[ 6-1: 0]  ),
+    .p_seq1_i( reg_sa_p_seq1[ 6-1: 0]  ),
+    .p_seq2_i( reg_sa_p_seq2[ 6-1: 0] ),
+    .p_seq3_i( reg_sa_p_seq2[ 6-1: 0] ),
+
+
+    .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]  ),     // done
 
     // outputs
-    .led0(      sample_acquisition_no_az_led0  ),
-    .monitor(   sample_acquisition_no_az_monitor  ),    // we could pass subset of monitor if watned. eg. only 4 pins...
-    .adc_reset_no ( sample_acquisition_no_az_adc2_reset_n),
+    .sw_pc_ctl_o( sequence_acquisition2_sw_pc_ctl  ),
+    .azmux_o (    sequence_acquisition2_azmux  ),
+
+    .leds_o(      sequence_acquisition2_leds  ),
+    .monitor_o(   sequence_acquisition2_monitor  ),    // only pass 2 bit to the az monitor
+    .status_o(  sequence_acquisition2_status ),
+
+    .adc_reset_no(  sequence_acquisition2_adc_reset_n )        // JA
   );
 
 
 
 
-  /*
-      - It may be possible to control and run the adc - with the direct register. just be setting the bit for the trigger.
-      - BUT. wants to be non edge triggered.
-
-  */
 
 
   ////////////////////////////
@@ -537,82 +536,64 @@ module top (
   mux_8to1_assign #( 32  )
   mux_8to1_assign_1  (
 
-    .a(  reg_direct  ),                         // mode/AF 0  MODE_DIRECT       note, could change to project the the spi signals on the monitor, for easier ddebuggin. no. because want direct to control all outputs for test.
+    .a(  reg_direct  ),                       // mode/AF 0  MODE_DIRECT       note, could change to project the the spi signals on the monitor, for easier ddebuggin. no. because want direct to control all outputs for test.
 
     /* TODO remove.
         the modes for output lo, and output hi - are not really needed. eg. mode 0; direct 0xffffffff ; or 0x00000000; etc.
         and there maybe chance of damage, if parts are populated
       */
-    .b(  32'b0  ),                              // mode/AF  1 MODE_LO           all outputs low.
-    .c( { 32 { 1'b1 } }    ),                   // mode/AF 2  MODE_HI           all outputs hi.
-    .d( test_pattern_out ),                     // mode/AF 3  MODE_PATTERN      pattern. needs xtal.
+    .b(  32'b0  ),                            // mode/AF  1 MODE_LO           all outputs low.
+    .c( { 32 { 1'b1 } }    ),                 // mode/AF 2  MODE_HI           all outputs hi.
+    .d( test_pattern_out ),                   // mode/AF 3  MODE_PATTERN      pattern. needs xtal.
 
-    // mode/AF 4 MODE_PC_TEST
-    .e( {  { 32 - 14 { 'b0 }},
-                                             // 14
-          sample_acquisition_pc_sw_pc_ctl,  // 12+2
-          sample_acquisition_pc_monitor,    // 4+8
-          3'b0,                             // 1+3    - should be reg_direct.
-          sample_acquisition_pc_led0        // 0+1
+
+    // mode 4
+    .e(  32'b0  ),     
+
+    // mode  5. adc refmux test
+    // limited modulation of ref currents, useful when populating pcb, don't need slope-amp/comparator etc.
+    .f( {  { 32 - 22 { 'b0 }},
+                                              // 22
+          refmux_test_refmux,                 // 18+4
+          4'b0,    // azmux                   // 14+4
+          2'b0 ,  // precharge                // 12+2
+          refmux_test_monitor,                // 4+8
+          4'b0   // leds                      // 0+4
         } ),
 
-/*
-    .a( { 1'b0, { 15 { 1'b0 } },  reg_led[ 0], { 13 { 1'b0 } } }    ),        // 0. default mode. 0 on all outputs, except follow reg_led, for led.
-    .b( { 1'b0, { `NUM_BITS { 1'b1 } } } ),             // 1.
-    .c( { 1'b0, test_pattern_out } ),                   // 2
-    .d( { 1'b0, reg_direct[ `NUM_BITS - 1 :  0 ]  } ), // 3.    // direct mode. register control.
-    .e( { 1'b0, sample_acquisition_pc_out} ),                   // 4
-    .f( { sample_acquisition_az_adc2_reset_n,    sample_acquisition_az_out } ),                   // 5
-    .g( { sample_acquisition_no_az_adc2_reset_n, sample_acquisition_no_az_out } ),                // 6
-    // .h( { 1'b0, { `NUM_BITS { 1'b1 } } } ),             // 7
-    .h( { 1'b0, sa_no_az_test_out } ),             // 7
-*/
 
-    // mode/AF  5  MODE_AZ_TEST with a mocked adc.  useful. for timing/ control tests
-    // very useful - allows testing precharge/az switching, even if don't have adc populated
-    .f( {  { 32 - 26 { 'b0 }},
-                                                // 26
-          1'b0, // adc2_reset_n         // 25 + 1
+    // mode  6  sequence acquisition with mocked adc.  and better monitor
+    // very useful - allows testing precharge/az switching, without adc populated
+    // and verifying timing sequences, with better monitor
+    .g( {  { 32 - 26 { 'b0 }},
+                                              // 26
+          1'b0, // adc_reset_n                // 25 + 1
           1'b0, // meas_complete              // 24+1
           1'b0,   // spi_interupt             // 23 + 1
           1'b0,  // adc_cmpr_latch            // 22+1
-          4'b0,  // adc_refmux               // 18+4
-          sample_acquisition_az_azmux,        // 14+4
-          sample_acquisition_az_sw_pc_ctl,   // 12+2
-          adc_mock_monitor[0 +: 6] , sample_acquisition_az_monitor[ 0 +: 2],    // 4+8
-          3'b0,                             // 1+3
-          sample_acquisition_az_led0        // 0+1
+          4'b0,  // adc_refmux                // 18+4
+          sequence_acquisition_azmux,         // 14+4
+          sequence_acquisition_sw_pc_ctl,     // 12+2
+          sequence_acquisition_monitor[ 0 +: 8],    // 4+8
+          sequence_acquisition_leds           // 0+1
         } ),
 
 
-    // mode  6. adc refmux test
-    // limited modulation of ref currents, useful when populating pcb, don't need slope-amp/comparator etc.
-    .g( {  { 32 - 22 { 'b0 }},
-                                              // 22
-          refmux_test_refmux,                // 18+4
-          4'b0,    // azmux                  // 14+4
-          2'b0 ,  // precharge               // 12+2
-          refmux_test_monitor,            //     4+8
-          4'b0   // leds                   // 0+4
+
+    // mode 7. sequence acquisition controller and full adc.
+   .h( {  { 32 - 26 { 'b0 }},
+                                              // 26
+          sequence_acquisition2_adc_reset_n,  // adc_reset_n     // 25 + 1
+          adc_measure_valid,                  // meas_complete              // 24+1
+          adc_measure_valid,                  // spi_interupt   // 23 + 1
+          adc_cmpr_latch_ctl,                 // adc_cmpr_latch   // 22+1
+          adc_mux,                            // adc_refmux     // 18+4
+          sequence_acquisition2_azmux,        // azmux      // 14+4
+          sequence_acquisition2_sw_pc_ctl,    // precharge    // 12+2
+          // adc_monitor[ 0 +: 6], sequence_acquisition2_monitor[ 0 +: 2],    // 4+8
+          adc_monitor[ 0 +: 6],  sequence_acquisition2_monitor[ 4],  sequence_acquisition2_monitor[ 0],    // 4+8.   eg. hi/lo, if ch1 pc is active
+          sequence_acquisition_leds           // 0+4
         } ),
-
-
-    // mode 7. full adc/ no az.
-    .h( {  { 32 - 26 { 'b0 }},
-                                                // 26
-          sample_acquisition_no_az_adc2_reset_n,        // 25 + 1
-          adc2_measure_valid,   // meas_complete              // 24+1
-          adc2_measure_valid,   // spi_interupt   // 23 + 1
-          adc2_cmpr_latch_ctl,  // adc_cmpr_latch   // 22+1
-          adc2_mux,             // adc_refmux     // 18+4
-          // use reg_direct to control the azmux
-          reg_direct [ 14 +: 4 ],  // azmux      // 14+4
-          2'b0 ,                  // precharge    // 12+2     // TODO fixme. samples boot only.  use reg_sa_p_pc.
-          adc2_monitor[ 0 +: 6], sample_acquisition_no_az_monitor[ 0 +: 2],    // 4+8
-          3'b0,                             // 1+3
-          sample_acquisition_az_led0        // 0+1
-        } ),
-
 
 
     .sel( reg_mode[ 3-1 : 0 ]),
@@ -621,17 +602,17 @@ module top (
 
     .out( {   dummy_bits_o,               // 26
 
-              adc2_reset_n,        // 25 + 1
+          adc_reset_n,        // 25 + 1
 
-              meas_complete_o,          // 24+1     // interupt_ctl *IS* generic so should be at start, and connects straight to adum. so place at beginning. same argument for meas_complete
-              spi_interrupt_ctl_o,      // 23+1     todo rename. drop the 'ctl'.
-              adc_cmpr_latch_ctl_o,         // 22+1
-              adc_refmux_o,             // 18+4     // better name adc_refmux   adc_cmpr_latch
-              azmux_o,                  // 14+4
-              pc_sw_o,              // 12+2
-              monitor_o,                // 4+8
-              leds_o                    // 0+4
-            }  )
+          meas_complete_o,          // 24+1     // interupt_ctl *IS* generic so should be at start, and connects straight to adum. so place at beginning. same argument for meas_complete
+          spi_interrupt_ctl_o,      // 23+1     todo rename. drop the 'ctl'.
+          adc_cmpr_latch_ctl_o,         // 22+1
+          adc_refmux_o,             // 18+4     // better name adc_refmux   adc_cmpr_latch
+          azmux_o,                  // 14+4
+          pc_sw_o,              // 12+2
+          monitor_o,                // 4+8
+          leds_o                    // 0+4
+        }  )
 
   );
 
@@ -664,13 +645,13 @@ module top (
     // inputs
     . reg_status( reg_status ),
 
-
-    // . reg_sa_arm_trigger ( reg_sa_arm_trigger ),
-
     . reg_sa_p_clk_count_precharge( reg_sa_p_clk_count_precharge),
-    . reg_sa_p_azmux_lo_val( reg_sa_p_azmux_lo_val),
-    . reg_sa_p_azmux_hi_val( reg_sa_p_azmux_hi_val),
-    . reg_sa_p_sw_pc_ctl_hi_val( reg_sa_p_sw_pc_ctl_hi_val),
+
+    . reg_sa_p_seq_n( reg_sa_p_seq_n),
+    . reg_sa_p_seq0( reg_sa_p_seq0),
+    . reg_sa_p_seq1( reg_sa_p_seq1),
+    . reg_sa_p_seq2( reg_sa_p_seq2),
+    . reg_sa_p_seq3( reg_sa_p_seq3),
 
 
     // outputs - sample acquisition
@@ -679,24 +660,6 @@ module top (
     . reg_adc_p_clk_count_reset( reg_adc_p_clk_count_reset ),
 
 
-
-/*
-
-
-    .reg_adc_p_clk_count_reset(reg_adc_p_clk_count_reset ),
-
-    // outputs adc
-    .reg_adc_clk_count_refmux_reset({{ 8 { 1'b0 } }, adc2_clk_count_refmux_reset_last }  ) ,
-    .reg_adc_clk_count_refmux_neg(  adc2_clk_count_refmux_neg_last   ) ,
-    .reg_adc_clk_count_refmux_pos(  adc2_clk_count_refmux_pos_last  ) ,
-    .reg_adc_clk_count_refmux_rd(  { {8{ 1'b0 }}, adc2_clk_count_refmux_rd_last }  ),
-    .reg_adc_clk_count_mux_sig(                   adc2_clk_count_mux_sig_last   ),
-
-    // adc stats
-    .reg_adc_stat_count_refmux_pos_up( { {8{ 1'b0 }},adc2_stat_count_refmux_pos_up_last } ),
-    .reg_adc_stat_count_refmux_neg_up( { {8{ 1'b0 }},adc2_stat_count_refmux_neg_up_last }),
-    .reg_adc_stat_count_cmpr_cross_up(  { {8{ 1'b0 }},adc2_stat_count_cmpr_cross_up_last} )
-*/
   );
 
 
