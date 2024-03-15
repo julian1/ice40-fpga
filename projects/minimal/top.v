@@ -658,7 +658,8 @@ module top (
           adc_mux,                            // adc_refmux     // 18+4
           sequence_acquisition2_azmux,        // azmux      // 14+4
           sequence_acquisition2_sw_pc_ctl,    // precharge    // 12+2
-          adc_monitor[ 0 +: 6], sequence_acquisition2_monitor[ 0 +: 2],    // 4+8
+          // adc_monitor[ 0 +: 6], sequence_acquisition2_monitor[ 0 +: 2],    // 4+8
+          adc_monitor[ 0 +: 6],  sequence_acquisition2_monitor[ 4],  sequence_acquisition2_monitor[ 0],    // 4+8.   eg. hi/lo, if pc is active
           sequence_acquisition_leds           // 0+4
         } ),
 
