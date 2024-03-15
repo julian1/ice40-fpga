@@ -242,7 +242,7 @@ module top (
 
     reg_sa_arm_trigger[0],            // ease having to do a separate register read, to retrieve state.
     sequence_acquisition_status_out, // 3 bits
-    adc2_measure_valid,
+    adc_measure_valid,
 
     // HW2,  HW1,  HW0 ,   4'b0,  outputs_vec[ `IDX_SPI_INTERRUPT_CTL ] ,
 
@@ -464,34 +464,34 @@ module top (
 
   ////////////////////////////
 
-  // adc gets instantiated once, so should be called adc. not adc2.
+  // adc gets instantiated once, so should be called adc. not adc.
   // do the no_az first. as the simplest.
 
   // TODO rename adc
-  wire          adc2_reset_n;
-  wire          adc2_measure_valid;
+  wire          adc_reset_n;
+  wire          adc_measure_valid;
 
-  wire [8-1: 0 ] adc2_monitor;
-  wire [4-1: 0 ] adc2_mux;
-  wire           adc2_cmpr_latch_ctl;
+  wire [8-1: 0 ] adc_monitor;
+  wire [4-1: 0 ] adc_mux;
+  wire           adc_cmpr_latch_ctl;
 
 
-  wire [24-1:0] adc2_clk_count_refmux_reset_last;
-  wire [32-1:0] adc2_clk_count_refmux_neg_last;    // maybe add reg_ prefix. No. they are not registers, until they are in the register_bank context.
-  wire [32-1:0] adc2_clk_count_refmux_pos_last;
-  wire [24-1:0] adc2_clk_count_refmux_rd_last;
-  wire [32-1:0] adc2_clk_count_mux_sig_last;
+  wire [24-1:0] adc_clk_count_refmux_reset_last;
+  wire [32-1:0] adc_clk_count_refmux_neg_last;    // maybe add reg_ prefix. No. they are not registers, until they are in the register_bank context.
+  wire [32-1:0] adc_clk_count_refmux_pos_last;
+  wire [24-1:0] adc_clk_count_refmux_rd_last;
+  wire [32-1:0] adc_clk_count_mux_sig_last;
 
-  wire [24-1 :0] adc2_stat_count_refmux_pos_up_last;
-  wire [24-1 :0] adc2_stat_count_refmux_neg_up_last;
-  wire [24-1 :0] adc2_stat_count_cmpr_cross_up_last;
+  wire [24-1 :0] adc_stat_count_refmux_pos_up_last;
+  wire [24-1 :0] adc_stat_count_refmux_neg_up_last;
+  wire [24-1 :0] adc_stat_count_cmpr_cross_up_last;
 
 
   adc_modulation
-  adc2(
+  adc(
 
     .clk(CLK),
-    .reset_n( adc2_reset_n),      // OK.
+    .reset_n( adc_reset_n),      // OK.
 
 
     .cmpr_val( adc_cmpr_p_i ),                  // OK.  fan in-  rename top_adc_cmpr_p_i ?
@@ -508,23 +508,23 @@ module top (
     . p_use_fast_rundown( 1'b1 ),
 
     // outputs - ctrl
-    .adc_measure_valid( adc2_measure_valid),    // OK, fan out back to the sa controllers
-    .cmpr_latch_ctl( adc2_cmpr_latch_ctl   ),
-    .monitor(  adc2_monitor  ),
-    .refmux(  { adc2_mux[  3  ],  adc2_mux[ 0 +: 2 ]   } ),           // pos, neg, reset. are on two different 4053,
-    .sigmux(    adc2_mux[  2  ] ),                                    // perhaps clearer if split into adcrefmux and adcsigmux in the wire assignment. but it would then need two vars.
+    .adc_measure_valid( adc_measure_valid),    // OK, fan out back to the sa controllers
+    .cmpr_latch_ctl( adc_cmpr_latch_ctl   ),
+    .monitor(  adc_monitor  ),
+    .refmux(  { adc_mux[  3  ],  adc_mux[ 0 +: 2 ]   } ),           // pos, neg, reset. are on two different 4053,
+    .sigmux(    adc_mux[  2  ] ),                                    // perhaps clearer if split into adcrefmux and adcsigmux in the wire assignment. but it would then need two vars.
                                                                       // which isn't representative of the single synchronizer. so do it here instead.
     // adc clk counts for last sample measurement
-    .clk_count_refmux_reset_last(adc2_clk_count_refmux_reset_last),
-    .clk_count_refmux_neg_last(  adc2_clk_count_refmux_neg_last),
-    .clk_count_refmux_pos_last(  adc2_clk_count_refmux_pos_last),
-    .clk_count_refmux_rd_last(   adc2_clk_count_refmux_rd_last),
-    .clk_count_mux_sig_last(  adc2_clk_count_mux_sig_last ),
+    .clk_count_refmux_reset_last(adc_clk_count_refmux_reset_last),
+    .clk_count_refmux_neg_last(  adc_clk_count_refmux_neg_last),
+    .clk_count_refmux_pos_last(  adc_clk_count_refmux_pos_last),
+    .clk_count_refmux_rd_last(   adc_clk_count_refmux_rd_last),
+    .clk_count_mux_sig_last(  adc_clk_count_mux_sig_last ),
 
     // stats
-    .stat_count_refmux_pos_up_last( adc2_stat_count_refmux_pos_up_last),
-    .stat_count_refmux_neg_up_last( adc2_stat_count_refmux_neg_up_last),
-    .stat_count_cmpr_cross_up_last( adc2_stat_count_cmpr_cross_up_last)
+    .stat_count_refmux_pos_up_last( adc_stat_count_refmux_pos_up_last),
+    .stat_count_refmux_neg_up_last( adc_stat_count_refmux_neg_up_last),
+    .stat_count_cmpr_cross_up_last( adc_stat_count_cmpr_cross_up_last)
   );
 
 
@@ -543,7 +543,7 @@ module top (
   wire [3-1:0]  sequence_acquisition2_status;
 
 
-  wire  sequence_acquisition2_adc2_reset_n;
+  wire  sequence_acquisition2_adc_reset_n;
 
 
   sequence_acquisition
@@ -554,7 +554,7 @@ module top (
 
     // inputs
     // .adc_measure_valid_i( adc_mock_measure_valid ),                     // JA
-    .adc_measure_valid_i( adc2_measure_valid ),                     // JA the real adc. from adc
+    .adc_measure_valid_i( adc_measure_valid ),                     // JA the real adc. from adc
 
 
     // TODO move to registers
@@ -576,7 +576,7 @@ module top (
     .monitor_o(   sequence_acquisition2_monitor  ),    // only pass 2 bit to the az monitor
     .status_o(  sequence_acquisition2_status ),
 
-    .adc_reset_no(  sequence_acquisition2_adc2_reset_n )        // JA
+    .adc_reset_no(  sequence_acquisition2_adc_reset_n )        // JA
   );
 
 
@@ -622,7 +622,7 @@ module top (
     // very useful - allows testing precharge/az switching, even if don't have adc populated
     .f( {  { 32 - 26 { 'b0 }},
                                                 // 26
-          1'b0, // adc2_reset_n         // 25 + 1
+          1'b0, // adc_reset_n         // 25 + 1
           1'b0, // meas_complete              // 24+1
           1'b0,   // spi_interupt             // 23 + 1
           1'b0,  // adc_cmpr_latch            // 22+1
@@ -650,15 +650,15 @@ module top (
     // mode 7. adc using sequence acquisition controller.
    .h( {  { 32 - 26 { 'b0 }},
                                                 // 26
-          sequence_acquisition2_adc2_reset_n,   // adc2_reset_n     // 25 + 1
-          adc2_measure_valid,                   // meas_complete              // 24+1
-          adc2_measure_valid,                   // spi_interupt   // 23 + 1
-          adc2_cmpr_latch_ctl,                // adc_cmpr_latch   // 22+1
-          adc2_mux,                           // adc_refmux     // 18+4
+          sequence_acquisition2_adc_reset_n,   // adc_reset_n     // 25 + 1
+          adc_measure_valid,                   // meas_complete              // 24+1
+          adc_measure_valid,                   // spi_interupt   // 23 + 1
+          adc_cmpr_latch_ctl,                // adc_cmpr_latch   // 22+1
+          adc_mux,                           // adc_refmux     // 18+4
           // use reg_direct to control the azmux
           sequence_acquisition2_azmux,        // azmux      // 14+4
           sequence_acquisition2_sw_pc_ctl,  // precharge    // 12+2     // TODO fixme. samples boot only.  use reg_sa_p_pc.
-          adc2_monitor[ 0 +: 6], sequence_acquisition2_monitor[ 0 +: 2],    // 4+8
+          adc_monitor[ 0 +: 6], sequence_acquisition2_monitor[ 0 +: 2],    // 4+8
           sequence_acquisition_leds        // 0+4
         } ),
 
@@ -669,7 +669,7 @@ module top (
 
     .out( {   dummy_bits_o,               // 26
 
-              adc2_reset_n,        // 25 + 1
+              adc_reset_n,        // 25 + 1
 
               meas_complete_o,          // 24+1     // interupt_ctl *IS* generic so should be at start, and connects straight to adum. so place at beginning. same argument for meas_complete
               spi_interrupt_ctl_o,      // 23+1     todo rename. drop the 'ctl'.
