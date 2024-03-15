@@ -368,7 +368,8 @@ module top (
   // we need to rename this.   sa_az_adc_mock_sw_pc_ctl.
   wire [2-1:0]  sample_acquisition_az_sw_pc_ctl;
   wire [4-1:0]  sample_acquisition_az_azmux;
-  wire          sample_acquisition_az_led0;
+
+  wire [4-1:0]  sample_acquisition_az_leds;
   wire [8-1:0]  sample_acquisition_az_monitor;
   wire [3-1:0]  sample_acquisition_az_status;
   // wire          sample_acquisition_az_adc_measure_trig;
@@ -425,7 +426,8 @@ module top (
     // outputs
     .sw_pc_ctl_o( sample_acquisition_az_sw_pc_ctl  ),
     .azmux_o (    sample_acquisition_az_azmux  ),
-    .led0_o(      sample_acquisition_az_led0  ),
+
+    .leds_o(      sample_acquisition_az_leds  ),
     .monitor_o(   sample_acquisition_az_monitor  ),    // only pass 2 bit to the az monitor
     .status_o(  sample_acquisition_az_status ),
 
@@ -655,8 +657,7 @@ module top (
           sample_acquisition_az_sw_pc_ctl,   // 12+2
           // adc_mock_monitor[0 +: 6] , sample_acquisition_az_monitor[ 0 +: 2],    // 4+8
           sample_acquisition_az_monitor[ 0 +: 8],    // 4+8
-          3'b0,                             // 1+3
-          sample_acquisition_az_led0        // 0+1
+          sample_acquisition_az_leds        // 0+1
         } ),
 
 
@@ -684,8 +685,8 @@ module top (
           reg_direct [ 14 +: 4 ],  // azmux      // 14+4
           2'b0 ,                  // precharge    // 12+2     // TODO fixme. samples boot only.  use reg_sa_p_pc.
           adc2_monitor[ 0 +: 6], sample_acquisition_no_az_monitor[ 0 +: 2],    // 4+8
-          3'b0,                             // 1+3
-          sample_acquisition_az_led0        // 0+1
+          // 3'b0,                             // 1+3
+          sample_acquisition_az_leds        // 0+1
         } ),
 
 

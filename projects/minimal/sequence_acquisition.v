@@ -66,10 +66,14 @@ module sequence_acquisition (
 
   output reg [ 2-1: 0]  sw_pc_ctl_o,      // TODO  fix rename pc_sw_o
   output reg [ 4-1:0 ] azmux_o,
-  output reg led0_o,
+
 
   // must be a register if driven synchronously.
   output reg [3-1: 0 ] status_o,
+
+
+
+  output wire [4-1:0] leds_o,
 
   /*/ now a wire.  output wire [ 2-1:0]  monitor_o       // driven as wire/assign.
   // think it is ok to be a combinatory logic - wire output - although may slow things down.
@@ -104,6 +108,10 @@ module sequence_acquisition (
   assign monitor_o[7] = adc_measure_valid_i;
 
 
+  assign leds_o[0] = (sample_i == 0);   
+  assign leds_o[1] = (sample_i == 1);   
+  assign leds_o[2] = (sample_i == 2);   
+  assign leds_o[3] = (sample_i == 3);   
 
   always @(posedge clk)
     begin
@@ -133,7 +141,7 @@ module sequence_acquisition (
             sw_pc_ctl_o       <= 2'b00;
             ////
 
-            led0_o            <= ! led0_o ;
+            // led0_o            <= ! led0_o ;
 /*
             case(sample_i)
               0: begin
