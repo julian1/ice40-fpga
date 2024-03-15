@@ -372,34 +372,9 @@ module top (
   wire [4-1:0]  sample_acquisition_az_leds;
   wire [8-1:0]  sample_acquisition_az_monitor;
   wire [3-1:0]  sample_acquisition_az_status;
-  // wire          sample_acquisition_az_adc_measure_trig;
 
-/*
-  sample_acquisition_az
-  sample_acquisition_az (
 
-    .clk(CLK),
-    .reset_n( trigger_source_internal_i ),    // we want this to remove. the old edge triggered stuff.
 
-    // inputs
-    .adc_measure_valid_i( adc_mock_measure_valid ),                     // fan-in from adc
-
-    // TODO move to registers
-    .p_seq0_i( reg_sa_p_seq0[ 4-1:0]  ),
-    .p_seq1_i( reg_sa_p_seq1[ 4-1:0]  ),
-    .p_seq2_i( reg_sa_p_seq2[ 2-1:0] ),
-    .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]  ),     // done
-
-    // outputs
-    .sw_pc_ctl_o( sample_acquisition_az_sw_pc_ctl  ),
-    .azmux_o (    sample_acquisition_az_azmux  ),
-    .led0_o(      sample_acquisition_az_led0  ),
-    .monitor_o(   sample_acquisition_az_monitor  ),    // only pass 2 bit to the az monitor
-    .status_o(  sample_acquisition_az_status ),
-
-    .adc_reset_no(  adc_mock_reset_n  )
-  );
-*/
 
   // rename sample_acquisition_sequence
   sequence_acquisition
