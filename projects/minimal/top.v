@@ -1,7 +1,7 @@
 
 /*
   - can have heartbeat timer. over spi.
-      but don't want to spew spi tranmsission during acquisition.
+      but don't want to spew spi tranmsission emi during acquisition.
 
   - if have more than one dac. then just create another register. very clean.
    - perhaps instead of !cs or !cs2.  could write macro  or asserted_n(cs ) etc
@@ -9,21 +9,17 @@
 
 
 
-// `include "../../common/mux_spi.v"
 `include "../../common/mux_assign.v"
 `include "../../common/test_pattern.v"
 `include "../../common/timed_latch.v"
 
 `include "register_set.v"
-// `include "sample_acquisition_pc.v"
 
-// `include "sample_acquisition_az.v"
 
-`include "adc-mock.v"       // change name adc-mock.
+`include "adc-mock.v"
 `include "refmux-test.v"
 
 `include "adc_modulation_05.v"
-// `include "sample_acquisition_no_az.v"
 `include "sequence_acquisition.v"
 
 `default_nettype none
@@ -31,10 +27,6 @@
 
 
 module top (
-
-  // these are all treated as wires.
-
-  // input  CLK,
 
 
   ////////////////////////
@@ -217,8 +209,6 @@ module top (
 
   wire [32-1:0] reg_direct;
 
-  // wire [32-1 :0] reg_sa_arm_trigger;              // only a single bit is needed here. should be able to write to handle more efficiently.
-
 
 
 
@@ -294,7 +284,7 @@ module top (
   // We could do one led, for SS, and one for CS2 (4094,etc).
   // rename timed_latch_hold
   /*
-    change name. this delay stretch the signal over longer clk duration.
+    change name.  latch signal for a delay, stretch signal over longer clk duration.
   */
   wire led0;
   timed_latch timed_latch (
@@ -367,7 +357,7 @@ module top (
   sequence_acquisition (
 
     .clk(CLK),
-    .reset_n( trigger_source_internal_i ),    // we want this to remove. the old edge triggered stuff.
+    .reset_n( trigger_source_internal_i ),
 
     // inputs
     .adc_measure_valid_i( adc_mock_measure_valid ),                     // fan-in from adc
@@ -407,10 +397,8 @@ module top (
 
   ////////////////////////////
 
-  // adc gets instantiated once, so should be called adc. not adc.
-  // do the no_az first. as the simplest.
 
-  // TODO rename adc
+  // adc
   wire          adc_reset_n;
   wire          adc_measure_valid;
 
@@ -434,7 +422,7 @@ module top (
   adc(
 
     .clk(CLK),
-    .reset_n( adc_reset_n),      // OK.
+    .reset_n( adc_reset_n),
 
 
     .cmpr_val( adc_cmpr_p_i ),                  // OK.  fan in-  rename top_adc_cmpr_p_i ?
@@ -548,7 +536,7 @@ module top (
 
 
     // mode 4
-    .e(  32'b0  ),     
+    .e(  32'b0  ),
 
     // mode  5. adc refmux test
     // limited modulation of ref currents, useful when populating pcb, don't need slope-amp/comparator etc.
