@@ -519,6 +519,10 @@ module top (
   // unused. should be able to be wire?
   reg [32-26- 1:0] dummy_bits_o ;
 
+  /*
+     note - if a controller is unused in a mode - it would be nice to hold it in reset.
+      can do by exposing the reset_n, and only turning it on, if active within the specific mode.
+  */
 
   // mode, alternative function selection
   mux_8to1_assign #( 32  )
