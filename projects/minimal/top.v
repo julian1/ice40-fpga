@@ -17,13 +17,13 @@
 `include "register_set.v"
 `include "sample_acquisition_pc.v"
 
-`include "sample_acquisition_az.v"
+// `include "sample_acquisition_az.v"
 
 `include "adc-mock.v"       // change name adc-mock.
 `include "refmux-test.v"
 
 `include "adc_modulation_05.v"
-`include "sample_acquisition_no_az.v"
+// `include "sample_acquisition_no_az.v"
 `include "sequence_acquisition.v"
 
 `default_nettype none
@@ -374,9 +374,6 @@ module top (
   wire [3-1:0]  sequence_acquisition_status;
 
 
-
-
-  // rename sample_acquisition_sequence
   sequence_acquisition
   sequence_acquisition (
 
@@ -541,6 +538,10 @@ module top (
 
 
 
+
+
+
+/*
   // wire [ `NUM_BITS-1:0 ]  sample_acquisition_no_az_out ;  // beter name ... _outputs_vec ?
 
   // wire sample_acquisition_no_az_reset_n;
@@ -568,6 +569,70 @@ module top (
     .monitor(   sample_acquisition_no_az_monitor  ),    // we could pass subset of monitor if watned. eg. only 4 pins...
     .adc_reset_no ( sample_acquisition_no_az_adc2_reset_n),
   );
+*/
+
+
+  wire [2-1:0]  sequence_acquisition2_sw_pc_ctl;
+  wire [4-1:0]  sequence_acquisition2_azmux;
+
+  wire [4-1:0]  sequence_acquisition2_leds;
+  wire [8-1:0]  sequence_acquisition2_monitor;
+  wire [3-1:0]  sequence_acquisition2_status;
+
+
+  wire  sequence_acquisition2_adc2_reset_n;
+
+
+  sequence_acquisition
+  sequence_acquisition2 (
+
+    .clk(CLK),
+    .reset_n( trigger_source_internal_i ),    // we want this to remove. the old edge triggered stuff.
+
+    // inputs
+    // .adc_measure_valid_i( adc_mock_measure_valid ),                     // JA
+    .adc_measure_valid_i( adc2_measure_valid ),                     // JA the real adc. from adc
+
+
+    // TODO move to registers
+
+    .p_seq_n_i( reg_sa_p_seq_n[ 2-1: 0]  ),
+    .p_seq0_i( reg_sa_p_seq0[ 6-1: 0]  ),
+    .p_seq1_i( reg_sa_p_seq1[ 6-1: 0]  ),
+    .p_seq2_i( reg_sa_p_seq2[ 6-1: 0] ),
+    .p_seq3_i( reg_sa_p_seq2[ 6-1: 0] ),
+
+
+    .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]  ),     // done
+
+    // outputs
+    .sw_pc_ctl_o( sequence_acquisition2_sw_pc_ctl  ),
+    .azmux_o (    sequence_acquisition2_azmux  ),
+
+    .leds_o(      sequence_acquisition2_leds  ),
+    .monitor_o(   sequence_acquisition2_monitor  ),    // only pass 2 bit to the az monitor
+    .status_o(  sequence_acquisition2_status ),
+
+    .adc_reset_no(  sequence_acquisition2_adc2_reset_n )        // JA
+  );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -647,7 +712,7 @@ module top (
           4'b0   // leds                   // 0+4
         } ),
 
-
+/*
     // mode 7. full adc/ no az.
     .h( {  { 32 - 26 { 'b0 }},
                                                 // 26
@@ -663,6 +728,39 @@ module top (
           // 3'b0,                             // 1+3
           sequence_acquisition_leds        // 0+1
         } ),
+*/
+
+
+   .h( {  { 32 - 26 { 'b0 }},
+                                                // 26
+          sequence_acquisition2_adc2_reset_n,        // 25 + 1
+          adc2_measure_valid,                   // meas_complete              // 24+1
+          adc2_measure_valid,                   // spi_interupt   // 23 + 1
+          adc2_cmpr_latch_ctl,                // adc_cmpr_latch   // 22+1
+          adc2_mux,                           // adc_refmux     // 18+4
+          // use reg_direct to control the azmux
+          sequence_acquisition2_azmux,        // azmux      // 14+4
+          sequence_acquisition2_sw_pc_ctl,  // precharge    // 12+2     // TODO fixme. samples boot only.  use reg_sa_p_pc.
+          adc2_monitor[ 0 +: 6], sequence_acquisition2_monitor[ 0 +: 2],    // 4+8
+          sequence_acquisition_leds        // 0+1
+        } ),
+
+
+
+
+/*
+  wire [2-1:0]  sequence_acquisition2_sw_pc_ctl;
+  wire [4-1:0]  sequence_acquisition2_azmux;
+
+  wire [4-1:0]  sequence_acquisition2_leds;
+  wire [8-1:0]  sequence_acquisition2_monitor;
+  wire [3-1:0]  sequence_acquisition2_status;
+
+
+  wire  sequence_acquisition2_adc2_reset_n;
+*/
+
+
 
 
 
