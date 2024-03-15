@@ -241,7 +241,7 @@ module top (
     HW2,  HW1,  HW0,
 
     reg_sa_arm_trigger[0],            // ease having to do a separate register read, to retrieve state.
-    sample_acquisition_az_status_out, // 3 bits
+    sequence_acquisition_status_out, // 3 bits
     adc2_measure_valid,
 
     // HW2,  HW1,  HW0 ,   4'b0,  outputs_vec[ `IDX_SPI_INTERRUPT_CTL ] ,
@@ -366,12 +366,12 @@ module top (
 
   // fucking hell it's getting a bit complicated.
   // we need to rename this.   sa_az_adc_mock_sw_pc_ctl.
-  wire [2-1:0]  sample_acquisition_az_sw_pc_ctl;
-  wire [4-1:0]  sample_acquisition_az_azmux;
+  wire [2-1:0]  sequence_acquisition_sw_pc_ctl;
+  wire [4-1:0]  sequence_acquisition_azmux;
 
-  wire [4-1:0]  sample_acquisition_az_leds;
-  wire [8-1:0]  sample_acquisition_az_monitor;
-  wire [3-1:0]  sample_acquisition_az_status;
+  wire [4-1:0]  sequence_acquisition_leds;
+  wire [8-1:0]  sequence_acquisition_monitor;
+  wire [3-1:0]  sequence_acquisition_status;
 
 
 
@@ -399,12 +399,12 @@ module top (
     .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]  ),     // done
 
     // outputs
-    .sw_pc_ctl_o( sample_acquisition_az_sw_pc_ctl  ),
-    .azmux_o (    sample_acquisition_az_azmux  ),
+    .sw_pc_ctl_o( sequence_acquisition_sw_pc_ctl  ),
+    .azmux_o (    sequence_acquisition_azmux  ),
 
-    .leds_o(      sample_acquisition_az_leds  ),
-    .monitor_o(   sample_acquisition_az_monitor  ),    // only pass 2 bit to the az monitor
-    .status_o(  sample_acquisition_az_status ),
+    .leds_o(      sequence_acquisition_leds  ),
+    .monitor_o(   sequence_acquisition_monitor  ),    // only pass 2 bit to the az monitor
+    .status_o(  sequence_acquisition_status ),
 
     .adc_reset_no(  adc_mock_reset_n  )
   );
@@ -613,7 +613,7 @@ module top (
     .c( { 1'b0, test_pattern_out } ),                   // 2
     .d( { 1'b0, reg_direct[ `NUM_BITS - 1 :  0 ]  } ), // 3.    // direct mode. register control.
     .e( { 1'b0, sample_acquisition_pc_out} ),                   // 4
-    .f( { sample_acquisition_az_adc2_reset_n,    sample_acquisition_az_out } ),                   // 5
+    .f( { sequence_acquisition_adc2_reset_n,    sequence_acquisition_out } ),                   // 5
     .g( { sample_acquisition_no_az_adc2_reset_n, sample_acquisition_no_az_out } ),                // 6
     // .h( { 1'b0, { `NUM_BITS { 1'b1 } } } ),             // 7
     .h( { 1'b0, sa_no_az_test_out } ),             // 7
@@ -628,11 +628,11 @@ module top (
           1'b0,   // spi_interupt             // 23 + 1
           1'b0,  // adc_cmpr_latch            // 22+1
           4'b0,  // adc_refmux               // 18+4
-          sample_acquisition_az_azmux,        // 14+4
-          sample_acquisition_az_sw_pc_ctl,   // 12+2
-          // adc_mock_monitor[0 +: 6] , sample_acquisition_az_monitor[ 0 +: 2],    // 4+8
-          sample_acquisition_az_monitor[ 0 +: 8],    // 4+8
-          sample_acquisition_az_leds        // 0+1
+          sequence_acquisition_azmux,        // 14+4
+          sequence_acquisition_sw_pc_ctl,   // 12+2
+          // adc_mock_monitor[0 +: 6] , sequence_acquisition_monitor[ 0 +: 2],    // 4+8
+          sequence_acquisition_monitor[ 0 +: 8],    // 4+8
+          sequence_acquisition_leds        // 0+1
         } ),
 
 
@@ -661,7 +661,7 @@ module top (
           2'b0 ,                  // precharge    // 12+2     // TODO fixme. samples boot only.  use reg_sa_p_pc.
           adc2_monitor[ 0 +: 6], sample_acquisition_no_az_monitor[ 0 +: 2],    // 4+8
           // 3'b0,                             // 1+3
-          sample_acquisition_az_leds        // 0+1
+          sequence_acquisition_leds        // 0+1
         } ),
 
 
