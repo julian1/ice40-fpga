@@ -343,78 +343,6 @@ module top (
 
 
 
-  ////////////////////////
-
-  wire          adc_mock_reset_n;
-  wire          adc_mock_measure_valid;
-  wire [8-1:0 ] adc_mock_monitor;
-
-  adc_mock
-  adc_mock (
-
-    .clk(CLK),
-    .reset_n( adc_mock_reset_n ),
-
-    // inputs
-    .p_clk_count_aperture_i( reg_adc_p_clk_count_aperture ),
-
-    // outputs
-    .adc_measure_valid_o( adc_mock_measure_valid ),
-    .monitor_o(  adc_mock_monitor )
-  );
-
-
-  // fucking hell it's getting a bit complicated.
-  // we need to rename this.   sa_az_adc_mock_sw_pc_ctl.
-  wire [2-1:0]  sequence_acquisition_sw_pc_ctl;
-  wire [4-1:0]  sequence_acquisition_azmux;
-
-  wire [4-1:0]  sequence_acquisition_leds;
-  wire [8-1:0]  sequence_acquisition_monitor;
-  wire [3-1:0]  sequence_acquisition_status;
-
-
-  sequence_acquisition
-  sequence_acquisition (
-
-    .clk(CLK),
-    .reset_n( trigger_source_internal_i ),    // we want this to remove. the old edge triggered stuff.
-
-    // inputs
-    .adc_measure_valid_i( adc_mock_measure_valid ),                     // fan-in from adc
-
-
-    // TODO move to registers
-
-    .p_seq_n_i( reg_sa_p_seq_n[ 2-1: 0]  ),
-    .p_seq0_i( reg_sa_p_seq0[ 6-1: 0]  ),
-    .p_seq1_i( reg_sa_p_seq1[ 6-1: 0]  ),
-    .p_seq2_i( reg_sa_p_seq2[ 6-1: 0] ),
-    .p_seq3_i( reg_sa_p_seq2[ 6-1: 0] ),
-
-
-    .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]  ),     // done
-
-    // outputs
-    .sw_pc_ctl_o( sequence_acquisition_sw_pc_ctl  ),
-    .azmux_o (    sequence_acquisition_azmux  ),
-
-    .leds_o(      sequence_acquisition_leds  ),
-    .monitor_o(   sequence_acquisition_monitor  ),    // only pass 2 bit to the az monitor
-    .status_o(  sequence_acquisition_status ),
-
-    .adc_reset_no(  adc_mock_reset_n  )
-  );
-
-
-  ////////////////////
-
-
-
-
-
-
-
 
 
 
@@ -455,6 +383,77 @@ module top (
     .refmux_o ( { refmux_test_refmux[  3  ],  refmux_test_refmux[ 0 +: 2 ]   }  ),
     .sigmux_o( refmux_test_refmux[ 2] )
   );
+
+
+
+
+
+
+
+  ////////////////////////
+
+  wire          adc_mock_reset_n;
+  wire          adc_mock_measure_valid;
+  wire [8-1:0 ] adc_mock_monitor;
+
+  adc_mock
+  adc_mock (
+
+    .clk(CLK),
+    .reset_n( adc_mock_reset_n ),
+
+    // inputs
+    .p_clk_count_aperture_i( reg_adc_p_clk_count_aperture ),
+
+    // outputs
+    .adc_measure_valid_o( adc_mock_measure_valid ),
+    .monitor_o(  adc_mock_monitor )
+  );
+
+  wire [2-1:0]  sequence_acquisition_sw_pc_ctl; // TODO fixme rename  pc_sw not sw_pc
+  wire [4-1:0]  sequence_acquisition_azmux;
+
+  wire [4-1:0]  sequence_acquisition_leds;
+  wire [8-1:0]  sequence_acquisition_monitor;
+  wire [3-1:0]  sequence_acquisition_status;
+
+
+
+  sequence_acquisition
+  sequence_acquisition (
+
+    .clk(CLK),
+    .reset_n( trigger_source_internal_i ),    // we want this to remove. the old edge triggered stuff.
+
+    // inputs
+    .adc_measure_valid_i( adc_mock_measure_valid ),                     // fan-in from adc
+
+
+    // TODO move to registers
+
+    .p_seq_n_i( reg_sa_p_seq_n[ 2-1: 0]  ),
+    .p_seq0_i( reg_sa_p_seq0[ 6-1: 0]  ),
+    .p_seq1_i( reg_sa_p_seq1[ 6-1: 0]  ),
+    .p_seq2_i( reg_sa_p_seq2[ 6-1: 0] ),
+    .p_seq3_i( reg_sa_p_seq2[ 6-1: 0] ),
+
+
+    .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]  ),     // done
+
+    // outputs
+    .sw_pc_ctl_o( sequence_acquisition_sw_pc_ctl  ),
+    .azmux_o (    sequence_acquisition_azmux  ),
+
+    .leds_o(      sequence_acquisition_leds  ),
+    .monitor_o(   sequence_acquisition_monitor  ),    // only pass 2 bit to the az monitor
+    .status_o(  sequence_acquisition_status ),
+
+    .adc_reset_no(  adc_mock_reset_n  )
+  );
+
+
+  ////////////////////
+
 
 
 
@@ -582,11 +581,6 @@ module top (
 
 
 
-  /*
-      - It may be possible to control and run the adc - with the direct register. just be setting the bit for the trigger.
-      - BUT. wants to be non edge triggered.
-
-  */
 
 
   ////////////////////////////
