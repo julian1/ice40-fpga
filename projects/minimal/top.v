@@ -532,14 +532,16 @@ module top (
   mux_8to1_assign #( 32  )
   mux_8to1_assign_1  (
 
-    .a(  reg_direct  ),                       // mode/AF 0  MODE_DIRECT       note, could change to project the the spi signals on the monitor, for easier ddebuggin. no. because want direct to control all outputs for test.
+    .a(  reg_direct  ),                       // mode/AF 0  MODE_DIRECT       note, could also project, spi signals on the monitor, for easier debuggin. no. because want direct to control all outputs for test.
 
     /* TODO remove.
         the modes for output lo, and output hi - are not really needed. eg. mode 0; direct 0xffffffff ; or 0x00000000; etc.
         and there maybe chance of damage, if parts are populated
       */
-    .b(  32'b0  ),                            // mode/AF  1 MODE_LO           all outputs low.
-    .c( { 32 { 1'b1 } }    ),                 // mode/AF 2  MODE_HI           all outputs hi.
+    .b(  32'b0  ),                            // mode/AF  1 unused, all outputs low.
+    .c(  32'b0  ),                            // mode/AF  2 unused, all outputs low.
+
+    // useful when populating board.
     .d( test_pattern_out ),                   // mode/AF 3  MODE_PATTERN      pattern. needs xtal.
 
 
