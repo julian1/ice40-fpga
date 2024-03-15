@@ -288,61 +288,6 @@ module top (
   wire [32-1 :0] reg_adc_p_clk_count_aperture;  // 32/31 bit nice. for long sample.
   wire [32-1 :0] reg_adc_p_clk_count_reset;
 
-  ////////
-  // rename sa_simple_ ?
-  // sa_pc_test
-  // or test_sa_pc
-
-  /*
-    - note that we can still hook this up to the adc. for measurement.
-    - slightly different from a direct mode. where there is no pc switching.
-
-    TODO. rename include test in name. it's actually sample acquisition.
-  */
-
-
-/*
-      ================
-    - EXTR.  NOT clear we even need the sample_acquisition_pc   - because can just use the sequence-acquisition.
-          and keep the azmux held off.
-        or even the non mocked.
-      eg.  i think the sample sequence controller - can manage to encode the pc  switching test.  also. by just holding the azmux off.
-    ================
-*/
-
-/*
-  wire sample_acquisition_pc_sw_pc_ctl;
-  wire sample_acquisition_pc_led0;
-  wire [8-1 : 0] sample_acquisition_pc_monitor;
-
-
-  // rename this doesn't do sample acquisition. it just switches the pre-charge
-  // we will switch to another mode  - before and after - in order to measure charge contribution
-
-  sample_acquisition_pc
-  sample_acquisition_pc (
-    // inputs
-    .clk(CLK),
-    .reset_n( 1'b0 ),                       // JA. EXTR. consider placing the bit in output reg. so that it can be enabled in the corresponding mode.
-                                            // likewise should be able to activate the adc in direct mode, by flipping the bit.  except won't work. because doesn't have control over refmux, comparator etc.
-                                            // But may be useful to create a direct mode (with no sequence), but with the adc.
-                                            // ---
-                                            // or connect to the trigger. because the behavior is much the same - as the sequence controller.
-
-    // inputs
-    .p_clk_sample_duration_i( reg_adc_p_clk_count_aperture ),
-    .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0] ),
-
-    // outputs
-    .sw_pc_ctl_o( sample_acquisition_pc_sw_pc_ctl   ),          // should pass in both. and a register like a mask. to indicate which to use. similar to register for az mux.  might encode in same register.
-    .led0_o(      sample_acquisition_pc_led0 ),                 // EXTR. just use the bits of reg_direct for azmux and which pc switch to use.  add back reg_direc2 for the ratiometric.
-    .monitor_o(   sample_acquisition_pc_monitor  )
-  );
-
-
-
-*/
-
 
 
   /////////////////////////
@@ -416,6 +361,7 @@ module top (
   wire [3-1:0]  sequence_acquisition_status;
 
 
+  // perhaps rename sequence_acquisition_with_adc_mock
 
   sequence_acquisition
   sequence_acquisition (
@@ -600,17 +546,6 @@ module top (
     .c( { 32 { 1'b1 } }    ),                 // mode/AF 2  MODE_HI           all outputs hi.
     .d( test_pattern_out ),                   // mode/AF 3  MODE_PATTERN      pattern. needs xtal.
 
-
-/*
-    // mode/AF 4 MODE_PC_TEST
-    .e( {  { 32 - 14 { 'b0 }},
-                                              // 14
-          sample_acquisition_pc_sw_pc_ctl,    // 12+2
-          sample_acquisition_pc_monitor,      // 4+8
-          3'b0,                               // 1+3    - should be reg_direct.
-          sample_acquisition_pc_led0          // 0+1
-        } ),
-*/
 
     // mode 4
     .e(  32'b0  ),     
