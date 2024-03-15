@@ -617,17 +617,6 @@ module top (
           sample_acquisition_pc_led0        // 0+1
         } ),
 
-/*
-    .a( { 1'b0, { 15 { 1'b0 } },  reg_led[ 0], { 13 { 1'b0 } } }    ),        // 0. default mode. 0 on all outputs, except follow reg_led, for led.
-    .b( { 1'b0, { `NUM_BITS { 1'b1 } } } ),             // 1.
-    .c( { 1'b0, test_pattern_out } ),                   // 2
-    .d( { 1'b0, reg_direct[ `NUM_BITS - 1 :  0 ]  } ), // 3.    // direct mode. register control.
-    .e( { 1'b0, sample_acquisition_pc_out} ),                   // 4
-    .f( { sequence_acquisition_adc2_reset_n,    sequence_acquisition_out } ),                   // 5
-    .g( { sample_acquisition_no_az_adc2_reset_n, sample_acquisition_no_az_out } ),                // 6
-    // .h( { 1'b0, { `NUM_BITS { 1'b1 } } } ),             // 7
-    .h( { 1'b0, sa_no_az_test_out } ),             // 7
-*/
 
     // mode/AF  5  MODE_AZ_TEST with a mocked adc.  useful. for timing/ control tests
     // very useful - allows testing precharge/az switching, even if don't have adc populated
@@ -658,7 +647,7 @@ module top (
         } ),
 
 
-    // mode 7. adc and 
+    // mode 7. adc using sequence acquisition controller.
    .h( {  { 32 - 26 { 'b0 }},
                                                 // 26
           sequence_acquisition2_adc2_reset_n,   // adc2_reset_n     // 25 + 1
