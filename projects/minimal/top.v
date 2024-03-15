@@ -598,23 +598,23 @@ module top (
   mux_8to1_assign #( 32  )
   mux_8to1_assign_1  (
 
-    .a(  reg_direct  ),                         // mode/AF 0  MODE_DIRECT       note, could change to project the the spi signals on the monitor, for easier ddebuggin. no. because want direct to control all outputs for test.
+    .a(  reg_direct  ),                       // mode/AF 0  MODE_DIRECT       note, could change to project the the spi signals on the monitor, for easier ddebuggin. no. because want direct to control all outputs for test.
 
     /* TODO remove.
         the modes for output lo, and output hi - are not really needed. eg. mode 0; direct 0xffffffff ; or 0x00000000; etc.
         and there maybe chance of damage, if parts are populated
       */
-    .b(  32'b0  ),                              // mode/AF  1 MODE_LO           all outputs low.
-    .c( { 32 { 1'b1 } }    ),                   // mode/AF 2  MODE_HI           all outputs hi.
-    .d( test_pattern_out ),                     // mode/AF 3  MODE_PATTERN      pattern. needs xtal.
+    .b(  32'b0  ),                            // mode/AF  1 MODE_LO           all outputs low.
+    .c( { 32 { 1'b1 } }    ),                 // mode/AF 2  MODE_HI           all outputs hi.
+    .d( test_pattern_out ),                   // mode/AF 3  MODE_PATTERN      pattern. needs xtal.
 
     // mode/AF 4 MODE_PC_TEST
     .e( {  { 32 - 14 { 'b0 }},
-                                             // 14
-          sample_acquisition_pc_sw_pc_ctl,  // 12+2
-          sample_acquisition_pc_monitor,    // 4+8
-          3'b0,                             // 1+3    - should be reg_direct.
-          sample_acquisition_pc_led0        // 0+1
+                                              // 14
+          sample_acquisition_pc_sw_pc_ctl,    // 12+2
+          sample_acquisition_pc_monitor,      // 4+8
+          3'b0,                               // 1+3    - should be reg_direct.
+          sample_acquisition_pc_led0          // 0+1
         } ),
 
 
@@ -622,44 +622,44 @@ module top (
     // limited modulation of ref currents, useful when populating pcb, don't need slope-amp/comparator etc.
     .f( {  { 32 - 22 { 'b0 }},
                                               // 22
-          refmux_test_refmux,                // 18+4
-          4'b0,    // azmux                  // 14+4
-          2'b0 ,  // precharge               // 12+2
-          refmux_test_monitor,            //     4+8
-          4'b0   // leds                   // 0+4
+          refmux_test_refmux,                 // 18+4
+          4'b0,    // azmux                   // 14+4
+          2'b0 ,  // precharge                // 12+2
+          refmux_test_monitor,                // 4+8
+          4'b0   // leds                      // 0+4
         } ),
 
 
     // mode  6  sequence acquisition with mocked adc.  and better monitor
-    // very useful - allows testing precharge/az switching, even if don't have adc populated
+    // very useful - allows testing precharge/az switching, without adc populated
+    // and verifying timing sequences, with better monitor
     .g( {  { 32 - 26 { 'b0 }},
-                                                // 26
-          1'b0, // adc_reset_n         // 25 + 1
+                                              // 26
+          1'b0, // adc_reset_n                // 25 + 1
           1'b0, // meas_complete              // 24+1
           1'b0,   // spi_interupt             // 23 + 1
           1'b0,  // adc_cmpr_latch            // 22+1
-          4'b0,  // adc_refmux               // 18+4
-          sequence_acquisition_azmux,        // 14+4
-          sequence_acquisition_sw_pc_ctl,   // 12+2
+          4'b0,  // adc_refmux                // 18+4
+          sequence_acquisition_azmux,         // 14+4
+          sequence_acquisition_sw_pc_ctl,     // 12+2
           sequence_acquisition_monitor[ 0 +: 8],    // 4+8
-          sequence_acquisition_leds        // 0+1
+          sequence_acquisition_leds           // 0+1
         } ),
 
 
 
-    // mode 7. adc using sequence acquisition controller.
+    // mode 7. sequence acquisition controller and full adc.
    .h( {  { 32 - 26 { 'b0 }},
-                                                // 26
-          sequence_acquisition2_adc_reset_n,   // adc_reset_n     // 25 + 1
-          adc_measure_valid,                   // meas_complete              // 24+1
-          adc_measure_valid,                   // spi_interupt   // 23 + 1
-          adc_cmpr_latch_ctl,                // adc_cmpr_latch   // 22+1
-          adc_mux,                           // adc_refmux     // 18+4
-          // use reg_direct to control the azmux
+                                              // 26
+          sequence_acquisition2_adc_reset_n,  // adc_reset_n     // 25 + 1
+          adc_measure_valid,                  // meas_complete              // 24+1
+          adc_measure_valid,                  // spi_interupt   // 23 + 1
+          adc_cmpr_latch_ctl,                 // adc_cmpr_latch   // 22+1
+          adc_mux,                            // adc_refmux     // 18+4
           sequence_acquisition2_azmux,        // azmux      // 14+4
-          sequence_acquisition2_sw_pc_ctl,  // precharge    // 12+2     // TODO fixme. samples boot only.  use reg_sa_p_pc.
+          sequence_acquisition2_sw_pc_ctl,    // precharge    // 12+2
           adc_monitor[ 0 +: 6], sequence_acquisition2_monitor[ 0 +: 2],    // 4+8
-          sequence_acquisition_leds        // 0+4
+          sequence_acquisition_leds           // 0+4
         } ),
 
 
@@ -669,17 +669,17 @@ module top (
 
     .out( {   dummy_bits_o,               // 26
 
-              adc_reset_n,        // 25 + 1
+          adc_reset_n,        // 25 + 1
 
-              meas_complete_o,          // 24+1     // interupt_ctl *IS* generic so should be at start, and connects straight to adum. so place at beginning. same argument for meas_complete
-              spi_interrupt_ctl_o,      // 23+1     todo rename. drop the 'ctl'.
-              adc_cmpr_latch_ctl_o,         // 22+1
-              adc_refmux_o,             // 18+4     // better name adc_refmux   adc_cmpr_latch
-              azmux_o,                  // 14+4
-              pc_sw_o,              // 12+2
-              monitor_o,                // 4+8
-              leds_o                    // 0+4
-            }  )
+          meas_complete_o,          // 24+1     // interupt_ctl *IS* generic so should be at start, and connects straight to adum. so place at beginning. same argument for meas_complete
+          spi_interrupt_ctl_o,      // 23+1     todo rename. drop the 'ctl'.
+          adc_cmpr_latch_ctl_o,         // 22+1
+          adc_refmux_o,             // 18+4     // better name adc_refmux   adc_cmpr_latch
+          azmux_o,                  // 14+4
+          pc_sw_o,              // 12+2
+          monitor_o,                // 4+8
+          leds_o                    // 0+4
+        }  )
 
   );
 
