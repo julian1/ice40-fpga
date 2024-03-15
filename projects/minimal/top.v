@@ -419,15 +419,6 @@ module top (
 
 
 
-
-
-
-
-
-
-
-
-
   /////////////////////////
   // We could do one led, for SS, and one for CS2 (4094,etc).
   // rename timed_latch_hold
@@ -541,36 +532,8 @@ module top (
 
 
 
-/*
-  // wire [ `NUM_BITS-1:0 ]  sample_acquisition_no_az_out ;  // beter name ... _outputs_vec ?
 
-  // wire sample_acquisition_no_az_reset_n;
-
-  wire sample_acquisition_no_az_adc2_reset_n;
-  wire sample_acquisition_no_az_led0 ;
-  wire [8-1:0] sample_acquisition_no_az_monitor;
-
-
-  // JA remove
-  // new sequence controller should be able to handle,  by only sampling hi, with or without precharge switching, controlled with flags
-  sample_acquisition_no_az
-  sample_acquisition_no_az (
-
-    .clk(CLK),
-    .reset_n( trigger_source_internal_i ),
-
-    // inputs
-    .adc_measure_valid( adc2_measure_valid ),                     // fan-in from adc
-
-    .p_clk_count_precharge( reg_sa_p_clk_count_precharge[ 24-1:0 ]),
-
-    // outputs
-    .led0(      sample_acquisition_no_az_led0  ),
-    .monitor(   sample_acquisition_no_az_monitor  ),    // we could pass subset of monitor if watned. eg. only 4 pins...
-    .adc_reset_no ( sample_acquisition_no_az_adc2_reset_n),
-  );
-*/
-
+  //////////////////
 
   wire [2-1:0]  sequence_acquisition2_sw_pc_ctl;
   wire [4-1:0]  sequence_acquisition2_azmux;
@@ -615,24 +578,6 @@ module top (
 
     .adc_reset_no(  sequence_acquisition2_adc2_reset_n )        // JA
   );
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -712,28 +657,11 @@ module top (
           4'b0   // leds                   // 0+4
         } ),
 
-/*
-    // mode 7. full adc/ no az.
-    .h( {  { 32 - 26 { 'b0 }},
-                                                // 26
-          sample_acquisition_no_az_adc2_reset_n,        // 25 + 1
-          adc2_measure_valid,   // meas_complete              // 24+1
-          adc2_measure_valid,   // spi_interupt   // 23 + 1
-          adc2_cmpr_latch_ctl,  // adc_cmpr_latch   // 22+1
-          adc2_mux,             // adc_refmux     // 18+4
-          // use reg_direct to control the azmux
-          reg_direct [ 14 +: 4 ],  // azmux      // 14+4
-          2'b0 ,                  // precharge    // 12+2     // TODO fixme. samples boot only.  use reg_sa_p_pc.
-          adc2_monitor[ 0 +: 6], sample_acquisition_no_az_monitor[ 0 +: 2],    // 4+8
-          // 3'b0,                             // 1+3
-          sequence_acquisition_leds        // 0+1
-        } ),
-*/
 
-
+    // mode 7. adc and 
    .h( {  { 32 - 26 { 'b0 }},
                                                 // 26
-          sequence_acquisition2_adc2_reset_n,        // 25 + 1
+          sequence_acquisition2_adc2_reset_n,   // adc2_reset_n     // 25 + 1
           adc2_measure_valid,                   // meas_complete              // 24+1
           adc2_measure_valid,                   // spi_interupt   // 23 + 1
           adc2_cmpr_latch_ctl,                // adc_cmpr_latch   // 22+1
@@ -742,26 +670,8 @@ module top (
           sequence_acquisition2_azmux,        // azmux      // 14+4
           sequence_acquisition2_sw_pc_ctl,  // precharge    // 12+2     // TODO fixme. samples boot only.  use reg_sa_p_pc.
           adc2_monitor[ 0 +: 6], sequence_acquisition2_monitor[ 0 +: 2],    // 4+8
-          sequence_acquisition_leds        // 0+1
+          sequence_acquisition_leds        // 0+4
         } ),
-
-
-
-
-/*
-  wire [2-1:0]  sequence_acquisition2_sw_pc_ctl;
-  wire [4-1:0]  sequence_acquisition2_azmux;
-
-  wire [4-1:0]  sequence_acquisition2_leds;
-  wire [8-1:0]  sequence_acquisition2_monitor;
-  wire [3-1:0]  sequence_acquisition2_status;
-
-
-  wire  sequence_acquisition2_adc2_reset_n;
-*/
-
-
-
 
 
     .sel( reg_mode[ 3-1 : 0 ]),
@@ -828,24 +738,6 @@ module top (
     . reg_adc_p_clk_count_reset( reg_adc_p_clk_count_reset ),
 
 
-
-/*
-
-
-    .reg_adc_p_clk_count_reset(reg_adc_p_clk_count_reset ),
-
-    // outputs adc
-    .reg_adc_clk_count_refmux_reset({{ 8 { 1'b0 } }, adc2_clk_count_refmux_reset_last }  ) ,
-    .reg_adc_clk_count_refmux_neg(  adc2_clk_count_refmux_neg_last   ) ,
-    .reg_adc_clk_count_refmux_pos(  adc2_clk_count_refmux_pos_last  ) ,
-    .reg_adc_clk_count_refmux_rd(  { {8{ 1'b0 }}, adc2_clk_count_refmux_rd_last }  ),
-    .reg_adc_clk_count_mux_sig(                   adc2_clk_count_mux_sig_last   ),
-
-    // adc stats
-    .reg_adc_stat_count_refmux_pos_up( { {8{ 1'b0 }},adc2_stat_count_refmux_pos_up_last } ),
-    .reg_adc_stat_count_refmux_neg_up( { {8{ 1'b0 }},adc2_stat_count_refmux_neg_up_last }),
-    .reg_adc_stat_count_cmpr_cross_up(  { {8{ 1'b0 }},adc2_stat_count_cmpr_cross_up_last} )
-*/
   );
 
 
