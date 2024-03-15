@@ -15,7 +15,7 @@
 `include "../../common/timed_latch.v"
 
 `include "register_set.v"
-`include "sample_acquisition_pc.v"
+// `include "sample_acquisition_pc.v"
 
 // `include "sample_acquisition_az.v"
 
@@ -310,6 +310,7 @@ module top (
     ================
 */
 
+/*
   wire sample_acquisition_pc_sw_pc_ctl;
   wire sample_acquisition_pc_led0;
   wire [8-1 : 0] sample_acquisition_pc_monitor;
@@ -340,10 +341,7 @@ module top (
 
 
 
-
-
-
-
+*/
 
 
 
@@ -602,6 +600,8 @@ module top (
     .c( { 32 { 1'b1 } }    ),                 // mode/AF 2  MODE_HI           all outputs hi.
     .d( test_pattern_out ),                   // mode/AF 3  MODE_PATTERN      pattern. needs xtal.
 
+
+/*
     // mode/AF 4 MODE_PC_TEST
     .e( {  { 32 - 14 { 'b0 }},
                                               // 14
@@ -610,7 +610,10 @@ module top (
           3'b0,                               // 1+3    - should be reg_direct.
           sample_acquisition_pc_led0          // 0+1
         } ),
+*/
 
+    // mode 4
+    .e(  32'b0  ),     
 
     // mode  5. adc refmux test
     // limited modulation of ref currents, useful when populating pcb, don't need slope-amp/comparator etc.
