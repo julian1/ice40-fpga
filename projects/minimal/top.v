@@ -418,6 +418,9 @@ module top (
   wire [24-1 :0] adc_stat_count_cmpr_cross_up_last;
 
 
+
+
+
   adc_modulation
   adc(
 
@@ -643,6 +646,7 @@ module top (
     // inputs
     . reg_status( reg_status ),
 
+    // sequence acquisition
     . reg_sa_p_clk_count_precharge( reg_sa_p_clk_count_precharge),
 
     . reg_sa_p_seq_n( reg_sa_p_seq_n),
@@ -652,11 +656,23 @@ module top (
     . reg_sa_p_seq3( reg_sa_p_seq3),
 
 
-    // outputs - sample acquisition
+    // adc outputs
     . reg_adc_p_clk_count_aperture( reg_adc_p_clk_count_aperture),
-
     . reg_adc_p_clk_count_reset( reg_adc_p_clk_count_reset ),
 
+
+    // adc inputs
+    // note we have to pad, to match register_set 32bit regs.
+    // perhaps change register_set.
+    .  reg_adc_clk_count_refmux_reset( { 8'b0, adc_clk_count_refmux_reset_last } ) ,
+    .  reg_adc_clk_count_refmux_neg( adc_clk_count_refmux_neg_last) ,
+    .  reg_adc_clk_count_refmux_pos( adc_clk_count_refmux_pos_last) ,
+    .  reg_adc_clk_count_refmux_rd( { 8'b0, adc_clk_count_refmux_rd_last } ) ,
+    .  reg_adc_clk_count_mux_sig( adc_clk_count_mux_sig_last ),
+
+    .  reg_adc_stat_count_refmux_pos_up( { 8'b0, adc_stat_count_refmux_pos_up_last } ),
+    .  reg_adc_stat_count_refmux_neg_up( { 8'b0, adc_stat_count_refmux_neg_up_last } ) ,
+    .  reg_adc_stat_count_cmpr_cross_up( { 8'b0, adc_stat_count_cmpr_cross_up_last } )
 
   );
 
