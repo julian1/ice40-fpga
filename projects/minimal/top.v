@@ -343,7 +343,7 @@ module top (
     .monitor_o(  adc_mock_monitor )
   );
 
-  wire [2-1:0]  sequence_acquisition_sw_pc_ctl; // TODO fixme rename  pc_sw not sw_pc
+  wire [2-1:0]  sequence_acquisition_pc_sw;
   wire [4-1:0]  sequence_acquisition_azmux;
 
   wire [4-1:0]  sequence_acquisition_leds;
@@ -372,7 +372,7 @@ module top (
     .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]  ),     // done
 
     // outputs
-    .sw_pc_ctl_o( sequence_acquisition_sw_pc_ctl  ),
+    .pc_sw_o( sequence_acquisition_pc_sw  ),
     .azmux_o (    sequence_acquisition_azmux  ),
 
     .leds_o(      sequence_acquisition_leds  ),
@@ -473,7 +473,7 @@ module top (
 
   //////////////////
 
-  wire [2-1:0]  sequence_acquisition2_sw_pc_ctl;
+  wire [2-1:0]  sequence_acquisition2_pc_sw;
   wire [4-1:0]  sequence_acquisition2_azmux;
 
   wire [4-1:0]  sequence_acquisition2_leds;
@@ -507,7 +507,7 @@ module top (
     .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]  ),     // done
 
     // outputs
-    .sw_pc_ctl_o( sequence_acquisition2_sw_pc_ctl  ),
+    .pc_sw_o( sequence_acquisition2_pc_sw  ),
     .azmux_o (    sequence_acquisition2_azmux  ),
 
     .leds_o(      sequence_acquisition2_leds  ),
@@ -574,7 +574,7 @@ module top (
           1'b0,  // adc_cmpr_latch            // 22+1
           4'b0,  // adc_refmux                // 18+4
           sequence_acquisition_azmux,         // 14+4
-          sequence_acquisition_sw_pc_ctl,     // 12+2
+          sequence_acquisition_pc_sw,     // 12+2
           sequence_acquisition_monitor[ 0 +: 8],    // 4+8
           sequence_acquisition_leds           // 0+1
         } ),
@@ -590,7 +590,7 @@ module top (
           adc_cmpr_latch_ctl,                 // adc_cmpr_latch   // 22+1
           adc_mux,                            // adc_refmux     // 18+4
           sequence_acquisition2_azmux,        // azmux      // 14+4
-          sequence_acquisition2_sw_pc_ctl,    // precharge    // 12+2
+          sequence_acquisition2_pc_sw,    // precharge    // 12+2
           // adc_monitor[ 0 +: 6], sequence_acquisition2_monitor[ 0 +: 2],    // 4+8
           adc_monitor[ 0 +: 6],  sequence_acquisition2_monitor[ 4],  sequence_acquisition2_monitor[ 0],    // 4+8.   eg. hi/lo, if ch1 pc is active
           sequence_acquisition_leds           // 0+4

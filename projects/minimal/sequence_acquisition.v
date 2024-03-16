@@ -66,7 +66,7 @@ module sequence_acquisition (
   // outputs.
   output reg adc_reset_no,  // rename _n_o. perhaps or trig. is even ok.
 
-  output reg [ 2-1: 0]  sw_pc_ctl_o,      // TODO  fix rename pc_sw_o
+  output reg [ 2-1: 0]  pc_sw_o,      // TODO  fix rename pc_sw_o
   output reg [ 4-1:0 ] azmux_o,
 
 
@@ -105,8 +105,8 @@ module sequence_acquisition (
   assign monitor_o[2] = (azmux_o == `S1);
   assign monitor_o[3] = (azmux_o == `S8);
 
-  assign monitor_o[4] = sw_pc_ctl_o[0 ] ;
-  assign monitor_o[5] = sw_pc_ctl_o[1 ] ;
+  assign monitor_o[4] = pc_sw_o[0 ] ;
+  assign monitor_o[5] = pc_sw_o[1 ] ;
 
   assign monitor_o[6] = adc_reset_no;
   assign monitor_o[7] = adc_measure_valid_i;
@@ -142,7 +142,7 @@ module sequence_acquisition (
           begin
             state           <= 15;
             clk_count_down  <= p_clk_count_precharge_i;
-            sw_pc_ctl_o       <= 2'b00;
+            pc_sw_o       <= 2'b00;
             ////
 
             // led0_o            <= ! led0_o ;
@@ -197,10 +197,10 @@ module sequence_acquisition (
             state           <= 33;
             clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
 
-            // sw_pc_ctl_o     <= pc_sw_sample_val;
+            // pc_sw_o     <= pc_sw_sample_val;
             case(sample_i)
-              0: sw_pc_ctl_o <= p_seq0_i[4 +: 2];
-              1: sw_pc_ctl_o <= p_seq1_i[4 +: 2];
+              0: pc_sw_o <= p_seq0_i[4 +: 2];
+              1: pc_sw_o <= p_seq1_i[4 +: 2];
             endcase
           end
         33:
