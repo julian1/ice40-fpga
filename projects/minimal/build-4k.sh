@@ -53,6 +53,8 @@ fi
 
 ################
 
+# TLV encoding. type-len-val https://en.wikipedia.org/wiki/Type%E2%80%93length%E2%80%93value
+
 # see
 # https://stackoverflow.com/questions/9955020/how-to-write-integer-to-binary-file-using-bash
 # test
