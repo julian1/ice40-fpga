@@ -594,8 +594,12 @@ module top (
 
 
 
-
-
+  /*
+    note mcu we could also write some status flags from mode,
+    as a way to communicate back to the data decoding.
+    this - maintainis single source-of-authority. and is simple
+    - eg. how to interpret the sequence - hi,lo, 4 cycle. etc.
+  */
 
   // readable inputs
   wire [32 - 1 :0] reg_status ;
