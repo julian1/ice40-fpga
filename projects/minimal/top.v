@@ -212,36 +212,6 @@ module top (
 
 
 
-  // readable inputs
-  wire [32 - 1 :0] reg_status ;
-
-  assign reg_status = {
-
-
-
-    21'b0,
-
-    hw_flags_i,
-
-    { 8'b10101010 }  // magic
-/*
-    8'b0 ,
-    monitor,                          // don't see having the monitor readable through a different register is useful.   a git commit or crc would be useful.
-                                      // add a count, as a transactional read lock.
-    HW2,  HW1,  HW0,
-
-    reg_sa_arm_trigger[0],            // ease having to do a separate register read, to retrieve state.
-    sequence_acquisition_status_out, // 3 bits
-    adc_measure_valid,
-
-    // HW2,  HW1,  HW0 ,   4'b0,  outputs_vec[ `IDX_SPI_INTERRUPT_CTL ] ,
-
-    3'b0,
-    SWITCH_SENSE_OUT, DCV_OVP_OUT, OHMS_OVP_OUT, SUPPLY_SENSE_OUT, UNUSED_2
-*/
- };
-
-
   // verilog literals are hard!.
   // 4'b1                         == 0001
   // { 1,1,1,1}                   == 0001
@@ -348,7 +318,7 @@ module top (
 
   wire [4-1:0]  sequence_acquisition_leds;
   wire [8-1:0]  sequence_acquisition_monitor;
-  wire [4-1:0]  sequence_acquisition_status;
+  // wire [4-1:0]  sequence_acquisition_status;
 
 
   // perhaps rename sequence_acquisition_with_adc_mock
@@ -362,7 +332,7 @@ module top (
     // inputs
     .adc_measure_valid_i( adc_mock_measure_valid ),                     // fan-in from adc
 
-    .p_seq_n_i( reg_sa_p_seq_n[ 2-1: 0]  ),
+    .p_seq_n_i( reg_sa_p_seq_n[ 3-1: 0]  ),   // 3 bits
     .p_seq0_i( reg_sa_p_seq0[ 6-1: 0]  ),
     .p_seq1_i( reg_sa_p_seq1[ 6-1: 0]  ),
     .p_seq2_i( reg_sa_p_seq2[ 6-1: 0] ),
@@ -377,7 +347,7 @@ module top (
 
     .leds_o(      sequence_acquisition_leds  ),
     .monitor_o(   sequence_acquisition_monitor  ),    // only pass 2 bit to the az monitor
-    .status_last_o(  sequence_acquisition_status ),
+    // .status_last_o(  sequence_acquisition_status ),
 
     .adc_reset_no(  adc_mock_reset_n  )
   );
@@ -478,8 +448,11 @@ module top (
 
   wire [4-1:0]  sequence_acquisition2_leds;
   wire [8-1:0]  sequence_acquisition2_monitor;
-  wire [4-1:0]  sequence_acquisition2_status;
+  // wire [4-1:0]  sequence_acquisition2_status;
 
+  // with two sequence modules,
+  // we would need to encode this in output vector if we wanted both values available.
+  wire [3-1:0]  sequence_acquisition2_sample_idx_last;
 
   wire  sequence_acquisition2_adc_reset_n;
 
@@ -496,7 +469,7 @@ module top (
 
     // TODO move to registers
 
-    .p_seq_n_i( reg_sa_p_seq_n[ 2-1: 0]  ),
+    .p_seq_n_i( reg_sa_p_seq_n[ 3-1: 0]  ),
     .p_seq0_i( reg_sa_p_seq0[ 6-1: 0]  ),
     .p_seq1_i( reg_sa_p_seq1[ 6-1: 0]  ),
     .p_seq2_i( reg_sa_p_seq2[ 6-1: 0] ),
@@ -511,9 +484,12 @@ module top (
 
     .leds_o(      sequence_acquisition2_leds  ),
     .monitor_o(   sequence_acquisition2_monitor  ),    // only pass 2 bit to the az monitor
-    .status_last_o(  sequence_acquisition2_status ),
+    // .status_last_o(  sequence_acquisition2_status ),
 
-    .adc_reset_no(  sequence_acquisition2_adc_reset_n )        // JA
+    . sample_idx_last_o( sequence_acquisition2_sample_idx_last),
+
+    .adc_reset_no(  sequence_acquisition2_adc_reset_n )
+
   );
 
 
@@ -621,6 +597,62 @@ module top (
 
 
 
+  // readable inputs
+  wire [32 - 1 :0] reg_status ;
+
+/*
+  assign reg_status = {
+
+    8'b0 ,
+    monitor,                          // add a count, as a transactional read lock.
+
+    HW2,  HW1,  HW0,
+    reg_sa_arm_trigger[0],            // ease having to do a separate register read, to retrieve state.
+    sample_acquisition_az_status_out, // 3 bits
+    adc2_measure_valid,
+
+    // HW2,  HW1,  HW0 ,   4'b0,  outputs_vec[ `IDX_SPI_INTERRUPT_CTL ] ,
+
+    3'b0, SWITCH_SENSE_OUT, DCV_OVP_OUT, OHMS_OVP_OUT, SUPPLY_SENSE_OUT, UNUSED_2
+ };
+*/
+
+
+  assign reg_status = {
+
+    8'b0,
+
+    // TODO add adc_status,  and sa_status
+
+    { 4'b0000 ,  1'b0,  sequence_acquisition2_sample_idx_last },    // 3 bits.
+
+    { 4'b0000 ,  hw_flags_i } ,
+
+    { 8'b10101010 }  // magic
+/*
+    8'b0 ,
+    monitor,                          // don't see having the monitor readable through a different register is useful.   a git commit or crc would be useful.
+                                      // add a count, as a transactional read lock.
+    HW2,  HW1,  HW0,
+
+    reg_sa_arm_trigger[0],            // ease having to do a separate register read, to retrieve state.
+    sequence_acquisition_status_out, // 3 bits
+    adc_measure_valid,
+
+    // HW2,  HW1,  HW0 ,   4'b0,  outputs_vec[ `IDX_SPI_INTERRUPT_CTL ] ,
+
+    3'b0,
+    SWITCH_SENSE_OUT, DCV_OVP_OUT, OHMS_OVP_OUT, SUPPLY_SENSE_OUT, UNUSED_2
+*/
+ };
+
+
+
+
+
+
+
+
 
   register_set // #( 32 )
   register_set
@@ -648,7 +680,7 @@ module top (
     // sequence acquisition
     . reg_sa_p_clk_count_precharge( reg_sa_p_clk_count_precharge),
 
-    . reg_sa_p_seq_n( reg_sa_p_seq_n),
+    . reg_sa_p_seq_n( reg_sa_p_seq_n),    // n == count == limit.  not invert.
     . reg_sa_p_seq0( reg_sa_p_seq0),
     . reg_sa_p_seq1( reg_sa_p_seq1),
     . reg_sa_p_seq2( reg_sa_p_seq2),

@@ -53,7 +53,7 @@ module sequence_acquisition (
   // inputs
   input [24-1:0]    p_clk_count_precharge_i,
 
-  input [ 2-1: 0 ]  p_seq_n_i,
+  input [ 3-1: 0 ]  p_seq_n_i,    // need at least 3 bits to encode 4.
   input [ 6-1 : 0 ] p_seq0_i,
   input [ 6-1 : 0 ] p_seq1_i,
   input [ 6-1 : 0 ] p_seq2_i,
@@ -71,10 +71,11 @@ module sequence_acquisition (
 
 
   //  - status_o should be treated generically.  just like monitor_o and leds_o.
-  // 4 bits or 8 bits.
-  // encode idx, or seq azval, or both?
-  output reg [4-1: 0 ] status_last_o,
 
+  // currently unused.
+  // output reg [4-1: 0 ] status_last_o,
+
+  output reg  [3-1: 0] sample_idx_last_o,
 
 
   output wire [4-1:0] leds_o,
@@ -91,12 +92,8 @@ module sequence_acquisition (
   reg [31:0]    clk_count_down;           // clk_count for the current phase. using 31 bitss, gives faster timing spec.  v 24 bits. weird. ??? 36MHz v 32MHz
 
 
-  // reg [2-1:0]  sample_idx = 0;     // 4-cycle acquision.
-  reg  sample_idx = 0;                // 2-cycle acquisition
+  reg  [3-1: 0] sample_idx = 0;
 
-
-  // reg [ 4-1 : 0 ] azmux_sample_val;
-  // reg [ 4-1 : 0 ] pc_sw_sample_val;
 
 
 
@@ -133,6 +130,11 @@ module sequence_acquisition (
             state <= 1;
 
             adc_reset_no    <= 0;
+
+            // avoid 0 which could confuse
+            // instead indicate no last sample available state
+            sample_idx_last_o <= 3'b111; 
+
           end
 
 
@@ -145,20 +147,6 @@ module sequence_acquisition (
             pc_sw_o       <= 2'b00;
             ////
 
-            // led0_o            <= ! led0_o ;
-/*
-            case(sample_idx)
-              0: begin
-                azmux_sample_val <= `S3;
-                pc_sw_sample_val <= 2'b01;
-              end
-
-              1: begin
-                azmux_sample_val <= `S7;
-                pc_sw_sample_val <= 2'b00; // it wouldn't even matter if we lifted the pre-charge switch.. here.
-              end
-            endcase
-*/
           end
 
         15:
@@ -176,7 +164,6 @@ module sequence_acquisition (
             state           <= 25;
             clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
 
-            // azmux_o           <= azmux_sample_val;
             case(sample_idx)
               0: azmux_o   <= p_seq0_i[ 0 +: 4 ];
               1: azmux_o   <= p_seq1_i[ 0 +: 4];
@@ -197,7 +184,6 @@ module sequence_acquisition (
             state           <= 33;
             clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
 
-            // pc_sw_o     <= pc_sw_sample_val;
             case(sample_idx)
               0: pc_sw_o <= p_seq0_i[4 +: 2];
               1: pc_sw_o <= p_seq1_i[4 +: 2];
@@ -219,15 +205,24 @@ module sequence_acquisition (
               // go back to state 1
               state         <= 1;
 
-              // set up the next sample
-              // if( sample_idx >= sample_n  - 1 ) sample_idx <= 0;   else sample_idx <= sample_idx + 1;
 
-              sample_idx <= sample_idx + 1;
+              sample_idx_last_o  <= sample_idx;
+
+              /*
+                avoid modulo
+                https://stackoverflow.com/questions/47425729/verilog-modulus-operator-for-wrapping-around-a-range
+                needs to be >= in case sample_n is reduced in write.
+              */
+              if(sample_idx >= p_seq_n_i - 1)
+                sample_idx <=  0;
+              else
+                sample_idx <= sample_idx + 1;
+
 
               // set status for hi sample
-              status_last_o    <= 4'b001; // we moved this.      // set status only after measure, to enable reg reading, during next measurement cycle.
+              // status_last_o    <= 4'b001; // we moved this.      // set status only after measure, to enable reg reading, during next measurement cycle.
 
-              // JA added. put adc in reset again
+              // put adc in reset again
               adc_reset_no <= 0;
             end
 
