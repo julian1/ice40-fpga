@@ -3,7 +3,7 @@
 
   remember also.
     we need a way to communicate back to the mcu which sample is the one in the sequence.
-    so the sample_i is good.
+    so the sample_idx is good.
     and can be encoded in the status regsiter.
     ----
     - think we may want the count. so that the receiver of data. can handle more easily.
@@ -91,8 +91,8 @@ module sequence_acquisition (
   reg [31:0]    clk_count_down;           // clk_count for the current phase. using 31 bitss, gives faster timing spec.  v 24 bits. weird. ??? 36MHz v 32MHz
 
 
-  // reg [2-1:0]  sample_i = 0;     // 4-cycle acquision.
-  reg  sample_i = 0;                // 2-cycle acquisition
+  // reg [2-1:0]  sample_idx = 0;     // 4-cycle acquision.
+  reg  sample_idx = 0;                // 2-cycle acquisition
 
 
   // reg [ 4-1 : 0 ] azmux_sample_val;
@@ -112,10 +112,10 @@ module sequence_acquisition (
   assign monitor_o[7] = adc_measure_valid_i;
 
 
-  assign leds_o[0] = (sample_i == 0);   
-  assign leds_o[1] = (sample_i == 1);   
-  assign leds_o[2] = (sample_i == 2);   
-  assign leds_o[3] = (sample_i == 3);   
+  assign leds_o[0] = (sample_idx == 0);
+  assign leds_o[1] = (sample_idx == 1);
+  assign leds_o[2] = (sample_idx == 2);
+  assign leds_o[3] = (sample_idx == 3);
 
   always @(posedge clk)
     begin
@@ -147,7 +147,7 @@ module sequence_acquisition (
 
             // led0_o            <= ! led0_o ;
 /*
-            case(sample_i)
+            case(sample_idx)
               0: begin
                 azmux_sample_val <= `S3;
                 pc_sw_sample_val <= 2'b01;
@@ -177,7 +177,7 @@ module sequence_acquisition (
             clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
 
             // azmux_o           <= azmux_sample_val;
-            case(sample_i)
+            case(sample_idx)
               0: azmux_o   <= p_seq0_i[ 0 +: 4 ];
               1: azmux_o   <= p_seq1_i[ 0 +: 4];
             endcase
@@ -198,7 +198,7 @@ module sequence_acquisition (
             clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
 
             // pc_sw_o     <= pc_sw_sample_val;
-            case(sample_i)
+            case(sample_idx)
               0: pc_sw_o <= p_seq0_i[4 +: 2];
               1: pc_sw_o <= p_seq1_i[4 +: 2];
             endcase
@@ -220,9 +220,9 @@ module sequence_acquisition (
               state         <= 1;
 
               // set up the next sample
-              // if( sample_i >= sample_n  - 1 ) sample_i <= 0;   else sample_i <= sample_i + 1;
+              // if( sample_idx >= sample_n  - 1 ) sample_idx <= 0;   else sample_idx <= sample_idx + 1;
 
-              sample_i <= sample_i + 1;
+              sample_idx <= sample_idx + 1;
 
               // set status for hi sample
               status_last_o    <= 4'b001; // we moved this.      // set status only after measure, to enable reg reading, during next measurement cycle.
