@@ -491,7 +491,6 @@ module top (
     .reset_n( trigger_source_internal_i ),    // we want this to remove. the old edge triggered stuff.
 
     // inputs
-    // .adc_measure_valid_i( adc_mock_measure_valid ),                     // JA
     .adc_measure_valid_i( adc_measure_valid ),                     // JA the real adc. from adc
 
 
