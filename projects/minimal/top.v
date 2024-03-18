@@ -600,35 +600,21 @@ module top (
   // readable inputs
   wire [32 - 1 :0] reg_status ;
 
-/*
-  assign reg_status = {
-
-    8'b0 ,
-    monitor,                          // add a count, as a transactional read lock.
-
-    HW2,  HW1,  HW0,
-    reg_sa_arm_trigger[0],            // ease having to do a separate register read, to retrieve state.
-    sample_acquisition_az_status_out, // 3 bits
-    adc2_measure_valid,
-
-    // HW2,  HW1,  HW0 ,   4'b0,  outputs_vec[ `IDX_SPI_INTERRUPT_CTL ] ,
-
-    3'b0, SWITCH_SENSE_OUT, DCV_OVP_OUT, OHMS_OVP_OUT, SUPPLY_SENSE_OUT, UNUSED_2
- };
-*/
-
-
   assign reg_status = {
 
     8'b0,
 
-    // TODO add adc_status,  and sa_status
+    // todo add adc_status,  and sa_status
 
-    { 4'b0000 ,  1'b0,  sequence_acquisition2_sample_idx_last },    // 3 bits.
+    {  1'b0,  reg_sa_p_seq_n[ 3-1: 0] ,  1'b0,  sequence_acquisition2_sample_idx_last },
 
     { 4'b0000 ,  hw_flags_i } ,
 
     { 8'b10101010 }  // magic
+ };
+
+
+
 /*
     8'b0 ,
     monitor,                          // don't see having the monitor readable through a different register is useful.   a git commit or crc would be useful.
@@ -644,10 +630,6 @@ module top (
     3'b0,
     SWITCH_SENSE_OUT, DCV_OVP_OUT, OHMS_OVP_OUT, SUPPLY_SENSE_OUT, UNUSED_2
 */
- };
-
-
-
 
 
 
