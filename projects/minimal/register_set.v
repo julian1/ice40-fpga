@@ -39,9 +39,10 @@
 ///////////////////////
 
 //  sample acquisition.
-`define REG_SA_P_SEQ_N                  20      // TODO - consider reorder
-`define REG_SA_P_CLK_COUNT_PRECHARGE    21
 
+`define REG_SA_P_CLK_COUNT_PRECHARGE    20
+
+`define REG_SA_P_SEQ_N                  21      // TODO - consider reorder
 `define REG_SA_P_SEQ0                   22
 `define REG_SA_P_SEQ1                   23
 `define REG_SA_P_SEQ2                   24
