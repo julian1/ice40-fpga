@@ -197,6 +197,14 @@ module top (
 
 
 
+  // verilog literals are hard!.
+  // 4'b1                         == 0001
+  // { 1,1,1,1}                   == 0001
+  // { 1'b1, 1'b1, 1'b1, 1'b1 }   == 1111
+  // 4 { 1'b1 }                   == 1111
+  // 4'b1111                      == 1111
+
+
 
   /////////////////////////////////////////////
   // 4094 OE
@@ -207,19 +215,12 @@ module top (
 
 
 
+  wire [32-1 :0] reg_mode;     // _mode or AF reg_af alternate function  two bits
+
   wire [32-1:0] reg_direct;
 
+  wire [32-1:0] reg_seq_mode;    // just pass-through communcation. from reg to status_out.
 
-
-
-  // verilog literals are hard!.
-  // 4'b1                         == 0001
-  // { 1,1,1,1}                   == 0001
-  // { 1'b1, 1'b1, 1'b1, 1'b1 }   == 1111
-  // 4 { 1'b1 }                   == 1111
-  // 4'b1111                      == 1111
-
-  wire [32-1 :0] reg_mode;     // _mode or AF reg_af alternate function  two bits
 
 
 
@@ -243,6 +244,7 @@ module top (
   wire [32-1:0] reg_sa_p_seq1;
   wire [32-1:0] reg_sa_p_seq2;
   wire [32-1:0] reg_sa_p_seq3;
+
 
 
   wire [32-1 :0] reg_adc_p_clk_count_aperture;  // 32/31 bit nice. for long sample.
@@ -599,6 +601,9 @@ module top (
     as a way to communicate back to the data decoding.
     this - maintainis single source-of-authority. and is simple
     - eg. how to interpret the sequence - hi,lo, 4 cycle. etc.
+    -----
+    the advantage is the synchronization   - between mcu state, and adc/sa state.
+      and being able to read consistently.
   */
 
   // readable inputs
@@ -606,9 +611,10 @@ module top (
 
   assign reg_status = {
 
-    8'b0,
 
-    // todo add adc_status,  and sa_status
+    // todo consider - add adc_status,  and sa_status
+
+    {  4'b0, reg_seq_mode[ 4-1 : 0]  } ,    // 4 bits
 
     {  1'b0,  reg_sa_p_seq_n[ 3-1: 0] ,  1'b0,  sequence_acquisition2_sample_idx_last },
 
@@ -659,6 +665,7 @@ module top (
     . reg_4094(reg_4094 ) ,
     . reg_mode(reg_mode),
     . reg_direct(reg_direct),
+    . reg_seq_mode ( reg_seq_mode  ) ,
 
     // inputs
     . reg_status( reg_status ),

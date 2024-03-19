@@ -9,16 +9,12 @@
 
 ////////////////////
 
-// TODO move these to common file.
 
-// TODO - add these in mcu code also.  it gets too confusing otherwise.
+/*
+  fpga should not include/have any concept of these reg/mux values, but it is
+  helpful to populate the registers with some default vals for default test/start behaviors
+*/
 
-// should be removed.
-// `define SW_PC_SIGNAL    1
-// `define SW_PC_BOOT      0
-
-
-// AZMUX PC-OUT select the hi
 `define S1          ((1<<3)|(1-1))
 `define S2          ((1<<3)|(2-1))
 `define S3          ((1<<3)|(3-1))
@@ -27,4 +23,3 @@
 `define S8          ((1<<3)|(8-1))
 
 
-// `define AZMUX_PCOUT    `S1     // signal PC-OUT

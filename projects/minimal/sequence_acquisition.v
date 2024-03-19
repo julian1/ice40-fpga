@@ -133,7 +133,7 @@ module sequence_acquisition (
 
             // avoid 0 which could confuse
             // instead indicate no last sample available state
-            sample_idx_last_o <= 3'b111; 
+            sample_idx_last_o <= 3'b111;
 
           end
 
@@ -213,10 +213,16 @@ module sequence_acquisition (
                 https://stackoverflow.com/questions/47425729/verilog-modulus-operator-for-wrapping-around-a-range
                 needs to be >= in case sample_n is reduced in write.
               */
+/*
               if(sample_idx >= p_seq_n_i - 1)
                 sample_idx <=  0;
               else
                 sample_idx <= sample_idx + 1;
+*/
+
+              sample_idx <= (sample_idx >= p_seq_n_i - 1)
+                              ? 0
+                              : sample_idx + 1;
 
 
               // set status for hi sample

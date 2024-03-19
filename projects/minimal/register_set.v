@@ -32,19 +32,22 @@
 `define REG_MODE                        12
 `define REG_DIRECT                      14
 `define REG_STATUS                      17
+`define REG_SEQ_MODE                    18  // treat as general register, since not used as a parameter that controls/influences any fsm.
+
 
 
 ///////////////////////
 
 //  sample acquisition.
-`define REG_SA_P_SEQ_N              20      // probably change reg to be a maskable source trigger.
-
+`define REG_SA_P_SEQ_N                  20      // TODO - consider reorder
 `define REG_SA_P_CLK_COUNT_PRECHARGE    21
 
-`define REG_SA_P_SEQ0           22
-`define REG_SA_P_SEQ1           23
-`define REG_SA_P_SEQ2           24
-`define REG_SA_P_SEQ3           25
+`define REG_SA_P_SEQ0                   22
+`define REG_SA_P_SEQ1                   23
+`define REG_SA_P_SEQ2                   24
+`define REG_SA_P_SEQ3                   25
+
+
 
 
 
@@ -87,13 +90,16 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   output reg [32-1:0] reg_4094,     // TODO change name it's a state register for OE. status .  or SR. reg_4094_.   or SR_4094,   sr_4094.
   output reg [32-1:0] reg_mode,
   output reg [32-1:0] reg_direct,
+  output reg [32-1:0] reg_seq_mode,
 
 
   // outputs signal acquisition
   output reg [32-1:0] reg_sa_p_seq_n,
   output reg [32-1:0] reg_sa_p_clk_count_precharge,
 
-  /* encode azmux value 4 bits, and precharge switch 2 bits.
+  /*
+    this isn't very efficient.
+    encode azmux value 4 bits, and precharge switch 2 bits.
     could use higher bits to encode other control eg. to not change/leave the precharge from previous value. etc.
     better than creating a separate controller module
   */
@@ -142,11 +148,15 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   // To use in an inout. the initial block is a driver. so must be placed here.
   initial begin
 
+    // TODO   review intit block - should be '=' or '<='
+    // should be '='
+
     // control
     reg_spi_mux   = 0;          // no spi device active
     reg_4094      = 0;
     reg_mode      = 0;
     reg_direct    = 0  ;
+    reg_seq_mode  <= 0; // AZ
 
     // signal acquisition
     // it is nice to have sa defaults...
@@ -156,12 +166,11 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
     // how can express macro constant. of fixed width? does this work?
     // reg_sa_p_seq0 <= { 2'b01, ((4'd1<<3)|(3-1))   };  //  `S3
 
-    reg_sa_p_seq_n <= 2;
-    reg_sa_p_seq0 <= { 2'b01, 4'd10   };  //  ((1<<3)|(3-1)) =  10          // S3 dcv
-    reg_sa_p_seq1 <= { 2'b00, 4'd14    };   // ((1<<3)|(7-1)) =  14       // S7  start-gnd.
-    // reg_sa_p_seq1 <= { 2'b01, 4'd10   };  //  ((1<<3)|(3-1)) =  10          // S3 dcv
-    reg_sa_p_seq2 <= 0 ;
-    reg_sa_p_seq3 <= 0 ;
+    reg_sa_p_seq_n    <= 2;
+    reg_sa_p_seq0     <= { 2'b01, 4'd10   };  //  ((1<<3)|(3-1)) =  10          // S3 dcv   TODO fixme. just use the define S3
+    reg_sa_p_seq1     <= { 2'b00, 4'd14    };   // ((1<<3)|(7-1)) =  14       // S7  star-gnd.  TODO fixme just use the define S7.
+    reg_sa_p_seq2     <= 0;
+    reg_sa_p_seq3     <= 0;
 
     // adc
     reg_adc_p_clk_count_aperture  <=  $rtoi( `CLK_FREQ * 0.2 );      // 200ms.
@@ -223,10 +232,13 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
               `REG_4094:      out <= reg_4094 << 8;
               `REG_MODE:      out <= reg_mode << 8;   // ok..
               `REG_DIRECT:    out <= reg_direct << 8;
+              `REG_SEQ_MODE:      out <= reg_seq_mode << 8;
+
               `REG_STATUS:    out <= reg_status << 8;
 
-               ////////
 
+              ////////
+              // sa
               `REG_SA_P_SEQ_N:            out <= reg_sa_p_seq_n << 8;
               `REG_SA_P_CLK_COUNT_PRECHARGE:  out <= reg_sa_p_clk_count_precharge << 8;
               `REG_SA_P_SEQ0:         out <= reg_sa_p_seq0 << 8;
@@ -236,14 +248,12 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
 
               /////
-
+              // adc
               `REG_ADC_P_CLK_COUNT_APERTURE:          out <= reg_adc_p_clk_count_aperture << 8;     // clk_count_sample_n clk_time_sample_clksample_time ??
               `REG_ADC_P_CLK_COUNT_RESET:   out <= reg_adc_p_clk_count_reset << 8;
 
 
-
-
-              // adc inputs
+              // adc inputs to module, and spi readable outputs
               `REG_ADC_CLK_COUNT_REFMUX_RESET: out <= reg_adc_clk_count_refmux_reset << 8;
               `REG_ADC_CLK_COUNT_REFMUX_NEG:   out <= reg_adc_clk_count_refmux_neg << 8;
               `REG_ADC_CLK_COUNT_REFMUX_POS:   out <= reg_adc_clk_count_refmux_pos << 8;
@@ -275,7 +285,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
             `REG_4094:      reg_4094    <= bin;
             `REG_MODE:      reg_mode    <= bin;
             `REG_DIRECT:    reg_direct  <= bin;
-            // STATUS
+            `REG_SEQ_MODE:  reg_seq_mode <= bin;
 
             //////////
 
@@ -287,11 +297,10 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
             `REG_SA_P_SEQ2:                 reg_sa_p_seq2 <= bin;
             `REG_SA_P_SEQ3:                 reg_sa_p_seq3 <= bin;
 
-              ////
 
-
-            `REG_ADC_P_CLK_COUNT_APERTURE:          reg_adc_p_clk_count_aperture <= bin;
-            `REG_ADC_P_CLK_COUNT_RESET:   reg_adc_p_clk_count_reset <= bin;
+            ////
+            `REG_ADC_P_CLK_COUNT_APERTURE:  reg_adc_p_clk_count_aperture <= bin;
+            `REG_ADC_P_CLK_COUNT_RESET:     reg_adc_p_clk_count_reset <= bin;
 
           endcase
 
