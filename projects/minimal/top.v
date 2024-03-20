@@ -618,7 +618,7 @@ module top (
 
     {  1'b0,  reg_sa_p_seq_n[ 3-1: 0] ,  1'b0,  sequence_acquisition2_sample_idx_last },
 
-    { 4'b0000 ,  hw_flags_i } ,
+    { reg_spi_mux [ 4-1: 0 ],  hw_flags_i } ,
 
     { 8'b10101010 }  // magic
  };
