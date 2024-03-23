@@ -167,6 +167,8 @@ module sequence_acquisition (
             case(sample_idx)
               0: azmux_o   <= p_seq0_i[ 0 +: 4 ];
               1: azmux_o   <= p_seq1_i[ 0 +: 4];
+              2: azmux_o   <= p_seq2_i[ 0 +: 4 ];
+              3: azmux_o   <= p_seq3_i[ 0 +: 4];
             endcase
           end
         25:
@@ -187,6 +189,8 @@ module sequence_acquisition (
             case(sample_idx)
               0: pc_sw_o <= p_seq0_i[4 +: 2];
               1: pc_sw_o <= p_seq1_i[4 +: 2];
+              2: pc_sw_o <= p_seq2_i[4 +: 2];
+              3: pc_sw_o <= p_seq3_i[4 +: 2];
             endcase
           end
         33:
@@ -196,6 +200,7 @@ module sequence_acquisition (
               // adc start
               adc_reset_no <= 1;
             end
+
 
         35:
           // wait for adc to measure

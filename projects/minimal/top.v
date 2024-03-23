@@ -338,7 +338,7 @@ module top (
     .p_seq0_i( reg_sa_p_seq0[ 6-1: 0]  ),
     .p_seq1_i( reg_sa_p_seq1[ 6-1: 0]  ),
     .p_seq2_i( reg_sa_p_seq2[ 6-1: 0] ),
-    .p_seq3_i( reg_sa_p_seq2[ 6-1: 0] ),
+    .p_seq3_i( reg_sa_p_seq3[ 6-1: 0] ),
 
 
     .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]  ),     // done
@@ -475,7 +475,7 @@ module top (
     .p_seq0_i( reg_sa_p_seq0[ 6-1: 0]  ),
     .p_seq1_i( reg_sa_p_seq1[ 6-1: 0]  ),
     .p_seq2_i( reg_sa_p_seq2[ 6-1: 0] ),
-    .p_seq3_i( reg_sa_p_seq2[ 6-1: 0] ),
+    .p_seq3_i( reg_sa_p_seq3[ 6-1: 0] ),
 
 
     .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]  ),     // done
