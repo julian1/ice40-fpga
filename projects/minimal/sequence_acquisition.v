@@ -135,6 +135,11 @@ module sequence_acquisition (
             // instead indicate no last sample available state
             sample_idx_last_o <= 3'b111;
 
+            /* TODO  - during reset - should should hold the precharge switches lo.
+            // azmux state should probably also be defined.  can use the first value.
+            */
+            // pc_sw_o       <= 2'b00;
+            // azmux_o   <= p_seq0_i[ 0 +: 4 ];
           end
 
 
@@ -144,8 +149,9 @@ module sequence_acquisition (
           begin
             state           <= 15;
             clk_count_down  <= p_clk_count_precharge_i;
+
+            // TODO REVIEW reset the precharge switches. - shoud do this in final state. instead.
             pc_sw_o       <= 2'b00;
-            ////
 
           end
 
