@@ -127,15 +127,17 @@ module sequence_acquisition (
         0:
           begin
             // having a state like, this may be useful for debuggin, because can put a pulse on the monitor_o.
-            state <= 1;
+            state         <= 1;
 
             // hold adc in reset also
-            adc_reset_no    <= 0;
+            adc_reset_no  <= 0;
+
+            sample_idx    <= 0;
 
             // avoid 0 which can be confused with first seq
             sample_idx_last_o <= 3'b111;
 
-            /* during reset - hold the precharge switches lo. to emit BOOT. and protect signal.
+            /* during reset - hold the precharge switches lo. to emit BOOT. and protect signal. both cahnnels
             // azmux state should probably also be defined.  can use the first value.
             */
             pc_sw_o       <= 2'b00;
@@ -147,7 +149,7 @@ module sequence_acquisition (
         // switch pre-charge switch to boot to protect signal, and pause.
         1:
           begin
-            state           <= 15;
+            state         <= 15;
             clk_count_down  <= p_clk_count_precharge_i;
 
             // TODO REVIEW reset the precharge switches. - shoud do this in final state. instead.
