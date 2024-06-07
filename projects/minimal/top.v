@@ -80,16 +80,17 @@ module top (
 
   output SPI_DAC_SS,
 
-  input U1004_4094_DATA,
+  input U1008_4094_DATA,
 
 
-  input trigger_source_external_i,   // trigger_ext_out   - need to re
-  input trigger_source_internal_i,   // trigger_int_out 38
-  input unused1_i,                    // 39
 
+  // input trigger_source_external_i,   // trigger_ext_out   - need to re
+  // input trigger_source_internal_i,   // trigger_int_out 38
+  // input unused1_i,                    // 39
+  input trig_sa_i,
 
   output spi_interrupt_ctl_o,
-  output meas_complete_o,
+  // output meas_complete_o,
 
 
   // output sig_pc1_sw_o,
@@ -126,7 +127,7 @@ module top (
   output SPI_MISO,
   // output b
 
-  input U1004_4094_DATA,
+  input U1008_4094_DATA,
   input LINE_SENSE_OUT,
   input SWITCH_SENSE_OUT,
   input DCV_OVP_OUT,
@@ -134,7 +135,7 @@ module top (
   input SUPPLY_SENSE_OUT,
   input UNUSED_2,                    // change name UNUSED_2_OUT
 
-  // input  U1004_4094_DATA,   // this is unused. but it's an input
+  // input  U1008_4094_DATA,   // this is unused. but it's an input
 
 
   //
@@ -329,7 +330,7 @@ module top (
   sequence_acquisition (
 
     .clk(CLK),
-    .reset_n( trigger_source_internal_i ),
+    .reset_n( trig_sa_i ),
 
     // inputs
     .adc_measure_valid_i( adc_mock_measure_valid ),                     // fan-in from adc
@@ -463,7 +464,7 @@ module top (
   sequence_acquisition2 (
 
     .clk(CLK),
-    .reset_n( trigger_source_internal_i ),    // we want this to remove. the old edge triggered stuff.
+    .reset_n( trig_sa_i ),    // we want this to remove. the old edge triggered stuff.
 
     // inputs
     .adc_measure_valid_i( adc_measure_valid ),                     // JA the real adc. from adc
@@ -502,6 +503,9 @@ module top (
   ////////////////////////////
   // unused. should be able to be wire?
   reg [32-26- 1:0] dummy_bits_o ;
+
+  reg meas_complete_o;   // now unused.
+
 
   /*
      note - if a controller is unused in a mode - it would be nice to hold it in reset.
