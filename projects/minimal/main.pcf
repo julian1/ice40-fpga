@@ -7,7 +7,7 @@
 
 
 
-# should prefix spi_comms_
+# TODO prefix spi_comms_
 
 # suspect 'S' indicates 'SPI' or 'serial' in this contet. not slave.
 # Eg. SDO is to MOSI - in context where fpga is spi master, when reading flash bitstream.
@@ -90,25 +90,23 @@ set_io monitor_o[7]     34
 
 
 
-# better name HW_FLAGS
-# put these as inputs in the status register.
-# perhaps as the first three bits.
 
 set_io hw_flags_i[0]      12
 set_io hw_flags_i[1]      19
 set_io hw_flags_i[2]      20
 set_io hw_flags_i[3]      21
 
-# TODO change to lower case. prefix with spi_ first. eg. spi_glb_mosi, spi_glb_4094_oe,
-# we can actually do this as a back annotation in kicad.
-# outputs
+
+############################
+# spi
 set_io spi_glb_mosi         91    # rename spi_glb_mosi
 set_io spi_4094_oe_ctl      94    # rename spi_4094_oe_ctl
 set_io spi_glb_clk          95    # rename spi_glb_clk
 
 set_io U1008_4094_DATA      98   # from level translator.
 
-# cs lines
+# spi cs lines
+# change to lower-case
 set_io spi_4094_strobe_ctl  93        # rename spi_4094_strobe_ctl
 set_io SPI_DAC_SS           96
 set_io SPI_ISO_DAC_CS           63
@@ -131,7 +129,7 @@ set_io pc_sw_o[1]     79
 
 
 # az mux
-# mar 2024. routed pcb with enable as first pin (pin 80) - should have been last.
+# mar 2024. accidently routed pcb with enable as first pin (pin 80) - should have been last.
 # perhaps keep as is, depending on copmlexity of rerouting.
 set_io azmux_o[0]      81   # A0_CTL
 set_io azmux_o[1]      87   # A1_CTL
