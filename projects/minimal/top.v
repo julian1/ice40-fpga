@@ -72,15 +72,20 @@ module top (
 
 
 
-  // 4094
+  // spi lines.
   output GLB_SPI_MOSI,
-  output GLB_SPI_CLK,
   output GLB_4094_OE_CTL,
-  output GLB_4094_STROBE_CTL,
-
-  output SPI_DAC_SS,
+  output GLB_SPI_CLK,
 
   input U1008_4094_DATA,
+
+  // cs lines
+  output GLB_4094_STROBE_CTL,
+  output SPI_DAC_SS,
+  output SPI_ISO_DAC_CS,
+  output SPI_ISO_DAC_CS2,
+
+
 
 
 
@@ -88,6 +93,9 @@ module top (
   // input trigger_source_internal_i,   // trigger_int_out 38
   // input unused1_i,                    // 39
   input trig_sa_i,
+
+
+
 
   output spi_interrupt_ctl_o,
   // output meas_complete_o,
@@ -115,9 +123,7 @@ module top (
 
 /*
 
-
-  //
-  // inputs
+  // OLD.
 
   // spi
   input  SPI_CLK,
@@ -135,19 +141,10 @@ module top (
   input SUPPLY_SENSE_OUT,
   input UNUSED_2,                    // change name UNUSED_2_OUT
 
-  // input  U1008_4094_DATA,   // this is unused. but it's an input
-
-
   //
   output SPI_INTERRUPT_CTL,    // should be modeal. eg. same as meas complete
   output MEAS_COMPLETE_CTL,
-
-  //  adc current switches
-  output U902_SW0_CTL,
-  output U902_SW1_CTL,
-  output U902_SW2_CTL,
-  output U902_SW3_CTL,
-  output CMPR_LATCH_CTL,
+    output CMPR_LATCH_CTL,
 
   ////////////
 */
@@ -172,12 +169,14 @@ module top (
   wire [32-1:0] reg_spi_mux ;// = 8'b00000001; // test
 
   assign GLB_SPI_CLK          = reg_spi_mux == 8'b0 ? 1 : SCK;      // park hi
-
   assign GLB_SPI_MOSI         = reg_spi_mux == 8'b0 ? 1 : SDI;      // park hi
 
-  assign GLB_4094_STROBE_CTL  = reg_spi_mux == 8'b01 ?  (~ SPI_CS2)  : 0;     // active hi
+  assign GLB_4094_STROBE_CTL  = reg_spi_mux ==   8'b01 ?  (~ SPI_CS2)  : 0;     // active hi, park lo
+  assign SPI_DAC_SS           = reg_spi_mux ==   8'b10 ?  SPI_CS2 : 1;     // active lo
+  assign SPI_ISO_DAC_CS       = reg_spi_mux ==  8'b100 ?  SPI_CS2 : 1;     // active lo
+  assign SPI_ISO_DAC_CS2      = reg_spi_mux == 8'b1000 ?  SPI_CS2 : 1;     // active lo
 
-  assign SPI_DAC_SS           = reg_spi_mux == 8'b10 ?  SPI_CS2 : 1;     // active lo
+
 
 
   wire w_dout ;

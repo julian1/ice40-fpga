@@ -52,7 +52,7 @@ set_io spi_interrupt_ctl_o 62
 
 # other isolator lines
 # the use of out and ctl is messed up here. because it's wrt the isolator rather than the fpga.
-# no. it is correct.  _out is an input to fpga.. 
+# no. it is correct.  _out is an input to fpga..
 # whether itadd suffix
 
 # TODO rename trig_sa_out
@@ -99,19 +99,20 @@ set_io hw_flags_i[1]      19
 set_io hw_flags_i[2]      20
 set_io hw_flags_i[3]      21
 
-# TODO change to lower case. perhaps prefix with spi_ first. eg. spi_glb_mosi, spi_glb_4094_oe, 
+# TODO change to lower case. prefix with spi_ first. eg. spi_glb_mosi, spi_glb_4094_oe,
+# we can actually do this as a back annotation in kicad.
 # outputs
-set_io GLB_SPI_MOSI         91
-set_io GLB_4094_OE_CTL      94
-set_io GLB_SPI_CLK          95
+set_io GLB_SPI_MOSI         91    # rename spi_glb_mosi
+set_io GLB_4094_OE_CTL      94    # rename spi_4094_oe_ctl
+set_io GLB_SPI_CLK          95    # rename spi_glb_clk
 
 set_io U1008_4094_DATA      98   # from level translator.
 
 # cs lines
 set_io GLB_4094_STROBE_CTL  93        # rename spi_4094_strobe_ctl
 set_io SPI_DAC_SS           96
-set_io SPI_ISO_CS           63
-set_io SPI_ISO_CS2          64
+set_io SPI_ISO_DAC_CS           63
+set_io SPI_ISO_DAC_CS2          64
 
 
 
