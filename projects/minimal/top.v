@@ -73,14 +73,14 @@ module top (
 
 
   // spi lines.
-  output GLB_SPI_MOSI,
-  output GLB_4094_OE_CTL,
-  output GLB_SPI_CLK,
+  output spi_glb_mosi,
+  output spi_4094_oe_ctl,
+  output spi_glb_clk,
 
   input U1008_4094_DATA,
 
   // cs lines
-  output GLB_4094_STROBE_CTL,
+  output spi_4094_strobe_ctl,
   output SPI_DAC_SS,
   output SPI_ISO_DAC_CS,
   output SPI_ISO_DAC_CS2,
@@ -162,16 +162,16 @@ module top (
           we should combine in line/place. the same way we do mux align.
           eg.
 
-      . vec_cs(  {  dummy,  GLB_4094_STROBE_CTL  }   ),
+      . vec_cs(  {  dummy,  spi_4094_strobe_ctl  }   ),
       ote. we are already doing this for polarity
   */
 
   wire [32-1:0] reg_spi_mux ;// = 8'b00000001; // test
 
-  assign GLB_SPI_CLK          = reg_spi_mux == 8'b0 ? 1 : SCK;      // park hi
-  assign GLB_SPI_MOSI         = reg_spi_mux == 8'b0 ? 1 : SDI;      // park hi
+  assign spi_glb_clk          = reg_spi_mux == 8'b0 ? 1 : SCK;      // park hi
+  assign spi_glb_mosi         = reg_spi_mux == 8'b0 ? 1 : SDI;      // park hi
 
-  assign GLB_4094_STROBE_CTL  = reg_spi_mux ==   8'b01 ?  (~ SPI_CS2)  : 0;     // active hi, park lo
+  assign spi_4094_strobe_ctl  = reg_spi_mux ==   8'b01 ?  (~ SPI_CS2)  : 0;     // active hi, park lo
   assign SPI_DAC_SS           = reg_spi_mux ==   8'b10 ?  SPI_CS2 : 1;     // active lo
   assign SPI_ISO_DAC_CS       = reg_spi_mux ==  8'b100 ?  SPI_CS2 : 1;     // active lo
   assign SPI_ISO_DAC_CS2      = reg_spi_mux == 8'b1000 ?  SPI_CS2 : 1;     // active lo
@@ -190,8 +190,8 @@ module top (
   // would be nice to project these in a mode,
   // but if there's a spi problem - we are unlikely to get it into a mode.
 
-  assign monitor_o[0]  = GLB_SPI_CLK;
-  assign monitor_o[1]  = GLB_SPI_MOSI;
+  assign monitor_o[0]  = spi_glb_clk;
+  assign monitor_o[1]  = spi_glb_mosi;
   assign monitor_o[2]  = SPI_DAC_SS     ;
 */
 
@@ -209,7 +209,7 @@ module top (
   /////////////////////////////////////////////
   // 4094 OE
   wire [32-1:0] reg_4094;   // TODO rename
-  assign { GLB_4094_OE_CTL } = reg_4094;    //  lo. start up not enabled.
+  assign { spi_4094_oe_ctl } = reg_4094;    //  lo. start up not enabled.
 
   ////////////////////////////////////////
 
