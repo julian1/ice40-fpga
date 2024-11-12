@@ -1,0 +1,59 @@
+
+# decent style guide,
+# https://github.com/lowRISC/style-guides/blob/master/VerilogCodingStyle.md#naming
+
+# jul 7, 2023.
+
+
+
+
+# TODO prefix spi_comms_
+
+# suspect 'S' indicates 'SPI' or 'serial' in this contet. not slave.
+# Eg. SDO is to MOSI - in context where fpga is spi master, when reading flash bitstream.
+# but is MISO - when fpga is spi slave when receiving bitstream.
+
+#A dual-function, serial output pin in both configuration modes.
+#iCE40 LM devices have this pin shared with hardened SPI IP
+#SPI_MISO pin.
+set_io SDO              14 # up5k
+
+# A dual-function, serial input pin in both configuration modes.
+# iCE40 LM devices have this pin shared with hardened SPI IP
+# SPI_MOSI pin.
+set_io SDI              17  # up5k
+
+
+#A dual-function clock signal. An output in Master mode and
+#input in Slave mode. iCE40 LM devices have this pin shared with
+# hardened SPI IP SPI_SCK pin.
+set_io SCK              15  # up5k 
+
+
+#An important dual-function, active-low slave select pin. After
+#the device exits POR or CRESET_B is toggled (High-Low-High), it
+#samples the SPI_SS to select the configuration mode (an output
+#in Master mode and an input in Slave mode). iCE40 LM devices
+#have this pin shared with hardened SPI IP SPI1_CSN pin.
+set_io SS               16  # up5k
+
+
+# consider adding '_n' suffix on cs,rst lines.
+#   Using the '_n' naming convention for port names when active low is still a good idea.
+
+
+
+
+
+
+###############################
+
+
+
+set_io leds_o[0]        36 
+set_io leds_o[1]        43
+set_io leds_o[2]        38 
+set_io leds_o[3]        42 
+
+
+
