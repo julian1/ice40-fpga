@@ -27,7 +27,7 @@ set_io SDI              17  # up5k
 #A dual-function clock signal. An output in Master mode and
 #input in Slave mode. iCE40 LM devices have this pin shared with
 # hardened SPI IP SPI_SCK pin.
-set_io SCK              15  # up5k 
+set_io SCK              15  # up5k
 
 
 #An important dual-function, active-low slave select pin. After
@@ -50,10 +50,11 @@ set_io SS               16  # up5k
 
 
 
-set_io leds_o[0]        36 
-set_io leds_o[1]        43
-set_io leds_o[2]        38 
-set_io leds_o[3]        42 
+set_io fets_o[0]        36
+set_io fets_o[1]        43
+set_io fets_o[2]        38
+set_io fets_o[3]        42
 
 
 
+set_io clk              35

@@ -35,8 +35,8 @@ nextpnr-ice40 --up5k  --package  sg48 --pcf  main.pcf --json ./build/main.json  
 
 icepack ./build/main.asc ./build/main.bin
 
-# icetime ./build/main.asc -d up5k  2>&1 | tee ./build/icetime.txt
-icetime ./build/main.asc -d hx4k 2>&1 | tee ./build/icetime.txt
+icetime ./build/main.asc -d up5k  2>&1 | tee ./build/icetime.txt
+# icetime ./build/main.asc -d hx4k 2>&1 | tee ./build/icetime.txt
 
 cat ./build/yosys-errors.txt
 

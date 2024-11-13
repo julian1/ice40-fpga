@@ -1,24 +1,5 @@
 /*
-  need to add core reset back.
-  possible that a timer reg, is read, while being shifted in spi transfer, and thus sees very large value timer duration
-  behavior is to appear to lockup.
-*/
-/*
-  --------------------
 
-  - OK. rewritten/ changed the register_bank strategy. sep 2023.
-
-  rather than use the async cs going high as a final clk pulse on which to set the register values .
-  instead use async cs - only to hold values in init/reset when cs is non enabled.
-  but when the spi transfer is inititiated by cs going lo, we are become committed to reading/writing values according to the clk count.
-  this is because cannot rely on cs edge of cs as async signal together with setting non-constant values.
-  there was a yosys error that was masked/not given because the code was split/factored into two always blocks.
-
-  note that if cs goes high early, indicating wrong/or aborted spi, then clk count and input data is reset without reg values being updated which is the desired behavior.
-  different spi length transfers are possible with more than once update function, eg. on a second count factor.
-  or code register specific transfer count/length
-
-  but all this means we have to use small blocking assignment - to arrange write on the final spi clk pulse. because we are not guaranteed anymore further clk cycles
 */
 
 
@@ -39,37 +20,6 @@
 ///////////////////////
 
 //  sample acquisition.
-
-`define REG_SA_P_CLK_COUNT_PRECHARGE    20
-
-`define REG_SA_P_SEQ_N                  21      // TODO - consider reorder
-`define REG_SA_P_SEQ0                   22
-`define REG_SA_P_SEQ1                   23
-`define REG_SA_P_SEQ2                   24
-`define REG_SA_P_SEQ3                   25
-
-
-
-
-
-// adc parameters
-`define REG_ADC_P_CLK_COUNT_APERTURE    30
-`define REG_ADC_P_CLK_COUNT_RESET       31
-
-
-
-// adc counts
-`define REG_ADC_CLK_COUNT_REFMUX_RESET  40
-`define REG_ADC_CLK_COUNT_REFMUX_NEG    41
-`define REG_ADC_CLK_COUNT_REFMUX_POS    42
-`define REG_ADC_CLK_COUNT_REFMUX_RD     43
-`define REG_ADC_CLK_COUNT_MUX_SIG       44
-
-
-// extra stat counts.
-`define REG_ADC_STAT_COUNT_REFMUX_POS_UP  50
-`define REG_ADC_STAT_COUNT_REFMUX_NEG_UP  51
-`define REG_ADC_STAT_COUNT_CMPR_CROSS_UP  52
 
 
 module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,   4 bytes data.
@@ -93,40 +43,6 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   output reg [32-1:0] reg_direct,
   output reg [32-1:0] reg_seq_mode,
 
-
-  // outputs signal acquisition
-  output reg [32-1:0] reg_sa_p_seq_n,
-  output reg [32-1:0] reg_sa_p_clk_count_precharge,
-
-  /*
-    this isn't very efficient.
-    encode azmux value 4 bits, and precharge switch 2 bits.
-    could use higher bits to encode other control eg. to not change/leave the precharge from previous value. etc.
-    better than creating a separate controller module
-  */
-  output reg [32-1:0] reg_sa_p_seq0,
-  output reg [32-1:0] reg_sa_p_seq1,
-  output reg [32-1:0] reg_sa_p_seq2,
-  output reg [32-1:0] reg_sa_p_seq3,
-
-
-
-  // outputs adc
-  output reg [32-1:0] reg_adc_p_clk_count_aperture,
-  output reg [32-1:0] reg_adc_p_clk_count_reset,    // move
-
-
-
-  // inputs adc
-  input wire [32-1:0] reg_adc_clk_count_refmux_reset,
-  input wire [32-1:0] reg_adc_clk_count_refmux_neg,
-  input wire [32-1:0] reg_adc_clk_count_refmux_pos,
-  input wire [32-1:0] reg_adc_clk_count_refmux_rd,
-  input wire [32-1:0] reg_adc_clk_count_mux_sig,
-
-  input wire [32-1:0] reg_adc_stat_count_refmux_pos_up,
-  input wire [32-1:0] reg_adc_stat_count_refmux_neg_up,
-  input wire [32-1:0] reg_adc_stat_count_cmpr_cross_up,
 
 
 
@@ -159,23 +75,6 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
     reg_direct    = 0  ;
     reg_seq_mode  <= 0; // AZ
 
-    // signal acquisition
-    // it is nice to have sa defaults...
-    // so can just put in az mode, and have something working.
-    reg_sa_p_clk_count_precharge  <= $rtoi( `CLK_FREQ * 500e-6 );   // == 10000 ==  500us.
-
-    // how can express macro constant. of fixed width? does this work?
-    // reg_sa_p_seq0 <= { 2'b01, ((4'd1<<3)|(3-1))   };  //  `S3
-
-    reg_sa_p_seq_n    <= 2;
-    reg_sa_p_seq0     <= { 2'b01, 4'd10   };  //  ((1<<3)|(3-1)) =  10          // S3 dcv   TODO fixme. just use the define S3
-    reg_sa_p_seq1     <= { 2'b00, 4'd14    };   // ((1<<3)|(7-1)) =  14       // S7  star-gnd.  TODO fixme just use the define S7.
-    reg_sa_p_seq2     <= 0;
-    reg_sa_p_seq3     <= 0;
-
-    // adc
-    reg_adc_p_clk_count_aperture  <=  $rtoi( `CLK_FREQ * 0.2 );      // 200ms.
-    reg_adc_p_clk_count_reset     <= 24'd10000 ;            // 20000000 * 0.5e-3 == 10000   500us.
   end
 
 
@@ -238,34 +137,6 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
               `REG_STATUS:    out <= reg_status << 8;
 
 
-              ////////
-              // sa
-              `REG_SA_P_SEQ_N:            out <= reg_sa_p_seq_n << 8;
-              `REG_SA_P_CLK_COUNT_PRECHARGE:  out <= reg_sa_p_clk_count_precharge << 8;
-              `REG_SA_P_SEQ0:         out <= reg_sa_p_seq0 << 8;
-              `REG_SA_P_SEQ1:         out <= reg_sa_p_seq1 << 8;
-              `REG_SA_P_SEQ2:         out <= reg_sa_p_seq2 << 8;
-              `REG_SA_P_SEQ3:         out <= reg_sa_p_seq3 << 8;
-
-
-              /////
-              // adc
-              `REG_ADC_P_CLK_COUNT_APERTURE:          out <= reg_adc_p_clk_count_aperture << 8;     // clk_count_sample_n clk_time_sample_clksample_time ??
-              `REG_ADC_P_CLK_COUNT_RESET:   out <= reg_adc_p_clk_count_reset << 8;
-
-
-              // adc inputs to module, and spi readable outputs
-              `REG_ADC_CLK_COUNT_REFMUX_RESET: out <= reg_adc_clk_count_refmux_reset << 8;
-              `REG_ADC_CLK_COUNT_REFMUX_NEG:   out <= reg_adc_clk_count_refmux_neg << 8;
-              `REG_ADC_CLK_COUNT_REFMUX_POS:   out <= reg_adc_clk_count_refmux_pos << 8;
-              `REG_ADC_CLK_COUNT_REFMUX_RD:    out <= reg_adc_clk_count_refmux_rd << 8;
-              `REG_ADC_CLK_COUNT_MUX_SIG:      out <= reg_adc_clk_count_mux_sig << 8;
-
-              `REG_ADC_STAT_COUNT_REFMUX_POS_UP:  out <=   reg_adc_stat_count_refmux_pos_up << 8;
-              `REG_ADC_STAT_COUNT_REFMUX_NEG_UP:  out <=  reg_adc_stat_count_refmux_neg_up << 8;
-              `REG_ADC_STAT_COUNT_CMPR_CROSS_UP:  out <= reg_adc_stat_count_cmpr_cross_up << 8;
-
-
 
               default:        out <=  24'b000011110000111100001111 << 8;
               // default:     out <=  32'b00001111000011110000111100001111<< 8;     // 32 bit value appears to work.
@@ -289,19 +160,6 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
             `REG_SEQ_MODE:  reg_seq_mode <= bin;
 
             //////////
-
-            `REG_SA_P_SEQ_N:                reg_sa_p_seq_n <= bin;
-            `REG_SA_P_CLK_COUNT_PRECHARGE:  reg_sa_p_clk_count_precharge <= bin;
-
-            `REG_SA_P_SEQ0:                 reg_sa_p_seq0 <= bin;
-            `REG_SA_P_SEQ1:                 reg_sa_p_seq1 <= bin;
-            `REG_SA_P_SEQ2:                 reg_sa_p_seq2 <= bin;
-            `REG_SA_P_SEQ3:                 reg_sa_p_seq3 <= bin;
-
-
-            ////
-            `REG_ADC_P_CLK_COUNT_APERTURE:  reg_adc_p_clk_count_aperture <= bin;
-            `REG_ADC_P_CLK_COUNT_RESET:     reg_adc_p_clk_count_reset <= bin;
 
           endcase
 

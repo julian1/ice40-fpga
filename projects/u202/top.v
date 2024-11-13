@@ -29,6 +29,94 @@
 
 
 
+
+// `define CLK_FREQ        20000000
+`define CLK_FREQ        12000000
+
+
+
+
+module fet_driver (
+
+  input   clk,
+  input   reset_n,
+
+  output reg [ 4-1: 0 ] fets_o,
+);
+
+
+  reg [7-1:0]   state = 0 ;
+  reg [31:0]    clk_count_down;
+
+  /*
+    there's a very strange bug lurking here, if we remove this register allocation , that is not even used.
+    then get spurious signals on adc_measure_valid in the real adc mode.
+
+  */
+
+
+
+
+  always @(posedge clk   )
+    begin
+
+      // if(clk_count_down != 0 )
+        // always decrement clk for the current phase
+      clk_count_down <= clk_count_down - 1;
+
+
+      case (state)
+
+        0:
+          // reset/park state.
+          begin
+
+            // setup next
+            clk_count_down  <= 10;     // set positive to avoid wrap around
+            state           <= 1;
+            fets_o          <= 3'b0000;    // off.
+          end
+
+        1:
+          if(clk_count_down == 0)
+            begin
+              clk_count_down  <= `CLK_FREQ / 1000;   // 1ms
+              state           <= 2;
+              fets_o          <= 4'b1001;    // fet1 (hi), fet4
+            end
+
+        2:
+          if(clk_count_down == 0)
+            begin
+              clk_count_down  <= `CLK_FREQ / 1000;   // 1ms
+              state           <= 1;
+              fets_o          <= 4'b0110;    // fet3 (hi), fet2
+            end
+
+      endcase
+
+
+      // synchronous reset - if reset_n enabled, then don't advance out-of reset state.
+      if(reset_n == 0)      // in reset
+        begin
+
+            state <= 0;
+        end
+
+
+    end
+endmodule
+
+
+
+
+
+
+
+
+
+
+
 module top (
 
 
@@ -62,12 +150,21 @@ module top (
 
 
   ///////////
-  output [ 4-1: 0 ] leds_o
+  output [ 4-1: 0 ] fets_o,
 
+  input clk
 
 );
 
+  reg [32-1:0] reg_status = 0;    // initial value
 
+
+  fet_driver
+  fet_driver(
+    . clk( clk),
+    . reset_n( 1'b1 ),
+    . fets_o( fets_o),
+  );
 
   // wire SDO = 1;
 
@@ -84,10 +181,10 @@ module top (
 
 
     // outputs
-    // . reg_spi_mux(reg_spi_mux),
+    // . reg_direct( fets_o ),
 
-    . reg_direct( leds_o ),
-
+    // inputs
+    . reg_status( reg_status),
   );
 
 
