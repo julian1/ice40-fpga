@@ -49,11 +49,11 @@ set_io SS               16  # up5k
 ###############################
 
 
-
-set_io fets_o[0]        36
-set_io fets_o[1]        43
-set_io fets_o[2]        38
-set_io fets_o[3]        42
+# weird order                   fet
+set_io fets_o[0]        36    # 1
+set_io fets_o[1]        38    # 2
+set_io fets_o[2]        42    # 3
+set_io fets_o[3]        43    # 4
 
 
 

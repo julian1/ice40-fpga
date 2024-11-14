@@ -80,7 +80,8 @@ module fet_driver (
         1:
           if(clk_count_down == 0)
             begin
-              clk_count_down  <= `CLK_FREQ / 1000;   // 1ms
+              clk_count_down  <= `CLK_FREQ / (15000 * 2);   // 15kHz.
+              // clk_count_down  <= `CLK_FREQ / 1000;   // 500Hz..   fet bootstrap cap not enough charge.
               state           <= 2;
               fets_o          <= 4'b1001;    // fet1 (hi), fet4
             end
@@ -88,7 +89,8 @@ module fet_driver (
         2:
           if(clk_count_down == 0)
             begin
-              clk_count_down  <= `CLK_FREQ / 1000;   // 1ms
+              clk_count_down  <= `CLK_FREQ / (15000 * 2);   // 15kHz.
+              // clk_count_down  <= `CLK_FREQ / 1000;    // 500Hz.
               state           <= 1;
               fets_o          <= 4'b0110;    // fet3 (hi), fet2
             end
