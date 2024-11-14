@@ -49,7 +49,9 @@ set_io SS               16  # up5k
 ###############################
 
 
-# weird order                   fet
+set_io clk              35
+
+# order follows pin
 set_io fets_o[0]        36    # 1
 set_io fets_o[1]        38    # 2
 set_io fets_o[2]        42    # 3
@@ -57,4 +59,12 @@ set_io fets_o[3]        43    # 4
 
 
 
-set_io clk              35
+
+
+
+set_io buzzer_o[0]        12
+set_io buzzer_o[1]        13
+
+
+set_io fan_pwm_o         11
+set_io fan_tach_i         10
