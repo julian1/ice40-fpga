@@ -43,7 +43,6 @@ module fet_driver (
       clk_count_down <= clk_count_down - 1;
 
       case (state)
-
         0:
           begin
             // setup next
@@ -67,9 +66,7 @@ module fet_driver (
               state           <= 1;
               out          <= 4'b0110;    // fet3 (hi), fet2
             end
-
       endcase
-
 
       // synchronous reset - if reset_n enabled, then don't advance out-of reset state.
       if(reset_n == 0)      // in reset
@@ -86,12 +83,9 @@ module fan_driver (
 
   input   clk,
   input   reset_n,
-
-  // EXTR. there are issues at start/ if we initialize output at full power.
-  output reg  out = 1,    // off, turn fet on, pull out lo.
+  // EXTR. issues on start/ if initialize output at full power.
+  output reg  out = 1,    // start turned off, turn fet on, pull out lo.
 );
-
-  // fan DS example uses 25kHz.
 
   reg [31:0]    clk_count_up  = 0;
 
@@ -101,7 +95,7 @@ module fan_driver (
       clk_count_up <= clk_count_up + 1;
 
       // turn on pulse/
-      if(clk_count_up == `CLK_FREQ  / 25000)  // 480
+      if(clk_count_up == `CLK_FREQ  / 25000)  // 480 .  fan DS example uses 25kHz.
         begin
           clk_count_up <= 0;
           out <= 1;
@@ -125,6 +119,50 @@ endmodule
 
 
 
+
+
+module fan_tach (
+
+  input   clk,
+  input   reset_n,
+
+  input   fan_tach_i,
+  output reg [16-1 :0 ] out,    // off, turn fet on, pull out lo.
+);
+
+  reg [31:0]    clk_count_up = 0;
+  reg [15:0]    rev_count   = 0;
+  reg [2-1:0]   cross       = 2'b00;              // edge detect. rename _edge.
+
+
+  always @(posedge clk   )
+    begin
+
+      clk_count_up      <= clk_count_up + 1;
+
+      // we need to count edges.
+      cross       <= {cross[0], fan_tach_i};
+
+      if(cross == 2'b01)
+        rev_count       <= rev_count + 1;
+
+
+      if(clk_count_up == `CLK_FREQ  / 1)  // 1 sec.
+        begin
+          clk_count_up  <= 0;
+          rev_count     <= 0;
+          out           <= rev_count;
+        end
+
+
+      if(reset_n == 0)      // synchronous reset
+        begin
+          clk_count_up  <= 0;
+          rev_count     <= 0;
+          out           <= 0;
+        end
+    end
+endmodule
 
 
 
@@ -177,7 +215,6 @@ module top (
 
 );
 
-  reg [32-1:0] reg_status = 0;    // initial value
 
   wire [32-1:0] reg_direct ;    // can set initial value. initial value
 
@@ -217,6 +254,31 @@ module top (
   );
 
 
+  reg [16-1:0]  fan_rev_count;
+
+  fan_tach
+  fan_tach(
+    . clk( clk),
+    . reset_n( 1'b1 ),
+    . fan_tach_i( fan_tach_i),
+    . out( fan_rev_count),
+  );
+
+
+
+  wire [32 - 1 :0] reg_status ;
+
+  assign reg_status = {
+
+    { 8'b0 },
+    { 8'b10101010 },  // magic
+    fan_rev_count
+ };
+
+
+
+
+
   // wire fan_pwm_o = 0;   // fan full speed.
   // wire fan_pwm_o = 1;     // fan off
   register_set // #( 32 )
@@ -235,7 +297,7 @@ module top (
     . reg_direct( reg_direct ),
 
     // inputs
-    . reg_status( reg_status),
+    . reg_status( reg_status   ),
   );
 
 
