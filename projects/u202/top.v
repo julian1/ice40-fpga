@@ -166,6 +166,85 @@ endmodule
 
 
 
+module updown_timer (
+
+  input   clk,
+  input   reset_n,
+
+  // change name count to counter.  eg. p_counter_n;
+  // or even timer. since marking time.
+  // or counter
+  input  [ 32-1: 0 ] p_period, // limit
+  input  [ 32-1: 0 ] p_start, // p_start and reset value, for multiple timer, phase relationship
+  // p_output_compare. or just p_oc.
+
+  // rather than Q,notQ. perhaps have ability to set output compare value. and output polarity
+  output reg  [2-1: 0 ] out,      // Q,~Q
+);
+
+
+
+  reg dir ;
+  reg [31:0]    count;    // better name timer_val
+
+  // count cannot be declarred an input register.
+  // so we need some other way to set the p_starting value.
+  reg first_n = 0;
+
+  always @( posedge clk)
+    begin
+
+      // first time
+      if(!first_n)
+        begin
+          first_n   <= 1;
+          out       <= 0;
+          dir       <= 0;
+          count     <= p_start;
+        end
+      else
+        begin
+
+        // count update, general case
+        if(dir)
+          count <= count + 1;
+        else
+          count <= count - 1;
+
+
+        // count update, specific case
+        if(count == 0)
+          begin
+            dir     <= 1;
+            count <= count + 1; // override previous dir, setting.
+          end
+
+        else if(count == p_period)
+          begin
+            dir     <= 0;
+            count <= count - 1; // override previous dir assign
+          end
+
+        // want separate OC counts. for the two channels. for deadtime
+        // out[0] <= 1'b1.
+        // and it is always the 0 -> 1 transition that should be delayed
+        if(count  < ( p_period >> 1 ) )  // half p_period
+          out       <= 2'b01;
+        else
+          out       <= 2'b10;
+      end
+
+
+      // synchronous reset - if reset_n enabled, then don't advance out-of reset state.
+      if(reset_n == 0)      // in reset
+        begin
+          first_n   <= 0;
+          out       <= 0;
+          dir       <= 0;
+          count     <= p_start;
+        end
+    end
+endmodule
 
 
 
@@ -218,7 +297,13 @@ module top (
 
   wire [32-1:0] reg_direct ;    // can set initial value. initial value
 
+  wire x ;
 
+  // wire fets_o[0]  = x;
+
+
+
+/*
   // fets
   fet_driver
   fet_driver1(
@@ -229,7 +314,49 @@ module top (
 
     . out( fets_o),
   );
+*/
 
+  /*
+      Q1      Q3
+          H
+      Q2      Q4
+
+  */
+
+  // this is constant.
+  // wire [32-1:0 ] fet_count_n = `CLK_FREQ / (15000 * 2);   // 400
+  localparam  [32-1:0 ] fet_count_n = `CLK_FREQ / (15000 * 2);   // 400
+
+  // eg. like a half bridge
+  updown_timer
+  updown_timer1 (
+    . clk( clk),
+    . reset_n( 1'b1 ),
+    . p_start( 0 ),
+    . p_period( fet_count_n ),    // 15kHz.
+
+
+   //          phase 1         phase 0
+    . out( { fets_o[ 1 /*2*/], fets_o[ 0 /*1*/] } ),    // fets 1(hi),2 are lhs. always complementary
+  );
+
+
+  updown_timer
+  updown_timer2 (
+    . clk( clk),
+    . reset_n( 1'b1 ),
+
+    . p_start( 0 ),
+    . p_period( fet_count_n   ),    // 15kHz.
+
+    . out( { fets_o[ 2 /* 3*/], fets_o[ 3 /*4*/ ]   } ),    // out of phase. fets 3(hi),4 are rhs. always complementary
+  );
+
+
+
+
+
+  ///////////////////////
 
   reg [2:1] dummy2;
 
