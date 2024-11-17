@@ -179,6 +179,7 @@ module updown_timer (
   // p_output_compare. or just p_oc.
 
   // rather than Q,notQ. perhaps have ability to set output compare value. and output polarity
+  // eg. top/bottom. of h-bridge side.
   output reg  [2-1: 0 ] out,      // Q,~Q
 );
 
@@ -324,8 +325,8 @@ module top (
   */
 
   // this is constant.
-  // wire [32-1:0 ] fet_count_n = `CLK_FREQ / (15000 * 2);   // 400
-  localparam  [32-1:0 ] fet_count_n = `CLK_FREQ / (15000 * 2);   // 400
+  // wire [32-1:0 ] p_period = `CLK_FREQ / (15000 * 2);   // 400
+  localparam  [32-1:0 ] p_period = `CLK_FREQ / (15000 * 2);   // 400
 
   // eg. like a half bridge
   updown_timer
@@ -333,7 +334,7 @@ module top (
     . clk( clk),
     . reset_n( 1'b1 ),
     . p_start( 0 ),
-    . p_period( fet_count_n ),    // 15kHz.
+    . p_period( p_period ),    // 15kHz.
 
 
    //          phase 1         phase 0
@@ -346,8 +347,8 @@ module top (
     . clk( clk),
     . reset_n( 1'b1 ),
 
-    . p_start( 0 ),
-    . p_period( fet_count_n   ),    // 15kHz.
+    . p_start( 300 ),  // phase advance
+    . p_period( p_period   ),    // 15kHz.
 
     . out( { fets_o[ 2 /* 3*/], fets_o[ 3 /*4*/ ]   } ),    // out of phase. fets 3(hi),4 are rhs. always complementary
   );
