@@ -99,15 +99,19 @@ set_io hw_flags_i[3]      21
 
 ############################
 # spi
-set_io spi_glb_mosi         91    # rename spi_glb_mosi
-set_io spi_4094_oe_ctl      94    # rename spi_4094_oe_ctl
-set_io spi_glb_clk          95    # rename spi_glb_clk
+set_io spi_glb_mosi         91
+set_io spi_glb_clk          95
+
+# 4094
+set_io spi_4094_strobe_ctl  93
+set_io spi_4094_oe_ctl      94
+
+
 
 set_io U1008_4094_DATA      98   # from level translator.
 
 # spi cs lines
 # change to lower-case
-set_io spi_4094_strobe_ctl  93        # rename spi_4094_strobe_ctl
 set_io SPI_DAC_SS           96
 set_io SPI_ISO_DAC_CS           63
 set_io SPI_ISO_DAC_CS2          64

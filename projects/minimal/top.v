@@ -66,7 +66,7 @@ module top (
   input [4-1: 0]    hw_flags_i,
 
 
-
+  // xtal
   input  CLK,
 
 
@@ -74,13 +74,16 @@ module top (
 
   // spi lines.
   output spi_glb_mosi,
-  output spi_4094_oe_ctl,
   output spi_glb_clk,
+
+  // 4094
+  output spi_4094_oe_ctl,
+  output spi_4094_strobe_ctl,
+
 
   input U1008_4094_DATA,
 
   // cs lines
-  output spi_4094_strobe_ctl,
   output SPI_DAC_SS,
   output SPI_ISO_DAC_CS,
   output SPI_ISO_DAC_CS2,

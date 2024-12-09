@@ -65,13 +65,13 @@ fi
 # add crc also
 #  rhash --crc32 ./bus
 
-magic=0xfe00fe00
-size=$( stat -c "%s" ./build/main.bin )
-
-echo $magic             | sed -E 's/0x(..)(..)(..)(..)/0: \4\3\2\1/' | xxd -r -g0 >>   ./build/main.bin.hdr
-
-printf "0: %.8x" $size  | sed -E 's/0: (..)(..)(..)(..)/0: \4\3\2\1/' | xxd -r -g0   >>   ./build/main.bin.hdr
-
-cat ./build/main.bin                  >>   ./build/main.bin.hdr
+#magic=0xfe00fe00
+#size=$( stat -c "%s" ./build/main.bin )
+#
+#echo $magic             | sed -E 's/0x(..)(..)(..)(..)/0: \4\3\2\1/' | xxd -r -g0 >>   ./build/main.bin.hdr
+#
+#printf "0: %.8x" $size  | sed -E 's/0: (..)(..)(..)(..)/0: \4\3\2\1/' | xxd -r -g0   >>   ./build/main.bin.hdr
+#
+#cat ./build/main.bin                  >>   ./build/main.bin.hdr
 
 

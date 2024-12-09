@@ -347,7 +347,8 @@ module top (
     . clk( clk),
     . reset_n( 1'b1 ),
 
-    . p_start( 300 ),  // phase advance
+    // . p_start( 300 ),  // phase advance
+    . p_start( 0 ),  // phase advance
     . p_period( p_period   ),    // 15kHz.
 
     . out( { fets_o[ 2 /* 3*/], fets_o[ 3 /*4*/ ]   } ),    // out of phase. fets 3(hi),4 are rhs. always complementary
