@@ -105,9 +105,6 @@ module top (
   // output meas_complete_o,
 
 
-  // output sig_pc1_sw_o,
-  // output sig_pc2_sw_o ,
-
   output [ 2-1: 0 ] pc_sw_o,
 
   // az mux
@@ -115,8 +112,6 @@ module top (
   output [ 4-1: 0 ] azmux_o,
 
 
-  // adc comparator latch ctl.
-  // should be cmpr_latch_ctl
   output adc_cmpr_latch_ctl_o,
 
   input adc_cmpr_p_i,
