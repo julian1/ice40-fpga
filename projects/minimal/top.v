@@ -66,9 +66,6 @@ module top (
   input [4-1: 0]    hw_flags_i,
 
 
-  // xtal
-  input  CLK,
-
 
 
 
@@ -77,16 +74,35 @@ module top (
   output spi_glb_clk,
 
   // 4094
-  output spi_4094_oe_ctl,
   output spi_4094_strobe_ctl,
-
-
+  output spi_4094_oe_ctl,
   input U1008_4094_DATA,
 
-  // cs lines
+  // other cs lines
   output SPI_DAC_SS,
   output SPI_ISO_DAC_CS,
   output SPI_ISO_DAC_CS2,
+
+
+  // xtal
+  input  CLK,
+
+
+  output [ 2-1: 0 ] pc_sw_o,
+
+  // az mux, u410
+  output [ 4-1: 0 ] azmux_o,
+
+
+  // U902. adc ref current mux
+  output [ 4-1: 0 ] adc_refmux_o,
+
+  input adc_cmpr_p_i,
+
+  output adc_cmpr_latch_ctl_o,
+
+
+  /////////////////
 
 
 
@@ -105,20 +121,9 @@ module top (
   // output meas_complete_o,
 
 
-  output [ 2-1: 0 ] pc_sw_o,
-
-  // az mux
-  // u410
-  output [ 4-1: 0 ] azmux_o,
 
 
-  output adc_cmpr_latch_ctl_o,
 
-  input adc_cmpr_p_i,
-
-
-  // U902. adc ref current mux
-  output [ 4-1: 0 ] adc_refmux_o,
 
 /*
 

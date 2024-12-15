@@ -7,3 +7,4 @@
 *.a
 *.iml
 build
+mysession.vim

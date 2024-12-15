@@ -144,24 +144,25 @@ set_io azmux_o[2]      107 # A2_CTL   unused for 2x04 adg1209
 set_io azmux_o[3]      104   # EN_CTL
 
 
-# adc comparator
-set_io adc_cmpr_latch_ctl_o   138
-
-# 5V tolerant input pin.  # better name?
-set_io adc_cmpr_p_i       135
-
-
-
 
 # adc ref current mux
 # note - pin order on ic is counter-clockwise
-set_io adc_refmux_o[0]      141
-set_io adc_refmux_o[1]      142
-set_io adc_refmux_o[2]      143
-set_io adc_refmux_o[3]      144
+# dec 2024.
+set_io adc_refmux_o[0]      137
+set_io adc_refmux_o[1]      138
+set_io adc_refmux_o[2]      139
+set_io adc_refmux_o[3]      141
 
 
 
+# 5V tolerant input pin.  # better name?
+# dec 2024.
+set_io adc_cmpr_p_i         143
+
+
+# adc comparator
+# dec 2024.
+set_io adc_cmpr_latch_ctl_o   144
 
 
 
