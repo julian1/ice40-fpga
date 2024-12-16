@@ -1,7 +1,7 @@
 
 /*
   simple modulation, to test the refmux
-  slope-amp and comparator does not need to be fitted.
+  works without slope-amp and comparator populated..
   but should add the comparator output to the monitor.
   --
   we have written this several times already as a test, so should keep it.
@@ -43,8 +43,8 @@ module refmux_test (
 
   input           clk,
 
-  input [24-1:0]  p_clk_count_reset_i,      // useful if running stand-alone,
-  input [24-1:0]  p_clk_count_fix_i,
+  input [32-1:0]  p_clk_count_reset_i,      // useful if running stand-alone,
+  input [32-1:0]  p_clk_count_fix_i,
 
   // comparator input
   input           cmpr_val_i,
@@ -74,10 +74,10 @@ module refmux_test (
   // eg. ccombinatorial logic driven off the output of the regs/state/dff.
   assign monitor_o[0] = (state == `STATE_FIX_POS);
   assign monitor_o[1] = (state == `STATE_FIX_NEG);
-  assign monitor_o[2] = cmpr_val_i;
+  assign monitor_o[2] = clk;
+  assign monitor_o[3] = cmpr_val_i;
 
-  // assign monitor_o[6-1: 3] = 3'b000 ;
-  assign monitor_o[ 3 +: 5 ] = 0 ;
+  assign monitor_o[ 4 +: 4 ] = 0 ;
 
 
   //////////////////////////////////////////////////////
