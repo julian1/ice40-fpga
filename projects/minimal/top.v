@@ -10,8 +10,6 @@
 
 
 `include "../../common/mux_assign.v"
-`include "../../common/test_pattern.v"
-`include "../../common/timed_latch.v"
 
 `include "register_set.v"
 
@@ -124,35 +122,6 @@ module top (
 
 
 
-
-/*
-
-  // OLD.
-
-  // spi
-  input  SPI_CLK,
-  input  SPI_CS,
-  input  SPI_MOSI,
-  input  SPI_CS2,
-  output SPI_MISO,
-  // output b
-
-  input U1008_4094_DATA,
-  input LINE_SENSE_OUT,
-  input SWITCH_SENSE_OUT,
-  input DCV_OVP_OUT,
-  input OHMS_OVP_OUT,
-  input SUPPLY_SENSE_OUT,
-  input UNUSED_2,                    // change name UNUSED_2_OUT
-
-  //
-  output SPI_INTERRUPT_CTL,    // should be modeal. eg. same as meas complete
-  output MEAS_COMPLETE_CTL,
-    output CMPR_LATCH_CTL,
-
-  ////////////
-*/
-
 );
 
 
@@ -232,18 +201,6 @@ module top (
 
 
 
-  // TODO drop the _out suffix. because any wire is a driver in the context of the top module.
-  // should prefix o_test_pattern ?  or just on module names?
-  wire [32-1 :0] test_pattern_out;
-
-  test_pattern  test_pattern_1 (
-    . clk( CLK),
-    . out( test_pattern_out)
-  );
-
-
-
-
   wire [32-1:0] reg_sa_p_clk_count_precharge;
 
   wire [32-1:0] reg_sa_p_seq_n;
@@ -259,19 +216,6 @@ module top (
 
 
 
-  /////////////////////////
-  // We could do one led, for SS, and one for CS2 (4094,etc).
-  // rename timed_latch_hold
-  /*
-    change name.  latch signal for a delay, stretch signal over longer clk duration.
-  */
-  wire led0;
-  timed_latch timed_latch (
-    . clk(CLK),
-    . trig_i( !SS || !SPI_CS2 ),      // rename set?
-    . out( led0 )
-  );
-
 
 
   // TODO consider rename adc_refmux_test.
@@ -285,7 +229,7 @@ module top (
     // we don't care about reset here
 
     . p_clk_count_reset_i( $rtoi(  `CLK_FREQ * 500e-6 )  ), // 500us.
-    . p_clk_count_fix_i(   $rtoi( `CLK_FREQ * 100e-6 )) ,  // 100us. initial but too long
+    . p_clk_count_fix_i(   $rtoi( `CLK_FREQ * 150e-6 )) ,  // 100us. initial but too long
 
     . cmpr_val_i( adc_cmpr_p_i ),
 
@@ -528,14 +472,9 @@ module top (
         the modes for output lo, and output hi - are not really needed. eg. mode 0; direct 0xffffffff ; or 0x00000000; etc.
         and there maybe chance of damage, if parts are populated
       */
-    .b(  32'b0  ),                            // mode/AF  1 unused, all outputs low.
-    .c(  32'b0  ),                            // mode/AF  2 unused, all outputs low.
-
-    // useful when populating board.
-    .d( test_pattern_out ),                   // mode/AF 3  MODE_PATTERN      pattern. needs xtal.
-
-
-    // mode 4
+    .b(  32'b0  ),
+    .c(  32'b0  ),
+    .d(  32'b0  ),
     .e(  32'b0  ),
 
     // mode  5. adc refmux test
@@ -714,4 +653,33 @@ module top (
 
 endmodule
 
+
+
+/*
+
+  // OLD.
+
+  // spi
+  input  SPI_CLK,
+  input  SPI_CS,
+  input  SPI_MOSI,
+  input  SPI_CS2,
+  output SPI_MISO,
+  // output b
+
+  input U1008_4094_DATA,
+  input LINE_SENSE_OUT,
+  input SWITCH_SENSE_OUT,
+  input DCV_OVP_OUT,
+  input OHMS_OVP_OUT,
+  input SUPPLY_SENSE_OUT,
+  input UNUSED_2,                    // change name UNUSED_2_OUT
+
+  //
+  output SPI_INTERRUPT_CTL,    // should be modeal. eg. same as meas complete
+  output MEAS_COMPLETE_CTL,
+    output CMPR_LATCH_CTL,
+
+  ////////////
+*/
 
