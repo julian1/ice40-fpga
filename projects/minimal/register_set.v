@@ -35,7 +35,8 @@
 `define REG_MODE                        12
 `define REG_DIRECT                      14
 `define REG_STATUS                      17
-`define REG_SEQ_MODE                    18  // treat as general register, since not used as a parameter that controls/influences any fsm.
+`define REG_SEQ_MODE                    18   // just pass-through communcation. from reg to the status register out.
+                                              // treat as general register, since not used as a parameter that controls/influences any fsm.
 
 
 

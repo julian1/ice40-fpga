@@ -197,7 +197,7 @@ module top (
 
   wire [32-1:0] reg_direct;
 
-  wire [32-1:0] reg_seq_mode;    // just pass-through communcation. from reg to status_out.
+  wire [32-1:0] reg_seq_mode;    // just pass-through communcation. from reg to the status register out.
 
 
 
