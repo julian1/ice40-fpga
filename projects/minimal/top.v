@@ -105,7 +105,7 @@ module top (
 
 
 
-  output unused3_o,
+  // output unused3_o,
 
   // input trigger_source_external_i,   // trigger_ext_out   - need to re
   // input trigger_source_internal_i,   // trigger_int_out 38
@@ -129,7 +129,7 @@ module top (
 
   // avoid leaving output floating. else digital isolator will see floating cmos input, and draw excess current.
   // TODO review. this. july 2024.
-  assign unused3_o  = 1;
+  // assign unused3_o  = 1;
 
 
   ////////////////////////////////////////

@@ -55,14 +55,18 @@ set_io spi_interrupt_ctl_o 62
 # no. it is correct.  _out is an input to fpga..
 # whether itadd suffix
 
+
+
+
+##################################
 # TODO rename trig_sa_out
 # set_io trigger_source_external_i   37   # trigger_sa_out
 
-set_io trig_sa_i        37
+# set_io trig_sa_i        37
 
-set_io unused1_i        38      # unused1_out
-set_io unused2_i        39      # unused2_out
-set_io unused3_o        41      # unused3_ctl  .   // needs to be defined else digital isolator will draw excess current.
+#set_io unused1_i        38      # unused1_out
+#set_io unused2_i        39      # unused2_out
+#set_io unused3_o        41      # unused3_ctl  .   // needs to be defined else digital isolator will draw excess current.
 
 
 
