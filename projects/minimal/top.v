@@ -110,7 +110,7 @@ module top (
   // input trigger_source_external_i,   // trigger_ext_out   - need to re
   // input trigger_source_internal_i,   // trigger_int_out 38
   // input unused1_i,                    // 39
-  input trig_sa_i,
+  input sa_trig_i,
 
 
 
@@ -282,7 +282,7 @@ module top (
   sequence_acquisition (
 
     .clk(CLK),
-    .reset_n( trig_sa_i ),
+    .reset_n( sa_trig_i ),
 
     // inputs
     .adc_measure_valid_i( adc_mock_measure_valid ),                     // fan-in from adc
@@ -416,7 +416,7 @@ module top (
   sequence_acquisition2 (
 
     .clk(CLK),
-    .reset_n( trig_sa_i ),    // we want this to remove. the old edge triggered stuff.
+    .reset_n( sa_trig_i ),    // we want this to remove. the old edge triggered stuff.
 
     // inputs
     .adc_measure_valid_i( adc_measure_valid ),                     // JA the real adc. from adc
