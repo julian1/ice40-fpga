@@ -141,7 +141,8 @@ set_io pc_sw_o[1]     101
 # mar 2024. accidently routed pcb with enable as first pin (pin 80) - should have been last.
 # perhaps keep as is, depending on difficulty of re-routing.
 # dec 2024.
-# match 1208 pinout.
+# use 4bit ctrl representation (eg. for adg1208 pinout), despite using 3bit adg1209 component.
+# more generic. can use either part.
 set_io azmux_o[0]      105 # A0_CTL
 set_io azmux_o[1]      106 # A1_CTL
 set_io azmux_o[2]      107 # A2_CTL   unused for 2x04 adg1209
