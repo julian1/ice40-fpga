@@ -157,7 +157,7 @@ set_io adc_refmux_o[3]      141
 
 # 5V tolerant input pin.  # better name?
 # dec 2024.
-set_io adc_cmpr_p_i         143
+set_io adc_cmpr_out       143
 
 
 # adc comparator

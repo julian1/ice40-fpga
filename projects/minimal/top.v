@@ -95,7 +95,7 @@ module top (
   // U902. adc ref current mux
   output [ 4-1: 0 ] adc_refmux_o,
 
-  input adc_cmpr_p_i,
+  input adc_cmpr_out,
 
   output adc_cmpr_latch_ctl_o,
 
@@ -118,11 +118,13 @@ module top (
   output spi_interrupt_ctl_o,
   // output meas_complete_o,
 
-
-
-
-
 );
+
+
+  // dec 2024. after changing pcb comparator output
+  wire adc_cmpr_p_i;
+  assign adc_cmpr_p_i = ! adc_cmpr_out;
+
 
 
   // avoid leaving output floating. else digital isolator will see floating cmos input, and draw excess current.
