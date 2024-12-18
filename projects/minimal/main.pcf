@@ -45,28 +45,6 @@ set_io SS               71
 # better name should be SS
 set_io SPI_CS2          61
 
-# should use lower case.
-# TODO drop the ctl. because _ctl==_o ??
-set_io spi_interrupt_ctl_o 62
-
-
-# other isolator lines
-# the use of out and ctl is messed up here. because it's wrt the isolator rather than the fpga.
-# no. it is correct.  _out is an input to fpga..
-# whether itadd suffix
-
-
-
-
-##################################
-# TODO rename trig_sa_out
-# set_io trigger_source_external_i   37   # trigger_sa_out
-
-# set_io sa_trig_i        37
-
-#set_io unused1_i        38      # unused1_out
-#set_io unused2_i        39      # unused2_out
-#set_io unused3_o        41      # unused3_ctl  .   // needs to be defined else digital isolator will draw excess current.
 
 
 
@@ -126,7 +104,7 @@ set_io SPI_ISO_DAC_CS2          64
 
 ############################
 
-# input
+# xtal input
 set_io CLK              129
 
 
@@ -170,26 +148,14 @@ set_io adc_cmpr_out       143
 set_io adc_cmpr_latch_ctl_o   144
 
 
-
-
-# set_io LINE_SENSE_OUT   80
-# set_io SWITCH_SENSE_OUT  81
-# set_io DCV_OVP_OUT      87
-# set_io OHMS_OVP_OUT     88
-# set_io SUPPLY_SENSE_OUT 90
-# set_io UNUSED_2         91    # connects to level-shift.  but level-shift unconnected. rename RESERVED.
-
-
-###############################
+# should use lower case.
+# TODO drop the ctl. because _ctl==_o ??
+set_io spi_interrupt_ctl_o 62
 
 
 
-# set_io CMPR_LATCH_CTL   137
-# set_io CMPR_P_OUT       138
-# set_io CMPR_N_OUT       139
-# set_io U902_SW0_CTL     141
-# set_io U902_SW1_CTL     142
-# set_io U902_SW2_CTL     143
-# set_io U902_SW3_CTL     144
+
+
+
 
 
