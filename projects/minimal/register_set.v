@@ -29,13 +29,14 @@
 
 `include "defines.v"    // `CLK_FREQ for default calculation
 
-
+// prefix REG_GEN_ ?
+// no.  just create a generic. general CR / control register.  for 4094 oe, perhaps the spi_mux.
 `define REG_SPI_MUX                     8
 `define REG_4094                        9
 `define REG_MODE                        12
 `define REG_DIRECT                      14
 `define REG_STATUS                      17
-`define REG_SEQ_MODE                    18   // just pass-through communcation. from reg to the status register out.
+`define REG_SEQ_MODE                    18   // just pass-through communcation. from input reg to the status register out.
                                               // treat as general register, since not used as a parameter that controls/influences any fsm.
 
 
@@ -52,8 +53,7 @@
 `define REG_SA_P_SEQ2                   24
 `define REG_SA_P_SEQ3                   25
 
-
-
+`define REG_SA_P_TRIG                     26
 
 
 // adc parameters
@@ -89,8 +89,11 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   // inputs - status, externally driven
   input wire [32-1:0] reg_status,
 
-  // outputs
+  // general
   // output/writable regs, driven by this module
+  // change name reg_gen_direct,  reg_gen_mode.
+
+
   output reg [32-1:0] reg_spi_mux,
   output reg [32-1:0] reg_4094,     // TODO consider change to a generic CR control register. encode 4094-OE and trigger.
   output reg [32-1:0] reg_mode,
@@ -112,6 +115,8 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   output reg [32-1:0] reg_sa_p_seq1,
   output reg [32-1:0] reg_sa_p_seq2,
   output reg [32-1:0] reg_sa_p_seq3,
+
+  output reg [32-1:0] reg_sa_p_trig,
 
 
 
@@ -176,6 +181,8 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
     reg_sa_p_seq1     <= { 2'b00, 4'd14    };   // ((1<<3)|(7-1)) =  14       // S7  star-gnd.  TODO fixme just use the define S7.
     reg_sa_p_seq2     <= 0;
     reg_sa_p_seq3     <= 0;
+
+    reg_sa_p_trig     <= 0;
 
     // adc
     reg_adc_p_clk_count_aperture  <=  $rtoi( `CLK_FREQ * 0.2 );      // 200ms.
@@ -251,6 +258,8 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
               `REG_SA_P_SEQ2:         out <= reg_sa_p_seq2 << 8;
               `REG_SA_P_SEQ3:         out <= reg_sa_p_seq3 << 8;
 
+              `REG_SA_P_TRIG:         out <= reg_sa_p_trig << 8;
+
 
               /////
               // adc
@@ -301,6 +310,8 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
             `REG_SA_P_SEQ1:                 reg_sa_p_seq1 <= bin;
             `REG_SA_P_SEQ2:                 reg_sa_p_seq2 <= bin;
             `REG_SA_P_SEQ3:                 reg_sa_p_seq3 <= bin;
+
+            `REG_SA_P_TRIG:                 reg_sa_p_trig <= bin;
 
 
             ////

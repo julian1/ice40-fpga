@@ -110,7 +110,7 @@ module top (
   // input trigger_source_external_i,   // trigger_ext_out   - need to re
   // input trigger_source_internal_i,   // trigger_int_out 38
   // input unused1_i,                    // 39
-  input sa_trig_i,
+  //input sa_trig_i,
 
 
 
@@ -211,6 +211,8 @@ module top (
   wire [32-1:0] reg_sa_p_seq2;
   wire [32-1:0] reg_sa_p_seq3;
 
+  wire [32-1:0] reg_sa_p_trig;
+
 
 
   wire [32-1 :0] reg_adc_p_clk_count_aperture;  // 32/31 bit nice. for long sample.
@@ -282,7 +284,7 @@ module top (
   sequence_acquisition (
 
     .clk(CLK),
-    .reset_n( sa_trig_i ),
+    .reset_n( reg_sa_p_trig[0] ),
 
     // inputs
     .adc_measure_valid_i( adc_mock_measure_valid ),                     // fan-in from adc
@@ -416,7 +418,7 @@ module top (
   sequence_acquisition2 (
 
     .clk(CLK),
-    .reset_n( sa_trig_i ),    // we want this to remove. the old edge triggered stuff.
+    .reset_n( reg_sa_p_trig[ 0] ),    // we want this to remove. the old edge triggered stuff.
 
     // inputs
     .adc_measure_valid_i( adc_measure_valid ),                     // JA the real adc. from adc
@@ -611,7 +613,7 @@ module top (
     // . dout( SDO /* SPI_MISO */ ),        // drive miso output pin directly.
 
 
-    // outputs
+    // outputs general
     . reg_spi_mux(reg_spi_mux),
     . reg_4094(reg_4094 ) ,
     . reg_mode(reg_mode),
@@ -621,7 +623,7 @@ module top (
     // inputs
     . reg_status( reg_status ),
 
-    // sequence acquisition
+    // sample/sequence acquisition
     . reg_sa_p_clk_count_precharge( reg_sa_p_clk_count_precharge),
 
     . reg_sa_p_seq_n( reg_sa_p_seq_n),    // n == count == limit.  not invert.
@@ -629,6 +631,8 @@ module top (
     . reg_sa_p_seq1( reg_sa_p_seq1),
     . reg_sa_p_seq2( reg_sa_p_seq2),
     . reg_sa_p_seq3( reg_sa_p_seq3),
+
+    . reg_sa_p_trig( reg_sa_p_trig),
 
 
     // adc outputs
