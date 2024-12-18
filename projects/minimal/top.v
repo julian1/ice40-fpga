@@ -100,23 +100,7 @@ module top (
   output adc_cmpr_latch_ctl_o,
 
 
-  /////////////////
-
-
-
-
-  // output unused3_o,
-
-  // input trigger_source_external_i,   // trigger_ext_out   - need to re
-  // input trigger_source_internal_i,   // trigger_int_out 38
-  // input unused1_i,                    // 39
-  //input sa_trig_i,
-
-
-
-
   output spi_interrupt_ctl_o,
-  // output meas_complete_o,
 
 );
 
@@ -468,10 +452,7 @@ module top (
 
     .a(  reg_direct  ),                       // mode/AF 0  MODE_DIRECT       note, could also project, spi signals on the monitor, for easier debuggin. no. because want direct to control all outputs for test.
 
-    /* TODO remove.
-        the modes for output lo, and output hi - are not really needed. eg. mode 0; direct 0xffffffff ; or 0x00000000; etc.
-        and there maybe chance of damage, if parts are populated
-      */
+    // unused.
     .b(  32'b0  ),
     .c(  32'b0  ),
     .d(  32'b0  ),
