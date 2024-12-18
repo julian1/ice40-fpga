@@ -186,12 +186,10 @@ module top (
 
   /////////////////////////////////////////////
   // 4094 OE
-  wire [32-1:0] reg_4094;   // TODO rename
-  assign { spi_4094_oe_ctl } = reg_4094;    //  lo. start up not enabled.
+  wire [32-1:0] reg_4094_oe;   // TODO rename
+  assign { spi_4094_oe_ctl } = reg_4094_oe;    //  lo. start up not enabled.
 
   ////////////////////////////////////////
-
-
 
   wire [32-1 :0] reg_mode;     // _mode or AF reg_af alternate function  two bits
 
@@ -201,8 +199,7 @@ module top (
 
 
 
-
-
+  // sample aquisition
   wire [32-1:0] reg_sa_p_clk_count_precharge;
 
   wire [32-1:0] reg_sa_p_seq_n;
@@ -214,15 +211,14 @@ module top (
   wire [32-1:0] reg_sa_p_trig;
 
 
-
+  // adc
   wire [32-1 :0] reg_adc_p_clk_count_aperture;  // 32/31 bit nice. for long sample.
   wire [32-1 :0] reg_adc_p_clk_count_reset;
 
 
 
-
-
   // TODO consider rename adc_refmux_test.
+  // no. because it is not the adc.
   wire [8-1:0] refmux_test_monitor;
   wire [4-1:0] refmux_test_refmux;
 
@@ -615,7 +611,7 @@ module top (
 
     // outputs general
     . reg_spi_mux(reg_spi_mux),
-    . reg_4094(reg_4094 ) ,
+    . reg_4094_oe(reg_4094_oe ) ,
     . reg_mode(reg_mode),
     . reg_direct(reg_direct),
     . reg_seq_mode ( reg_seq_mode  ) ,

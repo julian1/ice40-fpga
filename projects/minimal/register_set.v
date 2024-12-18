@@ -1,5 +1,5 @@
 /*
-  consider change reg_4094, to a generic CR control register. encode 4094-OE and trigger.
+  consider change reg_4094_oe, to a generic CR control register. encode 4094-OE and trigger.
 */
 /*
   need to add core reset back.
@@ -32,7 +32,7 @@
 // prefix REG_GEN_ ?
 // no.  just create a generic. general CR / control register.  for 4094 oe, perhaps the spi_mux.
 `define REG_SPI_MUX                     8
-`define REG_4094                        9
+`define REG_4094_OE                     9
 `define REG_MODE                        12
 `define REG_DIRECT                      14
 `define REG_STATUS                      17
@@ -44,7 +44,6 @@
 ///////////////////////
 
 //  sample acquisition.
-
 `define REG_SA_P_CLK_COUNT_PRECHARGE    20
 
 `define REG_SA_P_SEQ_N                  21      // TODO - consider reorder
@@ -95,7 +94,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
 
   output reg [32-1:0] reg_spi_mux,
-  output reg [32-1:0] reg_4094,     // TODO consider change to a generic CR control register. encode 4094-OE and trigger.
+  output reg [32-1:0] reg_4094_oe,     // TODO consider change to a generic CR control register. encode 4094-OE and trigger.
   output reg [32-1:0] reg_mode,
   output reg [32-1:0] reg_direct,
   output reg [32-1:0] reg_seq_mode,
@@ -163,7 +162,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
     // control
     reg_spi_mux   = 0;          // no spi device active
-    reg_4094      = 0;
+    reg_4094_oe      = 0;
     reg_mode      = 0;
     reg_direct    = 0  ;
     reg_seq_mode  <= 0; // AZ
@@ -241,7 +240,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
 
               `REG_SPI_MUX:   out <= reg_spi_mux << 8;
-              `REG_4094:      out <= reg_4094 << 8;
+              `REG_4094_OE:      out <= reg_4094_oe << 8;
               `REG_MODE:      out <= reg_mode << 8;   // ok..
               `REG_DIRECT:    out <= reg_direct << 8;
               `REG_SEQ_MODE:      out <= reg_seq_mode << 8;
@@ -296,7 +295,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
           case (  bin[MSB-2 : MSB-8 ] )
 
             `REG_SPI_MUX:   reg_spi_mux <= bin;
-            `REG_4094:      reg_4094    <= bin;
+            `REG_4094_OE:      reg_4094_oe    <= bin;
             `REG_MODE:      reg_mode    <= bin;
             `REG_DIRECT:    reg_direct  <= bin;
             `REG_SEQ_MODE:  reg_seq_mode <= bin;
