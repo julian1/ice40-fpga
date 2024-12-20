@@ -110,8 +110,8 @@ set_io CLK              129
 
 # TODO -  consider rename just 'pc switch'.  not 'sig pc switch'.
 # nov. 2024. pin assignment. back annotated.
-set_io pc_sw_o[0]     102
-set_io pc_sw_o[1]     101
+set_io pc_sw_o[0]     102   # sw1.
+set_io pc_sw_o[1]     101   # sw2
 
 
 
