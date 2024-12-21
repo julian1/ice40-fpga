@@ -179,7 +179,7 @@ module top (
 
   wire [32-1:0] reg_direct;
 
-  wire [32-1:0] reg_seq_mode;    // just pass-through communcation. from reg to the status register out.
+  // wire [32-1:0] reg_seq_mode;    // just pass-through communcation. from reg to the status register out.
 
 
 
@@ -544,7 +544,7 @@ module top (
 
     // todo consider - add adc_status,  and sa_status
 
-    {  4'b0, reg_seq_mode[ 4-1 : 0]  } ,    // 4 bits
+    4'b0, // {  4'b0, reg_seq_mode[ 4-1 : 0]  } ,    // 4 bits
 
     {  1'b0,  reg_sa_p_seq_n[ 3-1: 0] ,  1'b0,  sequence_acquisition2_sample_idx_last },
 
@@ -595,7 +595,7 @@ module top (
     . reg_4094_oe(reg_4094_oe ) ,
     . reg_mode(reg_mode),
     . reg_direct(reg_direct),
-    . reg_seq_mode ( reg_seq_mode  ) ,
+    // . reg_seq_mode ( reg_seq_mode  ) ,
 
     // inputs
     . reg_status( reg_status ),

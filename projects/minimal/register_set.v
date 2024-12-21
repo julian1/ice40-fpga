@@ -36,7 +36,7 @@
 `define REG_MODE                        12
 `define REG_DIRECT                      14
 `define REG_STATUS                      17
-`define REG_SEQ_MODE                    18   // just pass-through communcation. from input reg to the status register out.
+// `define REG_SEQ_MODE                    18   // just pass-through communcation. from input reg to the status register out.
                                               // treat as general register, since not used as a parameter that controls/influences any fsm.
 
 
@@ -97,7 +97,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   output reg [32-1:0] reg_4094_oe,     // TODO consider change to a generic CR control register. encode 4094-OE and trigger.
   output reg [32-1:0] reg_mode,
   output reg [32-1:0] reg_direct,
-  output reg [32-1:0] reg_seq_mode,
+  // output reg [32-1:0] reg_seq_mode,
 
 
   // outputs signal acquisition
@@ -165,7 +165,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
     reg_4094_oe      = 0;
     reg_mode      = 0;
     reg_direct    = 0  ;
-    reg_seq_mode  <= 0; // AZ
+    // reg_seq_mode  <= 0; // AZ
 
     // signal acquisition
     // it is nice to have sa defaults...
@@ -243,7 +243,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
               `REG_4094_OE:      out <= reg_4094_oe << 8;
               `REG_MODE:      out <= reg_mode << 8;   // ok..
               `REG_DIRECT:    out <= reg_direct << 8;
-              `REG_SEQ_MODE:      out <= reg_seq_mode << 8;
+              // `REG_SEQ_MODE:      out <= reg_seq_mode << 8;
 
               `REG_STATUS:    out <= reg_status << 8;
 
@@ -298,7 +298,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
             `REG_4094_OE:      reg_4094_oe    <= bin;
             `REG_MODE:      reg_mode    <= bin;
             `REG_DIRECT:    reg_direct  <= bin;
-            `REG_SEQ_MODE:  reg_seq_mode <= bin;
+            // ` REG_SEQ_MODE:  reg_seq_mode <= bin;
 
             //////////
 
