@@ -78,8 +78,8 @@ module top (
 
   // other cs lines
   output SPI_DAC_SS,
-  output SPI_ISO_DAC_CS,
-  output SPI_ISO_DAC_CS2,
+//  output SPI_ISO_DAC_CS,
+//  output SPI_ISO_DAC_CS2,
 
 
   // xtal
@@ -135,8 +135,8 @@ module top (
 
   assign spi_4094_strobe_ctl  = reg_spi_mux ==   8'b01 ?  (~ SPI_CS2)  : 0;     // active hi, park lo
   assign SPI_DAC_SS           = reg_spi_mux ==   8'b10 ?  SPI_CS2 : 1;     // active lo
-  assign SPI_ISO_DAC_CS       = reg_spi_mux ==  8'b100 ?  SPI_CS2 : 1;     // active lo
-  assign SPI_ISO_DAC_CS2      = reg_spi_mux == 8'b1000 ?  SPI_CS2 : 1;     // active lo
+//  assign SPI_ISO_DAC_CS       = reg_spi_mux ==  8'b100 ?  SPI_CS2 : 1;     // active lo
+//  assign SPI_ISO_DAC_CS2      = reg_spi_mux == 8'b1000 ?  SPI_CS2 : 1;     // active lo
 
 
 
