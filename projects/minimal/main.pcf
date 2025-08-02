@@ -35,7 +35,9 @@ set_io SCK              70
 #samples the SPI_SS to select the configuration mode (an output
 #in Master mode and an input in Slave mode). iCE40 LM devices
 #have this pin shared with hardened SPI IP SPI1_CSN pin.
-set_io SS               71
+
+# july 2025. incorporated to cs_vec
+# set_io SS               71
 
 
 # consider adding '_n' suffix on cs,rst lines.
@@ -43,6 +45,15 @@ set_io SS               71
 
 
 
+
+set_io spi_cs_vec[0]          71      # SS
+set_io spi_cs_vec[1]          61      # SPI_CS2
+set_io spi_cs_vec[2]          49      #  july 2025.
+
+
+# spi1.
+# better name should be SS
+# set_io SPI_CS2          61
 
 
 
@@ -80,9 +91,6 @@ set_io leds_o[3]        41
 
 
 
-# spi1.
-# better name should be SS
-set_io SPI_CS2          61
 
 
 # should use lower case.

@@ -50,10 +50,12 @@ module top (
   #samples the SPI_SS to select the configuration mode (an output
   #in Master mode and an input in Slave mode). iCE40 LM devices
   #have this pin shared with hardened SPI IP SPI1_CSN pin.*/
-  input SS,
+
+  // input SS,
+  // input  SPI_CS2,
 
 
-  input  SPI_CS2,
+  input [ 3-1 : 0 ] spi_cs_vec,
 
 
   ///////////
@@ -128,23 +130,46 @@ module top (
       ote. we are already doing this for polarity
   */
 
+/*
+  HERE
   wire [32-1:0] reg_spi_mux ;// = 8'b00000001; // test
 
   assign spi_glb_clk          = reg_spi_mux == 8'b0 ? 1 : SCK;      // park hi
   assign spi_glb_mosi         = reg_spi_mux == 8'b0 ? 1 : SDI;      // park hi
 
+  // cs
   assign spi_4094_strobe_ctl  = reg_spi_mux ==   8'b01 ?  (~ SPI_CS2)  : 0;     // active hi, park lo
   assign SPI_DAC_SS           = reg_spi_mux ==   8'b10 ?  SPI_CS2 : 1;     // active lo
 //  assign SPI_ISO_DAC_CS       = reg_spi_mux ==  8'b100 ?  SPI_CS2 : 1;     // active lo
 //  assign SPI_ISO_DAC_CS2      = reg_spi_mux == 8'b1000 ?  SPI_CS2 : 1;     // active lo
+*/
 
 
+  /////////////////////////
+
+  // spi lines - silence if active device is the fpga
+  assign spi_glb_clk              = spi_cs_vec ==  3'b001 ? 1 : SCK;      // park hi
+  assign spi_glb_mosi             = spi_cs_vec ==  3'b001 ? 1 : SDI;      // park hi
+
+
+
+  // spi CS. line decoding.
+  wire SS;
+
+  // slave select for register set
+  assign SS                       = spi_cs_vec ==  3'b001 ? 0 :  1;      // active lo, park hi
+
+  // 4094 strobe
+  assign spi_4094_strobe_ctl      = spi_cs_vec == 3'b010;             // active hi, park lo
+
+  assign SPI_DAC_SS               = 1;
+
+  /////////////////////////
 
 
   wire w_dout ;
 
   assign w_dout = SDO;
-
 
 
 
@@ -548,7 +573,9 @@ module top (
 
     {  1'b0,  reg_sa_p_seq_n[ 3-1: 0] ,  1'b0,  sequence_acquisition2_sample_idx_last },
 
-    { reg_spi_mux [ 4-1: 0 ],  hw_flags_i } ,
+    // HERE
+    // { reg_spi_mux [ 4-1: 0 ],  hw_flags_i } ,
+    { 4'b0, hw_flags_i } ,
 
     { 8'b10101010 }  // magic
  };
@@ -591,7 +618,8 @@ module top (
 
 
     // outputs general
-    . reg_spi_mux(reg_spi_mux),
+    // . reg_spi_mux(reg_spi_mux), HERE
+
     . reg_4094_oe(reg_4094_oe ) ,
     . reg_mode(reg_mode),
     . reg_direct(reg_direct),
