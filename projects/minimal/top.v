@@ -52,9 +52,8 @@ module top (
   #have this pin shared with hardened SPI IP SPI1_CSN pin.*/
 
   // input SS,
-  // input  SPI_CS2,
 
-
+  // SS used as first bit of spi_cs_vec muxing - july 2025
   input [ 3-1 : 0 ] spi_cs_vec,
 
 
@@ -147,17 +146,17 @@ module top (
 
   /////////////////////////
 
-  // spi lines - silence if active device is the fpga
+  // spi lines - silence if active device is the fpga/register set
   assign spi_glb_clk              = spi_cs_vec ==  3'b001 ? 1 : SCK;      // park hi
   assign spi_glb_mosi             = spi_cs_vec ==  3'b001 ? 1 : SDI;      // park hi
 
 
 
   // spi CS. line decoding.
-  wire SS;
+  wire spi_register_set_cs ;
 
   // slave select for register set
-  assign SS                       = spi_cs_vec ==  3'b001 ? 0 :  1;      // active lo, park hi
+  assign spi_register_set_cs      = spi_cs_vec ==  3'b001 ? 0 :  1;      // active lo, park hi
 
   // 4094 strobe
   assign spi_4094_strobe_ctl      = spi_cs_vec == 3'b010;             // active hi, park lo
@@ -609,7 +608,7 @@ module top (
 
     // should prefix fields with spi_
     . clk(   SCK ),
-    . cs_n(  SS /*SPI_CS */ ),        // rename cs_n
+    . cs_n(  spi_register_set_cs /* SS*/ /*SPI_CS */ ),
     . din(   SDI /*SPI_MOSI */),
 
 

@@ -46,9 +46,9 @@ set_io SCK              70
 
 
 
-set_io spi_cs_vec[0]          71      # SS
+set_io spi_cs_vec[0]          71      # SS  at bitstream configuration
 set_io spi_cs_vec[1]          61      # SPI_CS2
-set_io spi_cs_vec[2]          49      #  july 2025.
+set_io spi_cs_vec[2]          49      # added july 2025.
 
 
 # spi1.
