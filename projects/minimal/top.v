@@ -90,9 +90,9 @@ module top (
 
 
   // other cs lines
-  output SPI_DAC_CS,
-  output SPI_ISO_CS,
-  output SPI_ISO_CS2,
+  output SPI_CS_DAC,
+  output SPI_CS_ISO,
+  output SPI_CS_ISO2,
 
 
 
@@ -159,13 +159,6 @@ module top (
 
 
   /////////////////////////
-/*
-`define SPI_CS_VEC_DEASSERT             3'd0
-`define SPI_CS_VEC_FPGA0                3'd1
-`define SPI_CS_VEC_4094                 3'd2
-`define SPI_CS_VEC_MDAC0                3'd3
-`define SPI_CS_VEC_MDAC1                3'd4
-*/
 
 
   // spi lines - silence if active device is the fpga/register set
@@ -176,19 +169,19 @@ module top (
   // TODO - rename these.  should be spi_cs_ ...  eg. CS prefix at the  start.
 
   // spi CS. line decoding.
-  wire spi_register_set_cs ;
+  wire spi_cs_register_set ;
 
   // slave select for register set
-  assign spi_register_set_cs      = spi_cs_vec ==  `SPI_CS_VEC_FPGA0 ? 0 : 1;      // active lo, park hi
+  assign spi_cs_register_set      = spi_cs_vec ==  `SPI_CS_VEC_FPGA0 ? 0 : 1;      // active lo, park hi
 
   // 4094 strobe
   assign spi_4094_strobe_ctl      = spi_cs_vec == `SPI_CS_VEC_4094;             // active hi, park lo
 
-  assign SPI_DAC_CS               = spi_cs_vec == `SPI_CS_VEC_MDAC0 ? 0 : 1;      // active lo, park hi
+  assign SPI_CS_DAC               = spi_cs_vec == `SPI_CS_VEC_MDAC0 ? 0 : 1;      // active lo, park hi
 
-  assign SPI_ISO_CS               = spi_cs_vec == `SPI_CS_VEC_MDAC1 ? 0 : 1;      // active lo, park hi
+  assign SPI_CS_ISO               = spi_cs_vec == `SPI_CS_VEC_MDAC1 ? 0 : 1;      // active lo, park hi
 
-  assign SPI_ISO_CS2              = 1;    // unused
+  assign SPI_CS_ISO2              = 1;    // unused
 
 
 
@@ -637,7 +630,7 @@ module top (
 
     // should prefix fields with spi_
     . clk(   SCK ),
-    . cs_n(  spi_register_set_cs /* SS*/ /*SPI_CS */ ),
+    . cs_n(  spi_cs_register_set /* SS*/ /*SPI_CS */ ),
     . din(   SDI /*SPI_MOSI */),
 
 
