@@ -24,6 +24,17 @@
 
 
 
+
+// line encoding for cs of spi devices.  decimal
+// TODO prefix with SPI
+`define SPI_CS_VEC_DEASSERT             3'd0
+`define SPI_CS_VEC_FPGA0                3'd1
+`define SPI_CS_VEC_4094                 3'd2
+`define SPI_CS_VEC_MDAC0                3'd3
+`define SPI_CS_VEC_MDAC1                3'd4
+
+
+
 module top (
 
 
@@ -77,10 +88,13 @@ module top (
   output spi_4094_oe_ctl,
   input U1008_4094_DATA,
 
+
   // other cs lines
-  output SPI_DAC_SS,
-//  output SPI_ISO_DAC_CS,
-//  output SPI_ISO_DAC_CS2,
+  output SPI_DAC_CS,
+  output SPI_ISO_CS,
+  output SPI_ISO_CS2,
+
+
 
 
   // xtal
@@ -145,23 +159,38 @@ module top (
 
 
   /////////////////////////
+/*
+`define SPI_CS_VEC_DEASSERT             3'd0
+`define SPI_CS_VEC_FPGA0                3'd1
+`define SPI_CS_VEC_4094                 3'd2
+`define SPI_CS_VEC_MDAC0                3'd3
+`define SPI_CS_VEC_MDAC1                3'd4
+*/
+
 
   // spi lines - silence if active device is the fpga/register set
-  assign spi_glb_clk              = spi_cs_vec ==  3'b001 ? 1 : SCK;      // park hi
-  assign spi_glb_mosi             = spi_cs_vec ==  3'b001 ? 1 : SDI;      // park hi
+  assign spi_glb_clk              = spi_cs_vec ==  `SPI_CS_VEC_FPGA0 ? 1 : SCK;      // park hi
+  assign spi_glb_mosi             = spi_cs_vec ==  `SPI_CS_VEC_FPGA0 ? 1 : SDI;      // park hi
 
 
+  // TODO - rename these.  should be spi_cs_ ...  eg. CS prefix at the  start.
 
   // spi CS. line decoding.
   wire spi_register_set_cs ;
 
   // slave select for register set
-  assign spi_register_set_cs      = spi_cs_vec ==  3'b001 ? 0 :  1;      // active lo, park hi
+  assign spi_register_set_cs      = spi_cs_vec ==  `SPI_CS_VEC_FPGA0 ? 0 : 1;      // active lo, park hi
 
   // 4094 strobe
-  assign spi_4094_strobe_ctl      = spi_cs_vec == 3'b010;             // active hi, park lo
+  assign spi_4094_strobe_ctl      = spi_cs_vec == `SPI_CS_VEC_4094;             // active hi, park lo
 
-  assign SPI_DAC_SS               = 1;
+  assign SPI_DAC_CS               = spi_cs_vec == `SPI_CS_VEC_MDAC0 ? 0 : 1;      // active lo, park hi
+
+  assign SPI_ISO_CS               = spi_cs_vec == `SPI_CS_VEC_MDAC1 ? 0 : 1;      // active lo, park hi
+
+  assign SPI_ISO_CS2              = 1;    // unused
+
+
 
   /////////////////////////
 

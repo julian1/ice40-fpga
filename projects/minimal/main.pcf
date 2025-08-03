@@ -115,7 +115,11 @@ set_io U1008_4094_DATA      98   # from level translator.
 
 # spi cs lines
 # change to lower-case
-set_io SPI_DAC_SS           96
+set_io SPI_DAC_CS           96
+
+
+set_io SPI_ISO_CS           112
+set_io SPI_ISO_CS2          113
 
 
 # az mux
