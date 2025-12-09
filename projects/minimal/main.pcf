@@ -156,22 +156,38 @@ set_io pc_sw_o[1]     101   # sw2
 # adc ref current mux
 # note - pin order on ic is counter-clockwise
 # dec 2024.
-set_io adc_refmux_o[0]      137
-set_io adc_refmux_o[1]      138
-set_io adc_refmux_o[2]      139
-set_io adc_refmux_o[3]      141
+#set_io adc_refmux_o[0]      137
+#set_io adc_refmux_o[1]      138
+#set_io adc_refmux_o[2]      139
+#set_io adc_refmux_o[3]      141
+
+
+# nov. 2025.
+
+# we changed the order. here in the pin assignments.
+set_io adc_refmux_o[0]      144     # sw0 pos
+set_io adc_refmux_o[1]      143     # sw1 neg.
+
+# swap
+set_io adc_refmux_o[2]      141     # sw3. reset
+set_io adc_refmux_o[3]      142     # sw2  signal
 
 
 
 # 5V tolerant input pin.  # better name?
 # dec 2024.
-set_io adc_cmpr_out       143
+# set_io adc_cmpr_out       143
+
+# nov. 2025.
+set_io adc_cmpr_out         2
 
 
-# adc comparator
+# adc comparator latch
 # dec 2024.
-set_io adc_cmpr_latch_ctl_o   144
+# set_io adc_cmpr_latch_ctl_o   144
 
+# nov. 2025.
+set_io adc_cmpr_latch_ctl_o   1
 
 
 
