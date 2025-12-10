@@ -108,7 +108,12 @@ module top (
 
 
   // U902. adc ref current mux
-  output [ 4-1: 0 ] adc_refmux_o,
+  output [ 2-1: 0 ] adc_refmux_o,
+  output adc_sigmux_o,
+  output adc_rstmux_o,
+
+
+
 
   input adc_cmpr_out,
 
@@ -359,7 +364,11 @@ module top (
   // wire [4-1:0]  adc_status;      // TODO
 
 
-  wire [4-1: 0 ] adc_mux;
+  wire [2-1: 0 ] adc_refmux;
+  wire adc_sigmux;
+  wire adc_rstmux;
+
+
   wire           adc_cmpr_latch_ctl;
 
 
@@ -401,8 +410,8 @@ module top (
     .adc_measure_valid( adc_measure_valid),    // OK, fan out back to the sa controllers
     .cmpr_latch_ctl( adc_cmpr_latch_ctl   ),
     .monitor(  adc_monitor  ),
-    .refmux(  { adc_mux[  3  ],  adc_mux[ 0 +: 2 ]   } ),           // pos, neg, reset. are on two different 4053,
-    .sigmux(    adc_mux[  2  ] ),                                    // perhaps clearer if split into adcrefmux and adcsigmux in the wire assignment. but it would then need two vars.
+    .refmux(  { adc_rstmux ,  adc_refmux } ),           // pos, neg, reset. are on two different 4053,
+    .sigmux(   adc_sigmux  ),                                    // perhaps clearer if split into adcrefmux and adcsigmux in the wire assignment. but it would then need two vars.
                                                                       // which isn't representative of the single synchronizer. so do it here instead.
     // adc clk counts for last sample measurement
     .clk_count_refmux_reset_last(adc_clk_count_refmux_reset_last),
@@ -520,8 +529,9 @@ module top (
 
 
     // mode  6  sequence acquisition with mocked adc.  and better monitor
-    // very useful - allows testing precharge/az switching, without adc populated
+    // useful to test precharge/az switching, without needing adc to be populated
     // and verifying timing sequences, with better monitor
+    // needs trig asserted.
     .g( {  { 32 - 26 { 'b0 }},
                                               // 26
           1'b0, // adc_reset_n                // 25 + 1
@@ -538,13 +548,18 @@ module top (
 
 
     // mode 7. sequence acquisition controller and full adc.
+    // needs trig asserted.
    .h( {  { 32 - 26 { 'b0 }},
                                               // 26
           sequence_acquisition2_adc_reset_n,  // adc_reset_n     // 25 + 1
           adc_measure_valid,                  // meas_complete              // 24+1
           adc_measure_valid,                  // spi_interupt   // 23 + 1
           adc_cmpr_latch_ctl,                 // adc_cmpr_latch   // 22+1
-          adc_mux,                            // adc_refmux     // 18+4
+
+          adc_sigmux,
+          adc_rstmux,
+          adc_refmux,                            // adc muxes // 18+4
+
           sequence_acquisition2_azmux,        // azmux      // 14+4
           sequence_acquisition2_pc_sw,    // precharge    // 12+2
           // adc_monitor[ 0 +: 6], sequence_acquisition2_monitor[ 0 +: 2],    // 4+8
@@ -564,9 +579,13 @@ module top (
           meas_complete_o,          // 24+1     // interupt_ctl *IS* generic so should be at start, and connects straight to adum. so place at beginning. same argument for meas_complete
           spi_interrupt_ctl_o,      // 23+1     todo rename. drop the 'ctl'.
           adc_cmpr_latch_ctl_o,         // 22+1
-          adc_refmux_o,             // 18+4     // better name adc_refmux   adc_cmpr_latch
+
+          adc_sigmux_o,
+          adc_rstmux_o,
+          adc_refmux_o,             // adc muxes 18+4
+
           azmux_o,                  // 14+4
-          pc_sw_o,              // 12+2
+          pc_sw_o,                  // 12+2
           monitor_o,                // 4+8
           leds_o                    // 0+4
         }  )
