@@ -52,7 +52,7 @@
 `define REG_SA_P_SEQ2                   24
 `define REG_SA_P_SEQ3                   25
 
-`define REG_SA_P_TRIG                     26
+// `define REG_SA_P_TRIG                     26
 
 
 // adc parameters
@@ -115,7 +115,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   output reg [32-1:0] reg_sa_p_seq2,
   output reg [32-1:0] reg_sa_p_seq3,
 
-  output reg [32-1:0] reg_sa_p_trig,
+  // output reg [32-1:0] reg_sa_p_trig,
 
 
 
@@ -181,7 +181,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
     reg_sa_p_seq2     <= 0;
     reg_sa_p_seq3     <= 0;
 
-    reg_sa_p_trig     <= 0;
+    // reg_sa_p_trig     <= 0;
 
     // adc
     reg_adc_p_clk_count_aperture  <=  $rtoi( `CLK_FREQ * 0.2 );      // 200ms.
@@ -257,7 +257,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
               `REG_SA_P_SEQ2:         out <= reg_sa_p_seq2 << 8;
               `REG_SA_P_SEQ3:         out <= reg_sa_p_seq3 << 8;
 
-              `REG_SA_P_TRIG:         out <= reg_sa_p_trig << 8;
+              // `REG_SA_P_TRIG:         out <= reg_sa_p_trig << 8;
 
 
               /////
@@ -310,7 +310,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
             `REG_SA_P_SEQ2:                 reg_sa_p_seq2 <= bin;
             `REG_SA_P_SEQ3:                 reg_sa_p_seq3 <= bin;
 
-            `REG_SA_P_TRIG:                 reg_sa_p_trig <= bin;
+            // `REG_SA_P_TRIG:                 reg_sa_p_trig <= bin;
 
 
             ////

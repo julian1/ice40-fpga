@@ -86,7 +86,7 @@ module top (
   // 4094
   output spi_4094_strobe_ctl,
   output spi_4094_oe_ctl,
-  input U1008_4094_DATA,
+  input spi_4094_miso,
 
 
   // other cs lines
@@ -116,6 +116,10 @@ module top (
 
 
   output spi_interrupt_ctl_o,
+
+
+  // wire [32-1:0] reg_sa_p_trig;
+  input reg_sa_p_trig
 
 );
 
@@ -238,7 +242,6 @@ module top (
   wire [32-1:0] reg_sa_p_seq2;
   wire [32-1:0] reg_sa_p_seq3;
 
-  wire [32-1:0] reg_sa_p_trig;
 
 
   // adc
@@ -310,7 +313,7 @@ module top (
   sequence_acquisition (
 
     .clk(CLK),
-    .reset_n( reg_sa_p_trig[0] ),
+    .reset_n( reg_sa_p_trig ),
 
     // inputs
     .adc_measure_valid_i( adc_mock_measure_valid ),                     // fan-in from adc
@@ -444,7 +447,7 @@ module top (
   sequence_acquisition2 (
 
     .clk(CLK),
-    .reset_n( reg_sa_p_trig[ 0] ),    // we want this to remove. the old edge triggered stuff.
+    .reset_n( reg_sa_p_trig ),    // we want this to remove. the old edge triggered stuff.
 
     // inputs
     .adc_measure_valid_i( adc_measure_valid ),                     // JA the real adc. from adc
@@ -658,7 +661,7 @@ module top (
     . reg_sa_p_seq2( reg_sa_p_seq2),
     . reg_sa_p_seq3( reg_sa_p_seq3),
 
-    . reg_sa_p_trig( reg_sa_p_trig),
+    // . reg_sa_p_trig( reg_sa_p_trig),
 
 
     // adc outputs

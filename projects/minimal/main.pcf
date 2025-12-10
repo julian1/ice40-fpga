@@ -110,8 +110,8 @@ set_io spi_4094_strobe_ctl  93
 set_io spi_4094_oe_ctl      94
 
 
-
-set_io U1008_4094_DATA      98   # from level translator.
+# from level translator.
+set_io spi_4094_miso        98
 
 # other spi cs lines
 # TODO change to lower-case
@@ -189,7 +189,7 @@ set_io adc_cmpr_out         2
 # nov. 2025.
 set_io adc_cmpr_latch_ctl_o   1
 
-
+set_io reg_sa_p_trig               52
 
 
 
