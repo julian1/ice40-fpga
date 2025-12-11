@@ -31,7 +31,7 @@
 
 // prefix REG_GEN_ ?
 // no.  just create a generic. general CR / control register.  for 4094 oe, perhaps the spi_mux.
-`define REG_SPI_MUX                     8
+// `define REG_SPI_MUX                     8
 `define REG_4094_OE                     9
 `define REG_MODE                        12
 `define REG_DIRECT                      14
@@ -239,7 +239,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
               // default:     out <=  in[8 - 1  : 0] << 8 ;     // return passed address
 
 
-              `REG_SPI_MUX:   out <= reg_spi_mux << 8;
+              // `REG_SPI_MUX:   out <= reg_spi_mux << 8;
               `REG_4094_OE:      out <= reg_4094_oe << 8;
               `REG_MODE:      out <= reg_mode << 8;   // ok..
               `REG_DIRECT:    out <= reg_direct << 8;
@@ -294,7 +294,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
           case (  bin[MSB-2 : MSB-8 ] )
 
-            `REG_SPI_MUX:   reg_spi_mux <= bin;
+            // `REG_SPI_MUX:   reg_spi_mux <= bin;
             `REG_4094_OE:      reg_4094_oe    <= bin;
             `REG_MODE:      reg_mode    <= bin;
             `REG_DIRECT:    reg_direct  <= bin;
