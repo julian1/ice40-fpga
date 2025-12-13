@@ -104,20 +104,28 @@ set_io spi_interrupt_ctl_o 62
 # spi
 set_io spi_glb_mosi         91
 set_io spi_glb_clk          95
+set_io spi_glb_miso        98
 
 # 4094
 set_io spi_4094_strobe_ctl  93
 set_io spi_4094_oe_ctl      94
 
 
-# from level translator.
-set_io spi_4094_miso        98
+
+
+
 
 # other spi cs lines
 # TODO change to lower-case
-set_io SPI_CS_DAC           96
 set_io SPI_CS_ISO           112
 set_io SPI_CS_ISO2          113
+
+
+
+
+set_io spi_invert_dac_data    44
+set_io spi_invert_dac_clk     45
+set_io spi_invert_dac_ss      47
 
 
 # az mux

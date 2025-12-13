@@ -30,7 +30,7 @@
 `define SPI_CS_VEC_DEASSERT             3'd0
 `define SPI_CS_VEC_FPGA0                3'd1
 `define SPI_CS_VEC_4094                 3'd2
-`define SPI_CS_VEC_MDAC0                3'd3
+`define SPI_CS_VEC_INVERT_DAC           3'd3
 `define SPI_CS_VEC_MDAC1                3'd4
 
 
@@ -82,18 +82,24 @@ module top (
   // spi lines.
   output spi_glb_mosi,
   output spi_glb_clk,
+  input spi_glb_miso,
+
 
   // 4094
   output spi_4094_strobe_ctl,
   output spi_4094_oe_ctl,
-  input spi_4094_miso,
 
 
   // other cs lines
-  output SPI_CS_DAC,
+  // output SPI_CS_DAC,
   output SPI_CS_ISO,
   output SPI_CS_ISO2,
 
+
+
+  output spi_invert_dac_data,
+  output spi_invert_dac_clk,
+  output spi_invert_dac_ss,
 
 
 
@@ -175,6 +181,12 @@ module top (
   assign spi_glb_mosi             = spi_cs_vec ==  `SPI_CS_VEC_FPGA0 ? 1 : SDI;      // park hi
 
 
+
+  assign spi_invert_dac_data = spi_glb_mosi;
+  assign spi_invert_dac_clk = spi_glb_clk;
+
+
+
   // TODO - rename these.  should be spi_cs_ ...  eg. CS prefix at the  start.
 
   // spi CS. line decoding.
@@ -186,7 +198,7 @@ module top (
   // 4094 strobe
   assign spi_4094_strobe_ctl      = spi_cs_vec == `SPI_CS_VEC_4094;             // active hi, park lo
 
-  assign SPI_CS_DAC               = spi_cs_vec == `SPI_CS_VEC_MDAC0 ? 0 : 1;      // active lo, park hi
+  assign spi_invert_dac_ss        = spi_cs_vec == `SPI_CS_VEC_INVERT_DAC ? 0 : 1;      // active lo, park hi
 
   assign SPI_CS_ISO               = spi_cs_vec == `SPI_CS_VEC_MDAC1 ? 0 : 1;      // active lo, park hi
 
