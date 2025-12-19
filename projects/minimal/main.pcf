@@ -166,7 +166,7 @@ set_io adc_rstmux_o           141   # sw3. reset
 
 # 5V tolerant input pin.  # better name?
 # nov. 2025.
-set_io adc_cmpr_out         2
+set_io adc_cmpr_i         2
 
 
 # adc comparator latch

@@ -120,24 +120,21 @@ module top (
 
 
 
-
-  input adc_cmpr_out,
-
+  input adc_cmpr_i,
   output adc_cmpr_latch_ctl_o,
 
 
   output spi_interrupt_ctl_o,
 
 
-  // wire [32-1:0] sa_trig_i;
   input sa_trig_i
 
 );
 
 
   // dec 2024. after changing pcb comparator output
-  wire adc_cmpr_p_i;
-  assign adc_cmpr_p_i = ! adc_cmpr_out;
+  wire cmpr_val;
+  assign cmpr_val = ! adc_cmpr_i;
 
 
 
@@ -281,7 +278,7 @@ module top (
     . p_clk_count_reset_i( $rtoi(  `CLK_FREQ * 500e-6 )  ), // 500us.
     . p_clk_count_fix_i(   $rtoi( `CLK_FREQ * 150e-6 )) ,  // 100us. initial but too long
 
-    . cmpr_val_i( adc_cmpr_p_i ),
+    . cmpr_val_i( cmpr_val ),
 
     .monitor_o( refmux_test_monitor),
     /* ie. refmux order pos,neg,source,reset.
@@ -405,7 +402,7 @@ module top (
     .reset_n( adc_reset_n),
 
 
-    .cmpr_val( adc_cmpr_p_i ),                  // OK.  fan in-  rename top_adc_cmpr_p_i ?
+    .cmpr_val( cmpr_val ),                  // OK.  fan in-  rename top_cmpr_val ?
 
     . p_clk_count_aperture( reg_adc_p_clk_count_aperture /*reg_adc_p_aperture */),
     . p_clk_count_reset( reg_adc_p_clk_count_reset[ 24-1: 0  ]  ) ,
