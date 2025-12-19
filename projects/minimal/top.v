@@ -92,8 +92,8 @@ module top (
 
   // other cs lines
   // output SPI_CS_DAC,
-  output SPI_CS_ISO,
-  output SPI_CS_ISO2,
+  output spi_iso_cs,
+  output spi_iso_cs2,
 
 
 
@@ -200,9 +200,9 @@ module top (
 
   assign spi_invert_dac_ss        = spi_cs_vec == `SPI_CS_VEC_INVERT_DAC ? 0 : 1;      // active lo, park hi
 
-  assign SPI_CS_ISO               = spi_cs_vec == `SPI_CS_VEC_MDAC1 ? 0 : 1;      // active lo, park hi
+  assign spi_iso_cs               = spi_cs_vec == `SPI_CS_VEC_MDAC1 ? 0 : 1;      // active lo, park hi
 
-  assign SPI_CS_ISO2              = 1;    // unused
+  assign spi_iso_cs2              = 1;    // unused
 
 
 

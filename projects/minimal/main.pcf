@@ -111,14 +111,9 @@ set_io spi_4094_strobe_ctl  93
 set_io spi_4094_oe_ctl      94
 
 
-
-
-
-
-# other spi cs lines
-# TODO change to lower-case
-set_io SPI_CS_ISO           112
-set_io SPI_CS_ISO2          113
+# isolated dcv source - TODO better name?
+set_io spi_iso_cs           78
+set_io spi_iso_cs2          79
 
 
 
