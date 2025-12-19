@@ -176,7 +176,7 @@ set_io adc_cmpr_out         2
 # nov. 2025.
 set_io adc_cmpr_latch_ctl_o   1
 
-set_io reg_sa_p_trig               52
+set_io sa_trig_i               52
 
 
 
