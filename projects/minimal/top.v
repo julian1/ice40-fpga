@@ -540,7 +540,9 @@ module top (
     // mode  6  sequence acquisition with mocked adc.  and better monitor
     // useful to test precharge/az switching, without needing adc to be populated
     // and verifying timing sequences, with better monitor
-    // needs trig asserted.
+    // needs trig asserted.  and seq-n. etc.
+    // needs fpga cmos oscillator/xtal populated
+    // eg. set ch2 lts ; set mode 6;  trig ;   works. jan 2026.
     .g( {  { 32 - 26 { 'b0 }},
                                               // 26
           1'b0, // adc_reset_n                // 25 + 1
