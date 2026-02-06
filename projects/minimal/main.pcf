@@ -154,16 +154,18 @@ set_io pc_sw_o[1]             101   # sw2
 
 # nov. 2025.
 # order changed and pin assignments.
-set_io adc_refmux_o[0]        144   # u904-sw0-ctl pos
-set_io adc_refmux_o[1]        143   # u904-sw1-ctl neg.
 
-set_io adc_sigmux_o           142   # u904-sw2-ctl signal
-set_io adc_rstmux_o           141   # u904-sw3-ctl reset
+# feb 2026.
+set_io adc_refmux_o[0]        143   # u904-sw0-ctl pos  swapped feb 2026
+set_io adc_refmux_o[1]        144   # u904-sw1-ctl neg.
+
+set_io adc_sigmux_o           122   # u906-sw1-ctl
+set_io adc_rstmux_o           128   # u906-sw2-ctl
+
+set_io adc_int2_sigmux_o      121   # u918-sw1-ctl  swapped. feb 2026
+set_io adc_int2_rstmux_o      120   # u918-sw2-ctl
 
 
-# 2nd order integrator
-set_io adc_int2_sigmux_o      138   # u904-sw6-ctl / U918-SW1-SYNCH / signal
-set_io adc_int2_rstmux_o      137   # u904-sw7-ctl / U918-SW2-SYNCH / rst
 
 
 # consider prefix with 'util_'
@@ -181,8 +183,8 @@ set_io adc_cmpr_latch_ctl_o   1
 set_io adc_cmpr_i             2
 
 
-set_io adc_zgjc_sw_o[0]       3
-set_io adc_zgjc_sw_o[1]       4
+set_io adc_zgjc_sw_o[0]       4   # swapped  feb 2026
+set_io adc_zgjc_sw_o[1]       3
 
 
 set_io adc_int2_cmpr_i        8
