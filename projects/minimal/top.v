@@ -394,7 +394,7 @@ module top (
   wire [24-1:0] adc_clk_count_rstmux_last;
   wire [32-1:0] adc_clk_count_refmux_neg_last;    // maybe add reg_ prefix. No. they are not registers, until they are in the register_bank context.
   wire [32-1:0] adc_clk_count_refmux_pos_last;
-  wire [24-1:0] adc_clk_count_refmux_rd_last;
+  wire [24-1:0] adc_clk_count_refmux_both_last;
   wire [32-1:0] adc_clk_count_sigmux_last;
 
   wire [24-1 :0] adc_stat_count_refmux_pos_up_last;
@@ -439,7 +439,7 @@ module top (
     .clk_count_rstmux_last(adc_clk_count_rstmux_last),
     .clk_count_refmux_neg_last(  adc_clk_count_refmux_neg_last),
     .clk_count_refmux_pos_last(  adc_clk_count_refmux_pos_last),
-    .clk_count_refmux_rd_last(   adc_clk_count_refmux_rd_last),
+    .clk_count_refmux_both_last(   adc_clk_count_refmux_both_last),
     .clk_count_sigmux_last(  adc_clk_count_sigmux_last ),
 
     // stats
@@ -721,7 +721,7 @@ module top (
     // perhaps change register_set.
     .  reg_adc_clk_count_refmux_neg( adc_clk_count_refmux_neg_last) ,
     .  reg_adc_clk_count_refmux_pos( adc_clk_count_refmux_pos_last) ,
-    .  reg_adc_clk_count_refmux_rd( { 8'b0, adc_clk_count_refmux_rd_last } ) ,
+    .  reg_adc_clk_count_refmux_both( { 8'b0, adc_clk_count_refmux_both_last } ) ,
 
     .  reg_adc_clk_count_rstmux( { 8'b0, adc_clk_count_rstmux_last } ) ,
     .  reg_adc_clk_count_sigmux( adc_clk_count_sigmux_last ),

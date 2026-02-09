@@ -113,7 +113,7 @@ module adc_modulation (
   output reg [24-1:0] clk_count_rstmux_last,
   output reg [32-1:0] clk_count_refmux_neg_last,
   output reg [32-1:0] clk_count_refmux_pos_last,
-  output reg [24-1:0] clk_count_refmux_rd_last,
+  output reg [24-1:0] clk_count_refmux_both_last,
   output reg [32-1:0] clk_count_sigmux_last,
   output reg [32-1:0] clk_count_aperture_last,              // todo can expose this in the register set, in top.
 
@@ -152,7 +152,7 @@ module adc_modulation (
   reg [24-1:0] clk_count_rstmux;
   reg [32-1:0] clk_count_refmux_neg;
   reg [32-1:0] clk_count_refmux_pos;
-  reg [24-1:0] clk_count_refmux_rd;
+  reg [24-1:0] clk_count_refmux_both;
   reg [32-1:0] clk_count_sigmux ;
   reg [32-1:0] clk_count_aperture;
 
@@ -281,7 +281,7 @@ module adc_modulation (
 
         `REFMUX_BOTH:
             begin
-              clk_count_refmux_rd <= clk_count_refmux_rd + 1;
+              clk_count_refmux_both <= clk_count_refmux_both + 1;
               clk_count_refmux_neg <= clk_count_refmux_neg + 1;
               clk_count_refmux_pos <=  clk_count_refmux_pos + 1;
             end
@@ -371,7 +371,7 @@ module adc_modulation (
             // clear counts
             clk_count_refmux_neg  <= 0;
             clk_count_refmux_pos  <= 0;
-            clk_count_refmux_rd   <= 0;
+            clk_count_refmux_both   <= 0;
             clk_count_sigmux      <= 0;
             clk_count_aperture    <= 0;
 
@@ -621,7 +621,7 @@ module adc_modulation (
                 clk_count_rstmux_last       <= clk_count_rstmux;    // this doesn't work. reports 0.
                 clk_count_refmux_neg_last   <= clk_count_refmux_neg;
                 clk_count_refmux_pos_last   <= clk_count_refmux_pos;
-                clk_count_refmux_rd_last    <= clk_count_refmux_rd;
+                clk_count_refmux_both_last    <= clk_count_refmux_both;
                 clk_count_sigmux_last       <= clk_count_sigmux;                  // aperture. is the ctrl parameter for signal introduced..
                 clk_count_aperture_last     <= clk_count_aperture;
 
