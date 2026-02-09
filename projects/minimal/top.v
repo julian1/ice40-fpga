@@ -17,7 +17,7 @@
 `include "adc-mock.v"
 `include "refmux-test.v"
 
-`include "adc_modulation_05.v"
+`include "adc_modulation_06.v"
 `include "sequence_acquisition.v"
 
 `default_nettype none
