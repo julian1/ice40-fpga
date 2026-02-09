@@ -65,7 +65,6 @@
 `define REFMUX_RESET       3'b100
 
 
-// could also define CMPR_ENABLE DIABLE and.   also also sigmux on, off.
 
 
 
@@ -183,6 +182,13 @@ module adc_modulation (
 
   /////////////////////////
 
+
+  // need better name.
+  // different from sigmux - because we may not turn the signal on.
+  // also polarity
+  reg not_finished;
+
+
   reg [2-1:0] cmpr_crossr;              // perhaps add _transition? or cmpr_
 
   wire cmpr_cross_up     = cmpr_crossr == 2'b10;
@@ -204,7 +210,8 @@ module adc_modulation (
   assign monitor[0] = reset_n;
   assign monitor[1] = adc_measure_valid;
 
-  assign monitor[2] = sigmux;
+  // assign monitor[2] = sigmux;
+  assign monitor[2] = not_finished;
   assign monitor[3] = (state == `STATE_FAST_ABOVE_START);
   assign monitor[4] = (state == `STATE_FAST_BELOW_START);
   assign monitor[5] = (state == `STATE_RUNDOWN);
@@ -300,20 +307,17 @@ module adc_modulation (
 
 
       if(sigmux )
-        begin
-          // while integrating the signal
-          // increment aperture clk count
           clk_count_sigmux <= clk_count_sigmux + 1;
-
-        end
 
 
       // aperture count termination condition.
       if(clk_count_sigmux >= p_clk_count_aperture)
         begin
-          // turn off signal input
+          // turn off signal input if on.
           sigmux  <= 0;
 
+          // indicate we finished
+          not_finished <= 0;
         end
 
 
@@ -336,13 +340,14 @@ module adc_modulation (
 
             clk_count_refmux_reset <= 0;   // clear count to start
 
-            clk_count_down   <= p_clk_count_reset;
+            clk_count_down  <= p_clk_count_reset;
 
-            // JA
             sigmux          <= 0;
+            not_finished    <= 0;
+
             refmux          <= `REFMUX_RESET;
 
-            cmpr_latch_ctl          <= 1; // disable comparator, enable latch
+            cmpr_latch_ctl  <= 1; // disable comparator, enable latch
           end
 
 
@@ -360,6 +365,8 @@ module adc_modulation (
 
             // turn on signal input, to start signal integration
             sigmux            <= 1;
+            not_finished <= 1;
+
             refmux            <= `REFMUX_NONE; // turn off reset.     // TODO think this is correct. we don't want to increment signal count, while refmux is held in reset.
 
             // clear counts
@@ -478,7 +485,7 @@ module adc_modulation (
           if(clk_count_down == 0)
             begin
               // signal integration finished.
-              if( !sigmux)
+              if( !not_finished)
 
                 if(p_use_fast_rundown)
                   begin
@@ -605,6 +612,8 @@ module adc_modulation (
 
                 // turn off sigmux, and reset integrator
                 sigmux                  <= 0;
+                not_finished            <= 0;
+
                 refmux                  <= `REFMUX_RESET;
 
                 // counts
