@@ -62,18 +62,19 @@
 
 
 // adc counts
-`define REG_ADC_CLK_COUNT_REFMUX_NEG    41
-`define REG_ADC_CLK_COUNT_REFMUX_POS    42
-`define REG_ADC_CLK_COUNT_REFMUX_BOTH     43      // CONSIDER rename _BOTH
-
-`define REG_ADC_CLK_COUNT_RSTMUX        40
-`define REG_ADC_CLK_COUNT_SIGMUX       44
+`define REG_ADC_CLK_COUNT_REFMUX_NEG    40
+`define REG_ADC_CLK_COUNT_REFMUX_POS    41
+`define REG_ADC_CLK_COUNT_REFMUX_BOTH   42
+`define REG_ADC_CLK_COUNT_RSTMUX        43
+`define REG_ADC_CLK_COUNT_SIGMUX        44
 
 
 // extra stat counts.
 `define REG_ADC_STAT_COUNT_REFMUX_POS_UP  50
 `define REG_ADC_STAT_COUNT_REFMUX_NEG_UP  51
 `define REG_ADC_STAT_COUNT_CMPR_CROSS_UP  52
+
+
 
 
 module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,   4 bytes data.
@@ -263,17 +264,17 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
               /////
               // adc
-              `REG_ADC_P_CLK_COUNT_APERTURE:          out <= reg_adc_p_clk_count_aperture << 8;     // clk_count_sample_n clk_time_sample_clksample_time ??
-              `REG_ADC_P_CLK_COUNT_RESET:   out <= reg_adc_p_clk_count_reset << 8;
+              `REG_ADC_P_CLK_COUNT_APERTURE:      out <= reg_adc_p_clk_count_aperture << 8;     // clk_count_sample_n clk_time_sample_clksample_time ??
+              `REG_ADC_P_CLK_COUNT_RESET:         out <= reg_adc_p_clk_count_reset << 8;
 
 
               // adc inputs to module, and spi readable outputs
-              `REG_ADC_CLK_COUNT_REFMUX_NEG:    out <= reg_adc_clk_count_refmux_neg << 8;
-              `REG_ADC_CLK_COUNT_REFMUX_POS:    out <= reg_adc_clk_count_refmux_pos << 8;
+              `REG_ADC_CLK_COUNT_REFMUX_NEG:      out <= reg_adc_clk_count_refmux_neg << 8;
+              `REG_ADC_CLK_COUNT_REFMUX_POS:      out <= reg_adc_clk_count_refmux_pos << 8;
               `REG_ADC_CLK_COUNT_REFMUX_BOTH:     out <= reg_adc_clk_count_refmux_both << 8;
 
-              `REG_ADC_CLK_COUNT_RSTMUX:        out <= reg_adc_clk_count_rstmux << 8;
-              `REG_ADC_CLK_COUNT_SIGMUX:        out <= reg_adc_clk_count_sigmux << 8;
+              `REG_ADC_CLK_COUNT_RSTMUX:          out <= reg_adc_clk_count_rstmux << 8;
+              `REG_ADC_CLK_COUNT_SIGMUX:          out <= reg_adc_clk_count_sigmux << 8;
 
               `REG_ADC_STAT_COUNT_REFMUX_POS_UP:  out <=   reg_adc_stat_count_refmux_pos_up << 8;
               `REG_ADC_STAT_COUNT_REFMUX_NEG_UP:  out <=  reg_adc_stat_count_refmux_neg_up << 8;
