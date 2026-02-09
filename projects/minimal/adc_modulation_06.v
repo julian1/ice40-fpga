@@ -113,7 +113,7 @@ module adc_modulation (
   output reg [32-1:0] clk_count_refmux_neg_last,
   output reg [32-1:0] clk_count_refmux_pos_last,
   output reg [24-1:0] clk_count_refmux_rd_last,
-  output reg [32-1:0] clk_count_mux_sig_last,      // names are correct. aperture is the control parameter,  and mux_sig_count is the current clk count for signal duration,
+  output reg [32-1:0] clk_count_sigmux_last,      // names are correct. aperture is the control parameter,  and sigmux_count is the current clk count for signal duration,
 
 
 
@@ -165,7 +165,7 @@ module adc_modulation (
   reg [32-1:0] clk_count_refmux_neg;
   reg [32-1:0] clk_count_refmux_pos;
   reg [24-1:0] clk_count_refmux_rd;
-  reg [32-1:0] clk_count_mux_sig ;      // should be the same as p_aperture.  eg. 5sec*20MHz=100m count. won't fit in 24 bit value. would need to split between read registers.
+  reg [32-1:0] clk_count_sigmux ;      // should be the same as p_aperture.  eg. 5sec*20MHz=100m count. won't fit in 24 bit value. would need to split between read registers.
 
 
   // stats
@@ -299,13 +299,13 @@ module adc_modulation (
         begin
           // while integrating the signal
           // increment aperture clk count
-          clk_count_mux_sig <= clk_count_mux_sig + 1;
+          clk_count_sigmux <= clk_count_sigmux + 1;
 
         end
 
 
       // aperture count termination condition.
-      if(clk_count_mux_sig >= p_clk_count_aperture)
+      if(clk_count_sigmux >= p_clk_count_aperture)
         begin
           // turn off signal input
           sigmux  <= 0;
@@ -362,7 +362,7 @@ module adc_modulation (
             clk_count_refmux_neg  <= 0;
             clk_count_refmux_pos  <= 0;
             clk_count_refmux_rd   <= 0;
-            clk_count_mux_sig     <= 0;
+            clk_count_sigmux     <= 0;
 
             /////////////////////////////
             // perhaps should do at reset/ done state.
@@ -605,11 +605,11 @@ module adc_modulation (
 
                 // counts
                 clk_count_refmux_reset_last <= clk_count_refmux_reset;    // this doesn't work. reports 0.
-                clk_count_refmux_neg_last  <= clk_count_refmux_neg;
-                clk_count_refmux_pos_last  <= clk_count_refmux_pos;
-                clk_count_refmux_rd_last   <= clk_count_refmux_rd;
-                clk_count_mux_sig_last    <= clk_count_mux_sig;                  // aperture. is the ctrl parameter for signal introduced..
-                                                                            // TODO. rename clk_count_mux_sig.
+                clk_count_refmux_neg_last   <= clk_count_refmux_neg;
+                clk_count_refmux_pos_last   <= clk_count_refmux_pos;
+                clk_count_refmux_rd_last    <= clk_count_refmux_rd;
+                clk_count_sigmux_last       <= clk_count_sigmux;                  // aperture. is the ctrl parameter for signal introduced..
+                                                                            // TODO. rename clk_count_sigmux.
 
                 // stats
                 stat_count_refmux_pos_up_last   <= stat_count_refmux_pos_up ; // OK. this works.
