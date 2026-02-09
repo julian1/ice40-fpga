@@ -81,7 +81,7 @@ module adc_modulation (
   input           cmpr_val,
 
   // perhaps rename p_cc_aperture, p_cc_fix  etc.
-  input [32-1:0]  p_clk_count_aperture,
+  input [32-1:0]  p_clk_count_aperture,   // considuer rename ru_aperture  or just clk_count_runup
   input [24-1:0]  p_clk_count_reset,      // useful if running stand-alone,
   input [24-1:0]  p_clk_count_fix,
   inout [24-1:0]  p_clk_count_var,
@@ -173,9 +173,8 @@ module adc_modulation (
 
 
   // better name.
-  // different from sigmux - because we may not turn on sigmux
-  // integration not finished
-  reg aperture_ok;
+  // rename in_runup.  aperture_ok perhaps.
+  reg in_runup;
 
 
   reg [2-1:0] cmpr_crossr;              // perhaps add _transition? or cmpr_
@@ -200,7 +199,7 @@ module adc_modulation (
   assign monitor[1] = adc_measure_valid;
 
   // assign monitor[2] = sigmux;
-  assign monitor[2] = aperture_ok;
+  assign monitor[2] = in_runup;
   assign monitor[3] = (state == `STATE_FAST_ABOVE_START);
   assign monitor[4] = (state == `STATE_FAST_BELOW_START);
   assign monitor[5] = (state == `STATE_RUNDOWN);
@@ -302,7 +301,7 @@ module adc_modulation (
         clk_count_sigmux <= clk_count_sigmux + 1;
 
 
-      if(aperture_ok)
+      if(in_runup)
         clk_count_aperture <= clk_count_aperture + 1;
 
 
@@ -314,7 +313,7 @@ module adc_modulation (
           sigmux  <= 0;
 
           // indicate we finished RU
-          aperture_ok <= 0;
+          in_runup <= 0;
         end
 
 
@@ -341,7 +340,7 @@ module adc_modulation (
 
 
             // hold in reset
-            aperture_ok     <= 0;
+            in_runup        <= 0;
             sigmux          <= 0;
             rstmux          <= 1;
             refmux          <= `REFMUX_NONE;
@@ -363,7 +362,7 @@ module adc_modulation (
             state                 <= `STATE_FIX_POS_START;
 
             // start input integration
-            aperture_ok           <= 1;               // indicate start of aperture
+            in_runup              <= 1;               // start of runup
             sigmux                <= 1;               // turn on input signal
             rstmux                <= 0;               // turn off reset
             refmux                <= `REFMUX_NONE;
@@ -484,8 +483,8 @@ module adc_modulation (
         `STATE_VAR2:
           if(clk_count_down == 0)
             begin
-              // signal integration already finished.
-              if( !aperture_ok)
+              // runup already finished.
+              if( !in_runup)
 
                 if(p_use_fast_rundown)
                   begin
@@ -610,7 +609,7 @@ module adc_modulation (
 
 
                 // hold in reset
-                aperture_ok     <= 0;
+                in_runup        <= 0;
                 sigmux          <= 0;
                 rstmux          <= 1;
                 refmux          <= `REFMUX_NONE;
