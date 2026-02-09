@@ -319,7 +319,8 @@ module top (
 
     // outputs
     .pc_sw_o( sequence_acquisition_pc_sw  ),
-    .azmux_o (    sequence_acquisition_azmux  ),
+    .azmux_o (    sequence_acquisition_azmux ),
+
 
     .leds_o(      sequence_acquisition_leds  ),
     .monitor_o(   sequence_acquisition_monitor  ),    // only pass 2 bit to the az monitor
@@ -434,11 +435,13 @@ module top (
 
   wire [4-1:0]  sequence_acquisition2_leds;
   wire [8-1:0]  sequence_acquisition2_monitor;
-  // wire [4-1:0]  sequence_acquisition2_status;
 
   // with two sequence modules,
   // we would need to encode this in output vector if we wanted both values available.
   wire [3-1:0]  sequence_acquisition2_sample_idx_last;
+  wire          sequence_acquisitionr2_first_last;
+
+
 
   wire  sequence_acquisition2_adc_reset_n;
 
@@ -470,9 +473,9 @@ module top (
 
     .leds_o(      sequence_acquisition2_leds  ),
     .monitor_o(   sequence_acquisition2_monitor  ),    // only pass 2 bit to the az monitor
-    // .status_last_o(  sequence_acquisition2_status ),
 
-    . sample_idx_last_o( sequence_acquisition2_sample_idx_last),
+    .sample_idx_last_o( sequence_acquisition2_sample_idx_last),
+    .first_last_o(sequence_acquisitionr2_first_last),
 
     .adc_reset_no(  sequence_acquisition2_adc_reset_n )
 
@@ -611,7 +614,7 @@ module top (
 
     4'b0,
 
-    {  1'b0,  reg_sa_p_seq_n[ 3-1: 0] ,  1'b0,  sequence_acquisition2_sample_idx_last },
+    {  1'b0,  reg_sa_p_seq_n[ 3-1: 0] ,  sequence_acquisitionr2_first_last,  sequence_acquisition2_sample_idx_last },
 
     { 4'b0, hw_flags_i } ,
 

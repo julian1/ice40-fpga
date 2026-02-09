@@ -64,10 +64,13 @@ module sequence_acquisition (
   input adc_measure_valid_i,
 
   // outputs.
-  output reg adc_reset_no,  // rename _n_o. perhaps or trig. is even ok.
+  output reg adc_reset_no,              // rename _n_o. perhaps or trig. is even ok.
 
   output reg [ 2-1: 0]  pc_sw_o,      // TODO  fix rename pc_sw_o
   output reg [ 4-1:0 ] azmux_o,
+
+
+  output reg first_last_o,        //  first variable -  lagged
 
 
   //  - status_o should be treated generically.  just like monitor_o and leds_o.
@@ -93,6 +96,7 @@ module sequence_acquisition (
 
 
   reg  [3-1: 0] sample_idx = 0;
+  reg           first = 0;                  // after trigger.  mcu reset.
 
 
 
@@ -133,6 +137,9 @@ module sequence_acquisition (
             adc_reset_no  <= 0;
 
             sample_idx    <= 0;
+
+            first         <= 1;
+
 
             // avoid 0 which can be confused with first seq
             sample_idx_last_o <= 3'b111;
@@ -220,6 +227,9 @@ module sequence_acquisition (
 
 
               sample_idx_last_o  <= sample_idx;
+
+              first_last_o    <= first;   // lagged, to be correct when do spi read of status register
+              first           <= 0;
 
               /*
                 avoid modulo
