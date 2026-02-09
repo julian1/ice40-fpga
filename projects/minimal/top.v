@@ -396,6 +396,7 @@ module top (
   wire [32-1:0] adc_clk_count_refmux_pos_last;
   wire [24-1:0] adc_clk_count_refmux_both_last;
   wire [32-1:0] adc_clk_count_sigmux_last;
+  wire [32-1:0] adc_clk_count_aperture_last;
 
   wire [24-1 :0] adc_stat_count_refmux_pos_up_last;
   wire [24-1 :0] adc_stat_count_refmux_neg_up_last;
@@ -441,6 +442,7 @@ module top (
     .clk_count_refmux_pos_last(  adc_clk_count_refmux_pos_last),
     .clk_count_refmux_both_last(   adc_clk_count_refmux_both_last),
     .clk_count_sigmux_last(  adc_clk_count_sigmux_last ),
+    .clk_count_aperture_last( adc_clk_count_aperture_last),
 
     // stats
     .stat_count_refmux_pos_up_last( adc_stat_count_refmux_pos_up_last),
@@ -725,6 +727,8 @@ module top (
 
     .  reg_adc_clk_count_rstmux( { 8'b0, adc_clk_count_rstmux_last } ) ,
     .  reg_adc_clk_count_sigmux( adc_clk_count_sigmux_last ),
+    .  reg_adc_clk_count_aperture( adc_clk_count_sigmux_last),
+
 
     .  reg_adc_stat_count_refmux_pos_up( { 8'b0, adc_stat_count_refmux_pos_up_last } ),
     .  reg_adc_stat_count_refmux_neg_up( { 8'b0, adc_stat_count_refmux_neg_up_last } ) ,
