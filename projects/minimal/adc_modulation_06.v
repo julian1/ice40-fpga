@@ -212,27 +212,6 @@ module adc_modulation (
   assign monitor[6] = 1'b0;
   assign monitor[7] = 1'b0;
 
-  /*
-    EXTR.
-    this line restores the timing analysis.  but what does the ':+' operator do. distinct from '+:'
-    assigning at pos 2?
-  */
-  // assign monitor[6 :+ 2 ]  = 2'b0;
-  // assign monitor  = 6'b0;
-
-  //
-  // assign monitor[6 +: 2 ]  = 2'b0;
-
-/*
-  // assign monitor[ 2 +: 4]  = { sigmux, refmux };      // reference current, better name?
-  assign monitor[ 2 +: 4]  = {
-
-        (state == `STATE_RUNDOWN ),
-        (state == `STATE_FAST_BELOW_START),
-        (state == `STATE_FAST_ABOVE_START),
-        sigmux
-      };      // reference current, better name?
-*/
 
 
 
@@ -322,49 +301,23 @@ module adc_modulation (
           // increment aperture clk count
           clk_count_mux_sig <= clk_count_mux_sig + 1;
 
-          // ======================================
-          // aperture count termination condition.
-          // changed oct 30, 2023..  IMPORTANT. DIFFERENCEs MAY AFFECT calibration calculation.
-          // should be a count down
-          // now revert.
-          // NO. it may have been mcu roudinig. issue. reg_aperture. has the off-by-one. calculation
-          // NO. we have it configured differently.
-          // OK. it doesn't matter whether aperture runs - for one more extra clk cycle. or one less here.  nov 3. 2023.
-          //    eg. clk termination condition doesn't matter.
-          //    instead what matters is that the count is recorded in the same way as the counts for the reference currents.
-          //    so mcu should use the returned count, rather than the aperture control parameter
-          // =======================================
-
-          // have we reached end of aperture
-          if(clk_count_mux_sig >= p_clk_count_aperture)                  // original. slope-adc-3.
-          // if(clk_count_mux_sig >= (p_clk_count_aperture - 1) )              // changed oct 30, 2023..  IMPORTANT. DIFFERENCEs MAY AFFECT calibration calculation.
-
-            begin
-              // turn off signal input
-              sigmux  <= 0;
-
-            end
         end
 
 
+      // aperture count termination condition.
+      if(clk_count_mux_sig >= p_clk_count_aperture)
+        begin
+          // turn off signal input
+          sigmux  <= 0;
+
+        end
+
+
+
+      ///////////////////////////////////
+
       case (state)
-/*
 
-        `STATE_DONE:
-          begin
-            // default rest/park state
-
-            // disable comparator,
-            cmpr_latch_ctl <= 1;
-
-            // indicate signal valid, to indicate interuptable status, to enable trigger
-            adc_measure_valid <= 1;
-
-            // turn off sigmux, and reset integrator
-            sigmux            <= 0;
-            refmux            <= `REFMUX_RESET;
-          end
-*/
 
         `STATE_RESET_START:
 
