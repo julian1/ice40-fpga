@@ -19,10 +19,8 @@
 // disdvantage is that it is easy to forget the backtick
 
 
-// change one-hot?.
+// consider use one-hot encoding?
 
-// JA
-// `define STATE_DONE          0  // initial state
 
 `define STATE_RESET_START    0
 
@@ -41,9 +39,8 @@
 `define STATE_RUNDOWN_START 15
 `define STATE_RUNDOWN       16
 
-//  TODO fixme. nov  2023. states removed.
-`define STATE_PRERUNDOWN    18
 `define STATE_PRERUNDOWN_START 19
+`define STATE_PRERUNDOWN    18
 
 `define STATE_FAST_BELOW_START 20
 `define STATE_FAST_BELOW    21
@@ -53,17 +50,12 @@
 
 
 
-/*
-  ref mux state.
-  Note that this combines two 4053 switch..
-*/
 
-`define REFMUX_NONE        2'b00      // none - is required, because we turn off both pos-neg ref, to balance. switching.
+`define REFMUX_NONE        2'b00
 `define REFMUX_POS         2'b01
 `define REFMUX_NEG         2'b10
 `define REFMUX_BOTH        2'b11
 
-// `define REFMUX_RESET       3'b100
 
 
 
@@ -73,7 +65,7 @@ module adc_modulation (
 
 
   input           clk,
-  input           reset_n ,
+  input           reset_n,
 
 
 
@@ -85,12 +77,13 @@ module adc_modulation (
   input [24-1:0]  p_clk_count_reset,      // useful if running stand-alone,
   input [24-1:0]  p_clk_count_fix,
   inout [24-1:0]  p_clk_count_var,
-  input           p_use_slow_rundown,     // TODO prefix with p_. to indicate . an adc control parameter.
+
+  input           p_use_slow_rundown,
   input           p_use_fast_rundown,
 
 
   // outputs
-  output reg adc_measure_valid,           // to indicate/assert completion, and valid measurement
+  output reg adc_measure_valid,           // indicate/assert completion, and valid measurement
 
   // now a wire
   output wire [ 8-1:0]  monitor,
@@ -172,8 +165,7 @@ module adc_modulation (
   /////////////////////////
 
 
-  // better name.
-  // rename in_runup.  aperture_ok perhaps.
+  // better name.  aperture_ok perhaps.
   reg in_runup;
 
 
@@ -193,7 +185,6 @@ module adc_modulation (
 
 
 
-  // reg [ 4-1:0]  monitor_;
 
   assign monitor[0] = reset_n;
   assign monitor[1] = adc_measure_valid;
@@ -213,9 +204,9 @@ module adc_modulation (
 
   /*
       nov 12. 2023.
-    we double flop.
-    for meta-stability.  eg. to avoid read/use twice in same block, and can be evaluated differently.
-    but perhaps review.
+    we double flop.  for meta-stability.
+    ie. avoid read/use twice in same block, and can be evaluated differently.
+    perhaps review.
   */
   reg cmpr_val_last;
 
@@ -306,7 +297,7 @@ module adc_modulation (
 
 
 
-      // RU aperture termination condition.
+      // runup termination condition
       if(clk_count_aperture >= p_clk_count_aperture)
         begin
           // stop signal input integration
@@ -331,15 +322,15 @@ module adc_modulation (
             // setup next state to advance to if reset_n not asserted
             state           <= `STATE_RESET;
 
-            // indicate no measurement available
+            // indicate no valid measurement available
             adc_measure_valid <= 0;
 
-            clk_count_rstmux <= 0;   // clear count to start
+            clk_count_rstmux <= 0;   // clear rst count here
 
             clk_count_down  <= p_clk_count_reset;
 
 
-            // hold in reset
+            // hold integrator in reset
             in_runup        <= 0;
             sigmux          <= 0;
             rstmux          <= 1;
@@ -362,10 +353,10 @@ module adc_modulation (
             state                 <= `STATE_FIX_POS_START;
 
             // start input integration
-            in_runup              <= 1;               // start of runup
-            sigmux                <= 1;               // turn on input signal
+            in_runup              <= 1;               // start runup
+            sigmux                <= 1;               // turn on signal input
             rstmux                <= 0;               // turn off reset
-            refmux                <= `REFMUX_NONE;
+            refmux                <= `REFMUX_NONE;    // keep refmux off
 
             // clear counts
             clk_count_refmux_neg  <= 0;
@@ -615,19 +606,18 @@ module adc_modulation (
                 refmux          <= `REFMUX_NONE;
 
 
-
                 // counts
                 clk_count_rstmux_last       <= clk_count_rstmux;    // this doesn't work. reports 0.
                 clk_count_refmux_neg_last   <= clk_count_refmux_neg;
                 clk_count_refmux_pos_last   <= clk_count_refmux_pos;
                 clk_count_refmux_both_last    <= clk_count_refmux_both;
-                clk_count_sigmux_last       <= clk_count_sigmux;                  // aperture. is the ctrl parameter for signal introduced..
+                clk_count_sigmux_last       <= clk_count_sigmux;
                 clk_count_aperture_last     <= clk_count_aperture;
 
                 // stats
-                stat_count_refmux_pos_up_last   <= stat_count_refmux_pos_up ; // OK. this works.
-                stat_count_refmux_neg_up_last   <= stat_count_refmux_neg_up ;
-                stat_count_cmpr_cross_up_last <= stat_count_cmpr_cross_up ;
+                stat_count_refmux_pos_up_last   <= stat_count_refmux_pos_up;
+                stat_count_refmux_neg_up_last   <= stat_count_refmux_neg_up;
+                stat_count_cmpr_cross_up_last <= stat_count_cmpr_cross_up;
 
                 stat_count_var_up_last       <= stat_count_var_up;
                 stat_count_var_down_last     <= stat_count_var_down;
@@ -652,17 +642,6 @@ module adc_modulation (
 
 
 
-
-
-/*
-        // adc is always interruptable/ can be triggered to start at any time.
-        if(adc_measure_trig == 1)
-          begin
-
-            state <= `STATE_RESET_START;
-
-          end
-*/
     end
 
 
