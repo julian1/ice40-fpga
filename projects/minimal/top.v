@@ -727,7 +727,7 @@ module top (
 
     .  reg_adc_clk_count_rstmux( { 8'b0, adc_clk_count_rstmux_last } ) ,
     .  reg_adc_clk_count_sigmux( adc_clk_count_sigmux_last ),
-    .  reg_adc_clk_count_aperture( adc_clk_count_sigmux_last),
+    .  reg_adc_clk_count_aperture( adc_clk_count_aperture_last),
 
 
     .  reg_adc_stat_count_refmux_pos_up( { 8'b0, adc_stat_count_refmux_pos_up_last } ),
