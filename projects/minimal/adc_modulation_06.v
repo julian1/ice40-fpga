@@ -307,13 +307,13 @@ module adc_modulation (
 
 
 
-      // aperture count termination condition.
+      // RU aperture termination condition.
       if(clk_count_aperture >= p_clk_count_aperture)
         begin
-          // turn off signal input if on.
+          // stop signal input integration
           sigmux  <= 0;
 
-          // indicate we finished
+          // indicate we finished RU
           aperture_ok <= 0;
         end
 
@@ -362,7 +362,7 @@ module adc_modulation (
           begin
             state                 <= `STATE_FIX_POS_START;
 
-            // start
+            // start input integration
             aperture_ok           <= 1;               // indicate start of aperture
             sigmux                <= 1;               // turn on input signal
             rstmux                <= 0;               // turn off reset
