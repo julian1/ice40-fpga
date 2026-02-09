@@ -1,10 +1,8 @@
 
 /*
   - can have heartbeat timer. over spi.
-      but don't want to spew spi tranmsission emi during acquisition.
+      but should avoid spewing spi tranmsission emi during ordinary acquisition.
 
-  - if have more than one dac. then just create another register. very clean.
-   - perhaps instead of !cs or !cs2.  could write macro  or asserted_n(cs ) etc
 */
 
 
@@ -25,8 +23,7 @@
 
 
 
-// line encoding for cs of spi devices.  decimal
-// TODO prefix with SPI
+// cs assert encoding for different spi devices.  decimal
 `define SPI_CS_VEC_DEASSERT             3'd0
 `define SPI_CS_VEC_FPGA0                3'd1
 `define SPI_CS_VEC_4094                 3'd2
@@ -132,45 +129,16 @@ module top (
 );
 
 
-  // dec 2024. after changing pcb comparator output
+  // dec 2024. after changing pcb comparator output polarity
   wire cmpr_val;
   assign cmpr_val = ! adc_cmpr_i;
 
 
 
-  // avoid leaving output floating. else digital isolator will see floating cmos input, and draw excess current.
-  // TODO review. this. july 2024.
-  // assign unused3_o  = 1;
-
 
   ////////////////////////////////////////
   // spi muxing
 
-  /*
-    TODO. rather than pulling all these out in vectors.
-          we should combine in line/place. the same way we do mux align.
-          eg.
-
-      . vec_cs(  {  dummy,  spi_4094_strobe_ctl  }   ),
-      ote. we are already doing this for polarity
-  */
-
-/*
-  HERE
-  wire [32-1:0] reg_spi_mux ;// = 8'b00000001; // test
-
-  assign spi_glb_clk          = reg_spi_mux == 8'b0 ? 1 : SCK;      // park hi
-  assign spi_glb_mosi         = reg_spi_mux == 8'b0 ? 1 : SDI;      // park hi
-
-  // cs
-  assign spi_4094_strobe_ctl  = reg_spi_mux ==   8'b01 ?  (~ SPI_CS2)  : 0;     // active hi, park lo
-  assign SPI_DAC_SS           = reg_spi_mux ==   8'b10 ?  SPI_CS2 : 1;     // active lo
-//  assign SPI_ISO_DAC_CS       = reg_spi_mux ==  8'b100 ?  SPI_CS2 : 1;     // active lo
-//  assign SPI_ISO_DAC_CS2      = reg_spi_mux == 8'b1000 ?  SPI_CS2 : 1;     // active lo
-*/
-
-
-  /////////////////////////
 
 
   // spi lines - silence if active device is the fpga/register set
@@ -184,7 +152,6 @@ module top (
 
 
 
-  // TODO - rename these.  should be spi_cs_ ...  eg. CS prefix at the  start.
 
   // spi CS. line decoding.
   wire spi_cs_register_set ;
@@ -212,14 +179,13 @@ module top (
 
 
 
-/*
-  // would be nice to project these in a mode,
-  // but if there's a spi problem - we are unlikely to get it into a mode.
+  /*
+    // can use this to test spi liines
 
-  assign monitor_o[0]  = spi_glb_clk;
-  assign monitor_o[1]  = spi_glb_mosi;
-  assign monitor_o[2]  = SPI_DAC_SS     ;
-*/
+    assign monitor_o[0]  = spi_glb_clk;
+    assign monitor_o[1]  = spi_glb_mosi;
+    assign monitor_o[2]  = SPI_DAC_SS     ;
+  */
 
 
 
@@ -642,34 +608,15 @@ module top (
 
     // todo consider - add adc_status,  and sa_status
 
-    4'b0, // {  4'b0, reg_seq_mode[ 4-1 : 0]  } ,    // 4 bits
+    4'b0,
 
     {  1'b0,  reg_sa_p_seq_n[ 3-1: 0] ,  1'b0,  sequence_acquisition2_sample_idx_last },
 
-    // HERE
-    // { reg_spi_mux [ 4-1: 0 ],  hw_flags_i } ,
     { 4'b0, hw_flags_i } ,
 
     { 8'b10101010 }  // magic
  };
 
-
-
-/*
-    8'b0 ,
-    monitor,                          // don't see having the monitor readable through a different register is useful.   a git commit or crc would be useful.
-                                      // add a count, as a transactional read lock.
-    HW2,  HW1,  HW0,
-
-    reg_sa_arm_trigger[0],            // ease having to do a separate register read, to retrieve state.
-    sequence_acquisition_status_out, // 3 bits
-    adc_measure_valid,
-
-    // HW2,  HW1,  HW0 ,   4'b0,  outputs_vec[ `IDX_SPI_INTERRUPT_CTL ] ,
-
-    3'b0,
-    SWITCH_SENSE_OUT, DCV_OVP_OUT, OHMS_OVP_OUT, SUPPLY_SENSE_OUT, UNUSED_2
-*/
 
 
 
@@ -690,16 +637,14 @@ module top (
     // . dout( SDO /* SPI_MISO */ ),        // drive miso output pin directly.
 
 
-    // outputs general
-    // . reg_spi_mux(reg_spi_mux), HERE
-
+    // inputs
     . reg_4094_oe(reg_4094_oe ) ,
     . reg_mode(reg_mode),
     . reg_direct(reg_direct),
-    // . reg_seq_mode ( reg_seq_mode  ) ,
 
-    // inputs
+    // outputs
     . reg_status( reg_status ),
+
 
     // sample/sequence acquisition
     . reg_sa_p_clk_count_precharge( reg_sa_p_clk_count_precharge),
@@ -710,17 +655,13 @@ module top (
     . reg_sa_p_seq2( reg_sa_p_seq2),
     . reg_sa_p_seq3( reg_sa_p_seq3),
 
-    // . sa_trig_i( sa_trig_i),
-
-
     // adc outputs
     . reg_adc_p_clk_count_aperture( reg_adc_p_clk_count_aperture),
     . reg_adc_p_clk_count_reset( reg_adc_p_clk_count_reset ),
 
 
     // adc inputs
-    // note we have to pad, to match register_set 32bit regs.
-    // perhaps change register_set.
+    // pad to match register_set 32bit regs.
     .  reg_adc_clk_count_refmux_neg( adc_clk_count_refmux_neg_last) ,
     .  reg_adc_clk_count_refmux_pos( adc_clk_count_refmux_pos_last) ,
     .  reg_adc_clk_count_refmux_both( { 8'b0, adc_clk_count_refmux_both_last } ) ,
@@ -742,31 +683,4 @@ endmodule
 
 
 
-/*
-
-  // OLD.
-
-  // spi
-  input  SPI_CLK,
-  input  SPI_CS,
-  input  SPI_MOSI,
-  input  SPI_CS2,
-  output SPI_MISO,
-  // output b
-
-  input U1008_4094_DATA,
-  input LINE_SENSE_OUT,
-  input SWITCH_SENSE_OUT,
-  input DCV_OVP_OUT,
-  input OHMS_OVP_OUT,
-  input SUPPLY_SENSE_OUT,
-  input UNUSED_2,                    // change name UNUSED_2_OUT
-
-  //
-  output SPI_INTERRUPT_CTL,    // should be modeal. eg. same as meas complete
-  output MEAS_COMPLETE_CTL,
-    output CMPR_LATCH_CTL,
-
-  ////////////
-*/
 

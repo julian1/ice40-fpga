@@ -128,9 +128,6 @@ module adc_modulation (
 );
 
 
-  // wire refmux[ 3 - 1 ] ;    //= { rstmux, refmux_ }   ;
-
-
 
 
   reg [5-1:0]   state = 0; // RESET_START;

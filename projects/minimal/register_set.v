@@ -29,16 +29,10 @@
 
 `include "defines.v"    // `CLK_FREQ for default calculation
 
-// prefix REG_GEN_ ?
-// no.  just create a generic. general CR / control register.  for 4094 oe, perhaps the spi_mux.
-// `define REG_SPI_MUX                     8
 `define REG_4094_OE                     9
 `define REG_MODE                        12
 `define REG_DIRECT                      14
 `define REG_STATUS                      17
-// `define REG_SEQ_MODE                    18   // just pass-through communcation. from input reg to the status register out.
-                                              // treat as general register, since not used as a parameter that controls/influences any fsm.
-
 
 
 ///////////////////////
@@ -52,10 +46,9 @@
 `define REG_SA_P_SEQ2                   24
 `define REG_SA_P_SEQ3                   25
 
-// `define REG_SA_P_TRIG                     26
 
 
-// adc parameters
+// adc control parameters
 `define REG_ADC_P_CLK_COUNT_APERTURE    30
 `define REG_ADC_P_CLK_COUNT_RESET       31
 
@@ -70,7 +63,7 @@
 `define REG_ADC_CLK_COUNT_APERTURE      45
 
 
-// extra stat counts.
+// adc extra stat counts.
 `define REG_ADC_STAT_COUNT_REFMUX_POS_UP  50
 `define REG_ADC_STAT_COUNT_REFMUX_NEG_UP  51
 `define REG_ADC_STAT_COUNT_CMPR_CROSS_UP  52
@@ -242,42 +235,37 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
               // default:     out <=  in[8 - 2  : 0] << 8;
               // default:     out <=  in[8 - 1  : 0] << 8 ;     // return passed address
 
+              // general
+              `REG_4094_OE:                     out <= reg_4094_oe << 8;
+              `REG_MODE:                        out <= reg_mode << 8;   // ok..
+              `REG_DIRECT:                      out <= reg_direct << 8;
 
-              // `REG_SPI_MUX:   out <= reg_spi_mux << 8;
-              `REG_4094_OE:      out <= reg_4094_oe << 8;
-              `REG_MODE:      out <= reg_mode << 8;   // ok..
-              `REG_DIRECT:    out <= reg_direct << 8;
-              // `REG_SEQ_MODE:      out <= reg_seq_mode << 8;
-
-              `REG_STATUS:    out <= reg_status << 8;
-
+              `REG_STATUS:                      out <= reg_status << 8;
 
               ////////
               // sa
-              `REG_SA_P_SEQ_N:            out <= reg_sa_p_seq_n << 8;
-              `REG_SA_P_CLK_COUNT_PRECHARGE:  out <= reg_sa_p_clk_count_precharge << 8;
-              `REG_SA_P_SEQ0:         out <= reg_sa_p_seq0 << 8;
-              `REG_SA_P_SEQ1:         out <= reg_sa_p_seq1 << 8;
-              `REG_SA_P_SEQ2:         out <= reg_sa_p_seq2 << 8;
-              `REG_SA_P_SEQ3:         out <= reg_sa_p_seq3 << 8;
-
-              // `REG_SA_P_TRIG:         out <= reg_sa_p_trig << 8;
+              `REG_SA_P_SEQ_N:                  out <= reg_sa_p_seq_n << 8;
+              `REG_SA_P_CLK_COUNT_PRECHARGE:    out <= reg_sa_p_clk_count_precharge << 8;
+              `REG_SA_P_SEQ0:                   out <= reg_sa_p_seq0 << 8;
+              `REG_SA_P_SEQ1:                   out <= reg_sa_p_seq1 << 8;
+              `REG_SA_P_SEQ2:                   out <= reg_sa_p_seq2 << 8;
+              `REG_SA_P_SEQ3:                   out <= reg_sa_p_seq3 << 8;
 
 
               /////
               // adc
-              `REG_ADC_P_CLK_COUNT_APERTURE:      out <= reg_adc_p_clk_count_aperture << 8;     // clk_count_sample_n clk_time_sample_clksample_time ??
-              `REG_ADC_P_CLK_COUNT_RESET:         out <= reg_adc_p_clk_count_reset << 8;
+              `REG_ADC_P_CLK_COUNT_APERTURE:    out <= reg_adc_p_clk_count_aperture << 8;     // clk_count_sample_n clk_time_sample_clksample_time ??
+              `REG_ADC_P_CLK_COUNT_RESET:       out <= reg_adc_p_clk_count_reset << 8;
 
 
               // adc inputs to module, and spi readable outputs
-              `REG_ADC_CLK_COUNT_REFMUX_NEG:      out <= reg_adc_clk_count_refmux_neg << 8;
-              `REG_ADC_CLK_COUNT_REFMUX_POS:      out <= reg_adc_clk_count_refmux_pos << 8;
-              `REG_ADC_CLK_COUNT_REFMUX_BOTH:     out <= reg_adc_clk_count_refmux_both << 8;
+              `REG_ADC_CLK_COUNT_REFMUX_NEG:    out <= reg_adc_clk_count_refmux_neg << 8;
+              `REG_ADC_CLK_COUNT_REFMUX_POS:    out <= reg_adc_clk_count_refmux_pos << 8;
+              `REG_ADC_CLK_COUNT_REFMUX_BOTH:   out <= reg_adc_clk_count_refmux_both << 8;
 
-              `REG_ADC_CLK_COUNT_RSTMUX:          out <= reg_adc_clk_count_rstmux << 8;
-              `REG_ADC_CLK_COUNT_SIGMUX:          out <= reg_adc_clk_count_sigmux << 8;
-              `REG_ADC_CLK_COUNT_APERTURE:        out <= reg_adc_clk_count_aperture << 8;
+              `REG_ADC_CLK_COUNT_RSTMUX:        out <= reg_adc_clk_count_rstmux << 8;
+              `REG_ADC_CLK_COUNT_SIGMUX:        out <= reg_adc_clk_count_sigmux << 8;
+              `REG_ADC_CLK_COUNT_APERTURE:      out <= reg_adc_clk_count_aperture << 8;
 
               `REG_ADC_STAT_COUNT_REFMUX_POS_UP:  out <=   reg_adc_stat_count_refmux_pos_up << 8;
               `REG_ADC_STAT_COUNT_REFMUX_NEG_UP:  out <=  reg_adc_stat_count_refmux_neg_up << 8;
@@ -300,11 +288,9 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
           case (  bin[MSB-2 : MSB-8 ] )
 
-            // `REG_SPI_MUX:   reg_spi_mux <= bin;
             `REG_4094_OE:      reg_4094_oe    <= bin;
             `REG_MODE:      reg_mode    <= bin;
             `REG_DIRECT:    reg_direct  <= bin;
-            // ` REG_SEQ_MODE:  reg_seq_mode <= bin;
 
             //////////
 
