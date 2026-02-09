@@ -112,7 +112,8 @@ module adc_modulation (
   output reg [32-1:0] clk_count_refmux_neg_last,
   output reg [32-1:0] clk_count_refmux_pos_last,
   output reg [24-1:0] clk_count_refmux_rd_last,
-  output reg [32-1:0] clk_count_sigmux_last,      // names are correct. aperture is the control parameter,  and sigmux_count is the current clk count for signal duration,
+  output reg [32-1:0] clk_count_sigmux_last,
+  output reg [32-1:0] clk_count_aperture_last,              // todo can expose this in the register set, in top.
 
 
 
@@ -127,7 +128,6 @@ module adc_modulation (
   output reg [24-1:0] stat_count_fix_up_last,
   output reg [24-1:0] stat_count_fix_down_last,
   output reg [24-1:0] stat_count_flip_last
-//   output reg [24-1:0] stat_clk_count_rundown_last, // change name. phase rundown.
 
 
 );
@@ -136,23 +136,6 @@ module adc_modulation (
 
   reg [5-1:0]   state = 0; // RESET_START;
 
-  /*
-     EXTR. could be useful to spi query the current state
-    - could then determine that were updated during the reset period. and we don't have to call reset again.
-  */
-
-
-/*
-  // initial begin does seem to be supported.
-  initial begin
-    // state           = `STATE_DONE ;   // 0
-    state           = 0 ;   // 0
-
-    // TODO remove.
-    cmpr_latch_ctl  = 1; // disable comparator,
-
-  end
-*/
 
   //////////////////////////////////////////////////////
   // counters and settings  ...
@@ -164,8 +147,8 @@ module adc_modulation (
   reg [32-1:0] clk_count_refmux_neg;
   reg [32-1:0] clk_count_refmux_pos;
   reg [24-1:0] clk_count_refmux_rd;
-  reg [32-1:0] clk_count_sigmux ;      // should be the same as p_aperture.  eg. 5sec*20MHz=100m count. won't fit in 24 bit value. would need to split between read registers.
-
+  reg [32-1:0] clk_count_sigmux ;
+  reg [32-1:0] clk_count_aperture;
 
   // stats
   reg [24-1:0] stat_count_refmux_pos_up;
@@ -183,10 +166,10 @@ module adc_modulation (
   /////////////////////////
 
 
-  // need better name.
-  // different from sigmux - because we may not turn the signal on.
-  // also polarity
-  reg not_finished;
+  // better name.
+  // different from sigmux - because we may not turn on sigmux
+  // integration not finished
+  reg aperture_ok;
 
 
   reg [2-1:0] cmpr_crossr;              // perhaps add _transition? or cmpr_
@@ -211,7 +194,7 @@ module adc_modulation (
   assign monitor[1] = adc_measure_valid;
 
   // assign monitor[2] = sigmux;
-  assign monitor[2] = not_finished;
+  assign monitor[2] = aperture_ok;
   assign monitor[3] = (state == `STATE_FAST_ABOVE_START);
   assign monitor[4] = (state == `STATE_FAST_BELOW_START);
   assign monitor[5] = (state == `STATE_RUNDOWN);
@@ -310,14 +293,19 @@ module adc_modulation (
           clk_count_sigmux <= clk_count_sigmux + 1;
 
 
+      if(aperture_ok)
+          clk_count_aperture <= clk_count_aperture + 1;
+
+
+
       // aperture count termination condition.
-      if(clk_count_sigmux >= p_clk_count_aperture)
+      if(clk_count_aperture >= p_clk_count_aperture)
         begin
           // turn off signal input if on.
           sigmux  <= 0;
 
           // indicate we finished
-          not_finished <= 0;
+          aperture_ok <= 0;
         end
 
 
@@ -342,9 +330,8 @@ module adc_modulation (
 
             clk_count_down  <= p_clk_count_reset;
 
+            aperture_ok     <= 0;
             sigmux          <= 0;
-            not_finished    <= 0;
-
             refmux          <= `REFMUX_RESET;
 
             cmpr_latch_ctl  <= 1; // disable comparator, enable latch
@@ -361,23 +348,23 @@ module adc_modulation (
         // turn on signal integration, turn off reset, begin two phase runup
         `STATE_SIG_START:
           begin
-            state             <= `STATE_FIX_POS_START;
+            state                 <= `STATE_FIX_POS_START;
 
-            // turn on signal input, to start signal integration
-            sigmux            <= 1;
-            not_finished <= 1;
-
-            refmux            <= `REFMUX_NONE; // turn off reset.     // TODO think this is correct. we don't want to increment signal count, while refmux is held in reset.
+            // start
+            aperture_ok           <= 1;               // indicate start of aperture
+            sigmux                <= 1;               // turn on signal
+            refmux                <= `REFMUX_NONE;    // turn off reset.     // TODO think this is correct. we don't want to increment signal count, while refmux is held in reset.
 
             // clear counts
             clk_count_refmux_neg  <= 0;
             clk_count_refmux_pos  <= 0;
             clk_count_refmux_rd   <= 0;
-            clk_count_sigmux     <= 0;
+            clk_count_sigmux      <= 0;
+            clk_count_aperture    <= 0;
 
             /////////////////////////////
-            // perhaps should do at reset/ done state.
-            // clear the counts
+            // consider do this at reset/ done state.
+            // clear the stat counts
             stat_count_var_up      <= 0;
             stat_count_var_down    <= 0;
             stat_count_fix_up      <= 0;
@@ -484,8 +471,8 @@ module adc_modulation (
         `STATE_VAR2:
           if(clk_count_down == 0)
             begin
-              // signal integration finished.
-              if( !not_finished)
+              // signal integration already finished.
+              if( !aperture_ok)
 
                 if(p_use_fast_rundown)
                   begin
@@ -606,14 +593,12 @@ module adc_modulation (
                 adc_measure_valid <= 1;
 
                 // next transition
-                // state                   <= `STATE_DONE;
                 state                   <= `STATE_RESET_START;
 
 
                 // turn off sigmux, and reset integrator
+                aperture_ok             <= 0;
                 sigmux                  <= 0;
-                not_finished            <= 0;
-
                 refmux                  <= `REFMUX_RESET;
 
                 // counts
@@ -622,7 +607,7 @@ module adc_modulation (
                 clk_count_refmux_pos_last   <= clk_count_refmux_pos;
                 clk_count_refmux_rd_last    <= clk_count_refmux_rd;
                 clk_count_sigmux_last       <= clk_count_sigmux;                  // aperture. is the ctrl parameter for signal introduced..
-                                                                            // TODO. rename clk_count_sigmux.
+                clk_count_aperture_last     <= clk_count_aperture;
 
                 // stats
                 stat_count_refmux_pos_up_last   <= stat_count_refmux_pos_up ; // OK. this works.
