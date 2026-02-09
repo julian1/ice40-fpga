@@ -391,6 +391,7 @@ module top (
 
     . p_use_slow_rundown( 1'b1 ),
     . p_use_fast_rundown( 1'b1 ),
+    . p_use_input_signal( 1'b1 ),
 
     // outputs - ctrl
     .adc_measure_valid( adc_measure_valid),    // OK, fan out back to the sa controllers

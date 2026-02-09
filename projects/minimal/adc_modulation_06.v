@@ -80,6 +80,7 @@ module adc_modulation (
 
   input           p_use_slow_rundown,
   input           p_use_fast_rundown,
+  input           p_use_input_signal,     // whether to swtich in the input signal
 
 
   // outputs
@@ -350,10 +351,10 @@ module adc_modulation (
             state                 <= `STATE_FIX_POS_START;
 
             // start input integration
-            in_runup              <= 1;               // start runup
-            sigmux                <= 1;               // turn on signal input
-            rstmux                <= 0;               // turn off reset
-            refmux                <= `REFMUX_NONE;    // keep refmux off
+            in_runup              <= 1;                     // start runup
+            sigmux                <= p_use_input_signal;    // turn on signal input
+            rstmux                <= 0;                     // turn off reset
+            refmux                <= `REFMUX_NONE;          // keep refmux off
 
             // clear counts
             clk_count_refmux_neg  <= 0;
@@ -607,20 +608,21 @@ module adc_modulation (
                 clk_count_rstmux_last       <= clk_count_rstmux;    // this doesn't work. reports 0.
                 clk_count_refmux_neg_last   <= clk_count_refmux_neg;
                 clk_count_refmux_pos_last   <= clk_count_refmux_pos;
-                clk_count_refmux_both_last    <= clk_count_refmux_both;
+                clk_count_refmux_both_last  <= clk_count_refmux_both;
                 clk_count_sigmux_last       <= clk_count_sigmux;
                 clk_count_aperture_last     <= clk_count_aperture;
 
                 // stats
-                stat_count_refmux_pos_up_last   <= stat_count_refmux_pos_up;
-                stat_count_refmux_neg_up_last   <= stat_count_refmux_neg_up;
+                stat_count_refmux_pos_up_last <= stat_count_refmux_pos_up;
+                stat_count_refmux_neg_up_last <= stat_count_refmux_neg_up;
                 stat_count_cmpr_cross_up_last <= stat_count_cmpr_cross_up;
 
-                stat_count_var_up_last       <= stat_count_var_up;
-                stat_count_var_down_last     <= stat_count_var_down;
-                stat_count_fix_up_last       <= stat_count_fix_up;
-                stat_count_fix_down_last     <= stat_count_fix_down;
-                stat_count_flip_last         <= stat_count_flip;
+                stat_count_var_up_last      <= stat_count_var_up;
+                stat_count_var_down_last    <= stat_count_var_down;
+                stat_count_fix_up_last      <= stat_count_fix_up;
+                stat_count_fix_down_last    <= stat_count_fix_down;
+                stat_count_flip_last        <= stat_count_flip;
+
                 // stat_clk_count_rundown_last  <= clk_count;                           // why do we record this
 
               end
