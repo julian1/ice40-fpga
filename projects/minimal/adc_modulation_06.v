@@ -61,7 +61,7 @@
 `define REFMUX_NONE        3'b000      // none - is required, because we turn off both pos-neg ref, to balance. switching.
 `define REFMUX_POS         3'b001
 `define REFMUX_NEG         3'b010
-`define REFMUX_SLOW_POS    3'b011
+`define REFMUX_BOTH    3'b011
 `define REFMUX_RESET       3'b100
 
 
@@ -282,8 +282,12 @@ module adc_modulation (
         `REFMUX_POS:
             clk_count_refmux_pos <=  clk_count_refmux_pos + 1;
 
-        `REFMUX_SLOW_POS:
-            clk_count_refmux_rd <= clk_count_refmux_rd + 1;
+        `REFMUX_BOTH:
+            begin
+              clk_count_refmux_rd <= clk_count_refmux_rd + 1;
+              clk_count_refmux_neg <= clk_count_refmux_neg + 1;
+              clk_count_refmux_pos <=  clk_count_refmux_pos + 1;
+            end
 
         `REFMUX_NONE:
           ; // switches are turned off at start. and also at prerundown.
@@ -564,7 +568,7 @@ module adc_modulation (
             */
             if( p_use_slow_rundown )
               // turn on both references - to create +ve bias, to drive integrator down.
-              refmux      <= `REFMUX_SLOW_POS;
+              refmux      <= `REFMUX_BOTH;
             else
               // fast rundown
               refmux      <= `REFMUX_POS;

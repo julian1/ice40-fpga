@@ -66,7 +66,7 @@
 `define REG_ADC_CLK_COUNT_REFMUX_NEG    41
 `define REG_ADC_CLK_COUNT_REFMUX_POS    42
 `define REG_ADC_CLK_COUNT_REFMUX_RD     43
-`define REG_ADC_CLK_COUNT_MUX_SIG       44
+`define REG_ADC_CLK_COUNT_SIGMUX       44
 
 
 // extra stat counts.
@@ -130,7 +130,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   input wire [32-1:0] reg_adc_clk_count_refmux_neg,
   input wire [32-1:0] reg_adc_clk_count_refmux_pos,
   input wire [32-1:0] reg_adc_clk_count_refmux_rd,
-  input wire [32-1:0] reg_adc_clk_count_mux_sig,
+  input wire [32-1:0] reg_adc_clk_count_sigmux,
 
   input wire [32-1:0] reg_adc_stat_count_refmux_pos_up,
   input wire [32-1:0] reg_adc_stat_count_refmux_neg_up,
@@ -271,7 +271,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
               `REG_ADC_CLK_COUNT_REFMUX_NEG:   out <= reg_adc_clk_count_refmux_neg << 8;
               `REG_ADC_CLK_COUNT_REFMUX_POS:   out <= reg_adc_clk_count_refmux_pos << 8;
               `REG_ADC_CLK_COUNT_REFMUX_RD:    out <= reg_adc_clk_count_refmux_rd << 8;
-              `REG_ADC_CLK_COUNT_MUX_SIG:      out <= reg_adc_clk_count_mux_sig << 8;
+              `REG_ADC_CLK_COUNT_SIGMUX:      out <= reg_adc_clk_count_sigmux << 8;
 
               `REG_ADC_STAT_COUNT_REFMUX_POS_UP:  out <=   reg_adc_stat_count_refmux_pos_up << 8;
               `REG_ADC_STAT_COUNT_REFMUX_NEG_UP:  out <=  reg_adc_stat_count_refmux_neg_up << 8;
