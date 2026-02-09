@@ -612,12 +612,15 @@ module top (
 
     // todo consider - add adc_status,  and sa_status
 
-    4'b0,
+    4'b0,   // ??
 
+    // 24
     {  1'b0,  reg_sa_p_seq_n[ 3-1: 0] ,  sequence_acquisitionr2_first_last,  sequence_acquisition2_sample_idx_last },
 
+    // 16
     { 4'b0, hw_flags_i } ,
 
+    // 8
     { 8'b10101010 }  // magic
  };
 
