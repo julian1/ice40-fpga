@@ -58,11 +58,12 @@
   Note that this combines two 4053 switch..
 */
 
-`define REFMUX_NONE        3'b000      // none - is required, because we turn off both pos-neg ref, to balance. switching.
-`define REFMUX_POS         3'b001
-`define REFMUX_NEG         3'b010
-`define REFMUX_BOTH    3'b011
-`define REFMUX_RESET       3'b100
+`define REFMUX_NONE        2'b00      // none - is required, because we turn off both pos-neg ref, to balance. switching.
+`define REFMUX_POS         2'b01
+`define REFMUX_NEG         2'b10
+`define REFMUX_BOTH        2'b11
+
+// `define REFMUX_RESET       3'b100
 
 
 
@@ -94,8 +95,9 @@ module adc_modulation (
   // now a wire
   output wire [ 8-1:0]  monitor,
 
-  output reg [ 3-1:0]  refmux,            // reference current mux
-  output reg sigmux,                      // sample/signal input mux
+  output reg sigmux,
+  output reg rstmux,
+  output reg [ 2-1:0]  refmux,            // reference current mux
 
 
   // TODO need better name. hi = disable comparator and enable latch
@@ -108,7 +110,7 @@ module adc_modulation (
   // copy of the registers, used to enable spi reading, in new measurement cycle.
   // long registers are 32/31 bit counts, eg. (1<<31)/20e6. == 107 seconds, for long integrations
   // having visibility over the reset clk count is also useful for check, and consistentcy.
-  output reg [24-1:0] clk_count_refmux_reset_last,
+  output reg [24-1:0] clk_count_rstmux_last,
   output reg [32-1:0] clk_count_refmux_neg_last,
   output reg [32-1:0] clk_count_refmux_pos_last,
   output reg [24-1:0] clk_count_refmux_rd_last,
@@ -133,6 +135,10 @@ module adc_modulation (
 );
 
 
+  // wire refmux[ 3 - 1 ] ;    //= { rstmux, refmux_ }   ;
+
+
+
 
   reg [5-1:0]   state = 0; // RESET_START;
 
@@ -143,7 +149,7 @@ module adc_modulation (
   reg [31:0]  clk_count_down;
 
   // modulation counts
-  reg [24-1:0] clk_count_refmux_reset;
+  reg [24-1:0] clk_count_rstmux;
   reg [32-1:0] clk_count_refmux_neg;
   reg [32-1:0] clk_count_refmux_pos;
   reg [24-1:0] clk_count_refmux_rd;
@@ -201,6 +207,7 @@ module adc_modulation (
 
   assign monitor[6] = 1'b0;
   assign monitor[7] = 1'b0;
+
 
 
 
@@ -283,18 +290,20 @@ module adc_modulation (
           ; // switches are turned off at start. and also at prerundown.
             // don't really need to count this
 
-        `REFMUX_RESET:
-            clk_count_refmux_reset <= clk_count_refmux_reset + 1;
-
       endcase
 
 
+
+      if(rstmux)
+        clk_count_rstmux <= clk_count_rstmux + 1;
+
+
       if(sigmux )
-          clk_count_sigmux <= clk_count_sigmux + 1;
+        clk_count_sigmux <= clk_count_sigmux + 1;
 
 
       if(aperture_ok)
-          clk_count_aperture <= clk_count_aperture + 1;
+        clk_count_aperture <= clk_count_aperture + 1;
 
 
 
@@ -326,13 +335,16 @@ module adc_modulation (
             // indicate no measurement available
             adc_measure_valid <= 0;
 
-            clk_count_refmux_reset <= 0;   // clear count to start
+            clk_count_rstmux <= 0;   // clear count to start
 
             clk_count_down  <= p_clk_count_reset;
 
+
+            // hold in reset
             aperture_ok     <= 0;
             sigmux          <= 0;
-            refmux          <= `REFMUX_RESET;
+            rstmux          <= 1;
+            refmux          <= `REFMUX_NONE;
 
             cmpr_latch_ctl  <= 1; // disable comparator, enable latch
           end
@@ -352,8 +364,9 @@ module adc_modulation (
 
             // start
             aperture_ok           <= 1;               // indicate start of aperture
-            sigmux                <= 1;               // turn on signal
-            refmux                <= `REFMUX_NONE;    // turn off reset.     // TODO think this is correct. we don't want to increment signal count, while refmux is held in reset.
+            sigmux                <= 1;               // turn on input signal
+            rstmux                <= 0;               // turn off reset
+            refmux                <= `REFMUX_NONE;
 
             // clear counts
             clk_count_refmux_neg  <= 0;
@@ -596,13 +609,16 @@ module adc_modulation (
                 state                   <= `STATE_RESET_START;
 
 
-                // turn off sigmux, and reset integrator
-                aperture_ok             <= 0;
-                sigmux                  <= 0;
-                refmux                  <= `REFMUX_RESET;
+                // hold in reset
+                aperture_ok     <= 0;
+                sigmux          <= 0;
+                rstmux          <= 1;
+                refmux          <= `REFMUX_NONE;
+
+
 
                 // counts
-                clk_count_refmux_reset_last <= clk_count_refmux_reset;    // this doesn't work. reports 0.
+                clk_count_rstmux_last       <= clk_count_rstmux;    // this doesn't work. reports 0.
                 clk_count_refmux_neg_last   <= clk_count_refmux_neg;
                 clk_count_refmux_pos_last   <= clk_count_refmux_pos;
                 clk_count_refmux_rd_last    <= clk_count_refmux_rd;

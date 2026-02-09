@@ -267,7 +267,13 @@ module top (
   // TODO consider rename adc_refmux_test.
   // no. because it is not the adc.
   wire [8-1:0] refmux_test_monitor;
-  wire [4-1:0] refmux_test_refmux;
+
+
+  wire [2-1: 0 ] refmux_test_refmux;
+  wire refmux_test_sigmux;
+  wire refmux_test_rstmux;
+
+
 
   refmux_test refmux_test (
 
@@ -283,8 +289,12 @@ module top (
     .monitor_o( refmux_test_monitor),
     /* ie. refmux order pos,neg,source,reset.
       do we want to change this in main.pcf.. no keep ic sw pinout order.  */
-    .refmux_o ( { refmux_test_refmux[  3  ],  refmux_test_refmux[ 0 +: 2 ]   }  ),
-    .sigmux_o( refmux_test_refmux[ 2] )
+    // .refmux_o ( { refmux_test_refmux[  3  ],  refmux_test_refmux[ 0 +: 2 ]   }  ),
+    // .sigmux_o( refmux_test_refmux[ 2] )
+
+    .refmux( refmux_test_refmux ),
+    .sigmux( refmux_test_sigmux ),
+    .rstmux( refmux_test_rstmux )
   );
 
 
@@ -381,7 +391,7 @@ module top (
   wire           adc_cmpr_latch_ctl;
 
 
-  wire [24-1:0] adc_clk_count_refmux_reset_last;
+  wire [24-1:0] adc_clk_count_rstmux_last;
   wire [32-1:0] adc_clk_count_refmux_neg_last;    // maybe add reg_ prefix. No. they are not registers, until they are in the register_bank context.
   wire [32-1:0] adc_clk_count_refmux_pos_last;
   wire [24-1:0] adc_clk_count_refmux_rd_last;
@@ -419,11 +429,14 @@ module top (
     .adc_measure_valid( adc_measure_valid),    // OK, fan out back to the sa controllers
     .cmpr_latch_ctl( adc_cmpr_latch_ctl   ),
     .monitor(  adc_monitor  ),
-    .refmux(  { adc_rstmux ,  adc_refmux } ),           // pos, neg, reset. are on two different 4053,
-    .sigmux(   adc_sigmux  ),                                    // perhaps clearer if split into adcrefmux and adcsigmux in the wire assignment. but it would then need two vars.
-                                                                      // which isn't representative of the single synchronizer. so do it here instead.
+
+
+    .rstmux( adc_rstmux ),
+    .refmux( adc_refmux ),
+    .sigmux( adc_sigmux ),
+
     // adc clk counts for last sample measurement
-    .clk_count_refmux_reset_last(adc_clk_count_refmux_reset_last),
+    .clk_count_rstmux_last(adc_clk_count_rstmux_last),
     .clk_count_refmux_neg_last(  adc_clk_count_refmux_neg_last),
     .clk_count_refmux_pos_last(  adc_clk_count_refmux_pos_last),
     .clk_count_refmux_rd_last(   adc_clk_count_refmux_rd_last),
@@ -529,7 +542,11 @@ module top (
     // limited modulation of ref currents, useful when populating pcb, don't need slope-amp/comparator etc.
     .f( {  { 32 - 22 { 'b0 }},
                                               // 22
+
+          refmux_test_sigmux,
+          refmux_test_rstmux,
           refmux_test_refmux,                 // 18+4
+
           4'b0,    // azmux                   // 14+4
           2'b0 ,  // precharge                // 12+2
           refmux_test_monitor,                // 4+8
@@ -702,10 +719,11 @@ module top (
     // adc inputs
     // note we have to pad, to match register_set 32bit regs.
     // perhaps change register_set.
-    .  reg_adc_clk_count_refmux_reset( { 8'b0, adc_clk_count_refmux_reset_last } ) ,
     .  reg_adc_clk_count_refmux_neg( adc_clk_count_refmux_neg_last) ,
     .  reg_adc_clk_count_refmux_pos( adc_clk_count_refmux_pos_last) ,
     .  reg_adc_clk_count_refmux_rd( { 8'b0, adc_clk_count_refmux_rd_last } ) ,
+
+    .  reg_adc_clk_count_rstmux( { 8'b0, adc_clk_count_rstmux_last } ) ,
     .  reg_adc_clk_count_sigmux( adc_clk_count_sigmux_last ),
 
     .  reg_adc_stat_count_refmux_pos_up( { 8'b0, adc_stat_count_refmux_pos_up_last } ),

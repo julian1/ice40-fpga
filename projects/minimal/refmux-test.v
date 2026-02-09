@@ -29,11 +29,11 @@
   Note that this combines two 4053 switch..
 */
 
-`define REFMUX_NONE        3'b000      // none - is required, because we turn off both pos-neg ref, to balance. switching.
-`define REFMUX_POS         3'b001
-`define REFMUX_NEG         3'b010
-`define REFMUX_SLOW_POS    3'b011
-`define REFMUX_RESET       3'b100
+`define REFMUX_NONE        2'b00      // none - is required, because we turn off both pos-neg ref, to balance. switching.
+`define REFMUX_POS         2'b01
+`define REFMUX_NEG         2'b10
+// `define REFMUX_SLOW_POS    3'b011
+// `define REFMUX_RESET       3'b100
 
 
 
@@ -53,8 +53,11 @@ module refmux_test (
 	// now a wire. again.
   output wire [ 8-1:0]  monitor_o,
 
-  output reg [ 3-1:0]  refmux_o,            // reference current mux
-  output reg sigmux_o,                      // unused
+
+  output reg sigmux,
+  output reg rstmux,
+  output reg [ 2-1:0]  refmux,            // reference current mux
+
 
 	output reg cmpr_latch_ctl_o
 );
@@ -108,8 +111,8 @@ module refmux_test (
 
 
             // JA
-            sigmux_o          <= 0;
-            refmux_o          <= `REFMUX_RESET;
+            sigmux          <= 0;
+            refmux          <= `REFMUX_NONE;
 
             cmpr_latch_ctl_o   <= 1; // disable comparator, enable latch
           end
@@ -128,7 +131,7 @@ module refmux_test (
             state             <= `STATE_FIX_POS;
             clk_count_down    <= p_clk_count_fix_i;
 
-            refmux_o            <= `REFMUX_POS; // initial direction
+            refmux            <= `REFMUX_POS; // initial direction
 
           end
 
@@ -142,7 +145,7 @@ module refmux_test (
             state         <= `STATE_FIX_NEG;
             clk_count_down    <= p_clk_count_fix_i;
 
-            refmux_o        <= `REFMUX_NEG;
+            refmux        <= `REFMUX_NEG;
           end
 
 
