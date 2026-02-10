@@ -161,11 +161,6 @@ module top (
 
 
 
-
-  // spi CS. line decoding.
-  // wire spi_register_set_cs ;
-
-  // slave select for register set
   wire spi_register_set_cs        = spi_cs_vec_i ==  `SPI_CS_VEC_FPGA0 ? 0 : 1;         // active lo, park hi
 
   // 4094 strobe
