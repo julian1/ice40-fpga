@@ -200,8 +200,12 @@ module top (
 
   /////////////////////////////////////////////
   // 4094 OE
-  wire [32-1:0] reg_4094_oe;   // TODO rename
-  assign { spi_4094_oe } = reg_4094_oe;    //  lo. start up not enabled.
+  // JA. changed feb 2026. not tested.
+  wire [32-1:0] reg_4094_oe;
+  assign spi_4094_oe = reg_4094_oe[ 0 ] ;
+
+
+
 
   ////////////////////////////////////////
 
