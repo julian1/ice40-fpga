@@ -103,11 +103,11 @@ set_io leds_o[3]        41
 # spi
 set_io spi_glb_mosi         91
 set_io spi_glb_clk          95
-set_io spi_glb_miso        98
+set_io spi_glb_miso         98
 
 # 4094
-set_io spi_4094_strobe_ctl  93
-set_io spi_4094_oe_ctl      94
+set_io spi_4094_strobe      93
+set_io spi_4094_oe          94
 
 
 # isolated dcv source - TODO better name?

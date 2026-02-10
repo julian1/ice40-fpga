@@ -92,8 +92,8 @@ module top (
 
 
   // 4094
-  output spi_4094_strobe_ctl,
-  output spi_4094_oe_ctl,
+  output spi_4094_strobe,
+  output spi_4094_oe,
 
 
   // other cs lines
@@ -169,7 +169,7 @@ module top (
   wire spi_register_set_cs        = spi_cs_vec_i ==  `SPI_CS_VEC_FPGA0 ? 0 : 1;         // active lo, park hi
 
   // 4094 strobe
-  assign spi_4094_strobe_ctl      = spi_cs_vec_i == `SPI_CS_VEC_4094;                 // active hi, park lo
+  assign spi_4094_strobe          = spi_cs_vec_i == `SPI_CS_VEC_4094;                 // active hi, park lo
 
   assign spi_invert_dac_ss        = spi_cs_vec_i == `SPI_CS_VEC_INVERT_DAC ? 0 : 1;   // active lo, park hi
 
@@ -201,7 +201,7 @@ module top (
   /////////////////////////////////////////////
   // 4094 OE
   wire [32-1:0] reg_4094_oe;   // TODO rename
-  assign { spi_4094_oe_ctl } = reg_4094_oe;    //  lo. start up not enabled.
+  assign { spi_4094_oe } = reg_4094_oe;    //  lo. start up not enabled.
 
   ////////////////////////////////////////
 
