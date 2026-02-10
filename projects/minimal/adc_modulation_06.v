@@ -80,7 +80,7 @@ module adc_modulation (
 
   input           p_use_slow_rundown,
   input           p_use_fast_rundown,
-  input           p_use_sigmux,     // whether to swtich in the input signal
+  input           p_active_sigmux,     // whether to swtich in the input signal
 
 
   // outputs
@@ -352,7 +352,7 @@ module adc_modulation (
 
             // start input integration
             in_runup              <= 1;                     // start runup
-            sigmux                <= p_use_sigmux;    // turn on signal input
+            sigmux                <= p_active_sigmux;    // turn on signal input
             rstmux                <= 0;                     // turn off reset
             refmux                <= `REFMUX_NONE;          // keep refmux off
 

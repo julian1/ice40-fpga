@@ -227,7 +227,7 @@ module top (
 
   // whether to turn sigmux on
   // better name sigmux_active ??
-  wire cr_adc_p_use_sigmux = reg_cr[ 4 - 1 ];
+  wire cr_adc_p_active_sigmux = reg_cr[ 4 - 1 ];
 
 
 
@@ -399,7 +399,7 @@ module top (
 
     . p_use_slow_rundown( 1'b1 ),
     . p_use_fast_rundown( 1'b1 ),
-    . p_use_sigmux( cr_adc_p_use_sigmux),
+    . p_active_sigmux( cr_adc_p_active_sigmux),
 
     // outputs - ctrl
     .adc_measure_valid( adc_measure_valid),    // OK, fan out back to the sa controllers
