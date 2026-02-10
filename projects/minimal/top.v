@@ -3,6 +3,15 @@
   - can have heartbeat timer. over spi.
       but should avoid spewing spi tranmsission emi during ordinary acquisition.
 
+
+  // verilog literals are hard!.
+  // 4'b1                         == 0001
+  // { 1,1,1,1}                   == 0001
+  // { 1'b1, 1'b1, 1'b1, 1'b1 }   == 1111
+  // 4 { 1'b1 }                   == 1111
+  // 4'b1111                      == 1111
+
+
 */
 
 
@@ -154,17 +163,17 @@ module top (
 
 
   // spi CS. line decoding.
-  wire spi_cs_register_set ;
+  // wire spi_cs_register_set ;
 
   // slave select for register set
-  assign spi_cs_register_set      = spi_cs_vec ==  `SPI_CS_VEC_FPGA0 ? 0 : 1;      // active lo, park hi
+  wire spi_cs_register_set      = spi_cs_vec ==  `SPI_CS_VEC_FPGA0 ? 0 : 1;         // active lo, park hi
 
   // 4094 strobe
-  assign spi_4094_strobe_ctl      = spi_cs_vec == `SPI_CS_VEC_4094;             // active hi, park lo
+  assign spi_4094_strobe_ctl      = spi_cs_vec == `SPI_CS_VEC_4094;                 // active hi, park lo
 
-  assign spi_invert_dac_ss        = spi_cs_vec == `SPI_CS_VEC_INVERT_DAC ? 0 : 1;      // active lo, park hi
+  assign spi_invert_dac_ss        = spi_cs_vec == `SPI_CS_VEC_INVERT_DAC ? 0 : 1;   // active lo, park hi
 
-  assign spi_iso_cs               = spi_cs_vec == `SPI_CS_VEC_MDAC1 ? 0 : 1;      // active lo, park hi
+  assign spi_iso_cs               = spi_cs_vec == `SPI_CS_VEC_MDAC1 ? 0 : 1;        // active lo, park hi
 
   assign spi_iso_cs2              = 1;    // unused
 
@@ -173,10 +182,9 @@ module top (
   /////////////////////////
 
 
-  wire w_dout ;
 
-  assign w_dout = SDO;
-
+  // operating mode
+  wire [3-1:0 ] mode = reg_cr[ 3-1 : 0 ];
 
 
   /*
@@ -187,14 +195,6 @@ module top (
     assign monitor_o[2]  = SPI_DAC_SS     ;
   */
 
-
-
-  // verilog literals are hard!.
-  // 4'b1                         == 0001
-  // { 1,1,1,1}                   == 0001
-  // { 1'b1, 1'b1, 1'b1, 1'b1 }   == 1111
-  // 4 { 1'b1 }                   == 1111
-  // 4'b1111                      == 1111
 
 
 
@@ -568,7 +568,7 @@ module top (
         } ),
 
 
-    .sel( reg_cr[ 3-1 : 0 ]),
+    .sel( mode ),
 
     // leds and monitor go first, since they are the most generic functionality
 
@@ -634,14 +634,11 @@ module top (
   register_set
     (
 
-    // should prefix fields with spi_
+    // consider prefix fields with spi_
     . clk(   SCK ),
-    . cs_n(  spi_cs_register_set /* SS*/ /*SPI_CS */ ),
-    . din(   SDI /*SPI_MOSI */),
-
-
-    . dout( w_dout ),            // drive miso from via muxer
-    // . dout( SDO /* SPI_MISO */ ),        // drive miso output pin directly.
+    . cs_n(  spi_cs_register_set),
+    . din(   SDI ),
+    . dout( SDO ),
 
 
     // inputs
