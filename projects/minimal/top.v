@@ -177,11 +177,6 @@ module top (
   /////////////////////////
 
 
-
-  // operating mode
-  wire [3-1:0 ] mode = reg_cr[ 3-1 : 0 ];
-
-
   /*
     // can use this to test spi liines
 
@@ -195,7 +190,7 @@ module top (
 
   /////////////////////////////////////////////
   // 4094 OE
-  // JA. changed feb 2026. not tested.
+  // JA. changed feb 2026. only tested briefly with dmm. not 4094 function.
   wire [32-1:0] reg_4094_oe;
   assign spi_4094_oe = reg_4094_oe[ 0 ] ;
 
@@ -203,13 +198,13 @@ module top (
 
 
   ////////////////////////////////////////
+  // registers
 
-  wire [32-1 :0] reg_cr;     // _mode or AF reg_af alternate function  two bits
+  wire [32-1:0] reg_cr;
 
   wire [32-1:0] reg_direct;
 
-  // wire [32-1:0] reg_seq_mode;    // just pass-through communcation. from reg to the status register out.
-
+  wire [32-1:0] reg_status ;
 
 
   // sample aquisition
@@ -221,13 +216,26 @@ module top (
   wire [32-1:0] reg_sa_p_seq2;
   wire [32-1:0] reg_sa_p_seq3;
 
-
-
   // adc
-  wire [32-1 :0] reg_adc_p_clk_count_aperture;  // 32/31 bit nice. for long sample.
-  wire [32-1 :0] reg_adc_p_clk_count_reset;
+  wire [32-1:0] reg_adc_p_clk_count_aperture;  // 32/31 bit nice. for long sample.
+  wire [32-1:0] reg_adc_p_clk_count_reset;
 
 
+
+  // operating mode
+  wire [3-1:0 ] cr_mode = reg_cr[ 3-1 : 0 ];
+
+  // whether to turn sigmux on
+  // better name sigmux_active ??
+  wire cr_adc_p_use_sigmux = reg_cr[ 4 - 1 ];
+
+
+
+
+
+
+
+  ///////////////////////////
 
   // TODO consider rename adc_refmux_test.
   // no. because it is not the adc.
@@ -391,7 +399,7 @@ module top (
 
     . p_use_slow_rundown( 1'b1 ),
     . p_use_fast_rundown( 1'b1 ),
-    . p_use_input_signal( 1'b1 ),
+    . p_use_sigmux( cr_adc_p_use_sigmux),
 
     // outputs - ctrl
     .adc_measure_valid( adc_measure_valid),    // OK, fan out back to the sa controllers
@@ -567,7 +575,7 @@ module top (
         } ),
 
 
-    .sel( mode ),
+    .sel( cr_mode ),
 
     // leds and monitor go first, since they are the most generic functionality
 
@@ -603,8 +611,6 @@ module top (
       and being able to read consistently.
   */
 
-  // readable inputs
-  wire [32 - 1 :0] reg_status ;
 
   assign reg_status = {
 
