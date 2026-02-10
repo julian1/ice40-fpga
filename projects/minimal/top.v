@@ -70,8 +70,8 @@ module top (
 
   // input SS,
 
-  // SS used as first bit of spi_cs_vec muxing - july 2025
-  input [ 3-1 : 0 ] spi_cs_vec,
+  // SS used as first bit of spi_cs_vec_i muxing - july 2025
+  input [ 3-1 : 0 ] spi_cs_vec_i,
 
 
   ///////////
@@ -151,8 +151,8 @@ module top (
 
 
   // spi lines - silence if active device is the fpga/register set
-  assign spi_glb_clk              = spi_cs_vec ==  `SPI_CS_VEC_FPGA0 ? 1 : SCK;      // park hi
-  assign spi_glb_mosi             = spi_cs_vec ==  `SPI_CS_VEC_FPGA0 ? 1 : SDI;      // park hi
+  assign spi_glb_clk              = spi_cs_vec_i ==  `SPI_CS_VEC_FPGA0 ? 1 : SCK;      // park hi
+  assign spi_glb_mosi             = spi_cs_vec_i ==  `SPI_CS_VEC_FPGA0 ? 1 : SDI;      // park hi
 
 
 
@@ -166,14 +166,14 @@ module top (
   // wire spi_cs_register_set ;
 
   // slave select for register set
-  wire spi_cs_register_set      = spi_cs_vec ==  `SPI_CS_VEC_FPGA0 ? 0 : 1;         // active lo, park hi
+  wire spi_cs_register_set        = spi_cs_vec_i ==  `SPI_CS_VEC_FPGA0 ? 0 : 1;         // active lo, park hi
 
   // 4094 strobe
-  assign spi_4094_strobe_ctl      = spi_cs_vec == `SPI_CS_VEC_4094;                 // active hi, park lo
+  assign spi_4094_strobe_ctl      = spi_cs_vec_i == `SPI_CS_VEC_4094;                 // active hi, park lo
 
-  assign spi_invert_dac_ss        = spi_cs_vec == `SPI_CS_VEC_INVERT_DAC ? 0 : 1;   // active lo, park hi
+  assign spi_invert_dac_ss        = spi_cs_vec_i == `SPI_CS_VEC_INVERT_DAC ? 0 : 1;   // active lo, park hi
 
-  assign spi_iso_cs               = spi_cs_vec == `SPI_CS_VEC_MDAC1 ? 0 : 1;        // active lo, park hi
+  assign spi_iso_cs               = spi_cs_vec_i == `SPI_CS_VEC_MDAC1 ? 0 : 1;        // active lo, park hi
 
   assign spi_iso_cs2              = 1;    // unused
 

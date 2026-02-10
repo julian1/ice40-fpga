@@ -46,9 +46,9 @@ set_io SCK              70
 
 
 
-set_io spi_cs_vec[0]          71      # SS  at bitstream configuration
-set_io spi_cs_vec[1]          61      # SPI_CS2
-set_io spi_cs_vec[2]          49      # added july 2025.
+set_io spi_cs_vec_i[0]          71      # SS  at bitstream configuration
+set_io spi_cs_vec_i[1]          61      # SPI_CS2
+set_io spi_cs_vec_i[2]          49      # added july 2025.
 
 # TODO change lower case. -  drop the ctl. because _ctl==_o ??
 set_io spi_interrupt_ctl_o      62
