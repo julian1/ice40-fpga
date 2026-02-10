@@ -30,7 +30,7 @@
 `include "defines.v"    // `CLK_FREQ for default calculation
 
 `define REG_4094_OE                     9
-`define REG_MODE                        12
+`define REG_CR                        12
 `define REG_DIRECT                      14
 `define REG_STATUS                      17
 
@@ -89,9 +89,9 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   // change name reg_gen_direct,  reg_gen_mode.
 
 
-  output reg [32-1:0] reg_spi_mux,
+  // output reg [32-1:0] reg_spi_mux,
   output reg [32-1:0] reg_4094_oe,     // TODO consider change to a generic CR control register. encode 4094-OE and trigger.
-  output reg [32-1:0] reg_mode,
+  output reg [32-1:0] reg_cr,
   output reg [32-1:0] reg_direct,
   // output reg [32-1:0] reg_seq_mode,
 
@@ -158,9 +158,9 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
     // should be '='
 
     // control
-    reg_spi_mux   = 0;          // no spi device active
+    // reg_spi_mux   = 0;          // no spi device active
     reg_4094_oe      = 0;
-    reg_mode      = 0;
+    reg_cr      = 0;
     reg_direct    = 0  ;
     // reg_seq_mode  <= 0; // AZ
 
@@ -237,7 +237,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
               // general
               `REG_4094_OE:                     out <= reg_4094_oe << 8;
-              `REG_MODE:                        out <= reg_mode << 8;   // ok..
+              `REG_CR:                        out <= reg_cr << 8;   // ok..
               `REG_DIRECT:                      out <= reg_direct << 8;
 
               `REG_STATUS:                      out <= reg_status << 8;
@@ -288,9 +288,9 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
           case (  bin[MSB-2 : MSB-8 ] )
 
-            `REG_4094_OE:      reg_4094_oe    <= bin;
-            `REG_MODE:      reg_mode    <= bin;
-            `REG_DIRECT:    reg_direct  <= bin;
+            `REG_4094_OE:       reg_4094_oe <= bin;
+            `REG_CR:            reg_cr      <= bin;
+            `REG_DIRECT:        reg_direct  <= bin;
 
             //////////
 

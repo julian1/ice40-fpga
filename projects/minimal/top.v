@@ -205,7 +205,7 @@ module top (
 
   ////////////////////////////////////////
 
-  wire [32-1 :0] reg_mode;     // _mode or AF reg_af alternate function  two bits
+  wire [32-1 :0] reg_cr;     // _mode or AF reg_af alternate function  two bits
 
   wire [32-1:0] reg_direct;
 
@@ -568,7 +568,7 @@ module top (
         } ),
 
 
-    .sel( reg_mode[ 3-1 : 0 ]),
+    .sel( reg_cr[ 3-1 : 0 ]),
 
     // leds and monitor go first, since they are the most generic functionality
 
@@ -646,7 +646,7 @@ module top (
 
     // inputs
     . reg_4094_oe(reg_4094_oe ) ,
-    . reg_mode(reg_mode),
+    . reg_cr(reg_cr),
     . reg_direct(reg_direct),
 
     // outputs
