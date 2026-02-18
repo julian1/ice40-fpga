@@ -154,8 +154,8 @@ module adc_modulation (
 
   reg [2-1:0] cmpr_crossr;              // perhaps add _transition? or cmpr_
 
-  wire cmpr_cross_up     = cmpr_crossr == 2'b10;
-  wire cmpr_cross_down   = cmpr_crossr == 2'b01;
+  wire cmpr_cross_up     = cmpr_crossr == 2'b01;
+  wire cmpr_cross_down   = cmpr_crossr == 2'b10;
   wire cmpr_cross_any    = cmpr_cross_up || cmpr_cross_down ;
 
 
@@ -394,7 +394,7 @@ module adc_modulation (
             state             <= `STATE_VAR;
             clk_count_down    <= p_clk_count_var;
 
-            if( cmpr_val_last)   // test below the zero-cross
+            if( !cmpr_val_last)   // test below the zero-cross
               begin
                 refmux        <= `REFMUX_NEG;  // add negative ref. to drive up.
                 stat_count_var_up  <= stat_count_var_up + 1;
@@ -440,7 +440,7 @@ module adc_modulation (
             state             <= `STATE_VAR2;
             clk_count_down    <= p_clk_count_var;
 
-            if( cmpr_val_last) // below zero-cross
+            if( !cmpr_val_last) // below zero-cross
               begin
                 refmux        <= `REFMUX_NEG;
                 stat_count_var_up  <= stat_count_var_up + 1;
@@ -466,7 +466,7 @@ module adc_modulation (
 
                 if(p_use_fast_rundown)
                   begin
-                    if(  cmpr_val_last) // below cross
+                    if(  !cmpr_val_last) // below cross
                       state <= `STATE_FAST_BELOW_START;
                     else                      // above cross
                       state <= `STATE_FAST_ABOVE_START;
@@ -477,7 +477,7 @@ module adc_modulation (
                     /*
                       TODO fixme. nov  2023. state removed.
                     */
-                    if( refmux  == `REFMUX_NEG && ! cmpr_val_last)
+                    if( refmux  == `REFMUX_NEG && cmpr_val_last)
                       state <= `STATE_PRERUNDOWN_START;
                     else
                       // keep cycling
@@ -506,7 +506,7 @@ module adc_modulation (
           begin
             refmux          <= `REFMUX_POS;
 
-            if( cmpr_val_last)                  // below zero-cross. EXTR. note not a comparator transition test. instead an actual value .
+            if( !cmpr_val_last)                  // below zero-cross. EXTR. note not a comparator transition test. instead an actual value .
               state   <= `STATE_FAST_BELOW_START;     // advance to below_start.
           end
 
@@ -521,7 +521,7 @@ module adc_modulation (
            begin
             refmux    <= `REFMUX_NEG;
 
-             if( ! cmpr_val_last) // above zero-cross
+             if( cmpr_val_last) // above zero-cross
               begin
                 state         <= `STATE_RUNDOWN_START; // goto rundown.
 

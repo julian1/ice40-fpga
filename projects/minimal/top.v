@@ -139,8 +139,10 @@ module top (
 
 
   // dec 2024. after changing pcb comparator output polarity
-  wire cmpr_val;
-  assign cmpr_val = ! adc_cmpr_i;
+  // wire cmpr_val;
+  // assign cmpr_val = adc_cmpr_i;
+
+  wire cmpr_val = adc_cmpr_i;
 
 
 
