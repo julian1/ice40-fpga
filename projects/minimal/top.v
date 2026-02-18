@@ -511,11 +511,10 @@ module top (
 
   // hold state after valid measure.
 
-            // sample_idx_last_o <= 3'b111;
+  // avoid 0 which can be confused with first seq
+  // sample_idx_last_o <= 3'b111;
   reg [3-1:0]  reg_sequence_acquisition2_sample_idx;
   reg           reg_sequence_acquisitionr2_first;
-
-
 
 
 
@@ -565,8 +564,8 @@ module top (
         begin
 
           // snapshot variable state after a valid measurement
-          reg_sequence_acquisition2_sample_idx = sequence_acquisition2_sample_idx;
-          reg_sequence_acquisitionr2_first  = sequence_acquisitionr2_first;
+          reg_sequence_acquisition2_sample_idx  <= sequence_acquisition2_sample_idx;
+          reg_sequence_acquisitionr2_first      <= sequence_acquisitionr2_first;
         end
     end
 

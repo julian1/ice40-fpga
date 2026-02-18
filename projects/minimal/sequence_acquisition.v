@@ -71,15 +71,6 @@ module sequence_acquisition (
 
 
 
-  // TODO clean up
-  // JA. output reg first_last_o,        //  first variable -  lagged
-  //  - status_o should be treated generically.  just like monitor_o and leds_o.
-  // currently unused.
-  // output reg [4-1: 0 ] status_last_o,
-
-  // JA. output reg  [3-1: 0] sample_idx_last_o,
-
-
   output wire [4-1:0] leds_o,
 
   /*/ now a wire.  output wire [ 2-1:0]  monitor_o       // driven as wire/assign.
@@ -99,10 +90,12 @@ module sequence_acquisition (
 
 
 
+  // should expose in module, not sure.
+  reg [7-1:0]   state = 0 ;
 
-  reg [7-1:0]   state = 0 ;     // should expose in module, not sure.
 
-  reg [31:0]    clk_count_down;           // clk_count for the current phase. using 31 bitss, gives faster timing spec.  v 24 bits. weird. ??? 36MHz v 32MHz
+  // clk_count for the current phase. 31 bitss, gives faster timing spec.  v 24 bits. weird. ??? 36MHz v 32MHz
+  reg [31:0]    clk_count_down;
 
 
 
@@ -148,9 +141,6 @@ module sequence_acquisition (
 
             first         <= 1;
 
-
-            // avoid 0 which can be confused with first seq
-            // sample_idx_last_o <= 3'b111;
 
             /* during reset - hold the precharge switches lo. to emit BOOT. and protect signal. both cahnnels
             // azmux state should probably also be defined.  can use the first value.
@@ -230,12 +220,8 @@ module sequence_acquisition (
           if( adc_measure_valid_i )
             begin
 
-              // go back to state 1
+              // set up next state
               state         <= 1;
-
-
-              // sample_idx_last_o  <= sample_idx;
-              // first_last_o    <= first;   // lagged, to be correct when do spi read of status register
 
               first           <= 0;
 
@@ -244,14 +230,10 @@ module sequence_acquisition (
                 https://stackoverflow.com/questions/47425729/verilog-modulus-operator-for-wrapping-around-a-range
                 needs to be >= in case sample_n is reduced in write.
               */
-
               sample_idx <= (sample_idx >= p_seq_n_i - 1)
                               ? 0
                               : sample_idx + 1;
 
-
-              // set status for hi sample
-              // status_last_o    <= 4'b001; // we moved this.      // set status only after measure, to enable reg reading, during next measurement cycle.
 
               // put adc in reset again
               adc_reset_no <= 0;
