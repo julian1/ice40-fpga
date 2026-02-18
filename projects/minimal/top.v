@@ -510,6 +510,9 @@ module top (
   wire          sequence_acquisitionr2_first;
 
   // hold state after valid measure.
+  // important - could aggregate these into a single  'sa_status' register  right here
+  // to avoid needing multiple registers.
+  // then just
 
   // avoid 0 which can be confused with first seq
   // sample_idx_last_o <= 3'b111;
@@ -703,6 +706,7 @@ module top (
     4'b0,   // ??
 
     // 24
+    // consider - into sa_status register.  once. then include here.
     {   1'b0,                                     // 1
         reg_sa_p_seq_n[ 3-1: 0] ,                 // 3
         reg_sequence_acquisitionr2_first,         // 1 bit
@@ -742,16 +746,16 @@ module top (
     . reg_status(     reg_status ),
 
 
-    // sample/sequence acquisition
+    // parameter inputs - sequence acquisition.
     . reg_sa_p_clk_count_precharge(       reg_sa_p_clk_count_precharge),
 
-    . reg_sa_p_seq_n( reg_sa_p_seq_n),    // n == count == limit.  not invert.
+    . reg_sa_p_seq_n( reg_sa_p_seq_n),
     . reg_sa_p_seq0(  reg_sa_p_seq0),
     . reg_sa_p_seq1(  reg_sa_p_seq1),
     . reg_sa_p_seq2(  reg_sa_p_seq2),
     . reg_sa_p_seq3(  reg_sa_p_seq3),
 
-
+    // parameter inputs - adc
     . reg_adc_p_clk_count_aperture(       reg_adc_p_clk_count_aperture),
     . reg_adc_p_clk_count_reset(          reg_adc_p_clk_count_reset ),
 
