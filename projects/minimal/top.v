@@ -753,13 +753,12 @@ module top (
     . reg_sa_p_seq2( reg_sa_p_seq2),
     . reg_sa_p_seq3( reg_sa_p_seq3),
 
-    // adc outputs
+
     . reg_adc_p_clk_count_aperture( reg_adc_p_clk_count_aperture),
     . reg_adc_p_clk_count_reset( reg_adc_p_clk_count_reset ),
 
 
-    // adc inputs
-    // pad to match register_set 32bit regs.
+    // adc outputs
     .  reg_adc_clk_count_refmux_neg(      reg_adc_clk_count_refmux_neg) ,
     .  reg_adc_clk_count_refmux_pos(      reg_adc_clk_count_refmux_pos) ,
     .  reg_adc_clk_count_refmux_both(     reg_adc_clk_count_refmux_both) ,
