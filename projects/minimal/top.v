@@ -736,26 +736,26 @@ module top (
 
 
     // inputs
-    . reg_4094_oe(reg_4094_oe ) ,
-    . reg_cr(reg_cr),
-    . reg_direct(reg_direct),
+    . reg_4094_oe(    reg_4094_oe ) ,
+    . reg_cr(         reg_cr),
+    . reg_direct(     reg_direct),
 
     // outputs
-    . reg_status( reg_status ),
+    . reg_status(     reg_status ),
 
 
     // sample/sequence acquisition
-    . reg_sa_p_clk_count_precharge( reg_sa_p_clk_count_precharge),
+    . reg_sa_p_clk_count_precharge(       reg_sa_p_clk_count_precharge),
 
     . reg_sa_p_seq_n( reg_sa_p_seq_n),    // n == count == limit.  not invert.
-    . reg_sa_p_seq0( reg_sa_p_seq0),
-    . reg_sa_p_seq1( reg_sa_p_seq1),
-    . reg_sa_p_seq2( reg_sa_p_seq2),
-    . reg_sa_p_seq3( reg_sa_p_seq3),
+    . reg_sa_p_seq0(  reg_sa_p_seq0),
+    . reg_sa_p_seq1(  reg_sa_p_seq1),
+    . reg_sa_p_seq2(  reg_sa_p_seq2),
+    . reg_sa_p_seq3(  reg_sa_p_seq3),
 
 
-    . reg_adc_p_clk_count_aperture( reg_adc_p_clk_count_aperture),
-    . reg_adc_p_clk_count_reset( reg_adc_p_clk_count_reset ),
+    . reg_adc_p_clk_count_aperture(       reg_adc_p_clk_count_aperture),
+    . reg_adc_p_clk_count_reset(          reg_adc_p_clk_count_reset ),
 
 
     // adc outputs

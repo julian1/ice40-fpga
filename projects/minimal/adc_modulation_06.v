@@ -211,6 +211,10 @@ module adc_modulation (
 
       cmpr_crossr               <= {cmpr_crossr[0], cmpr_val};
 
+
+
+      //////////
+
       // TODO change name ref_sw_pos_cross
       // instrumentation for switch transitions for both pos,neg (and both).
       refmux_pos_cross          <= { refmux_pos_cross[0], refmux[0] }; // old, new
