@@ -138,10 +138,8 @@ module top (
 );
 
 
-  // dec 2024. after changing pcb comparator output polarity
-  // wire cmpr_val;
-  // assign cmpr_val = adc_cmpr_i;
 
+  // Feb. 2026. changed polarity handling in adc module
   wire cmpr_val = adc_cmpr_i;
 
 
@@ -530,8 +528,6 @@ module top (
     .adc_measure_valid_i( adc_measure_valid ),                     // JA the real adc. from adc
 
 
-    // TODO move to registers
-
     .p_seq_n_i( reg_sa_p_seq_n[ 3-1: 0]  ),
     .p_seq0_i( reg_sa_p_seq0[ 6-1: 0]  ),
     .p_seq1_i( reg_sa_p_seq1[ 6-1: 0]  ),
@@ -707,10 +703,10 @@ module top (
     4'b0,   // ??
 
     // 24
-    {   1'b0,
-        reg_sa_p_seq_n[ 3-1: 0] ,
-        reg_sequence_acquisitionr2_first,
-        reg_sequence_acquisition2_sample_idx
+    {   1'b0,                                     // 1
+        reg_sa_p_seq_n[ 3-1: 0] ,                 // 3
+        reg_sequence_acquisitionr2_first,         // 1 bit
+        reg_sequence_acquisition2_sample_idx      // 3 bits.
     },
 
     // 16

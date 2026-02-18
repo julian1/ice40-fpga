@@ -84,31 +84,23 @@ module adc_modulation (
 
 
   // outputs
-  output reg adc_measure_valid,           // indicate/assert completion, and valid measurement
+  output reg          adc_measure_valid,           // indicate/assert completion, and valid measurement
 
   // now a wire
-  output wire [ 8-1:0]  monitor,
+  output wire [ 8-1:0] monitor,
 
-  output reg sigmux,
-  output reg rstmux,
-  output reg [ 2-1:0]  refmux,            // reference current mux
+  output reg          sigmux,
+  output reg          rstmux,
+  output reg [ 2-1:0] refmux,            // reference current mux
 
 
   // TODO need better name. hi = disable comparator and enable latch
   // corresponds to hardware.
-  output reg      cmpr_latch_ctl,
+  output reg          cmpr_latch_ctl,
 
 
   ///////////
-
-  /*
-
-    Feb. 2026. we could really simplify this
-    by moving all these outside the adc.
-    - and read/ update them
-
-  */
-
+  // Feb. 2026. removed lagged vars
 
   // counts
   output reg [24-1:0] clk_count_rstmux,
