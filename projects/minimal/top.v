@@ -365,17 +365,29 @@ module top (
   wire           adc_cmpr_latch_ctl;
 
 
-  wire [24-1:0] adc_clk_count_rstmux_last;
-  wire [32-1:0] adc_clk_count_refmux_neg_last;    // maybe add reg_ prefix. No. they are not registers, until they are in the register_bank context.
-  wire [32-1:0] adc_clk_count_refmux_pos_last;
-  wire [24-1:0] adc_clk_count_refmux_both_last;
-  wire [32-1:0] adc_clk_count_sigmux_last;
-  wire [32-1:0] adc_clk_count_aperture_last;
+  reg [24-1:0] reg_adc_clk_count_rstmux;
+  reg [32-1:0] reg_adc_clk_count_refmux_neg;
+  reg [32-1:0] reg_adc_clk_count_refmux_pos;
+  reg [24-1:0] reg_adc_clk_count_refmux_both;
+  reg [32-1:0] reg_adc_clk_count_sigmux;
+  reg [32-1:0] reg_adc_clk_count_aperture;
 
-  wire [24-1 :0] adc_stat_count_refmux_pos_up_last;
-  wire [24-1 :0] adc_stat_count_refmux_neg_up_last;
-  wire [24-1 :0] adc_stat_count_cmpr_cross_up_last;
+  reg [24-1:0] reg_adc_stat_count_refmux_pos_up;
+  reg [24-1:0] reg_adc_stat_count_refmux_neg_up;
+  reg [24-1:0] reg_adc_stat_count_cmpr_cross_up;
 
+
+  ///
+  wire [24-1:0] adc_clk_count_rstmux;
+  wire [32-1:0] adc_clk_count_refmux_neg;
+  wire [32-1:0] adc_clk_count_refmux_pos;
+  wire [24-1:0] adc_clk_count_refmux_both;
+  wire [32-1:0] adc_clk_count_sigmux;
+  wire [32-1:0] adc_clk_count_aperture;
+
+  wire [24-1:0] adc_stat_count_refmux_pos_up;
+  wire [24-1:0] adc_stat_count_refmux_neg_up;
+  wire [24-1:0] adc_stat_count_cmpr_cross_up;
 
 
 
@@ -412,18 +424,56 @@ module top (
     .sigmux( adc_sigmux ),
 
     // adc clk counts for last sample measurement
-    .clk_count_rstmux_last(adc_clk_count_rstmux_last),
-    .clk_count_refmux_neg_last(  adc_clk_count_refmux_neg_last),
-    .clk_count_refmux_pos_last(  adc_clk_count_refmux_pos_last),
-    .clk_count_refmux_both_last(   adc_clk_count_refmux_both_last),
-    .clk_count_sigmux_last(  adc_clk_count_sigmux_last ),
-    .clk_count_aperture_last( adc_clk_count_aperture_last),
+    .clk_count_rstmux(         adc_clk_count_rstmux),
+    .clk_count_refmux_neg(     adc_clk_count_refmux_neg),
+    .clk_count_refmux_pos(     adc_clk_count_refmux_pos),
+    .clk_count_refmux_both(    adc_clk_count_refmux_both),
+    .clk_count_sigmux(         adc_clk_count_sigmux),
+    .clk_count_aperture(       adc_clk_count_aperture),
 
     // stats
-    .stat_count_refmux_pos_up_last( adc_stat_count_refmux_pos_up_last),
-    .stat_count_refmux_neg_up_last( adc_stat_count_refmux_neg_up_last),
-    .stat_count_cmpr_cross_up_last( adc_stat_count_cmpr_cross_up_last)
+    .stat_count_refmux_pos_up( adc_stat_count_refmux_pos_up),
+    .stat_count_refmux_neg_up( adc_stat_count_refmux_neg_up),
+    .stat_count_cmpr_cross_up( adc_stat_count_cmpr_cross_up)
+
   );
+
+
+
+  // we could use an 2d array...
+
+
+  always @(posedge CLK)
+    begin
+      // wait for adc to measure
+      if( adc_measure_valid)
+        begin
+
+          // we should do the 24 to 32 bit padding here.
+
+          // counts
+          reg_adc_clk_count_rstmux       <= adc_clk_count_rstmux;
+          reg_adc_clk_count_refmux_neg   <= adc_clk_count_refmux_neg;
+          reg_adc_clk_count_refmux_pos   <= adc_clk_count_refmux_pos;
+          reg_adc_clk_count_refmux_both  <= adc_clk_count_refmux_both;
+          reg_adc_clk_count_sigmux       <= adc_clk_count_sigmux;
+          reg_adc_clk_count_aperture     <= adc_clk_count_aperture;
+
+          // stats
+          reg_adc_stat_count_refmux_pos_up <= adc_stat_count_refmux_pos_up;
+          reg_adc_stat_count_refmux_neg_up <= adc_stat_count_refmux_neg_up;
+          reg_adc_stat_count_cmpr_cross_up <= adc_stat_count_cmpr_cross_up;
+
+
+          /*
+          stat_count_var_up_last      <= stat_count_var_up;
+          stat_count_var_down_last    <= stat_count_var_down;
+          stat_count_fix_up_last      <= stat_count_fix_up;
+          stat_count_fix_down_last    <= stat_count_fix_down;
+          stat_count_flip_last        <= stat_count_flip;
+          */
+        end
+    end
 
 
 
@@ -671,18 +721,17 @@ module top (
 
     // adc inputs
     // pad to match register_set 32bit regs.
-    .  reg_adc_clk_count_refmux_neg( adc_clk_count_refmux_neg_last) ,
-    .  reg_adc_clk_count_refmux_pos( adc_clk_count_refmux_pos_last) ,
-    .  reg_adc_clk_count_refmux_both( { 8'b0, adc_clk_count_refmux_both_last } ) ,
+    .  reg_adc_clk_count_refmux_neg( reg_adc_clk_count_refmux_neg) ,
+    .  reg_adc_clk_count_refmux_pos( reg_adc_clk_count_refmux_pos) ,
+    .  reg_adc_clk_count_refmux_both( { 8'b0, reg_adc_clk_count_refmux_both } ) ,
+    .  reg_adc_clk_count_rstmux( { 8'b0, reg_adc_clk_count_rstmux } ) ,
+    .  reg_adc_clk_count_sigmux( reg_adc_clk_count_sigmux ),
+    .  reg_adc_clk_count_aperture( reg_adc_clk_count_aperture),
 
-    .  reg_adc_clk_count_rstmux( { 8'b0, adc_clk_count_rstmux_last } ) ,
-    .  reg_adc_clk_count_sigmux( adc_clk_count_sigmux_last ),
-    .  reg_adc_clk_count_aperture( adc_clk_count_aperture_last),
 
-
-    .  reg_adc_stat_count_refmux_pos_up( { 8'b0, adc_stat_count_refmux_pos_up_last } ),
-    .  reg_adc_stat_count_refmux_neg_up( { 8'b0, adc_stat_count_refmux_neg_up_last } ) ,
-    .  reg_adc_stat_count_cmpr_cross_up( { 8'b0, adc_stat_count_cmpr_cross_up_last } )
+    .  reg_adc_stat_count_refmux_pos_up( { 8'b0, reg_adc_stat_count_refmux_pos_up } ),
+    .  reg_adc_stat_count_refmux_neg_up( { 8'b0, reg_adc_stat_count_refmux_neg_up } ) ,
+    .  reg_adc_stat_count_cmpr_cross_up( { 8'b0, reg_adc_stat_count_cmpr_cross_up } )
 
   );
 

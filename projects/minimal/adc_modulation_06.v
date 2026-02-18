@@ -101,34 +101,38 @@ module adc_modulation (
 
   ///////////
 
-  // copy of the registers, used to enable spi reading, in new measurement cycle.
-  // long registers are 32/31 bit counts, eg. (1<<31)/20e6. == 107 seconds, for long integrations
-  // having visibility over the reset clk count is also useful for check, and consistentcy.
-  output reg [24-1:0] clk_count_rstmux_last,
-  output reg [32-1:0] clk_count_refmux_neg_last,
-  output reg [32-1:0] clk_count_refmux_pos_last,
-  output reg [24-1:0] clk_count_refmux_both_last,
-  output reg [32-1:0] clk_count_sigmux_last,
-  output reg [32-1:0] clk_count_aperture_last,              // todo can expose this in the register set, in top.
+  /*
+
+    Feb. 2026. we could really simplify this
+    by moving all these outside the adc.
+    - and read/ update them
+
+  */
 
 
+  // counts
+  output reg [24-1:0] clk_count_rstmux,
+  output reg [32-1:0] clk_count_refmux_neg,
+  output reg [32-1:0] clk_count_refmux_pos,
+  output reg [24-1:0] clk_count_refmux_both,
+  output reg [32-1:0] clk_count_sigmux,
+  output reg [32-1:0] clk_count_aperture,
 
-  // stats / behavior/transition counts
-  // prefix with stat_
-  output reg [24-1:0] stat_count_refmux_pos_up_last,
-  output reg [24-1:0] stat_count_refmux_neg_up_last,
-  output reg [24-1:0] stat_count_cmpr_cross_up_last,
 
-  output reg [24-1:0] stat_count_var_up_last,
-  output reg [24-1:0] stat_count_var_down_last,
-  output reg [24-1:0] stat_count_fix_up_last,
-  output reg [24-1:0] stat_count_fix_down_last,
-  output reg [24-1:0] stat_count_flip_last
+  // stats
+  output reg [24-1:0] stat_count_refmux_pos_up,
+  output reg [24-1:0] stat_count_refmux_neg_up,
+  output reg [24-1:0] stat_count_cmpr_cross_up,
+
+  // nore
+  output reg [24-1:0] stat_count_var_up,
+  output reg [24-1:0] stat_count_var_down,
+  output reg [24-1:0] stat_count_fix_up,
+  output reg [24-1:0] stat_count_fix_down,
+  output reg [24-1:0] stat_count_flip
 
 
 );
-
-
 
 
   reg [5-1:0]   state = 0; // RESET_START;
@@ -138,25 +142,6 @@ module adc_modulation (
   // counters and settings  ...
 
   reg [31:0]  clk_count_down;
-
-  // modulation counts
-  reg [24-1:0] clk_count_rstmux;
-  reg [32-1:0] clk_count_refmux_neg;
-  reg [32-1:0] clk_count_refmux_pos;
-  reg [24-1:0] clk_count_refmux_both;
-  reg [32-1:0] clk_count_sigmux ;
-  reg [32-1:0] clk_count_aperture;
-
-  // stats
-  reg [24-1:0] stat_count_refmux_pos_up;
-  reg [24-1:0] stat_count_refmux_neg_up;
-  reg [24-1:0] stat_count_cmpr_cross_up;
-
-  reg [24-1:0] stat_count_var_up;
-  reg [24-1:0] stat_count_var_down;
-  reg [24-1:0] stat_count_fix_up;
-  reg [24-1:0] stat_count_fix_down;
-  reg [24-1:0] stat_count_flip;
 
 
 
@@ -603,7 +588,7 @@ module adc_modulation (
                 rstmux          <= 1;
                 refmux          <= `REFMUX_NONE;
 
-
+/*
                 // counts
                 clk_count_rstmux_last       <= clk_count_rstmux;    // this doesn't work. reports 0.
                 clk_count_refmux_neg_last   <= clk_count_refmux_neg;
@@ -622,6 +607,7 @@ module adc_modulation (
                 stat_count_fix_up_last      <= stat_count_fix_up;
                 stat_count_fix_down_last    <= stat_count_fix_down;
                 stat_count_flip_last        <= stat_count_flip;
+*/
 
                 // stat_clk_count_rundown_last  <= clk_count;                           // why do we record this
 
