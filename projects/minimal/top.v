@@ -453,6 +453,7 @@ module top (
       if( adc_measure_valid)
         begin
 
+          // snapshot variable state after a valid measurement
           // do padding from 24 to 32 bits for the registers here
 
 
@@ -498,14 +499,24 @@ module top (
   wire [4-1:0]  sequence_acquisition2_leds;
   wire [8-1:0]  sequence_acquisition2_monitor;
 
-  // with two sequence modules,
-  // we would need to encode this in output vector if we wanted both values available.
-  wire [3-1:0]  sequence_acquisition2_sample_idx_last;
-  wire          sequence_acquisitionr2_first_last;
-
-
 
   wire  sequence_acquisition2_adc_reset_n;
+
+  ////////////////
+
+  // with two sequence modules,
+  // we would need to encode this in output vector if we wanted both values available.
+  wire [3-1:0]  sequence_acquisition2_sample_idx;
+  wire          sequence_acquisitionr2_first;
+
+  // hold state after valid measure.
+
+            // sample_idx_last_o <= 3'b111;
+  reg [3-1:0]  reg_sequence_acquisition2_sample_idx;
+  reg           reg_sequence_acquisitionr2_first;
+
+
+
 
 
   sequence_acquisition
@@ -530,18 +541,38 @@ module top (
     .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]  ),     // done
 
     // outputs
-    .pc_sw_o( sequence_acquisition2_pc_sw  ),
+    .pc_sw_o(     sequence_acquisition2_pc_sw  ),
     .azmux_o (    sequence_acquisition2_azmux  ),
 
     .leds_o(      sequence_acquisition2_leds  ),
     .monitor_o(   sequence_acquisition2_monitor  ),    // only pass 2 bit to the az monitor
 
-    .sample_idx_last_o( sequence_acquisition2_sample_idx_last),
-    .first_last_o(sequence_acquisitionr2_first_last),
 
-    .adc_reset_no(  sequence_acquisition2_adc_reset_n )
+    .sample_idx(   sequence_acquisition2_sample_idx),       // careful/tricky - because  will be initialized to 0.  which is the same as if the first reading.
+    .first (       sequence_acquisitionr2_first),
 
+    // control the adc
+    .adc_reset_no( sequence_acquisition2_adc_reset_n )
   );
+
+
+
+
+  always @(posedge CLK)
+    begin
+      // wait for adc to measure
+      if( adc_measure_valid)
+        begin
+
+          // snapshot variable state after a valid measurement
+          reg_sequence_acquisition2_sample_idx = sequence_acquisition2_sample_idx;
+          reg_sequence_acquisitionr2_first  = sequence_acquisitionr2_first;
+        end
+    end
+
+
+
+
 
 
 
@@ -675,7 +706,11 @@ module top (
     4'b0,   // ??
 
     // 24
-    {  1'b0,  reg_sa_p_seq_n[ 3-1: 0] ,  sequence_acquisitionr2_first_last,  sequence_acquisition2_sample_idx_last },
+    {   1'b0,
+        reg_sa_p_seq_n[ 3-1: 0] ,
+        reg_sequence_acquisitionr2_first,
+        reg_sequence_acquisition2_sample_idx
+    },
 
     // 16
     { 4'b0, hw_flags_i } ,

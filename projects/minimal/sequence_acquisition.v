@@ -70,15 +70,14 @@ module sequence_acquisition (
   output reg [ 4-1:0 ] azmux_o,
 
 
-  output reg first_last_o,        //  first variable -  lagged
 
-
+  // TODO clean up
+  // JA. output reg first_last_o,        //  first variable -  lagged
   //  - status_o should be treated generically.  just like monitor_o and leds_o.
-
   // currently unused.
   // output reg [4-1: 0 ] status_last_o,
 
-  output reg  [3-1: 0] sample_idx_last_o,
+  // JA. output reg  [3-1: 0] sample_idx_last_o,
 
 
   output wire [4-1:0] leds_o,
@@ -86,17 +85,26 @@ module sequence_acquisition (
   /*/ now a wire.  output wire [ 2-1:0]  monitor_o       // driven as wire/assign.
   // think it is ok to be a combinatory logic - wire output - although may slow things down.
   */
-  output wire [ 8-1:0]  monitor_o
+  output wire [ 8-1:0]  monitor_o,
+
+
+  ////////////////
+
+  output reg  [3-1: 0] sample_idx ,
+
+  // is it the first reading after trigger assert
+  output reg           first ,
 
 );
+
+
+
 
   reg [7-1:0]   state = 0 ;     // should expose in module, not sure.
 
   reg [31:0]    clk_count_down;           // clk_count for the current phase. using 31 bitss, gives faster timing spec.  v 24 bits. weird. ??? 36MHz v 32MHz
 
 
-  reg  [3-1: 0] sample_idx = 0;
-  reg           first = 0;                  // after trigger.  mcu reset.
 
 
 
@@ -142,7 +150,7 @@ module sequence_acquisition (
 
 
             // avoid 0 which can be confused with first seq
-            sample_idx_last_o <= 3'b111;
+            // sample_idx_last_o <= 3'b111;
 
             /* during reset - hold the precharge switches lo. to emit BOOT. and protect signal. both cahnnels
             // azmux state should probably also be defined.  can use the first value.
@@ -226,9 +234,9 @@ module sequence_acquisition (
               state         <= 1;
 
 
-              sample_idx_last_o  <= sample_idx;
+              // sample_idx_last_o  <= sample_idx;
+              // first_last_o    <= first;   // lagged, to be correct when do spi read of status register
 
-              first_last_o    <= first;   // lagged, to be correct when do spi read of status register
               first           <= 0;
 
               /*
