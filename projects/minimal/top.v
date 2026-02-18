@@ -366,6 +366,7 @@ module top (
 
 
 
+
   // should all be 32 bit. to match the register_set
   reg [32-1:0] reg_adc_clk_count_rstmux;
   reg [32-1:0] reg_adc_clk_count_refmux_neg;
@@ -381,7 +382,7 @@ module top (
 
 
 
-  ///
+  // adc vars
   wire [24-1:0] adc_clk_count_rstmux;
   wire [32-1:0] adc_clk_count_refmux_neg;
   wire [32-1:0] adc_clk_count_refmux_pos;
@@ -444,7 +445,6 @@ module top (
 
 
 
-  // we could use an 2d array...
 
 
   always @(posedge CLK)
@@ -453,17 +453,7 @@ module top (
       if( adc_measure_valid)
         begin
 
-          // we should do the 24 to 32 bit padding here.
-
-
-/*
-    .  reg_adc_clk_count_rstmux( { 8'b0, reg_adc_clk_count_rstmux } ) ,
-    .  reg_adc_clk_count_refmux_both( { 8'b0, reg_adc_clk_count_refmux_both } ) ,
-
-    .  reg_adc_stat_count_refmux_pos_up( { 8'b0, reg_adc_stat_count_refmux_pos_up } ),
-    .  reg_adc_stat_count_refmux_neg_up( { 8'b0, reg_adc_stat_count_refmux_neg_up } ) ,
-    .  reg_adc_stat_count_cmpr_cross_up( { 8'b0, reg_adc_stat_count_cmpr_cross_up } )
-*/
+          // do padding from 24 to 32 bits for the registers here
 
 
           // counts
