@@ -275,6 +275,11 @@ module adc_modulation (
         clk_count_aperture <= clk_count_aperture + 1;
 
 
+      /* we have to keep a separate variable for aperture, and count it
+        because the sigmux clk count is not incremented if sigmux is not turned on, eg. during weight calc.
+        likewise we need a separate in_runup variable, separate from testing the sigmux variable
+      */
+
 
       // runup termination condition
       if(clk_count_aperture >= p_clk_count_aperture)
@@ -301,7 +306,7 @@ module adc_modulation (
             // setup next state to advance to if reset_n not asserted
             state           <= `STATE_RESET;
 
-            // indicate no valid measurement available
+            // clear valid measurement available
             adc_measure_valid <= 0;
 
             clk_count_rstmux <= 0;   // clear rst count here
