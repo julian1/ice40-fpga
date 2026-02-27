@@ -165,29 +165,29 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
     reg_4094_oe      = 0;
     reg_cr      = 0;
     reg_direct    = 0  ;
-    // reg_seq_mode  <= 0; // AZ
+    // reg_seq_mode  = 0; // AZ
 
     // signal acquisition
     // it is nice to have sa defaults...
     // so can just put in az mode, and have something working.
 
-    // reg_sa_p_clk_count_trig_delay <= $rtoi( `CLK_FREQ * 100e-3 );   // 100ms.  3458a. is 30ms ?
-    reg_sa_p_clk_count_precharge  <= $rtoi( `CLK_FREQ * 500e-6 );   // 500us.
+    reg_sa_p_clk_count_trig_delay = $rtoi( `CLK_FREQ * 100e-3 );   // 100ms.  3458a. is 30ms ?
+    reg_sa_p_clk_count_precharge  = $rtoi( `CLK_FREQ * 500e-6 );   // 500us.
 
     // how can express macro constant. of fixed width? does this work?
-    // reg_sa_p_seq0 <= { 2'b01, ((4'd1<<3)|(3-1))   };  //  `S3
+    // reg_sa_p_seq0 = { 2'b01, ((4'd1<<3)|(3-1))   };  //  `S3
 
-    reg_sa_p_seq_n    <= 2;
-    reg_sa_p_seq0     <= { 2'b01, 4'd10   };  //  ((1<<3)|(3-1)) =  10          // S3 dcv   TODO fixme. just use the define S3
-    reg_sa_p_seq1     <= { 2'b00, 4'd14    };   // ((1<<3)|(7-1)) =  14       // S7  star-gnd.  TODO fixme just use the define S7.
-    reg_sa_p_seq2     <= 0;
-    reg_sa_p_seq3     <= 0;
+    reg_sa_p_seq_n    = 2;
+    reg_sa_p_seq0     = { 2'b01, 4'd10   };  //  ((1<<3)|(3-1)) =  10          // S3 dcv   TODO fixme. just use the define S3
+    reg_sa_p_seq1     = { 2'b00, 4'd14    };   // ((1<<3)|(7-1)) =  14       // S7  star-gnd.  TODO fixme just use the define S7.
+    reg_sa_p_seq2     = 0;
+    reg_sa_p_seq3     = 0;
 
-    // reg_sa_p_trig     <= 0;
+    // reg_sa_p_trig     = 0;
 
     // adc
-    reg_adc_p_clk_count_aperture  <=  $rtoi( `CLK_FREQ * 0.2 );      // 200ms.
-    reg_adc_p_clk_count_reset     <= 24'd10000 ;                    // 20000000 * 0.5e-3 == 10000   500us.
+    reg_adc_p_clk_count_aperture  =  $rtoi( `CLK_FREQ * 0.2 );      // 200ms.
+    reg_adc_p_clk_count_reset     = 24'd10000 ;                    // 20000000 * 0.5e-3 == 10000   500us.
   end
 
 
