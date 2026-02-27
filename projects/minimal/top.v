@@ -208,6 +208,7 @@ module top (
 
 
   // sample aquisition
+  wire [32-1:0] reg_sa_p_clk_count_trig_delay;
   wire [32-1:0] reg_sa_p_clk_count_precharge;
 
   wire [32-1:0] reg_sa_p_seq_n;
@@ -315,14 +316,15 @@ module top (
     // inputs
     .adc_measure_valid_i( adc_mock_measure_valid ),                     // fan-in from adc
 
+    .p_clk_count_trig_delay_i( reg_sa_p_clk_count_trig_delay),
+    .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]  ),     // done
+
     .p_seq_n_i( reg_sa_p_seq_n[ 3-1: 0]  ),   // 3 bits
     .p_seq0_i( reg_sa_p_seq0[ 6-1: 0]  ),
     .p_seq1_i( reg_sa_p_seq1[ 6-1: 0]  ),
     .p_seq2_i( reg_sa_p_seq2[ 6-1: 0] ),
     .p_seq3_i( reg_sa_p_seq3[ 6-1: 0] ),
 
-
-    .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]  ),     // done
 
     // outputs
     .pc_sw_o( sequence_acquisition_pc_sw  ),
@@ -525,11 +527,13 @@ module top (
   sequence_acquisition2 (
 
     .clk(CLK),
-    .reset_n( sa_trig_i ),    // we want this to remove. the old edge triggered stuff.
+    .reset_n( sa_trig_i ),
 
     // inputs
-    .adc_measure_valid_i( adc_measure_valid ),                     // JA the real adc. from adc
+    .adc_measure_valid_i( adc_measure_valid ),
 
+    .p_clk_count_trig_delay_i( reg_sa_p_clk_count_trig_delay),
+    .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]),
 
     .p_seq_n_i( reg_sa_p_seq_n[ 3-1: 0]  ),
     .p_seq0_i( reg_sa_p_seq0[ 6-1: 0]  ),
@@ -537,8 +541,6 @@ module top (
     .p_seq2_i( reg_sa_p_seq2[ 6-1: 0] ),
     .p_seq3_i( reg_sa_p_seq3[ 6-1: 0] ),
 
-
-    .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]  ),     // done
 
     // outputs
     .pc_sw_o(     sequence_acquisition2_pc_sw  ),
@@ -747,6 +749,8 @@ module top (
 
 
     // parameter inputs - sequence acquisition.
+
+    . reg_sa_p_clk_count_trig_delay(      reg_sa_p_clk_count_trig_delay),
     . reg_sa_p_clk_count_precharge(       reg_sa_p_clk_count_precharge),
 
     . reg_sa_p_seq_n( reg_sa_p_seq_n),

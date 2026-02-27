@@ -30,7 +30,7 @@
 `include "defines.v"    // `CLK_FREQ for default calculation
 
 `define REG_4094_OE                     9
-`define REG_CR                        12
+`define REG_CR                          12
 `define REG_DIRECT                      14
 `define REG_STATUS                      17
 
@@ -38,6 +38,7 @@
 ///////////////////////
 
 //  sample acquisition.
+`define REG_SA_P_CLK_COUNT_TRIG_DELAY   19
 `define REG_SA_P_CLK_COUNT_PRECHARGE    20
 
 `define REG_SA_P_SEQ_N                  21
@@ -96,16 +97,18 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   // output reg [32-1:0] reg_seq_mode,
 
 
+
   // outputs signal acquisition
-  output reg [32-1:0] reg_sa_p_seq_n,
+  output reg [32-1:0] reg_sa_p_clk_count_trig_delay,
   output reg [32-1:0] reg_sa_p_clk_count_precharge,
 
   /*
-    this isn't very efficient.
-    encode azmux value 4 bits, and precharge switch 2 bits.
+    representation is not very efficient.
+    encode azmux value 4 bits, and precharge switch 2 bits is 6 bits.
     could use higher bits to encode other control eg. to not change/leave the precharge from previous value. etc.
     better than creating a separate controller module
   */
+  output reg [32-1:0] reg_sa_p_seq_n,
   output reg [32-1:0] reg_sa_p_seq0,
   output reg [32-1:0] reg_sa_p_seq1,
   output reg [32-1:0] reg_sa_p_seq2,
@@ -167,7 +170,9 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
     // signal acquisition
     // it is nice to have sa defaults...
     // so can just put in az mode, and have something working.
-    reg_sa_p_clk_count_precharge  <= $rtoi( `CLK_FREQ * 500e-6 );   // == 10000 ==  500us.
+
+    reg_sa_p_clk_count_trig_delay <= $rtoi( `CLK_FREQ * 100e-3 );   // 100ms.  3458a. is 30ms ?
+    reg_sa_p_clk_count_precharge  <= $rtoi( `CLK_FREQ * 500e-6 );   // 500us.
 
     // how can express macro constant. of fixed width? does this work?
     // reg_sa_p_seq0 <= { 2'b01, ((4'd1<<3)|(3-1))   };  //  `S3
@@ -182,7 +187,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
     // adc
     reg_adc_p_clk_count_aperture  <=  $rtoi( `CLK_FREQ * 0.2 );      // 200ms.
-    reg_adc_p_clk_count_reset     <= 24'd10000 ;            // 20000000 * 0.5e-3 == 10000   500us.
+    reg_adc_p_clk_count_reset     <= 24'd10000 ;                    // 20000000 * 0.5e-3 == 10000   500us.
   end
 
 
@@ -237,15 +242,17 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
               // general
               `REG_4094_OE:                     out <= reg_4094_oe << 8;
-              `REG_CR:                        out <= reg_cr << 8;   // ok..
+              `REG_CR:                          out <= reg_cr << 8;
               `REG_DIRECT:                      out <= reg_direct << 8;
 
               `REG_STATUS:                      out <= reg_status << 8;
 
               ////////
-              // sa
-              `REG_SA_P_SEQ_N:                  out <= reg_sa_p_seq_n << 8;
+              // sa - sample acquisition
+              `REG_SA_P_CLK_COUNT_TRIG_DELAY:   out <= reg_sa_p_clk_count_trig_delay << 8;
               `REG_SA_P_CLK_COUNT_PRECHARGE:    out <= reg_sa_p_clk_count_precharge << 8;
+
+              `REG_SA_P_SEQ_N:                  out <= reg_sa_p_seq_n << 8;
               `REG_SA_P_SEQ0:                   out <= reg_sa_p_seq0 << 8;
               `REG_SA_P_SEQ1:                   out <= reg_sa_p_seq1 << 8;
               `REG_SA_P_SEQ2:                   out <= reg_sa_p_seq2 << 8;
@@ -294,9 +301,10 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
             //////////
 
-            `REG_SA_P_SEQ_N:                reg_sa_p_seq_n <= bin;
+            `REG_SA_P_CLK_COUNT_TRIG_DELAY: reg_sa_p_clk_count_trig_delay <= bin;
             `REG_SA_P_CLK_COUNT_PRECHARGE:  reg_sa_p_clk_count_precharge <= bin;
 
+            `REG_SA_P_SEQ_N:                reg_sa_p_seq_n <= bin;
             `REG_SA_P_SEQ0:                 reg_sa_p_seq0 <= bin;
             `REG_SA_P_SEQ1:                 reg_sa_p_seq1 <= bin;
             `REG_SA_P_SEQ2:                 reg_sa_p_seq2 <= bin;

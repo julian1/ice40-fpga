@@ -51,6 +51,7 @@ module sequence_acquisition (
   input   reset_n,
 
   // inputs
+  input [32-1:0]    p_clk_count_trig_delay_i,
   input [24-1:0]    p_clk_count_precharge_i,
 
   input [ 3-1: 0 ]  p_seq_n_i,    // need at least 3 bits to encode 4.

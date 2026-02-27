@@ -280,7 +280,6 @@ module adc_modulation (
         likewise we need a separate in_runup variable, separate from testing the sigmux variable
       */
 
-
       // runup termination condition
       if(clk_count_aperture >= p_clk_count_aperture)
         begin
