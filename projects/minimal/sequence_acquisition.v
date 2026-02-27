@@ -60,24 +60,25 @@ module sequence_acquisition (
   input [ 6-1 : 0 ] p_seq2_i,
   input [ 6-1 : 0 ] p_seq3_i,
 
+  input             p_noaz,
 
 
-  input adc_measure_valid_i,
+  input             adc_measure_valid_i,
 
   // outputs.
-  output reg adc_reset_no,              // rename _n_o. perhaps or trig. is even ok.
+  output reg        adc_reset_no,              // control the adc.  rename _n_o. perhaps or trig. is even ok.
 
-  output reg [ 2-1: 0]  pc_sw_o,      // TODO  fix rename pc_sw_o
-  output reg [ 4-1:0 ] azmux_o,
+  output reg [ 2-1: 0]  pc_sw_o,
+  output reg [ 4-1:0 ]  azmux_o,
 
 
 
-  output wire [4-1:0] leds_o,
+  output wire [4-1:0]   leds_o,
 
   /*/ now a wire.  output wire [ 2-1:0]  monitor_o       // driven as wire/assign.
   // think it is ok to be a combinatory logic - wire output - although may slow things down.
   */
-  output wire [ 8-1:0]  monitor_o,
+  output wire [ 8-1:0] monitor_o,
 
 
   ////////////////

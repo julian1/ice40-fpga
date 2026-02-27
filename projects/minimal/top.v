@@ -226,12 +226,11 @@ module top (
   // operating mode
   wire [3-1:0 ] cr_mode = reg_cr[ 3-1 : 0 ];
 
-  // whether to turn sigmux on
-  // better name sigmux_active ??
-  wire cr_adc_p_active_sigmux = reg_cr[ 4 - 1 ];
+  // adc, flag to control whether to switch sigmux on
+  wire cr_adc_p_active_sigmux = reg_cr[ 3 ];
 
-
-
+  // sa, noaz flag
+  wire cr_sa_p_noaz = reg_cr[ 4 ];
 
 
 
@@ -325,6 +324,7 @@ module top (
     .p_seq2_i( reg_sa_p_seq2[ 6-1: 0] ),
     .p_seq3_i( reg_sa_p_seq3[ 6-1: 0] ),
 
+    .p_noaz( cr_sa_p_noaz ),
 
     // outputs
     .pc_sw_o( sequence_acquisition_pc_sw  ),
@@ -541,6 +541,7 @@ module top (
     .p_seq2_i( reg_sa_p_seq2[ 6-1: 0] ),
     .p_seq3_i( reg_sa_p_seq3[ 6-1: 0] ),
 
+    .p_noaz( cr_sa_p_noaz ),
 
     // outputs
     .pc_sw_o(     sequence_acquisition2_pc_sw  ),
