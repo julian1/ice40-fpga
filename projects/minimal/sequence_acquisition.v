@@ -38,6 +38,23 @@
 
 
 
+`define STATE_RESET_START    0
+// `define STATE_RESET          2
+
+`define STATE_PC_PROTECT_START   1
+`define STATE_PC_PROTECT         15
+
+
+`define STATE_SIGNAL_START      2
+`define STATE_SIGNAL            25
+
+
+`define STATE_PC_SAMPLE_START   3
+`define STATE_PC_SAMPLE         33
+
+
+`define STATE_WAIT_ADC          35
+
 
 // rename sample_sequence_acquisition
 // or sample_acquisition_sequence
@@ -131,10 +148,10 @@ module sequence_acquisition (
       case (state)
 
         // precharge switch - protects the signal. from the charge-injection of the AZ switch.
-        0:
+        `STATE_RESET_START:
           begin
             // having a state like, this may be useful for debuggin, because can put a pulse on the monitor_o.
-            state         <= 1;
+            state         <= `STATE_PC_PROTECT_START;
 
             // hold adc in reset also
             adc_reset_no  <= 0;
@@ -154,19 +171,19 @@ module sequence_acquisition (
 
 
         // switch pre-charge switch to boot to protect signal, and pause.
-        1:
+        `STATE_PC_PROTECT_START:
           begin
-            state         <= 15;
-            clk_count_down  <= p_clk_count_precharge_i;
+            state         <= `STATE_PC_PROTECT;
+            clk_count_down <= p_clk_count_precharge_i;
 
             // TODO REVIEW reset the precharge switches. - shoud do this in final state. instead.
             pc_sw_o       <= 2'b00;
 
           end
 
-        15:
+        `STATE_PC_PROTECT:
           if(clk_count_down == 0)
-            state <= 2;
+            state <= `STATE_SIGNAL_START;
 
 
 
@@ -174,31 +191,32 @@ module sequence_acquisition (
         ////////////////////////////
         // switch azmux_o to the signal of interest, which may be a low. and pause
         // precharge phase.
-        2:
+        `STATE_SIGNAL_START:
           begin
-            state           <= 25;
+            state           <= `STATE_SIGNAL;
             clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
 
-            case(sample_idx)
+            case( sample_idx)
               0: azmux_o   <= p_seq0_i[ 0 +: 4 ];
               1: azmux_o   <= p_seq1_i[ 0 +: 4];
               2: azmux_o   <= p_seq2_i[ 0 +: 4 ];
               3: azmux_o   <= p_seq3_i[ 0 +: 4];
             endcase
           end
-        25:
+
+        `STATE_SIGNAL:
           if(clk_count_down == 0)
-            state <= 3;
+            state <= `STATE_PC_SAMPLE_START;
 
 
 
         /////////////////////////
-        // switch pc-switch from BOOT to the signal input (which may be a ground), and pause.
+        // switch pc-switch from BOOT to the signal input if defined (which may be a ground), and pause.
         // if we are sampling a ground, and pc_val = 0, then this does nothing.
         // and we could skip it, but probably not unreasonable to keep timing the same.
-        3:
+        `STATE_PC_SAMPLE_START:
           begin
-            state           <= 33;
+            state           <= `STATE_PC_SAMPLE;
             clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
 
             case(sample_idx)
@@ -208,24 +226,26 @@ module sequence_acquisition (
               3: pc_sw_o <= p_seq3_i[4 +: 2];
             endcase
           end
-        33:
+
+        `STATE_PC_SAMPLE:
           if(clk_count_down == 0)
             begin
-              state           <= 35;
+              state         <= `STATE_WAIT_ADC;
               // adc start
-              adc_reset_no <= 1;
+              adc_reset_no  <= 1;
             end
 
 
-        35:
+
+        `STATE_WAIT_ADC:
           // wait for adc to measure
           if( adc_measure_valid_i )
             begin
 
               // set up next state
-              state         <= 1;
+              state         <= `STATE_PC_PROTECT_START;
 
-              first           <= 0;
+              first         <= 0;
 
               /*
                 avoid modulo
@@ -245,11 +265,12 @@ module sequence_acquisition (
 
 
 
-      // override all states - if reset_n enabled, then don't advance out-of reset state.
+      // override all states -
+      // if reset_n enabled, then don't advance out-of reset state.
       if(reset_n == 0)      // in reset
         begin
 
-            state <= 0;
+            state <= `STATE_RESET_START;
         end
 
 
