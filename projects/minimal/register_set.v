@@ -171,7 +171,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
     // it is nice to have sa defaults...
     // so can just put in az mode, and have something working.
 
-    reg_sa_p_clk_count_trig_delay <= $rtoi( `CLK_FREQ * 100e-3 );   // 100ms.  3458a. is 30ms ?
+    // reg_sa_p_clk_count_trig_delay <= $rtoi( `CLK_FREQ * 100e-3 );   // 100ms.  3458a. is 30ms ?
     reg_sa_p_clk_count_precharge  <= $rtoi( `CLK_FREQ * 500e-6 );   // 500us.
 
     // how can express macro constant. of fixed width? does this work?

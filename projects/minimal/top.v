@@ -208,7 +208,7 @@ module top (
 
 
   // sample aquisition
-  wire [32-1:0] reg_sa_p_clk_count_trig_delay;
+  wire [32-1:0] reg_sa_p_clk_count_trig_delay ;//= 20000000;
   wire [32-1:0] reg_sa_p_clk_count_precharge;
 
   wire [32-1:0] reg_sa_p_seq_n;
@@ -315,7 +315,7 @@ module top (
     // inputs
     .adc_measure_valid_i( adc_mock_measure_valid ),                     // fan-in from adc
 
-    .p_clk_count_trig_delay_i( reg_sa_p_clk_count_trig_delay),
+    .p_clk_count_trig_delay_i( /*20000000*/ reg_sa_p_clk_count_trig_delay ),
     .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]  ),     // done
 
     .p_seq_n_i( reg_sa_p_seq_n[ 3-1: 0]  ),   // 3 bits
@@ -532,7 +532,7 @@ module top (
     // inputs
     .adc_measure_valid_i( adc_measure_valid ),
 
-    .p_clk_count_trig_delay_i( reg_sa_p_clk_count_trig_delay),
+    .p_clk_count_trig_delay_i( /*20000000*/ reg_sa_p_clk_count_trig_delay),
     .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]),
 
     .p_seq_n_i( reg_sa_p_seq_n[ 3-1: 0]  ),

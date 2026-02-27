@@ -38,11 +38,11 @@
 
 
 
-`define STATE_RESET_START    0
-// `define STATE_RESET          2
+`define STATE_RESET_START       0
+`define STATE_TRIG_DELAY        4
 
-`define STATE_PC_PROTECT_START   1
-`define STATE_PC_PROTECT         15
+`define STATE_PC_PROTECT_START  1
+`define STATE_PC_PROTECT        15
 
 
 `define STATE_SIGNAL_START      2
@@ -147,11 +147,12 @@ module sequence_acquisition (
 
       case (state)
 
-        // precharge switch - protects the signal. from the charge-injection of the AZ switch.
+        // reset state
         `STATE_RESET_START:
           begin
             // having a state like, this may be useful for debuggin, because can put a pulse on the monitor_o.
-            state         <= `STATE_PC_PROTECT_START;
+            state         <= `STATE_TRIG_DELAY;
+            clk_count_down <= p_clk_count_trig_delay_i;
 
             // hold adc in reset also
             adc_reset_no  <= 0;
@@ -169,6 +170,11 @@ module sequence_acquisition (
           end
 
 
+        `STATE_TRIG_DELAY:
+          if(clk_count_down == 0)
+            state         <= `STATE_PC_PROTECT_START;
+
+
 
         // switch pre-charge switch to boot to protect signal, and pause.
         `STATE_PC_PROTECT_START:
@@ -176,7 +182,8 @@ module sequence_acquisition (
             state         <= `STATE_PC_PROTECT;
             clk_count_down <= p_clk_count_precharge_i;
 
-            // TODO REVIEW reset the precharge switches. - shoud do this in final state. instead.
+            // keep the pc_sw lo if coming from reset_start/trig_delay
+            // switch to pc_sw lo if coming from wait_adc
             pc_sw_o       <= 2'b00;
 
           end
