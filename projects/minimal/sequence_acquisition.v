@@ -37,23 +37,23 @@
 `include "defines.v"
 
 
-
+// should use one-hot?
 `define STATE_RESET_START       0
-`define STATE_TRIG_DELAY        4
+`define STATE_TRIG_DELAY        1
 
-`define STATE_PC_PROTECT_START  1
-`define STATE_PC_PROTECT        15
-
-
-`define STATE_SIGNAL_START      2
-`define STATE_SIGNAL            25
+`define STATE_PC_PROTECT_START  2
+`define STATE_PC_PROTECT        3
 
 
-`define STATE_PC_SAMPLE_START   3
-`define STATE_PC_SAMPLE         33
+`define STATE_SIGNAL_START      4
+`define STATE_SIGNAL            5
 
 
-`define STATE_WAIT_ADC          35
+`define STATE_PC_SAMPLE_START   6
+`define STATE_PC_SAMPLE         7
+
+
+`define STATE_WAIT_ADC          8
 
 
 // rename sample_sequence_acquisition
