@@ -1,31 +1,13 @@
+
 /*
-   keep the precharge time the same, when taking a low  measurement - for symmetry and to be more generic.
+   keep the precharge time the same, when taking a LO - to keep simpler / symmetry and to be more generic.
 
-  remember also.
-    we need a way to communicate back to the mcu which sample is the one in the sequence.
-    so the sample_idx is good.
-    and can be encoded in the status regsiter.
-    ----
-    - think we may want the count. so that the receiver of data. can handle more easily.
-    - eg. doesn't have to say   if(mode == modeA &&  count == 0 || count == 2)
-    - not sure, it's not that complicated to interpret.
-    ------
+  remember
+    - use idx to communicate back to the mcu the current sample in the sequence via the status register.
+    - lo idx is always 0 in AZ. and 2 in ratiometric.
+    - could also return the azmux and pc state used for the sample
 
-    EXTR. if we didn't want the pre-charge to switch in in non-AZ mode,
-        then could this with another bitvector.   eg. in the two hi bits.
-        -----
-        that eliminates the need to have a separate no_az controller.
 
-    { wheether to switch pc switch, value of pc switch, azmux val }
-    ------
-    if we use a count . it might be easier to use registers.  eg.  reg_sa_sample_0  reg_sa_sample_1  etc.
-    and just pack the bits.
-    simple azcase is just write two registers, and sequence n.
-
-    sample_seq0
-    sample_seq1
-    sample_seq2
-    sample_seq3
 */
 
 
