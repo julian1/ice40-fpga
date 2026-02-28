@@ -259,10 +259,12 @@ module sequence_acquisition (
                 https://stackoverflow.com/questions/47425729/verilog-modulus-operator-for-wrapping-around-a-range
                 needs to be >= in case sample_n is reduced in write.
               */
-              sample_idx <= (sample_idx >= p_seq_n_i - 1)
-                              ? 0
-                              : sample_idx + 1;
-
+              if(!p_noaz)
+                sample_idx <= (sample_idx >= p_seq_n_i - 1)
+                                ? 0
+                                : sample_idx + 1;
+              else
+                sample_idx <= 1;
 
               // put adc in reset again
               adc_reset_no <= 0;
