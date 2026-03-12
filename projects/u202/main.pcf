@@ -5,13 +5,15 @@
 # jul 7, 2023.
 
 
-
-
 # TODO prefix spi_comms_
 
 # suspect 'S' indicates 'SPI' or 'serial' in this contet. not slave.
 # Eg. SDO is to MOSI - in context where fpga is spi master, when reading flash bitstream.
 # but is MISO - when fpga is spi slave when receiving bitstream.
+
+# consider adding '_n' suffix on cs,rst lines.
+#   Using the '_n' naming convention for port names when active low is still a good idea.
+
 
 #A dual-function, serial output pin in both configuration modes.
 #iCE40 LM devices have this pin shared with hardened SPI IP
@@ -38,13 +40,6 @@ set_io SCK              15  # up5k
 set_io SS               16  # up5k
 
 
-# consider adding '_n' suffix on cs,rst lines.
-#   Using the '_n' naming convention for port names when active low is still a good idea.
-
-
-
-
-
 
 ###############################
 
@@ -52,19 +47,33 @@ set_io SS               16  # up5k
 set_io clk              35
 
 # order follows pin
-set_io fets_o[0]        36    # 1
-set_io fets_o[1]        38    # 2
-set_io fets_o[2]        42    # 3
-set_io fets_o[3]        43    # 4
+#set_io fets_o[0]        36    # 1
+#set_io fets_o[1]        38    # 2
+#set_io fets_o[2]        42    # 3
+#set_io fets_o[3]        43    # 4
+
+
+
+set_io fsmc_a18               46
+set_io fsmc_a19               47
+set_io fsmc_clk               44
+set_io fsmc_a20               48
+set_io fsmc_cs                45
+set_io fsmc_a21               2
+set_io fsmc_a22               4
+set_io fsmc_a17               3
+
+
+# ok. feb 2026
+set_io fan_tach_i             10
+set_io fan_pwm_o              11
+set_io buzzer_o[0]            12
+set_io ikon_data_dir          21
+set_io buzzer_o[1]            13
+set_io fsmc_cs_itron          19
+set_io fsmc_cs_ssd1963        18
 
 
 
 
 
-
-set_io buzzer_o[0]        12
-set_io buzzer_o[1]        13
-
-
-set_io fan_pwm_o         11
-set_io fan_tach_i         10

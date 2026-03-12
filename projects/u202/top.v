@@ -286,12 +286,30 @@ module top (
 
 
   ///////////
-  output [ 4-1: 0 ] fets_o,
+  // output [ 4-1: 0 ] fets_o,
+
   output [ 2-1: 0 ] buzzer_o,
 
   output  fan_pwm_o,
-  input   fan_tach_i
+  input   fan_tach_i,
 
+
+  // iniput is wire by default.
+
+  input fsmc_clk,
+  input fsmc_cs,
+
+  input fsmc_a17,
+  input fsmc_a18,
+  input fsmc_a19,
+  input fsmc_a20,
+  input fsmc_a21,
+  input fsmc_a22,
+
+
+  output ikon_data_dir,
+  output fsmc_cs_itron,
+  output fsmc_cs_ssd1963,
 
 );
 
@@ -303,64 +321,33 @@ module top (
   // wire fets_o[0]  = x;
 
 
+  ///////////////////////
 
-/*
-  // fets
-  fet_driver
-  fet_driver1(
-    . clk( clk),
-    . reset_n( 1'b1 ),
+  // FSMC WR/RW and A16_RS all route directly
 
-    . p_clk_count_n( `CLK_FREQ / (15000 * 2)  ),    // 15kHz.
+  // asynch logic, use same address for tft and itron initially
 
-    . out( fets_o),
-  );
-*/
+  assign fsmc_cs_itron  = ~ (fsmc_a18  & (~ fsmc_cs) );
 
-  /*
-      Q1      Q3
-          H
-      Q2      Q4
+  // even for test we dont' want to cross write
+  // anything to vfd, when initializing tft.
 
-  */
-
-  // this is constant.
-  // wire [32-1:0 ] p_period = `CLK_FREQ / (15000 * 2);   // 400
-  localparam  [32-1:0 ] p_period = `CLK_FREQ / (15000 * 2);   // 400
-
-  // eg. like a half bridge
-  updown_timer
-  updown_timer1 (
-    . clk( clk),
-    . reset_n( 1'b1 ),
-    . p_start( 0 ),
-    . p_period( p_period ),    // 15kHz.
+  // works. but the fsmc needs to be slowed down a bit.
+  // eg. fsmc_setup( 2);  rather than fsmc_setup( 1);
+  assign fsmc_cs_ssd1963 = ~ (fsmc_a19  & (~ fsmc_cs) );
+  // assign fsmc_cs_ssd1963 = ~ fsmc_a19  ; // works
+  // assign fsmc_cs_ssd1963 = fsmc_cs;  // works
 
 
-   //          phase 1         phase 0
-    . out( { fets_o[ 1 /*2*/], fets_o[ 0 /*1*/] } ),    // fets 1(hi),2 are lhs. always complementary
-  );
-
-
-  updown_timer
-  updown_timer2 (
-    . clk( clk),
-    . reset_n( 1'b1 ),
-
-    // . p_start( 300 ),  // phase advance
-    . p_start( 0 ),  // phase advance
-    . p_period( p_period   ),    // 15kHz.
-
-    . out( { fets_o[ 2 /* 3*/], fets_o[ 3 /*4*/ ]   } ),    // out of phase. fets 3(hi),4 are rhs. always complementary
-  );
-
-
-
+  // EXTR. we did not route WR/RW to ice40.  so cannot manipulate this
+  // so only WR is supported
+  // this is a problem for TFT read, not just VFD read.
+  assign ikon_data_dir = 1'b1;
 
 
   ///////////////////////
 
-  reg [2:1] dummy2;
+  reg [2:1] dummy2; // TODO remove
 
   // buzzer
   fet_driver
