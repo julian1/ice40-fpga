@@ -701,6 +701,19 @@ module top (
   */
 
 
+
+  /*
+    - add a short (4 or 8 bit) transaction id field for spi reads - to ensure consistency of register reads
+        add to status register.  rather than another separate register.
+        eg. read twice. at start, and again after reading other registers and compare..
+
+      always @(posedge CLK)
+        begin
+          status_count <= status_count;
+        end
+  */
+
+
   assign reg_status = {
 
 
