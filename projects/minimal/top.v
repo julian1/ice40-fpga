@@ -79,7 +79,7 @@ module top (
 
   output [ 8-1: 0]  monitor_o,
 
-  input [4-1: 0]    hw_flags_i,
+  // input [4-1: 0]    hw_flags_i,
 
 
 
@@ -133,7 +133,20 @@ module top (
   output spi_interrupt_ctl_o,
 
 
-  input sa_trig_i
+  input sa_trig_i,
+
+  //////////////
+
+
+  output [2-1:0] adc_zgjc_sw_o,
+
+  input adc_zgjc_cmpr_i,
+
+  input ovld_amp_i,
+  input unld_amp_i,
+  input ovld_boot_ch1_i,
+  input ovld_boot_ch2_i,
+
 
 );
 
@@ -142,7 +155,8 @@ module top (
   // Feb. 2026. changed polarity handling in adc module
   wire cmpr_val = adc_cmpr_i;
 
-
+  // default driver
+  assign adc_zgjc_sw_o = 2'b00;
 
 
   ////////////////////////////////////////
@@ -711,6 +725,11 @@ module top (
         begin
           status_count <= status_count;
         end
+
+
+
+
+
   */
 
 
@@ -719,7 +738,7 @@ module top (
 
     // todo consider - add adc_status,  and sa_status
 
-    4'b0,   // ??
+    4'b0,   // ?? TODO review.  should be 8 bits.
 
     // 24
     // consider - into sa_status register.  once. then include here.
@@ -730,7 +749,14 @@ module top (
     },
 
     // 16
-    { 4'b0, hw_flags_i } ,
+    // { 4'b0, hw_flags_i } ,
+    {   3'b0,
+        unld_amp_i,
+        ovld_amp_i,
+        ovld_boot_ch2_i,
+        ovld_boot_ch1_i,
+        adc_zgjc_cmpr_i
+    },
 
     // 8
     { 8'b10101010 }  // magic
