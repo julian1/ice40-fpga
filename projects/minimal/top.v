@@ -140,12 +140,12 @@ module top (
 
   output [2-1:0] adc_zgjc_sw_o,
 
-  input adc_zgjc_cmpr_i,
+  input amp_cmpr_i,
 
-  input ovld_amp_i,
-  input unld_amp_i,
-  input ovld_boot_ch1_i,
-  input ovld_boot_ch2_i,
+  input amp_ovld_i,
+  input amp_unld_i,
+  input boot_ch1_ovld_i,
+  input boot_ch2_ovld_i,
 
 
 );
@@ -751,11 +751,11 @@ module top (
     // 16
     // { 4'b0, hw_flags_i } ,
     {   3'b0,
-        unld_amp_i,
-        ovld_amp_i,
-        ovld_boot_ch2_i,
-        ovld_boot_ch1_i,
-        adc_zgjc_cmpr_i
+        boot_ch2_ovld_i,
+        boot_ch1_ovld_i,
+        amp_unld_i,
+        amp_ovld_i,
+        amp_cmpr_i
     },
 
     // 8
