@@ -140,7 +140,7 @@ module top (
 
   output [2-1:0] adc_zgjc_sw_o,
 
-  input adc_agjc_cmpr_i,
+  input adc_zgjc_cmpr_i,
 
   input ovld_amp_i,
   input unld_amp_i,
@@ -725,6 +725,11 @@ module top (
         begin
           status_count <= status_count;
         end
+
+
+
+
+
   */
 
 
@@ -733,7 +738,7 @@ module top (
 
     // todo consider - add adc_status,  and sa_status
 
-    4'b0,   // ??
+    4'b0,   // ?? TODO review.  should be 8 bits.
 
     // 24
     // consider - into sa_status register.  once. then include here.
@@ -745,7 +750,13 @@ module top (
 
     // 16
     // { 4'b0, hw_flags_i } ,
-    { 4'b0, 4'b0 } ,
+    {   3'b0,
+        unld_amp_i,
+        ovld_amp_i,
+        ovld_boot_ch2_i,
+        ovld_boot_ch1_i,
+        adc_zgjc_cmpr_i
+    },
 
     // 8
     { 8'b10101010 }  // magic
