@@ -586,12 +586,37 @@ module top (
           */
 
 
+          // rename these to sr_
+
           // snapshot variable state after a valid measurement
           reg_sequence_acquisition2_sample_idx  <= sequence_acquisition2_sample_idx;
           reg_sequence_acquisitionr2_first      <= sequence_acquisitionr2_first;
         end
     end
 
+
+
+  reg [8-1: 0] sr_comparators ;
+
+  always @(posedge CLK)
+    begin
+      // wait for adc start of measurement
+      // note that this is not a pulse.
+      // however - we may need to sample for the full period. and raise an interrupt if out of bound at any time.
+      //
+      if( sequence_acquisition2_adc_reset_n)
+        begin
+
+          // sample the comparator values - but only if sampling a HI. and not a zero
+          // this is needed to determine. the zgjc. current.
+          // EXTR - this may mean we actually want to start on a HI.
+          // and may want shorter dummy period. than aperture. for first value. kkkkkk
+          if( sequence_acquisition2_sample_idx == 3'b1 )
+
+            sr_comparators <=  { 3'b0, boot_ch2_ovld_i, boot_ch1_ovld_i, amp_unld_i, amp_ovld_i, amp_cmpr_i };
+
+        end
+    end
 
 
 
@@ -757,6 +782,8 @@ module top (
 
     // 16
     // { 4'b0, hw_flags_i } ,
+    sr_comparators,
+/*
     {   3'b0,
         boot_ch2_ovld_i,
         boot_ch1_ovld_i,
@@ -764,6 +791,7 @@ module top (
         amp_ovld_i,
         amp_cmpr_i
     },
+*/
 
     // 8
     { 8'b10101010 }  // magic
