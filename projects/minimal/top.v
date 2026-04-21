@@ -580,6 +580,11 @@ module top (
       // wait for adc to measure
       if( adc_measure_valid)
         begin
+          /*  there is a race-condition here, with spi reading of the status register.
+              since we set these at the end of the measurement it is not too bad.
+              but it is not great.
+          */
+
 
           // snapshot variable state after a valid measurement
           reg_sequence_acquisition2_sample_idx  <= sequence_acquisition2_sample_idx;
@@ -725,13 +730,15 @@ module top (
         begin
           status_count <= status_count;
         end
+  */
 
-
+  /*
+    - we may want two status registers.
+      - and then copy everything....
 
 
 
   */
-
 
   assign reg_status = {
 
