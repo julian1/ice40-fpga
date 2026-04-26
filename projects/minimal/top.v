@@ -542,7 +542,8 @@ module top (
 
 
   // ie. edge detect. raise interrupts up transitions
-  reg [2-1:0] amp_ovld_transition = 2'b11;
+  // TODO.  should be able to remove initial assignment.  in favor of normal synchronous. assignment at the start of each block.
+  reg [2-1:0] amp_ovld_transition ;//= 2'b11;
 
 
   // reg do_interrupt;
@@ -555,7 +556,7 @@ module top (
     begin
 
 
-      // clear any active interrupt flags
+      // default - clear active interrupt and flags
       // interrupt_flags <= { 4'b0000 };
       do_interrupt                   <= 1'b0;
 
@@ -618,12 +619,12 @@ module top (
         begin
 
 
-          if(   ~ sequence_acquisition2_adc_reset_n)
-          begin
+//          if(   ~ sequence_acquisition2_adc_reset_n)      // TODO think we can remove this conditional   and just override behavior
+//          begin
 
-            // hold transition in reset
+            // default - hold transition in reset
             amp_ovld_transition     <= 2'b11;
-          end
+//          end
 
           /*
             during adc measurement.  if taking a HI sampple.
@@ -743,6 +744,7 @@ module top (
   reg [32-26- 1:0] dummy_bits_o ;
 
   reg meas_complete_dummy_o;   // now unused.
+                                // TODO rename dummy
 
 
   /*
