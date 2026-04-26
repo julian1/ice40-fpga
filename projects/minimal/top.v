@@ -618,11 +618,11 @@ module top (
         begin
 
 
-          // keep transition in reset
           if(   ~ sequence_acquisition2_adc_reset_n)
           begin
 
-              amp_ovld_transition     <= 2'b11;
+            // hold transition in reset
+            amp_ovld_transition     <= 2'b11;
           end
 
           /*
