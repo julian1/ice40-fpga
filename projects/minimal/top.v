@@ -559,8 +559,8 @@ module top (
       if( adc_measure_valid)
         begin
 
-          // snapshot variable state after a valid conversion
-          // do padding from 24 to 32 bits for the registers here
+          // snapshot register state after a valid conversion
+          // handle padding for 24 bit registers here
 
           // counts
           reg_adc_clk_count_rstmux        <= { 8'b0, adc_clk_count_rstmux };
