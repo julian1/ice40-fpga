@@ -109,6 +109,7 @@ module refmux_test (
 
             clk_count_down   <= p_clk_count_reset_i;
 
+            rstmux          <= 0;
 
             // JA
             sigmux          <= 0;
