@@ -218,7 +218,7 @@ module top (
 
   wire [32-1:0] reg_direct;
 
-  wire [32-1:0] reg_status ;
+  reg [32-1:0] reg_status ;
 
 
   // sample aquisition
@@ -463,42 +463,6 @@ module top (
 
 
 
-  always @(posedge CLK)
-    begin
-      // wait for adc to measure
-      if( adc_measure_valid)
-        begin
-
-          // snapshot variable state after a valid measurement
-          // do padding from 24 to 32 bits for the registers here
-
-
-          // counts
-          reg_adc_clk_count_rstmux       <= { 8'b0, adc_clk_count_rstmux };
-          reg_adc_clk_count_refmux_neg   <= adc_clk_count_refmux_neg;
-          reg_adc_clk_count_refmux_pos   <= adc_clk_count_refmux_pos;
-          reg_adc_clk_count_refmux_both  <= { 8'b0, adc_clk_count_refmux_both } ;
-          reg_adc_clk_count_sigmux       <= adc_clk_count_sigmux;
-          reg_adc_clk_count_aperture     <= adc_clk_count_aperture;
-
-          // stats
-          reg_adc_stat_count_refmux_pos_up <= { 8'b0, adc_stat_count_refmux_pos_up } ;
-          reg_adc_stat_count_refmux_neg_up <= { 8'b0, adc_stat_count_refmux_neg_up } ;
-          reg_adc_stat_count_cmpr_cross_up <= { 8'b0, adc_stat_count_cmpr_cross_up } ;
-
-
-          /*
-          stat_count_var_up_last      <= stat_count_var_up;
-          stat_count_var_down_last    <= stat_count_var_down;
-          stat_count_fix_up_last      <= stat_count_fix_up;
-          stat_count_fix_down_last    <= stat_count_fix_down;
-          stat_count_flip_last        <= stat_count_flip;
-          */
-        end
-    end
-
-
-
 
   /*
     status_o should be treated/managed generically - just like monitor_o and leds_o.  for each controller (sequence,adc etc).
@@ -525,6 +489,7 @@ module top (
   wire [3-1:0]  sequence_acquisition2_sample_idx;
   wire          sequence_acquisitionr2_first;
 
+/*
   // hold state after valid measure.
   // important - could aggregate these into a single  'sa_status' register  right here
   // to avoid needing multiple registers.
@@ -534,7 +499,7 @@ module top (
   // sample_idx_last_o <= 3'b111;
   reg [3-1:0]  reg_sequence_acquisition2_sample_idx;
   reg           reg_sequence_acquisitionr2_first;
-
+*/
 
 
   sequence_acquisition
@@ -575,6 +540,162 @@ module top (
 
 
 
+
+  // ie. edge detect. raise interrupts up transitions
+  reg [2-1:0] amp_ovld_transition = 2'b11;
+
+
+  // reg do_interrupt;
+  // reg [4-1: 0] interrupt_flags;
+  reg do_interrupt;
+
+  // reg [8-1: 0] sr_comparators ;
+
+  always @(posedge CLK)
+    begin
+
+
+      // clear any active interrupt flags
+      // interrupt_flags <= { 4'b0000 };
+      do_interrupt                   <= 1'b0;
+
+
+      // wait for adc to measure
+      if( adc_measure_valid)
+        begin
+
+          // snapshot variable state after a valid measurement
+          // do padding from 24 to 32 bits for the registers here
+
+          // counts
+          reg_adc_clk_count_rstmux        <= { 8'b0, adc_clk_count_rstmux };
+          reg_adc_clk_count_refmux_neg    <= adc_clk_count_refmux_neg;
+          reg_adc_clk_count_refmux_pos    <= adc_clk_count_refmux_pos;
+          reg_adc_clk_count_refmux_both   <= { 8'b0, adc_clk_count_refmux_both } ;
+          reg_adc_clk_count_sigmux        <= adc_clk_count_sigmux;
+          reg_adc_clk_count_aperture      <= adc_clk_count_aperture;
+
+          // stats
+          reg_adc_stat_count_refmux_pos_up <= { 8'b0, adc_stat_count_refmux_pos_up } ;
+          reg_adc_stat_count_refmux_neg_up <= { 8'b0, adc_stat_count_refmux_neg_up } ;
+          reg_adc_stat_count_cmpr_cross_up <= { 8'b0, adc_stat_count_cmpr_cross_up } ;
+
+
+          /*
+          stat_count_var_up_last      <= stat_count_var_up;
+          stat_count_var_down_last    <= stat_count_var_down;
+          stat_count_fix_up_last      <= stat_count_fix_up;
+          stat_count_fix_down_last    <= stat_count_fix_down;
+          stat_count_flip_last        <= stat_count_flip;
+          */
+
+
+          /*  snapshot sa, adc conversion, and comparators
+              and without regard to whether the reading is a LO or HI
+          */
+         reg_status <= {
+
+            8'b0,
+            // 24
+            {   1'b0,                                     // 1
+                reg_sa_p_seq_n[ 3-1: 0] ,                 // 3      // this is dumb.  should just record the azmux state in 4 bits.
+                sequence_acquisitionr2_first,         // 1 bit
+                sequence_acquisition2_sample_idx      // 3 bits.
+            },
+            // 16
+            { 3'b0, boot_ch2_ovld_i, boot_ch1_ovld_i, amp_unld_i, amp_ovld_i, amp_cmpr_i },
+            // 8
+            { 4'b0001 },  // interrupt source flags
+            { 4'b1010 }   // magic
+          };
+
+
+          // interrupt_flags[ 0]  <= 1'b1;
+          do_interrupt <= 1'b1;
+
+        end
+        else
+        begin
+
+
+          if(   ~ sequence_acquisition2_adc_reset_n)
+          begin
+
+            // hold transition in reset
+            amp_ovld_transition     <= 2'b11;
+          end
+
+          /*
+            during adc measurement.  if taking a HI sampple.
+
+          */
+          if(   sequence_acquisition2_adc_reset_n
+              && (sequence_acquisition2_sample_idx == 3'b0
+              ||  sequence_acquisition2_sample_idx == 3'd2)
+            )
+            begin
+
+              // only do transition/edge detect for comparators
+              // while taking a valid HI sample.
+              // actually we want to reset the transition
+              // each time.
+              amp_ovld_transition    <= {amp_ovld_transition[0], amp_ovld_i };
+
+              if( amp_ovld_transition == 2'b10 )
+              // if( !amp_ovld_i)
+                begin
+
+                  // clear adc counts, avoid confusion
+
+                  // counts
+                  reg_adc_clk_count_rstmux        <= 32'b0;
+                  reg_adc_clk_count_refmux_neg    <= 32'b0;
+                  reg_adc_clk_count_refmux_pos    <= 32'b0;
+                  reg_adc_clk_count_refmux_both   <= 32'b0;
+                  reg_adc_clk_count_sigmux        <= 32'b0;
+                  reg_adc_clk_count_aperture      <= 32'b0;
+
+                  // stats
+                  reg_adc_stat_count_refmux_pos_up <= 32'b0;
+                  reg_adc_stat_count_refmux_neg_up <= 32'b0;
+                  reg_adc_stat_count_cmpr_cross_up <= 32'b0;
+
+
+                  reg_status <= {
+
+                    8'b0,
+                    // 24
+                    {   1'b0,                                     // 1
+                        reg_sa_p_seq_n[ 3-1: 0] ,                 // 3 // this is dumb.  should just record the azmux state in 4 bits.
+                        sequence_acquisitionr2_first,         // 1 bit
+                        sequence_acquisition2_sample_idx      // 3 bits.
+                    },
+                    // 16
+                    { 3'b0, boot_ch2_ovld_i, boot_ch1_ovld_i, amp_unld_i, amp_ovld_i, amp_cmpr_i },
+                    // 8
+                    { 4'b0010 },  // interrupt source flags
+                    { 4'b1010 }   // magic
+                  };
+
+                  /*
+                    IMPORTANT. rather than check if we previously raised an interrupt.
+                    instead just do edge detect/state transition of the comparator output.
+                    this is a reasonable basis to generate multiple interrupts
+                  */
+
+                  // interrupt_flags[ 1 ]  <= 1'b1;
+                  do_interrupt <= 1'b1;
+
+                end
+
+            end
+        end
+    end
+
+
+
+/*
+
   always @(posedge CLK)
     begin
       // wait for adc to measure
@@ -583,7 +704,7 @@ module top (
           /*  there is a race-condition here, with spi reading of the status register.
               since we set these at the end of the measurement it is not too bad.
               but it is not great.
-          */
+          * /
 
 
           // rename these to sr_
@@ -593,32 +714,23 @@ module top (
           reg_sequence_acquisitionr2_first      <= sequence_acquisitionr2_first;
         end
     end
+*/
 
 
-
-  reg [8-1: 0] sr_comparators ;
-
+/*
   always @(posedge CLK)
     begin
-      // wait for adc start of measurement
-      // note that this is not a pulse.
-      // however - we may need to sample for the full period. and raise an interrupt if out of bound at any time.
-      //
-      if( sequence_acquisition2_adc_reset_n)
-        begin
 
-          // sample the comparator values - but only if sampling a HI. and not a zero
-          // this is needed to determine. the zgjc. current.
-          // EXTR - this may mean we actually want to start on a HI.
-          // and may want shorter dummy period. than aperture. for first value. kkkkkk
-          if( sequence_acquisition2_sample_idx == 3'b1 )
+      /*
+        during the measurement. of a HI. if get amp_overload. then snapshot.
 
-            sr_comparators <=  { 3'b0, boot_ch2_ovld_i, boot_ch1_ovld_i, amp_unld_i, amp_ovld_i, amp_cmpr_i };
+
+
 
         end
     end
 
-
+*/
 
 
 
@@ -630,7 +742,7 @@ module top (
   // unused. should be able to be wire?
   reg [32-26- 1:0] dummy_bits_o ;
 
-  reg meas_complete_o;   // now unused.
+  reg meas_complete_dummy_o;   // now unused.
 
 
   /*
@@ -692,8 +804,14 @@ module top (
    .h( {  { 32 - 26 { 'b0 }},
                                               // 26
           sequence_acquisition2_adc_reset_n,  // adc_reset_n     // 25 + 1
+
+          1'b0,                               // meas_complete              // 24+1
+          do_interrupt,                       // spi_interupt   // 23 + 1
+
+/*
           adc_measure_valid,                  // meas_complete              // 24+1
           adc_measure_valid,                  // spi_interupt   // 23 + 1
+*/
           adc_cmpr_latch_ctl,                 // adc_cmpr_latch   // 22+1
 
           adc_sigmux,
@@ -712,13 +830,14 @@ module top (
 
     // leds and monitor go first, since they are the most generic functionality
 
-    .out( {   dummy_bits_o,               // 26
+    .out( {
+          dummy_bits_o,             // 26
 
-          adc_reset_n,        // 25 + 1
+          adc_reset_n,              // 25 + 1
 
-          meas_complete_o,          // 24+1     // interupt_ctl *IS* generic so should be at start, and connects straight to adum. so place at beginning. same argument for meas_complete
+          meas_complete_dummy_o,    // 24+1     // interupt_ctl *IS* generic so should be at start, and connects straight to adum. so place at beginning. same argument for meas_complete
           spi_interrupt_ctl_o,      // 23+1     todo rename. drop the 'ctl'.
-          adc_cmpr_latch_ctl_o,         // 22+1
+          adc_cmpr_latch_ctl_o,     // 22+1
 
           adc_sigmux_o,
           adc_rstmux_o,
@@ -765,6 +884,8 @@ module top (
 
   */
 
+
+/*
   assign reg_status = {
 
 
@@ -783,22 +904,13 @@ module top (
     // 16
     // { 4'b0, hw_flags_i } ,
     sr_comparators,
-/*
-    {   3'b0,
-        boot_ch2_ovld_i,
-        boot_ch1_ovld_i,
-        amp_unld_i,
-        amp_ovld_i,
-        amp_cmpr_i
-    },
-*/
 
     // 8
     { 8'b10101010 }  // magic
  };
 
 
-
+*/
 
 
 
