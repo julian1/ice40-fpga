@@ -617,6 +617,14 @@ module top (
         else
         begin
 
+
+          // keep transition in reset
+          if(   ~ sequence_acquisition2_adc_reset_n)
+          begin
+
+              amp_ovld_transition     <= 2'b11;
+          end
+
           /*
             during adc measurement.  if taking a HI sampple.
 
@@ -629,6 +637,8 @@ module top (
 
               // only do transition/edge detect for comparators
               // while taking a valid HI sample.
+              // actually we want to reset the transition
+              // each time.
               amp_ovld_transition    <= {amp_ovld_transition[0], amp_ovld_i };
 
               if( amp_ovld_transition == 2'b10 )
@@ -668,14 +678,13 @@ module top (
                   };
 
                   /*
-                    IMPORTANT. rather than record whether we raised an interrupt.
-                    instead just record the state transition of the comparator.
-                    it is fine/good to generate multiple interrupts on this basis.
+                    IMPORTANT. rather than check if we previously raised an interrupt.
+                    instead just do edge detect/state transition of the comparator output.
+                    this is a reasonable basis to generate multiple interrupts
                   */
 
-                  // this will generate a stream of interrupts not clear
                   // interrupt_flags[ 1 ]  <= 1'b1;
-                  // do_interrupt <= 1'b1;
+                  do_interrupt <= 1'b1;
 
                 end
 
