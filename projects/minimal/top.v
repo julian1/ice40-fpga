@@ -539,12 +539,8 @@ module top (
   reg [2-1:0] amp_ovld_transition;
 
 
-  /* raise an interrupt;   better name?
-    consider rnemae interrupt_flag... except it is not control, it is the line state.
-    consider rename just interrupt_o
-  */
-  reg do_interrupt;
 
+  reg interrupt_valid;
   // reg [4-1: 0] interrupt_flags;
 
 
@@ -553,7 +549,7 @@ module top (
 
 
       // default - clear active interrupt
-      do_interrupt                   <= 1'b0;
+      interrupt_valid                   <= 1'b0;
       // interrupt_flags <= { 4'b0000 };
 
 
@@ -607,8 +603,8 @@ module top (
           };
 
 
+          interrupt_valid <= 1'b1;
           // interrupt_flags[ 0]  <= 1'b1;
-          do_interrupt <= 1'b1;
 
         end
         else
@@ -677,8 +673,8 @@ module top (
                   };
 
 
+                  interrupt_valid <= 1'b1;
                   // interrupt_flags[ 1 ]  <= 1'b1;
-                  do_interrupt <= 1'b1;
 
                 end   // ovld transition
 
@@ -761,7 +757,7 @@ module top (
           sequence_acquisition2_adc_reset_n,  // adc_reset_n      // 25 + 1
 
           1'b0,                               // dummy bit.       // 24+1
-          do_interrupt,                       // spi_interupt     // 23 + 1
+          interrupt_valid,                       // spi_interupt     // 23 + 1
 
           adc_cmpr_latch_ctl,                 // adc_cmpr_latch   // 22+1
 
