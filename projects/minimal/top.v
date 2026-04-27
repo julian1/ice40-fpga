@@ -140,12 +140,15 @@ module top (
 
   output [2-1:0] adc_zgjc_sw_o,
 
-  input amp_cmpr_i,
-
-  input amp_ovld_i,
-  input amp_unld_i,
-  input boot_ch1_ovld_i,
-  input boot_ch2_ovld_i,
+  /*
+    comparators.
+    consider should prefix with cmpr to be consistent
+  */
+  input cmpr_amp_zero_i,
+  input cmpr_amp_ovld_i,
+  input cmpr_amp_undl_i_i,
+  input cmpr_boot_ch1_ovld_i,
+  input cmpr_boot_ch2_ovld_i,
 
 
 );
@@ -597,7 +600,7 @@ module top (
                 sequence_acquisition2_sample_idx      // 3 bits.
             },
             // 16
-            { 3'b0, boot_ch2_ovld_i, boot_ch1_ovld_i, amp_unld_i, amp_ovld_i, amp_cmpr_i },
+            { 3'b0, cmpr_boot_ch2_ovld_i, cmpr_boot_ch1_ovld_i, cmpr_amp_undl_i_i, cmpr_amp_ovld_i, cmpr_amp_zero_i },
             // 8
             { 4'b0001 },  // interrupt source flags
             { 4'b1010 }   // magic
@@ -635,7 +638,7 @@ module top (
               */
 
               // edge detect for comparators
-              amp_ovld_transition    <= {amp_ovld_transition[0], amp_ovld_i };
+              amp_ovld_transition    <= {amp_ovld_transition[0], cmpr_amp_ovld_i };
 
 
               if( amp_ovld_transition == 2'b10 )
@@ -667,7 +670,7 @@ module top (
                         sequence_acquisition2_sample_idx      // 3 bits.
                     },
                     // 16
-                    { 3'b0, boot_ch2_ovld_i, boot_ch1_ovld_i, amp_unld_i, amp_ovld_i, amp_cmpr_i },
+                    { 3'b0, cmpr_boot_ch2_ovld_i, cmpr_boot_ch1_ovld_i, cmpr_amp_undl_i_i, cmpr_amp_ovld_i, cmpr_amp_zero_i },
                     // 8
                     { 4'b0010 },  // interrupt source flags
                     { 4'b1010 }   // magic
