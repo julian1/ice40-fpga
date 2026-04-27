@@ -85,7 +85,7 @@ module sequence_acquisition (
   output reg  [3-1: 0] sample_idx ,
 
   // is it the first reading after trigger assert
-  output reg           first ,
+  output reg           sample_first ,
 
 );
 
@@ -141,7 +141,7 @@ module sequence_acquisition (
 
             sample_idx    <= 0;
 
-            first         <= 1;
+            sample_first  <= 1;
 
 
             /* during reset - hold the precharge switches lo. to emit BOOT. and protect signal. both cahnnels
@@ -234,7 +234,7 @@ module sequence_acquisition (
               // set up next state
               state         <= `STATE_PC_PROTECT_START;
 
-              first         <= 0;
+              sample_first  <= 0;
 
               /*
                 avoid modulo

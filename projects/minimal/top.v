@@ -485,12 +485,8 @@ module top (
 
   wire          sequence_acquisition2_adc_reset_n;
 
-  ////////////////
-
-  // with two sequence modules,
-  // we would need to encode this in output vector if we wanted both values available.
   wire [3-1:0]  sequence_acquisition2_sample_idx;
-  wire          sequence_acquisitionr2_first;
+  wire          sequence_acquisitionr2_sample_first;
 
 
 
@@ -525,7 +521,7 @@ module top (
 
 
     .sample_idx(   sequence_acquisition2_sample_idx),       // careful/tricky - because  will be initialized to 0.  which is the same as if the first reading.
-    .first (       sequence_acquisitionr2_first),
+    .sample_first( sequence_acquisitionr2_sample_first),
 
     // control the adc
     .adc_reset_no( sequence_acquisition2_adc_reset_n )
@@ -592,7 +588,7 @@ module top (
             // 24
             {   1'b0,                                     // 1
                 reg_sa_p_seq_n[ 3-1: 0] ,                 // 3      // this is dumb.  should just record the azmux state in 4 bits.
-                sequence_acquisitionr2_first,         // 1 bit
+                sequence_acquisitionr2_sample_first,         // 1 bit
                 sequence_acquisition2_sample_idx      // 3 bits.
             },
             // 16
@@ -662,7 +658,7 @@ module top (
                     // 24
                     {   1'b0,                                 // 1
                         reg_sa_p_seq_n[ 3-1: 0] ,             // 3 // this is dumb.  should just record the azmux state in 4 bits.
-                        sequence_acquisitionr2_first,         // 1 bit
+                        sequence_acquisitionr2_sample_first,         // 1 bit
                         sequence_acquisition2_sample_idx      // 3 bits.
                     },
                     // 16
