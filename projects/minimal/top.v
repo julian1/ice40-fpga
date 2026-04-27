@@ -532,7 +532,7 @@ module top (
 
 
   // comparator edge/transition detect
-  reg [2-1:0] amp_ovld_transition;
+  reg [2-1:0] cmpr_amp_ovld_transition;
 
 
 
@@ -609,7 +609,7 @@ module top (
 
           // default behavior - hold comparator transition detect in reset
           // until we are ready to sample a HI
-          amp_ovld_transition     <= 2'b11;
+          cmpr_amp_ovld_transition     <= 2'b11;
 
 
           if(   sequence_acquisition2_adc_reset_n
@@ -630,10 +630,10 @@ module top (
               */
 
               // edge detect for comparators
-              amp_ovld_transition    <= {amp_ovld_transition[0], cmpr_amp_ovld_i };
+              cmpr_amp_ovld_transition    <= {cmpr_amp_ovld_transition[0], cmpr_amp_ovld_i };
 
 
-              if( amp_ovld_transition == 2'b10 )
+              if( cmpr_amp_ovld_transition == 2'b10 )
                 begin
 
                   // clear adc counts from last conversion, avoid confusion
