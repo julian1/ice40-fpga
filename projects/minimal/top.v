@@ -447,7 +447,7 @@ module top (
     .refmux( adc_refmux ),
     .sigmux( adc_sigmux ),
 
-    // adc clk counts for last sample measurement
+    // adc clk counts for last sample conversion
     .clk_count_rstmux(         adc_clk_count_rstmux),
     .clk_count_refmux_neg(     adc_clk_count_refmux_neg),
     .clk_count_refmux_pos(     adc_clk_count_refmux_pos),
@@ -471,7 +471,7 @@ module top (
     status_o should be treated/managed generically - just like monitor_o and leds_o.  for each controller (sequence,adc etc).
       like a generic service to a module
     eg. try to conform to same/standard bit width.
-    - call it status_last ... because it is for the completed measurement, not current.
+    - call it status_last ... because it is for the completed conversion, not current.
   */
 
   //////////////////

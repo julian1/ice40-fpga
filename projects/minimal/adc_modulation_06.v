@@ -84,7 +84,7 @@ module adc_modulation (
 
 
   // outputs
-  output reg          adc_conversion_valid,           // indicate/assert completion, and valid measurement
+  output reg          adc_conversion_valid,           // indicate/assert completion, and valid conversion
 
   // now a wire
   output wire [ 8-1:0] monitor,
@@ -305,7 +305,7 @@ module adc_modulation (
             // setup next state to advance to if reset_n not asserted
             state           <= `STATE_RESET;
 
-            // clear valid measurement available
+            // clear valid conversion available
             adc_conversion_valid <= 0;
 
             clk_count_rstmux <= 0;   // clear rst count here
@@ -527,7 +527,7 @@ module adc_modulation (
                   and this applies - if the sequence is spread over two switches - for both +ref and -ref currents..
                   reduces noise.  0.7uV to 0.6uV or lower. RMS 1nplc .
                 --
-                - remember abrupt chages in noise, are due to variations in run-up counts, between measurements due to slight thermal shifts.
+                - remember abrupt chages in noise, are due to variations in run-up counts, between conversions due to slight thermal shifts.
                 */
                 refmux    <= `REFMUX_NONE;
               end
@@ -575,7 +575,7 @@ module adc_modulation (
 
                 cmpr_latch_ctl          <= 1; // disable comparator,
 
-                // signal valid measurement.
+                // signal valid conversion.
                 adc_conversion_valid <= 1;
 
                 // next transition

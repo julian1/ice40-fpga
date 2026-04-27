@@ -4,7 +4,7 @@
 
   - adc is interruptable/ can be triggered to start at any time.
   - by by the az/non-az controller. so no handshake needed. so use _trig.
-  - the adc when running is master/output channel. and therefore should assert valid when measurement is finished
+  - the adc when running is master/output channel. and therefore should assert valid when conversion is finished
 
 */
 
@@ -20,7 +20,7 @@ module adc_mock (
   input [32-1:0]  p_clk_count_aperture_i,   // eg. clk_count_mux_sig_n
 
   // outputs
-  output reg adc_conversion_valid_o,     // adc is master, and asserts valid when measurement complete
+  output reg adc_conversion_valid_o,     // adc is master, and asserts valid when conversion complete
   output wire [ 8-1:0]  monitor_o
 );
 
@@ -58,11 +58,11 @@ module adc_mock (
             // setup next state to advance to if reset_n not asserted
             state <= 1;
 
-            // indicate no measurement available
+            // indicate no conversion available
             adc_conversion_valid_o <= 0;
 
 
-            // set sample/measure period
+            // set sample/conversion period
             clk_count_down  <= p_clk_count_aperture_i;
 
           end
@@ -70,15 +70,15 @@ module adc_mock (
 
         1:
           begin
-            // mock/sim measurement - by waiting for measurement
+            // mock/sim conversion - by waiting for conversion
             if(clk_count_down == 0)
               state <= 4;
           end
 
         4:
-          // measure done
+          // conversion done
           begin
-            // assert the measurement is done/valid
+            // assert the conversion is done/valid
             adc_conversion_valid_o <= 1;
 
           end
