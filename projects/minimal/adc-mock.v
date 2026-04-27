@@ -20,7 +20,7 @@ module adc_mock (
   input [32-1:0]  p_clk_count_aperture_i,   // eg. clk_count_mux_sig_n
 
   // outputs
-  output reg adc_measure_valid_o,     // adc is master, and asserts valid when measurement complete
+  output reg adc_conversion_valid_o,     // adc is master, and asserts valid when measurement complete
   output wire [ 8-1:0]  monitor_o
 );
 
@@ -30,14 +30,14 @@ module adc_mock (
 
   /*
     there's a very strange bug lurking here, if we remove this register allocation , that is not even used.
-    then get spurious signals on adc_measure_valid in the real adc mode.
+    then get spurious signals on adc_conversion_valid in the real adc mode.
 
   */
   reg [ 6-1:0]  monitor_xxx;
 
   // combinatorial logic
   assign monitor_o[0] = reset_n;
-  assign monitor_o[1] = adc_measure_valid_o;
+  assign monitor_o[1] = adc_conversion_valid_o;
 
   assign monitor_o[2 +: 6 ] = 0;
 
@@ -59,7 +59,7 @@ module adc_mock (
             state <= 1;
 
             // indicate no measurement available
-            adc_measure_valid_o <= 0;
+            adc_conversion_valid_o <= 0;
 
 
             // set sample/measure period
@@ -79,7 +79,7 @@ module adc_mock (
           // measure done
           begin
             // assert the measurement is done/valid
-            adc_measure_valid_o <= 1;
+            adc_conversion_valid_o <= 1;
 
           end
       endcase

@@ -62,7 +62,7 @@ module sequence_acquisition (
   input             p_noaz,
 
 
-  input             adc_measure_valid_i,
+  input             adc_conversion_valid_i,
 
   // outputs.
   output reg        adc_reset_no,              // control the adc.  rename _n_o. perhaps or trig. is even ok.
@@ -112,7 +112,7 @@ module sequence_acquisition (
   assign monitor_o[5] = pc_sw_o[1 ] ;
 
   assign monitor_o[6] = adc_reset_no;
-  assign monitor_o[7] = adc_measure_valid_i;
+  assign monitor_o[7] = adc_conversion_valid_i;
 
 
   assign leds_o[0] = (sample_idx == 0);
@@ -228,7 +228,7 @@ module sequence_acquisition (
 
         `STATE_WAIT_ADC:
           // wait for adc to measure
-          if( adc_measure_valid_i )
+          if( adc_conversion_valid_i )
             begin
 
               // set up next state

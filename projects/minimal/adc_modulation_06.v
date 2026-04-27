@@ -84,7 +84,7 @@ module adc_modulation (
 
 
   // outputs
-  output reg          adc_measure_valid,           // indicate/assert completion, and valid measurement
+  output reg          adc_conversion_valid,           // indicate/assert completion, and valid measurement
 
   // now a wire
   output wire [ 8-1:0] monitor,
@@ -162,7 +162,7 @@ module adc_modulation (
 
 
   assign monitor[0] = reset_n;
-  assign monitor[1] = adc_measure_valid;
+  assign monitor[1] = adc_conversion_valid;
 
   // assign monitor[2] = sigmux;
   assign monitor[2] = in_runup;
@@ -306,7 +306,7 @@ module adc_modulation (
             state           <= `STATE_RESET;
 
             // clear valid measurement available
-            adc_measure_valid <= 0;
+            adc_conversion_valid <= 0;
 
             clk_count_rstmux <= 0;   // clear rst count here
 
@@ -576,7 +576,7 @@ module adc_modulation (
                 cmpr_latch_ctl          <= 1; // disable comparator,
 
                 // signal valid measurement.
-                adc_measure_valid <= 1;
+                adc_conversion_valid <= 1;
 
                 // next transition
                 state                   <= `STATE_RESET_START;

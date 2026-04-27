@@ -90,7 +90,7 @@ module adc_modulation (
 
 
   // outputs
-  output reg adc_measure_valid,           // to indicate/assert completion, and valid measurement
+  output reg adc_conversion_valid,           // to indicate/assert completion, and valid measurement
 
   // now a wire
   output wire [ 8-1:0]  monitor,
@@ -202,7 +202,7 @@ module adc_modulation (
   // reg [ 4-1:0]  monitor_;
 
   assign monitor[0] = reset_n;
-  assign monitor[1] = adc_measure_valid;
+  assign monitor[1] = adc_conversion_valid;
 
   assign monitor[2] = sigmux;
   assign monitor[3] = (state == `STATE_FAST_ABOVE_START);
@@ -358,7 +358,7 @@ module adc_modulation (
             cmpr_latch_ctl <= 1;
 
             // indicate signal valid, to indicate interuptable status, to enable trigger
-            adc_measure_valid <= 1;
+            adc_conversion_valid <= 1;
 
             // turn off sigmux, and reset integrator
             sigmux            <= 0;
@@ -375,7 +375,7 @@ module adc_modulation (
             state           <= `STATE_RESET;
 
             // indicate no measurement available
-            adc_measure_valid <= 0;
+            adc_conversion_valid <= 0;
 
             clk_count_refmux_reset <= 0;   // clear count to start
 
@@ -639,7 +639,7 @@ module adc_modulation (
                 cmpr_latch_ctl          <= 1; // disable comparator,
 
                 // signal valid measurement.
-                adc_measure_valid <= 1;
+                adc_conversion_valid <= 1;
 
                 // next transition
                 // state                   <= `STATE_DONE;

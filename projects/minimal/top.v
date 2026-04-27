@@ -309,7 +309,7 @@ module top (
     .p_clk_count_aperture_i( reg_adc_p_clk_count_aperture ),
 
     // outputs
-    .adc_measure_valid_o( adc_mock_measure_valid ),
+    .adc_conversion_valid_o( adc_mock_measure_valid ),
     .monitor_o(  adc_mock_monitor )
   );
 
@@ -330,7 +330,7 @@ module top (
     .reset_n( sa_trig_i ),
 
     // inputs
-    .adc_measure_valid_i( adc_mock_measure_valid ),                     // fan-in from adc
+    .adc_conversion_valid_i( adc_mock_measure_valid ),                     // fan-in from adc
 
     .p_clk_count_trig_delay_i( reg_sa_p_clk_count_trig_delay ),
     .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]  ),     // done
@@ -370,7 +370,7 @@ module top (
 
   // adc
   wire          adc_reset_n;
-  wire          adc_measure_valid;
+  wire          adc_conversion_valid;
 
   wire [8-1: 0 ] adc_monitor;
   // wire [4-1:0]  adc_status;      // TODO
@@ -438,7 +438,7 @@ module top (
     . p_active_sigmux( cr_adc_p_active_sigmux),
 
     // outputs - ctrl
-    .adc_measure_valid( adc_measure_valid),    // OK, fan out back to the sa controllers
+    .adc_conversion_valid( adc_conversion_valid),    // OK, fan out back to the sa controllers
     .cmpr_latch_ctl( adc_cmpr_latch_ctl   ),
     .monitor(  adc_monitor  ),
 
@@ -503,7 +503,7 @@ module top (
     .reset_n( sa_trig_i ),
 
     // inputs
-    .adc_measure_valid_i( adc_measure_valid ),
+    .adc_conversion_valid_i( adc_conversion_valid ),
 
     .p_clk_count_trig_delay_i( reg_sa_p_clk_count_trig_delay),
     .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]),
@@ -554,8 +554,8 @@ module top (
 
 
       // wait for adc conversion
-      // TODO consider rename adc_measure_valid,  to adc_conversion_valid
-      if( adc_measure_valid)
+      // TODO consider rename adc_conversion_valid,  to adc_conversion_valid
+      if( adc_conversion_valid)
         begin
 
           // snapshot register state after a valid conversion
