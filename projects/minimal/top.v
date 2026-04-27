@@ -611,13 +611,13 @@ module top (
         begin
 
 
-          // default behavior - reset comparator transition detect when not sampling or during a LO
-          // to be ready when being sampling a HI
+          // default behavior - hold comparator transition detect in reset
+          // until we are ready to sample a HI
           amp_ovld_transition     <= 2'b11;
 
 
           if(   sequence_acquisition2_adc_reset_n
-              && (sequence_acquisition2_sample_idx == 3'b0
+              && (sequence_acquisition2_sample_idx == 3'b0        // HI is even by convention. change  this to idx modulo 2 == 0
               ||  sequence_acquisition2_sample_idx == 3'd2)
             )
             begin
