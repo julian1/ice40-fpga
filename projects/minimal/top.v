@@ -692,9 +692,17 @@ module top (
   reg dummy_bit2_o;   // meas_complete output.  now unused.
 
 
+
+
+
   /*
      note - if a controller is unused in a mode - it would be nice to hold it in reset.
       can do by exposing the reset_n, and only turning it on, if active within the specific mode.
+  */
+
+  /*
+    note - hanging this combinatorial logic on the output registers
+    may increase variation in output propagation delay
   */
 
   // mode, alternative function selection
@@ -812,48 +820,48 @@ module top (
     (
 
     // consider prefix fields with spi_
-    . clk(  SCK ),
-    . cs_n( spi_register_set_cs),
-    . din(  SDI ),
-    . dout( SDO ),
+    .clk(  SCK ),
+    .cs_n( spi_register_set_cs),
+    .din(  SDI ),
+    .dout( SDO ),
 
 
     // inputs
-    . reg_4094_oe(    reg_4094_oe ) ,
-    . reg_cr(         reg_cr),
-    . reg_direct(     reg_direct),
+    .reg_4094_oe(    reg_4094_oe ) ,
+    .reg_cr(         reg_cr),
+    .reg_direct(     reg_direct),
 
     // outputs
-    . reg_status(     reg_status ),
+    .reg_status(     reg_status ),
 
 
     // parameter inputs - sample acquisition.
-    . reg_sa_p_clk_count_trig_delay(      reg_sa_p_clk_count_trig_delay),
-    . reg_sa_p_clk_count_precharge(       reg_sa_p_clk_count_precharge),
+    .reg_sa_p_clk_count_trig_delay(      reg_sa_p_clk_count_trig_delay),
+    .reg_sa_p_clk_count_precharge(       reg_sa_p_clk_count_precharge),
 
-    . reg_sa_p_seq_n( reg_sa_p_seq_n),
-    . reg_sa_p_seq0(  reg_sa_p_seq0),
-    . reg_sa_p_seq1(  reg_sa_p_seq1),
-    . reg_sa_p_seq2(  reg_sa_p_seq2),
-    . reg_sa_p_seq3(  reg_sa_p_seq3),
+    .reg_sa_p_seq_n( reg_sa_p_seq_n),
+    .reg_sa_p_seq0(  reg_sa_p_seq0),
+    .reg_sa_p_seq1(  reg_sa_p_seq1),
+    .reg_sa_p_seq2(  reg_sa_p_seq2),
+    .reg_sa_p_seq3(  reg_sa_p_seq3),
 
     // parameter inputs - adc
-    . reg_adc_p_clk_count_aperture(       reg_adc_p_clk_count_aperture),
-    . reg_adc_p_clk_count_reset(          reg_adc_p_clk_count_reset ),
+    .reg_adc_p_clk_count_aperture(       reg_adc_p_clk_count_aperture),
+    .reg_adc_p_clk_count_reset(          reg_adc_p_clk_count_reset ),
 
 
     // adc outputs
-    .  reg_adc_clk_count_refmux_neg(      reg_adc_clk_count_refmux_neg) ,
-    .  reg_adc_clk_count_refmux_pos(      reg_adc_clk_count_refmux_pos) ,
-    .  reg_adc_clk_count_refmux_both(     reg_adc_clk_count_refmux_both) ,
-    .  reg_adc_clk_count_rstmux(          reg_adc_clk_count_rstmux),
-    .  reg_adc_clk_count_sigmux(          reg_adc_clk_count_sigmux),
-    .  reg_adc_clk_count_aperture(        reg_adc_clk_count_aperture),
+    .reg_adc_clk_count_refmux_neg(      reg_adc_clk_count_refmux_neg) ,
+    .reg_adc_clk_count_refmux_pos(      reg_adc_clk_count_refmux_pos) ,
+    .reg_adc_clk_count_refmux_both(     reg_adc_clk_count_refmux_both) ,
+    .reg_adc_clk_count_rstmux(          reg_adc_clk_count_rstmux),
+    .reg_adc_clk_count_sigmux(          reg_adc_clk_count_sigmux),
+    .reg_adc_clk_count_aperture(        reg_adc_clk_count_aperture),
 
 
-    .  reg_adc_stat_count_refmux_pos_up(  reg_adc_stat_count_refmux_pos_up),
-    .  reg_adc_stat_count_refmux_neg_up(  reg_adc_stat_count_refmux_neg_up) ,
-    .  reg_adc_stat_count_cmpr_cross_up(  reg_adc_stat_count_cmpr_cross_up)
+    .reg_adc_stat_count_refmux_pos_up(  reg_adc_stat_count_refmux_pos_up),
+    .reg_adc_stat_count_refmux_neg_up(  reg_adc_stat_count_refmux_neg_up) ,
+    .reg_adc_stat_count_cmpr_cross_up(  reg_adc_stat_count_cmpr_cross_up)
 
   );
 
