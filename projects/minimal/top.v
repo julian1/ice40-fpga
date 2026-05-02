@@ -532,20 +532,22 @@ module top (
 
 
   // comparator edge/transition detect
-  reg [2-1:0] cmpr_amp_ovld_transition;
-  reg [2-1:0] cmpr_amp_unld_transition;
+  // reg [2-1:0] cmpr_amp_ovld_transition;
+  // reg [2-1:0] cmpr_amp_unld_transition;
 
+  // only need to raise one interrupt per measurement cycle. this is
+  reg cmpr_amp_oob_raised = 1'b0;
 
 
   reg interrupt_valid;
-  // reg [4-1: 0] interrupt_flags;
+  // reg [4-1: 0] interrupt_flags;    - encode in sr instead.
 
 
   always @(posedge CLK)
     begin
 
 
-      // default - clear active interrupt
+      // interrupt should only be asserted for a single clock cycle
       interrupt_valid                   <= 1'b0;
       // interrupt_flags <= { 4'b0000 };
 
@@ -610,14 +612,47 @@ module top (
 
           // default behavior - hold comparator transition detect in reset
           // until we are ready to sample a HI
-          cmpr_amp_ovld_transition     <= 2'b11;
-          cmpr_amp_unld_transition     <= 2'b00;      // eg. normally low. since comparator active lo, and amp-out > threshold.
+          /* resetting these flags  on every reading - means if out of bounds then we always generate an OOB interrupt
+             which is not what we want.
+
+             no valid range we can switch to.
+              - would be better. instead. to clear these only on an intermediate range change.
+              so be able to ignore an interupt.
+              ----------
+
+              Or else just use interrupt enable register.  in the CR.
+                and dont enable for the top register.
+
+              eg.
+              if( cmpr_amp_ovld_transition == 2'b10 && cr.amp_ovld_ie  == 2'b10  )
+              important
+
+              Or even easier.
+
+              if( cmpr_amp_ovld_transition == cr.amp_ovld_ie  == 2'b10  )
+
+          */
+          // cmpr_amp_ovld_transition     <= 2'b11;
+          // cmpr_amp_unld_transition     <= 2'b00;      // eg. normally low. since comparator active lo, and amp-out > threshold.
 
 
-          if(   sequence_acquisition2_adc_reset_n
+
+          // during conversion reset, clean flag
+          // if( !  sequence_acquisition2_adc_reset_n)
+            // cmpr_amp_oob_raised <= 1'b0;
+
+
+          if( !
+              ( sequence_acquisition2_adc_reset_n
               && (sequence_acquisition2_sample_idx == 3'b0        // HI is even by convention. change  this to idx modulo 2 == 0
-              ||  sequence_acquisition2_sample_idx == 3'd2)
+              ||  sequence_acquisition2_sample_idx == 3'd2))
             )
+            begin
+
+              // not an active high - keep flag cleared - ready for next active hi
+              cmpr_amp_oob_raised <= 1'b0;
+            end
+            else
             begin
 
               /*
@@ -631,17 +666,25 @@ module top (
                 this is simpler and more flexible to handle on the mcu side
               */
 
-              // edge detect for comparators
-              cmpr_amp_ovld_transition    <= {cmpr_amp_ovld_transition[0], cmpr_amp_ovld_i };
+              /*
+                // edge detect for comparators
+                cmpr_amp_ovld_transition    <= {cmpr_amp_ovld_transition[0], cmpr_amp_ovld_i };
 
-              cmpr_amp_unld_transition    <= {cmpr_amp_unld_transition[0], cmpr_amp_unld_i };
+                cmpr_amp_unld_transition    <= {cmpr_amp_unld_transition[0], cmpr_amp_unld_i };
+
+                if( (cmpr_amp_ovld_transition == 2'b10     // above abs max
+                  || cmpr_amp_unld_transition == 2'b01)    // dip below abs min
+              */
 
 
-
-              if( cmpr_amp_ovld_transition == 2'b10
-                || cmpr_amp_unld_transition == 2'b01
+              if((cmpr_amp_ovld_i             // amp-out out of range. above abs max
+                || ! cmpr_amp_unld_i)         // amp-out out of range. dip below abs min
+                && ! cmpr_amp_oob_raised      // and no interrupt raised
                 )
                 begin
+
+                  // set that we already raised an interrupt for this measure
+                  cmpr_amp_oob_raised             <= 1'b1;
 
                   // clear adc counts from last conversion, avoid confusion
 
