@@ -146,7 +146,7 @@ module top (
   */
   input cmpr_amp_zero_i,
   input cmpr_amp_ovld_i,
-  input cmpr_amp_undl_i_i,
+  input cmpr_amp_unld_i,
   input cmpr_boot_ch1_ovld_i,
   input cmpr_boot_ch2_ovld_i,
 
@@ -533,6 +533,7 @@ module top (
 
   // comparator edge/transition detect
   reg [2-1:0] cmpr_amp_ovld_transition;
+  reg [2-1:0] cmpr_amp_unld_transition;
 
 
 
@@ -592,7 +593,7 @@ module top (
                 sequence_acquisition2_sample_idx      // 3 bits.
             },
             // 16
-            { 3'b0, cmpr_boot_ch2_ovld_i, cmpr_boot_ch1_ovld_i, cmpr_amp_undl_i_i, cmpr_amp_ovld_i, cmpr_amp_zero_i },
+            { 3'b0, cmpr_boot_ch2_ovld_i, cmpr_boot_ch1_ovld_i, cmpr_amp_unld_i, cmpr_amp_ovld_i, cmpr_amp_zero_i },
             // 8
             { 4'b0001 },  // interrupt source flags
             { 4'b1010 }   // magic
@@ -610,6 +611,7 @@ module top (
           // default behavior - hold comparator transition detect in reset
           // until we are ready to sample a HI
           cmpr_amp_ovld_transition     <= 2'b11;
+          cmpr_amp_unld_transition     <= 2'b00;      // eg. normally low. since comparator active lo, and amp-out > threshold.
 
 
           if(   sequence_acquisition2_adc_reset_n
@@ -632,8 +634,13 @@ module top (
               // edge detect for comparators
               cmpr_amp_ovld_transition    <= {cmpr_amp_ovld_transition[0], cmpr_amp_ovld_i };
 
+              cmpr_amp_unld_transition    <= {cmpr_amp_unld_transition[0], cmpr_amp_unld_i };
 
-              if( cmpr_amp_ovld_transition == 2'b10 )
+
+
+              if( cmpr_amp_ovld_transition == 2'b10
+                || cmpr_amp_unld_transition == 2'b01
+                )
                 begin
 
                   // clear adc counts from last conversion, avoid confusion
@@ -662,7 +669,7 @@ module top (
                         sequence_acquisition2_sample_idx      // 3 bits.
                     },
                     // 16
-                    { 3'b0, cmpr_boot_ch2_ovld_i, cmpr_boot_ch1_ovld_i, cmpr_amp_undl_i_i, cmpr_amp_ovld_i, cmpr_amp_zero_i },
+                    { 3'b0, cmpr_boot_ch2_ovld_i, cmpr_boot_ch1_ovld_i, cmpr_amp_unld_i, cmpr_amp_ovld_i, cmpr_amp_zero_i },
                     // 8
                     { 4'b0010 },  // interrupt source flags
                     { 4'b1010 }   // magic
