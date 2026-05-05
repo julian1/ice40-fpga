@@ -539,6 +539,23 @@ module top (
   always @(posedge CLK)
     begin
 
+      // HI is even by convention. change  this to idx modulo 2 == 0
+      // actually hard code may be better... modulo can be expensive to synthesize if not power of 2.
+
+      if( sequence_acquisition2_adc_reset_n
+          && (sequence_acquisition2_sample_idx == 3'b0
+          ||  sequence_acquisition2_sample_idx == 3'd2)
+        )
+        begin
+          // normal HI sample.
+
+
+
+        end
+
+
+
+
 
       // interrupt should only be asserted for a single clock cycle
       interrupt_valid                   <= 1'b0;
