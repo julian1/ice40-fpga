@@ -535,21 +535,46 @@ module top (
 
   reg interrupt_valid;
 
+  // record comparator states seen during sample using 2 bit state
+  reg [2-1:0] cmpr_amp_zero;
+  reg [2-1:0] cmpr_amp_ovld;
+  reg [2-1:0] cmpr_amp_unld;
+
+
 
   always @(posedge CLK)
     begin
 
-      // HI is even by convention. change  this to idx modulo 2 == 0
-      // actually hard code may be better... modulo can be expensive to synthesize if not power of 2.
+      /* HI is even by convention.
+          consider change  this to idx modulo 2 == 0
+          actually hard code may be better... modulo can be expensive to synthesize if not power of 2.
+      */
 
       if( sequence_acquisition2_adc_reset_n
           && (sequence_acquisition2_sample_idx == 3'b0
           ||  sequence_acquisition2_sample_idx == 3'd2)
         )
         begin
-          // normal HI sample.
 
+          // normal HI sample
+          if( cmpr_amp_ovld_i)  cmpr_amp_ovld[ 0] <= 1'b1;
+          else                  cmpr_amp_ovld[ 1] <= 1'b1;
 
+          if( cmpr_amp_unld_i)  cmpr_amp_unld[ 0] <= 1'b1;
+          else                  cmpr_amp_unld[ 1] <= 1'b1;
+
+          if( cmpr_amp_zero_i)  cmpr_amp_zero[ 0] <= 1'b1;
+          else                  cmpr_amp_zero[ 1] <= 1'b1;
+
+        end
+        else
+        begin
+
+          // any other state
+          // clear ready for next HI sample
+          cmpr_amp_ovld   <= 2'b00;
+          cmpr_amp_unld   <= 2'b00;
+          cmpr_amp_zero   <= 2'b00;
 
         end
 
@@ -605,7 +630,13 @@ module top (
                 sequence_acquisition2_sample_idx      // 3 bits.
             },
             // 16
-            { 3'b0, cmpr_boot_ch2_ovld_i, cmpr_boot_ch1_ovld_i, cmpr_amp_unld_i, cmpr_amp_ovld_i, cmpr_amp_zero_i },
+            {   //  3'b0,
+                cmpr_boot_ch2_ovld_i,
+                cmpr_boot_ch1_ovld_i,
+                cmpr_amp_unld,
+                cmpr_amp_ovld,
+                cmpr_amp_zero
+            },
             // 8
             { 4'b0001 },  // interrupt source flags
             { 4'b1010 }   // magic
