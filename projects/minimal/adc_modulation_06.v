@@ -75,6 +75,8 @@ module adc_modulation (
   // perhaps rename p_cc_aperture, p_cc_fix  etc.
   input [32-1:0]  p_clk_count_aperture,   // considuer rename ru_aperture  or just clk_count_runup
   input [24-1:0]  p_clk_count_reset,      // useful if running stand-alone,
+
+  // consider distinguish pos,neg values- in order to centre better runup with ref-current asymmetry.
   input [24-1:0]  p_clk_count_fix,
   inout [24-1:0]  p_clk_count_var,
 

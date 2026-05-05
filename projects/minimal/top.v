@@ -582,13 +582,12 @@ module top (
 
 
 
-      // interrupt should only be asserted for a single clock cycle
+      // only assert interrupt for one clock cycle
       interrupt_valid                   <= 1'b0;
       // interrupt_flags <= { 4'b0000 };
 
 
       // wait for adc conversion
-      // TODO consider rename adc_conversion_valid,  to adc_conversion_valid
       if( adc_conversion_valid)
         begin
 
@@ -650,7 +649,7 @@ module top (
         else
         begin
 
-          /* put any other interrupts that are drivers for the status register, and interupt_valid flag.
+          /* put any other interrupts that are drivers for the status register and interupt_valid flag.
               here
           */
 
