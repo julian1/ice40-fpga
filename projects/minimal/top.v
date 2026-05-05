@@ -532,12 +532,8 @@ module top (
 
 
 
-  // only need to raise one interrupt per measurement cycle. this is
-  reg cmpr_amp_oob_raised = 1'b0;
-
 
   reg interrupt_valid;
-  // reg [4-1: 0] interrupt_flags;    - encode in sr instead.
 
 
   always @(posedge CLK)
@@ -606,76 +602,11 @@ module top (
         else
         begin
 
+          /* put any other interrupts that are drivers for the status register, and interupt_valid flag.
+              here
+          */
 
 
-
-          if( !
-              ( sequence_acquisition2_adc_reset_n
-              && (sequence_acquisition2_sample_idx == 3'b0        // HI is even by convention. change  this to idx modulo 2 == 0
-              ||  sequence_acquisition2_sample_idx == 3'd2))
-            )
-            begin
-
-              // not an active high conversion - keep flag cleared - ready for next active hi
-              cmpr_amp_oob_raised <= 1'b0;
-            end
-            else
-            begin
-
-              /*
-                during active phase of adc HI conversion, we monitor the amp_ovld for transitions
-                - behavior is now to generate max, one interrupt for an input overload condition for the duration of the conversion.
-              */
-
-
-              if((cmpr_amp_ovld_i             // amp-out out of range. above abs max
-                || ! cmpr_amp_unld_i)         // amp-out out of range. dip below abs min
-                && ! cmpr_amp_oob_raised      // and no interrupt raised
-                )
-                begin
-
-                  // set that we already raised an interrupt for this measure
-                  cmpr_amp_oob_raised             <= 1'b1;
-
-                  // clear adc counts from last conversion, avoid confusion
-
-                  // counts
-                  reg_adc_clk_count_rstmux        <= 32'b0;
-                  reg_adc_clk_count_refmux_neg    <= 32'b0;
-                  reg_adc_clk_count_refmux_pos    <= 32'b0;
-                  reg_adc_clk_count_refmux_both   <= 32'b0;
-                  reg_adc_clk_count_sigmux        <= 32'b0;
-                  reg_adc_clk_count_aperture      <= 32'b0;
-
-                  // stats
-                  reg_adc_stat_count_refmux_pos_up <= 32'b0;
-                  reg_adc_stat_count_refmux_neg_up <= 32'b0;
-                  reg_adc_stat_count_cmpr_cross_up <= 32'b0;
-
-
-                  reg_status <= {
-                    // 32
-                    8'b0,
-                    // 24
-                    {   1'b0,                                 // 1
-                        reg_sa_p_seq_n[ 3-1: 0] ,             // 3 // this is dumb.  should just record the azmux state in 4 bits.
-                        sequence_acquisitionr2_sample_first,         // 1 bit
-                        sequence_acquisition2_sample_idx      // 3 bits.
-                    },
-                    // 16
-                    { 3'b0, cmpr_boot_ch2_ovld_i, cmpr_boot_ch1_ovld_i, cmpr_amp_unld_i, cmpr_amp_ovld_i, cmpr_amp_zero_i },
-                    // 8
-                    { 4'b0010 },  // interrupt source flags
-                    { 4'b1010 }   // magic
-                  };
-
-
-                  interrupt_valid <= 1'b1;
-                  // interrupt_flags[ 1 ]  <= 1'b1;
-
-                end   // ovld transition
-
-            end       // active HI sample
         end           // not completed a vaid adc conversion
     end               // synchronous block
 
@@ -871,5 +802,80 @@ module top (
 endmodule
 
 
+/*
+
+  // only need to raise one interrupt per measurement cycle. this is
+  reg cmpr_amp_oob_raised = 1'b0;
 
 
+          if( !
+              ( sequence_acquisition2_adc_reset_n
+              && (sequence_acquisition2_sample_idx == 3'b0        // HI is even by convention. change  this to idx modulo 2 == 0
+              ||  sequence_acquisition2_sample_idx == 3'd2))
+            )
+            begin
+
+              // not an active high conversion - keep flag cleared - ready for next active hi
+              cmpr_amp_oob_raised <= 1'b0;
+            end
+            else
+            begin
+
+              /*
+                during active phase of adc HI conversion, we monitor the amp_ovld for transitions
+                - behavior is now to generate max, one interrupt for an input overload condition for the duration of the conversion.
+              * /
+
+
+              if((cmpr_amp_ovld_i             // amp-out out of range. above abs max
+                || ! cmpr_amp_unld_i)         // amp-out out of range. dip below abs min
+                && ! cmpr_amp_oob_raised      // and no interrupt raised
+                )
+                begin
+
+                  // set that we already raised an interrupt for this measure
+                  cmpr_amp_oob_raised             <= 1'b1;
+
+                  // clear adc counts from last conversion, avoid confusion
+
+                  // counts
+                  reg_adc_clk_count_rstmux        <= 32'b0;
+                  reg_adc_clk_count_refmux_neg    <= 32'b0;
+                  reg_adc_clk_count_refmux_pos    <= 32'b0;
+                  reg_adc_clk_count_refmux_both   <= 32'b0;
+                  reg_adc_clk_count_sigmux        <= 32'b0;
+                  reg_adc_clk_count_aperture      <= 32'b0;
+
+                  // stats
+                  reg_adc_stat_count_refmux_pos_up <= 32'b0;
+                  reg_adc_stat_count_refmux_neg_up <= 32'b0;
+                  reg_adc_stat_count_cmpr_cross_up <= 32'b0;
+
+
+                  reg_status <= {
+                    // 32
+                    8'b0,
+                    // 24
+                    {   1'b0,                                 // 1
+                        reg_sa_p_seq_n[ 3-1: 0] ,             // 3 // this is dumb.  should just record the azmux state in 4 bits.
+                        sequence_acquisitionr2_sample_first,         // 1 bit
+                        sequence_acquisition2_sample_idx      // 3 bits.
+                    },
+                    // 16
+                    { 3'b0, cmpr_boot_ch2_ovld_i, cmpr_boot_ch1_ovld_i, cmpr_amp_unld_i, cmpr_amp_ovld_i, cmpr_amp_zero_i },
+                    // 8
+                    { 4'b0010 },  // interrupt source flags
+                    { 4'b1010 }   // magic
+                  };
+
+
+                  interrupt_valid <= 1'b1;
+                  // interrupt_flags[ 1 ]  <= 1'b1;
+
+                end   // ovld transition
+
+            end       // active HI sample
+
+
+
+*/
