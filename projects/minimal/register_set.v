@@ -32,7 +32,7 @@
 `define REG_4094_OE                     9
 `define REG_CR                          12
 `define REG_DIRECT                      14
-`define REG_STATUS                      17
+`define REG_SR                          17
 
 
 ///////////////////////
@@ -245,7 +245,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
               `REG_CR:                          out <= reg_cr << 8;
               `REG_DIRECT:                      out <= reg_direct << 8;
 
-              `REG_STATUS:                      out <= reg_status << 8;
+              `REG_SR:                          out <= reg_status << 8;
 
               ////////
               // sa - sample acquisition
