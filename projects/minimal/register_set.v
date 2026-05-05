@@ -83,7 +83,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
 
   // inputs - status, externally driven
-  input wire [32-1:0] reg_status,
+  input wire [32-1:0] reg_sr,
 
   // general
   // output/writable regs, driven by this module
@@ -245,7 +245,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
               `REG_CR:                          out <= reg_cr << 8;
               `REG_DIRECT:                      out <= reg_direct << 8;
 
-              `REG_SR:                          out <= reg_status << 8;
+              `REG_SR:                          out <= reg_sr << 8;
 
               ////////
               // sa - sample acquisition

@@ -221,7 +221,7 @@ module top (
 
   wire [32-1:0] reg_direct;
 
-  reg [32-1:0] reg_status ;
+  reg [32-1:0] reg_sr ;
 
 
   // sample aquisition
@@ -620,7 +620,7 @@ module top (
 
           /*  snapshot sa, adc conversion, and comparator state
           */
-          reg_status <= {
+          reg_sr <= {
             // 32
             8'b0,
             // 24
@@ -812,7 +812,7 @@ module top (
     .reg_direct(     reg_direct),
 
     // outputs
-    .reg_status(     reg_status ),
+    .reg_sr(     reg_sr ),
 
 
     // parameter inputs - sample acquisition.
@@ -900,7 +900,7 @@ endmodule
                   reg_adc_stat_count_cmpr_cross_up <= 32'b0;
 
 
-                  reg_status <= {
+                  reg_sr <= {
                     // 32
                     8'b0,
                     // 24
