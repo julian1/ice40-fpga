@@ -336,20 +336,20 @@ module top (
     .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]  ),     // done
 
     .p_seq_n_i( reg_sa_p_seq_n[ 3-1: 0]  ),   // 3 bits
-    .p_seq0_i( reg_sa_p_seq0[ 6-1: 0]  ),
-    .p_seq1_i( reg_sa_p_seq1[ 6-1: 0]  ),
-    .p_seq2_i( reg_sa_p_seq2[ 6-1: 0] ),
-    .p_seq3_i( reg_sa_p_seq3[ 6-1: 0] ),
+    .p_seq0_i(  reg_sa_p_seq0[ 6-1: 0]  ),
+    .p_seq1_i(  reg_sa_p_seq1[ 6-1: 0]  ),
+    .p_seq2_i(  reg_sa_p_seq2[ 6-1: 0] ),
+    .p_seq3_i(  reg_sa_p_seq3[ 6-1: 0] ),
 
-    .p_noaz( cr_sa_p_noaz ),
+    .p_noaz_i(  cr_sa_p_noaz ),
 
     // outputs
-    .pc_sw_o( sequence_acquisition_pc_sw  ),
-    .azmux_o (    sequence_acquisition_azmux ),
+    .pc_sw_o(   sequence_acquisition_pc_sw  ),
+    .azmux_o (  sequence_acquisition_azmux ),
 
 
-    .leds_o(      sequence_acquisition_leds  ),
-    .monitor_o(   sequence_acquisition_monitor  ),    // only pass 2 bit to the az monitor
+    .leds_o(    sequence_acquisition_leds  ),
+    .monitor_o( sequence_acquisition_monitor  ),    // only pass 2 bit to the az monitor
     // .status_last_o(  sequence_acquisition_status ),
 
     .adc_reset_no(  adc_mock_reset_n  )
@@ -510,7 +510,7 @@ module top (
     .p_seq2_i( reg_sa_p_seq2[ 6-1: 0] ),
     .p_seq3_i( reg_sa_p_seq3[ 6-1: 0] ),
 
-    .p_noaz( cr_sa_p_noaz ),
+    .p_noaz_i( cr_sa_p_noaz ),
 
     // outputs
     .pc_sw_o(     sequence_acquisition2_pc_sw  ),

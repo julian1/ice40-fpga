@@ -49,7 +49,7 @@ module sequence_acquisition (
   input   clk,
   input   reset_n,
 
-  // inputs
+  // control inputs
   input [32-1:0]    p_clk_count_trig_delay_i,
   input [24-1:0]    p_clk_count_precharge_i,
 
@@ -59,13 +59,23 @@ module sequence_acquisition (
   input [ 6-1 : 0 ] p_seq2_i,
   input [ 6-1 : 0 ] p_seq3_i,
 
-  input             p_noaz,
+  input             p_noaz_i,
 
+
+  /////////////////////////
+  // adc inputs and outputs
 
   input             adc_conversion_valid_i,
 
-  // outputs.
-  output reg        adc_reset_no,              // control the adc.  rename _n_o. perhaps or trig. is even ok.
+  output reg        adc_reset_no,              // control the adc.  consider rename _n_o. perhaps or trig. is even ok.
+
+  // output reg [32-1:0] adc_clk_count_aperture_o,
+  // input      [32-1:0] adc_clk_count_aperture_i,
+
+
+
+  //////////////
+  // control outputs
 
   output reg [ 2-1: 0]  pc_sw_o,
   output reg [ 4-1:0 ]  azmux_o,
@@ -77,15 +87,16 @@ module sequence_acquisition (
   /*/ now a wire.  output wire [ 2-1:0]  monitor_o       // driven as wire/assign.
   // think it is ok to be a combinatory logic - wire output - although may slow things down.
   */
-  output wire [ 8-1:0] monitor_o,
+  output wire [ 8-1:0]  monitor_o,
 
 
   ////////////////
+  // TODO consider add _o suffix.
 
-  output reg  [3-1: 0] sample_idx ,
+  output reg  [3-1: 0] sample_idx,
 
   // is it the first reading after trigger assert
-  output reg           sample_first ,
+  output reg           sample_first,
 
 );
 
@@ -234,14 +245,14 @@ module sequence_acquisition (
               // set up next state
               state         <= `STATE_PC_PROTECT_START;
 
-              sample_first  <= 0;
+              sample_first         <= 0;
 
               /*
                 avoid modulo
                 https://stackoverflow.com/questions/47425729/verilog-modulus-operator-for-wrapping-around-a-range
                 needs to be >= in case sample_n is reduced in write.
               */
-              if(!p_noaz)
+              if(!p_noaz_i)
                 sample_idx <= (sample_idx >= p_seq_n_i - 1)
                                 ? 0
                                 : sample_idx + 1;
