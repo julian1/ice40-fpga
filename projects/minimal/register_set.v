@@ -52,7 +52,7 @@
 // adc control parameters
 `define REG_ADC_P_CLK_COUNT_APERTURE    30
 `define REG_ADC_P_CLK_COUNT_RESET       31
-
+`define REG_ADC_P_CLK_COUNT_APERTURE_OOB 32
 
 
 // adc counts
@@ -121,6 +121,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
   // outputs adc
   output reg [32-1:0] reg_adc_p_clk_count_aperture,
   output reg [32-1:0] reg_adc_p_clk_count_reset,    // move
+  output reg [32-1:0] reg_adc_p_clk_count_aperture_oob,
 
 
 
@@ -186,8 +187,9 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
     // reg_sa_p_trig     = 0;
 
     // adc
-    reg_adc_p_clk_count_aperture  =  $rtoi( `CLK_FREQ * 0.2 );      // 200ms.
-    reg_adc_p_clk_count_reset     = 24'd10000 ;                    // 20000000 * 0.5e-3 == 10000   500us.
+    reg_adc_p_clk_count_aperture      =  $rtoi( `CLK_FREQ * 0.2 );      // 200ms.
+    reg_adc_p_clk_count_reset         = 24'd10000 ;                    // 20000000 * 0.5e-3 == 10000   500us.
+    reg_adc_p_clk_count_aperture_oob  = $rtoi( `CLK_FREQ * 0.02 );
   end
 
 
@@ -261,18 +263,19 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
 
               /////
               // adc
-              `REG_ADC_P_CLK_COUNT_APERTURE:    out <= reg_adc_p_clk_count_aperture << 8;     // clk_count_sample_n clk_time_sample_clksample_time ??
-              `REG_ADC_P_CLK_COUNT_RESET:       out <= reg_adc_p_clk_count_reset << 8;
+              `REG_ADC_P_CLK_COUNT_APERTURE:      out <= reg_adc_p_clk_count_aperture << 8;     // clk_count_sample_n clk_time_sample_clksample_time ??
+              `REG_ADC_P_CLK_COUNT_RESET:         out <= reg_adc_p_clk_count_reset << 8;
+              `REG_ADC_P_CLK_COUNT_APERTURE_OOB:  out <= reg_adc_p_clk_count_aperture_oob << 8;
 
 
               // adc inputs to module, and spi readable outputs
-              `REG_ADC_CLK_COUNT_REFMUX_NEG:    out <= reg_adc_clk_count_refmux_neg << 8;
-              `REG_ADC_CLK_COUNT_REFMUX_POS:    out <= reg_adc_clk_count_refmux_pos << 8;
-              `REG_ADC_CLK_COUNT_REFMUX_BOTH:   out <= reg_adc_clk_count_refmux_both << 8;
+              `REG_ADC_CLK_COUNT_REFMUX_NEG:      out <= reg_adc_clk_count_refmux_neg << 8;
+              `REG_ADC_CLK_COUNT_REFMUX_POS:      out <= reg_adc_clk_count_refmux_pos << 8;
+              `REG_ADC_CLK_COUNT_REFMUX_BOTH:     out <= reg_adc_clk_count_refmux_both << 8;
 
-              `REG_ADC_CLK_COUNT_RSTMUX:        out <= reg_adc_clk_count_rstmux << 8;
-              `REG_ADC_CLK_COUNT_SIGMUX:        out <= reg_adc_clk_count_sigmux << 8;
-              `REG_ADC_CLK_COUNT_APERTURE:      out <= reg_adc_clk_count_aperture << 8;
+              `REG_ADC_CLK_COUNT_RSTMUX:          out <= reg_adc_clk_count_rstmux << 8;
+              `REG_ADC_CLK_COUNT_SIGMUX:          out <= reg_adc_clk_count_sigmux << 8;
+              `REG_ADC_CLK_COUNT_APERTURE:        out <= reg_adc_clk_count_aperture << 8;
 
               `REG_ADC_STAT_COUNT_REFMUX_POS_UP:  out <=   reg_adc_stat_count_refmux_pos_up << 8;
               `REG_ADC_STAT_COUNT_REFMUX_NEG_UP:  out <=  reg_adc_stat_count_refmux_neg_up << 8;
@@ -316,6 +319,7 @@ module register_set #(parameter MSB=40)   (   // 1 byte address, and write flag,
             ////
             `REG_ADC_P_CLK_COUNT_APERTURE:  reg_adc_p_clk_count_aperture <= bin;
             `REG_ADC_P_CLK_COUNT_RESET:     reg_adc_p_clk_count_reset <= bin;
+            `REG_ADC_P_CLK_COUNT_APERTURE_OOB: reg_adc_p_clk_count_aperture_oob <= bin;
 
           endcase
 

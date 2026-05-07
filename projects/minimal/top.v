@@ -237,6 +237,7 @@ module top (
   // adc
   wire [32-1:0] reg_adc_p_clk_count_aperture;  // 32/31 bit nice. for long sample.
   wire [32-1:0] reg_adc_p_clk_count_reset;
+  wire [32-1:0] reg_adc_p_clk_count_aperture_oob;
 
 
 
@@ -552,11 +553,12 @@ module top (
 
           if( sequence_acquisitionr2_sample_first)
             // adc_p_clk_count_aperture <=  reg_adc_p_clk_count_aperture_first;
-            adc_p_clk_count_aperture <= $rtoi( `CLK_FREQ * 0.02 );  // 20ms.  1nplc. for 50Hz.
+            // adc_p_clk_count_aperture <= $rtoi( `CLK_FREQ * 0.02 );  // 20ms.  1nplc. for 50Hz.
 
+            adc_p_clk_count_aperture <=   reg_adc_p_clk_count_aperture_oob;
           // normal
           else
-            adc_p_clk_count_aperture <=  reg_adc_p_clk_count_aperture;
+            adc_p_clk_count_aperture <=   reg_adc_p_clk_count_aperture;
 
         end
     end
@@ -860,6 +862,7 @@ module top (
     // parameter inputs - adc
     .reg_adc_p_clk_count_aperture(       reg_adc_p_clk_count_aperture),
     .reg_adc_p_clk_count_reset(          reg_adc_p_clk_count_reset ),
+    .reg_adc_p_clk_count_aperture_oob(   reg_adc_p_clk_count_aperture_oob),
 
 
     // adc outputs
