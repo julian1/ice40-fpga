@@ -386,6 +386,12 @@ module top (
 
 
 
+  // adc input - control
+  reg [32-1:0] adc_p_clk_count_aperture;
+
+
+  // adc output registers to hold snapshot values
+
   // should all be 32 bit. to match the register_set
   reg [32-1:0] reg_adc_clk_count_rstmux;
   reg [32-1:0] reg_adc_clk_count_refmux_neg;
@@ -401,7 +407,7 @@ module top (
 
 
 
-  // adc vars
+  // adc outputs
   wire [24-1:0] adc_clk_count_rstmux;
   wire [32-1:0] adc_clk_count_refmux_neg;
   wire [32-1:0] adc_clk_count_refmux_pos;
@@ -425,7 +431,8 @@ module top (
 
     .cmpr_val( cmpr_val ),                  // OK.  fan in-  rename top_cmpr_val ?
 
-    . p_clk_count_aperture( reg_adc_p_clk_count_aperture /*reg_adc_p_aperture */),
+    . p_clk_count_aperture( adc_p_clk_count_aperture),
+
     . p_clk_count_reset( reg_adc_p_clk_count_reset[ 24-1: 0  ]  ) ,
     // . p_clk_count_fix( 24'd15 ) ,         // +-15V. reduced integrator swing.
     // . p_clk_count_var( 24'd100 ) ,
@@ -483,10 +490,11 @@ module top (
   wire [8-1:0]  sequence_acquisition2_monitor;
 
 
-  wire          sequence_acquisition2_adc_reset_n;
-
   wire [3-1:0]  sequence_acquisition2_sample_idx;
   wire          sequence_acquisitionr2_sample_first;
+
+  wire          sequence_acquisition2_adc_reset_n;
+  wire          sequence_acquisition2_adc_conversion_start;
 
 
 
@@ -524,12 +532,34 @@ module top (
     .sample_first( sequence_acquisitionr2_sample_first),
 
     // control the adc
-    .adc_reset_no( sequence_acquisition2_adc_reset_n )
+    .adc_reset_no( sequence_acquisition2_adc_reset_n ),
+    .adc_conversion_start_o ( sequence_acquisition2_adc_conversion_start)
   );
 
 
 
 
+  always @(posedge CLK)
+    begin
+
+
+      // would be cleaner/ nicer if start was a one clk signal
+      // to set once only
+      if( sequence_acquisition2_adc_conversion_start)
+        begin
+
+          // load the adc aperture.
+
+          if( sequence_acquisitionr2_sample_first)
+            // adc_p_clk_count_aperture <=  reg_adc_p_clk_count_aperture_oob;
+            adc_p_clk_count_aperture <= $rtoi( `CLK_FREQ * 0.02 );  // 20ms.  1nplc. for 50Hz.
+
+          // normal
+          else
+            adc_p_clk_count_aperture <=  reg_adc_p_clk_count_aperture;
+
+        end
+    end
 
 
 
@@ -547,7 +577,7 @@ module top (
 
       /* HI is even by convention.
           consider change  this to idx modulo 2 == 0
-          actually hard code may be better... modulo can be expensive to synthesize if not power of 2.
+          no hard code since modulo can be expensive to synthesize if not power of 2.
       */
 
       if( sequence_acquisition2_adc_reset_n

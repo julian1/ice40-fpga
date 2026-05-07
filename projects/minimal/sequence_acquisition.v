@@ -67,11 +67,9 @@ module sequence_acquisition (
 
   input             adc_conversion_valid_i,
 
-  output reg        adc_reset_no,              // control the adc.  consider rename _n_o. perhaps or trig. is even ok.
+  output reg        adc_reset_no,              // hold adc in reset.
 
-  // output reg [32-1:0] adc_clk_count_aperture_o,
-  // input      [32-1:0] adc_clk_count_aperture_i,
-
+  output reg        adc_conversion_start_o,      // one-clock cycle control
 
 
   //////////////
@@ -95,7 +93,11 @@ module sequence_acquisition (
 
   output reg  [3-1: 0] sample_idx,
 
-  // is it the first reading after trigger assert
+  /*
+    first sample after trigger assert
+    deasserted after sequence cycle complete
+    better than count - which is overflow and seeing 0 again.
+  */
   output reg           sample_first,
 
 );
@@ -135,7 +137,9 @@ module sequence_acquisition (
     begin
 
       // always decrement clk for the current phase
-      clk_count_down <= clk_count_down - 1;
+      clk_count_down          <= clk_count_down - 1;
+
+      adc_conversion_start_o  <= 1'b0;
 
 
       case (state)
@@ -232,7 +236,9 @@ module sequence_acquisition (
             begin
               state         <= `STATE_WAIT_ADC;
               // adc start
-              adc_reset_no  <= 1;
+              adc_reset_no  <= 1'b1;
+
+              adc_conversion_start_o  <= 1'b1;
             end
 
 
@@ -245,18 +251,25 @@ module sequence_acquisition (
               // set up next state
               state         <= `STATE_PC_PROTECT_START;
 
-              sample_first         <= 0;
 
               /*
                 avoid modulo
                 https://stackoverflow.com/questions/47425729/verilog-modulus-operator-for-wrapping-around-a-range
                 needs to be >= in case sample_n is reduced in write.
               */
-              if(!p_noaz_i)
-                sample_idx <= (sample_idx >= p_seq_n_i - 1)
-                                ? 0
-                                : sample_idx + 1;
+              if( !p_noaz_i)
+
+                if( sample_idx < p_seq_n_i - 1)
+                  sample_idx  <= sample_idx + 1;
+                else
+                  begin
+                    sample_idx    <=  0;
+
+                    sample_first  <= 0;
+                  end
+
               else
+                // FIXME
                 sample_idx <= 1;
 
               // put adc in reset again
