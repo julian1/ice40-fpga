@@ -539,27 +539,29 @@ module top (
 
 
 
+  reg oob_aperture;
 
   always @(posedge CLK)
     begin
 
 
-      // would be cleaner/ nicer if start was a one clk signal
-      // to set once only
+      // adc conversion start
       if( sequence_acquisition2_adc_conversion_start)
         begin
 
-          // load the adc aperture.
-
+          // set adc aperture.
           if( sequence_acquisitionr2_sample_first)
-            // adc_p_clk_count_aperture <=  reg_adc_p_clk_count_aperture_first;
-            // adc_p_clk_count_aperture <= $rtoi( `CLK_FREQ * 0.02 );  // 20ms.  1nplc. for 50Hz.
+            begin
 
-            adc_p_clk_count_aperture <=   reg_adc_p_clk_count_aperture_oob;
-          // normal
+            adc_p_clk_count_aperture  <= reg_adc_p_clk_count_aperture_oob;
+            oob_aperture              <= 1'b1;
+            end
           else
-            adc_p_clk_count_aperture <=   reg_adc_p_clk_count_aperture;
+            begin
 
+            adc_p_clk_count_aperture  <= reg_adc_p_clk_count_aperture;
+            oob_aperture              <= 1'b0;
+            end
         end
     end
 
@@ -573,6 +575,11 @@ module top (
   reg [2-1:0] cmpr_amp_unld;
 
 
+  // it makes sense to maintain the concept of a hi here
+  wire is_hi ;
+  assign is_hi = sequence_acquisition2_sample_idx == 3'b0
+            || sequence_acquisition2_sample_idx == 3'd2;
+
 
   always @(posedge CLK)
     begin
@@ -582,10 +589,7 @@ module top (
           no hard code since modulo can be expensive to synthesize if not power of 2.
       */
 
-      if( sequence_acquisition2_adc_reset_n
-          && (sequence_acquisition2_sample_idx == 3'b0
-          ||  sequence_acquisition2_sample_idx == 3'd2)
-        )
+      if( sequence_acquisition2_adc_reset_n && is_hi)
         begin
 
           // normal HI sample
@@ -653,10 +657,13 @@ module top (
           */
           reg_sr <= {
             // 32
-                // copy the low 8 bits of the control register
-                // so that fields are fixed/stamped at time of the interrupt
-                reg_cr[ 8-1 : 0],
-
+            {
+                4'b0,
+                cr_adc_p_active_sigmux,
+                cr_sa_p_noaz,
+                is_hi,            // dynamic
+                oob_aperture      // dynamic
+            },
             // 24
             {   1'b0,                                     // 1
                 reg_sa_p_seq_n[ 3-1: 0] ,                 // 3      // this is dumb.  should just record the azmux state in 4 bits.
