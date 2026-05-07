@@ -651,12 +651,15 @@ module top (
           */
           reg_sr <= {
             // 32
-            8'b0,
+                // copy the low 8 bits of the control register
+                // so that fields are fixed/stamped at time of the interrupt
+                reg_cr[ 8-1 : 0],
+
             // 24
             {   1'b0,                                     // 1
                 reg_sa_p_seq_n[ 3-1: 0] ,                 // 3      // this is dumb.  should just record the azmux state in 4 bits.
-                sequence_acquisitionr2_sample_first,         // 1 bit
-                sequence_acquisition2_sample_idx      // 3 bits.
+                sequence_acquisitionr2_sample_first,      // 1 bit
+                sequence_acquisition2_sample_idx          // 3 bits.
             },
             // 16
             {   //  3'b0,
@@ -664,7 +667,7 @@ module top (
                 cmpr_boot_ch1_ovld_i,
                 cmpr_amp_unld,
                 cmpr_amp_ovld,
-                cmpr_amp_zero
+                cmpr_amp_zero                             // 2
             },
             // 8
             { 4'b0001 },  // interrupt source flags
