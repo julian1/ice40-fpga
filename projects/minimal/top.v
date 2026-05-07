@@ -551,7 +551,7 @@ module top (
           // load the adc aperture.
 
           if( sequence_acquisitionr2_sample_first)
-            // adc_p_clk_count_aperture <=  reg_adc_p_clk_count_aperture_oob;
+            // adc_p_clk_count_aperture <=  reg_adc_p_clk_count_aperture_first;
             adc_p_clk_count_aperture <= $rtoi( `CLK_FREQ * 0.02 );  // 20ms.  1nplc. for 50Hz.
 
           // normal
