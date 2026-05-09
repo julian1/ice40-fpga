@@ -1,6 +1,18 @@
 /*
   rewrite. apr. 2026
 
+  - it may be better to pack the write flag after the addr.
+    instead of the high bit. like this,
+
+  eg. pack    { addr[7-1:0], wr flag,  data }
+
+  this delays knowledge about operation type,
+  but gains a clock cycle, after receiving the address, to perform a 2-cycle port read
+  in order to load the output shift register in time
+
+  also knowledge about a decision to write is only needed write after receiving all bytes.
+
+  But a write might also be tricky - and need both the clk cycle and the cs going hi - to work.
 
 */
 
@@ -62,15 +74,12 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
   input  clk,
   input  cs_n,
   input  din,       // sdi
-  output dout,      // sdo - NO. we assign it to last bit of the output.
+  output dout,
 
 
   // inputs - status, externally driven
   input wire [32-1:0] reg_sr,
 
-  // general
-  // output/writable regs, driven by this module
-  // change name reg_gen_direct,  reg_gen_mode.
 
 
   // output reg [32-1:0] reg_spi_mux,
@@ -231,13 +240,18 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
         /*
             we have all 8 bits here, with din as last bit.
           - so load the out register in time, and not miss any bits on the output
+          ---------
+
+          slight timing issues for the read?
+          perhaps signal-integrity with long spi traces
+          and because device reads dout on the trailing/rising clock edge?
         */
 
         else if( count == 7)    // this is the 8th bit, din included
           begin
 
 
-            addr <= { in[ 7 -1 -1: 0], din };       // store for use by write
+            addr <= { in[ 7 -1 -1: 0], din };       // store for later use by write
 
 
             case ( { in[ 7 -1 -1: 0], din } )
@@ -284,6 +298,7 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
               `REG_ADC_STAT_COUNT_REFMUX_NEG_UP:  out <= reg_adc_stat_count_refmux_neg_up;
               `REG_ADC_STAT_COUNT_CMPR_CROSS_UP:  out <= reg_adc_stat_count_cmpr_cross_up;
 
+              // if get default back, it likely means the addr was not seen correctly
               default:                            out <= 32'b00001111000011110000111100001111;
 
             endcase
@@ -291,12 +306,10 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
 
 
         /*
-          may be possible to delay and just use the pos edge of cs to latch values.
-          instead. to allow use of 'in' instead of '{ in[ 32 -1 -1: 0], din }';
-          but perhaps better to rely on the count and having the expected register addr
+          may be possible to delay, and use the pos edge of cs to latch values.
+          then could use 'in' instead of '{ in[ 32 -1 -1: 0], din }';
+          but consider - better to use the clk count
 
-          this works but seems to change the timing slightly????
-          think signal integrity with long spi traces
         */
 
         else if ( count == 32 + 8 - 1 && write_flag   )   // have all bits and write flag is set.
