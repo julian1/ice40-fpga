@@ -27,6 +27,11 @@
 `include "adc_modulation_06.v"
 `include "sequence_acquisition.v"
 
+`include "dual_port_ram.v"
+
+
+
+
 `default_nettype none
 
 
@@ -38,6 +43,9 @@
 `define SPI_CS_VEC_4094                 3'd2
 `define SPI_CS_VEC_INVERT_DAC           3'd3
 `define SPI_CS_VEC_MDAC1                3'd4
+
+
+
 
 
 
@@ -251,7 +259,33 @@ module top (
   wire cr_sa_p_noaz = reg_cr[ 4 ];
 
 
+/*
 
+  consider - separate virtual spi device for block ram.
+
+  for( i = 0; i < 12; ++i )
+    spi_write( i , mem[ i] );
+    spi_write( 0 , mem[ i] );   // auto incrementing
+
+    input clk,
+    // Port A: Write
+    input we,
+    input [ADDR_WIDTH-1:0] addr_a,
+    input [DATA_WIDTH-1:0] din_a,
+    // Port B: Read
+    input [ADDR_WIDTH-1:0] addr_b,
+    output reg [DATA_WIDTH-1:0] dout_b
+*/
+
+/*
+
+logic
+
+  dual_port_ram   ram (
+    .clk( CLK),
+
+  );
+*/
 
   ///////////////////////////
 
