@@ -27,7 +27,8 @@
 `include "adc_modulation_06.v"
 `include "sequence_acquisition.v"
 
-`include "dual_port_ram.v"
+// `include "dual_port_ram.v"
+`include "register_set2.v"
 
 
 
@@ -867,8 +868,20 @@ logic
   */
 
 
+  register_set2 // #( 32 )
+  register_set2
+    (
+
+    // consider prefix fields with spi_
+    .clk(  SCK ),
+    .cs_n( spi_register_set_cs),
+    .din(  SDI ),
+    .dout( SDO )
+
+  );
 
 
+  reg dummy;
 
   register_set // #( 32 )
   register_set
@@ -878,7 +891,7 @@ logic
     .clk(  SCK ),
     .cs_n( spi_register_set_cs),
     .din(  SDI ),
-    .dout( SDO ),
+    .dout( dummy ),
 
 
     // inputs
