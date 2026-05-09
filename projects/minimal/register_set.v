@@ -299,7 +299,8 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
               `REG_ADC_STAT_COUNT_CMPR_CROSS_UP:  out <= reg_adc_stat_count_cmpr_cross_up;
 
               // if get default back, it likely means the addr was not seen correctly
-              default:                            out <= 32'b00001111000011110000111100001111;
+              // default:                            out <= 32'b00001111000011110000111100001111;
+              default:                            out <= 32'b11001100110011001100110011001100;
 
             endcase
           end // count == 8
