@@ -871,6 +871,7 @@ logic
   register_set2 // #( 32 )
   register_set2
     (
+    .system_clk( CLK),
 
     // consider prefix fields with spi_
     .clk(  SCK ),
