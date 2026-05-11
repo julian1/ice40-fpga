@@ -312,14 +312,15 @@ module register_set2   (
               begin
                 out   <= rout;
 
-                 // clear read request
-                read_request[ 0]  <= 1'b0;
-              end
+                          end
             else
               begin
 
                 out <= 32'b11001100110011001100110011001100;
               end
+
+            // clear read request regardless whether succeeded
+            read_request[ 0]  <= 1'b0;
 
 
           end
@@ -329,8 +330,9 @@ module register_set2   (
         else if ( count == 32 + 8 - 1 && spi_write_flag)   // have all bits and write flag is set.
           begin
 
-            // write can be sent blind and not acknowledged
-            // and write prop delay does not matter
+            // write request - can be sent blind and does not need to be acknowledged
+            // but would be good to clear the write_request flag...
+            // it will be cleared on async cs going hi.
             write_request[0] <= 1'b1;
 
           end
