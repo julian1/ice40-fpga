@@ -434,6 +434,14 @@ module top (
     // control the adc
     .adc_reset_no( sequence_acquisition2_adc_reset_n ),
     .adc_conversion_start_o ( sequence_acquisition2_adc_conversion_start)
+
+    /*
+
+      pass reg_direct here.  to support a mode/state that would allow register control over the outputs?
+
+    .reg_direct( sequence_acquisition2_reg_direct)
+    */
+
   );
 
 
