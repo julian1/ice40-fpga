@@ -202,7 +202,8 @@ module top (
 
   wire register_set_sdo;
 
-  assign SDO                      = ! spi_register_set_cs ? register_set_sdo : 0 ;
+  assign SDO                      = ! spi_register_set_cs ? register_set_sdo : 0 ;      // park miso hi or lo ?
+                                                                                        // seems to definitely like LO
 
 
   /////////////////////////
@@ -390,9 +391,6 @@ module top (
   wire [2-1:0]  sequence_acquisition2_pc_sw;
   wire [4-1:0]  sequence_acquisition2_azmux;
 
-  // wire [4-1:0]  sequence_acquisition2_leds;
-  // wire [8-1:0]  sequence_acquisition2_monitor;
-
 
   wire [3-1:0]  sequence_acquisition2_sample_idx;
   wire          sequence_acquisitionr2_sample_first;
@@ -426,18 +424,13 @@ module top (
 
     .p_noaz_i( cr_sa_p_noaz ),
 
-    .blinker_i(  blinker_out ),
-
 
     // outputs
 
-    .state( sequence_acquisition2_state),
+    .state(       sequence_acquisition2_state),
 
     .pc_sw_o(     sequence_acquisition2_pc_sw  ),
     .azmux_o (    sequence_acquisition2_azmux  ),
-
-    // .leds_o(      sequence_acquisition2_leds  ),
-    // .monitor_o(   sequence_acquisition2_monitor  ),    // only pass 2 bit to the az monitor
 
 
     .sample_idx(   sequence_acquisition2_sample_idx),       // careful/tricky - because  will be initialized to 0.  which is the same as if the first reading.
@@ -450,7 +443,7 @@ module top (
 
     /*
 
-      pass reg_direct here.  to support a mode/state that would allow register control over the outputs?
+      pass reg_direct here.  to support a modeal control and register control of outputs.
 
     .reg_direct( sequence_acquisition2_reg_direct)
     */
@@ -465,7 +458,7 @@ module top (
   reg [ 4-1:0] blinker_out;
 
   blinker
-  blinker (
+  blinker /* (  4 )*/  (
 
     .clk(CLK),
     // .reset_n( sa_trig
@@ -476,15 +469,27 @@ module top (
 
 
 
-  // reg [8-1 : 0 ]      monitor;
+  /*
+      try to make leds and monitor should be non-intrusive  on modules
+      means must be instantiated top level
+  */
 
-  // output reg [4-1:0]   leds_o;
 
   always @(posedge CLK)
     begin
 
-      monitor_o[ 0 ] = sequence_acquisition2_adc_conversion_start;
+      // non-intrusive
+      // note clock delay
+      monitor_o[ 0]       <= sequence_acquisition2_adc_conversion_start;
+      monitor_o[ 1]       <= adc_conversion_valid;
 
+      // eg. other inputs
+      // monitor_o[ 2]       <= adc_reset_no;
+      // monitor_o[ 2]       <= pc_sw_o[ 0 ];
+
+
+      // intrusive. the adc code the monitor state
+      monitor_o[ 2 +: 6]  <= adc_monitor;
     end
 
 
@@ -706,14 +711,6 @@ module top (
     assign azmux_o              = sequence_acquisition2_azmux;        // azmux            // 14+4
     assign pc_sw_o              = sequence_acquisition2_pc_sw;        // precharge            // 12+2
 
-/*
-    // assign monitor_o            = { adc_monitor[ 0 +: 6],  sequence_acquisition2_monitor[ 4],  sequence_acquisition2_monitor[ 0] } ;    // 4+8.   eg. hi/lo, if ch1 pc is active
-    assign monitor_o            = monitor; // { adc_monitor[ 0 +: 6],  sequence_acquisition2_monitor[ 4],  sequence_acquisition2_monitor[ 0] } ;    // 4+8.   eg. hi/lo, if ch1 pc is active
-
-    // assign leds_o               = sequence_acquisition_leds;           // 0+4
-    assign leds_o               = sequence_acquisition2_leds;           // 0+4
-*/
-
 
 
   /*
@@ -728,6 +725,8 @@ module top (
   // spi fills without this ? memory alignment issue?
   // does not see the addr properly
   reg dummy;
+  reg dummy2;
+  reg dummy3;
 
 /*
 
