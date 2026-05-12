@@ -1,5 +1,8 @@
 
 /*
+
+  supervisor.
+
    keep the precharge time the same, when taking a LO - to keep simpler / symmetry and to be more generic.
 
   remember
@@ -114,8 +117,16 @@ module sequence_acquisition (
 
 
 
+  /* FIXME.
+      - put  adc_reset_no, adc_conversion_start_o, adc_conversion_valid_i  in first bits of monitor
+          because that is what we want to trigger on.
+      - then azmux idx in
+      - and pc switches.
 
+      - top two bits can go to the adc.
 
+      it is up to  top.v to reorganize. the monitor.  if that is what we want.
+  */
   assign monitor_o[0] = (azmux_o == `S3);   // (count == 0 ) etc.
   assign monitor_o[1] = (azmux_o == `S7);
   assign monitor_o[2] = (azmux_o == `S1);
@@ -128,8 +139,22 @@ module sequence_acquisition (
   assign monitor_o[7] = adc_conversion_valid_i;
 
 
+  /*  extr.
+      it should be possible to have a separate state machine. for the different modes
+      and then we just assign the correct outputs depending on the state mode.
+      - this may be an easier way to implement the patterns  - instead of setting different starter states
+      -----
+      no-   because would have clock propagation delay.
+  */
 
 
+  /*
+    instantiate blinker at top level.  and pass it in here.
+    */
+  // EXTR. move this out of here.
+  // instead just assign leds_o  to the output of the bliinker module
+  // but only in the first state.
+  // could even pass the led blinker module into here - to be assigned.
   /////////////
   localparam BITS = 4;
   localparam LOG2DELAY = 21;
@@ -141,6 +166,9 @@ module sequence_acquisition (
 
   always @(posedge clk)
     begin
+
+      // EXTR.
+      // if( mode == 0 )
 
       // always decrement clk for the current phase
       clk_count_down          <= clk_count_down - 1;
@@ -217,6 +245,11 @@ module sequence_acquisition (
           begin
             state           <= `STATE_SIGNAL;
             clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
+
+            // FIXME.
+            // leds_o          <= 4'd1 << sample_idx;
+            // monitor [ 4 +: 4 ] <= 4'd1 << sample_idx;
+
 
             case( sample_idx)
               0: begin azmux_o   <= p_seq0_i[ 0 +: 4 ];
