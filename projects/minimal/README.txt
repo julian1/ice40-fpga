@@ -1,6 +1,6 @@
 
 
-handles
+handle/manage
 
   sample acquisition az control
   triggering

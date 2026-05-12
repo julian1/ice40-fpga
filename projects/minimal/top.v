@@ -605,6 +605,10 @@ module top (
 
 
 
+    /*
+      - avoid combinatorial logic after registers on outputs
+        less possibility of sub-clk timing variation/issues
+    */
 
     assign adc_reset_n          = sequence_acquisition2_adc_reset_n;  // adc_reset_n      // 25 + 1
     assign spi_interrupt_ctl_o  = interrupt_valid;                    // spi_interupt     // 23 + 1
