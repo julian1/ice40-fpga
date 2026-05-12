@@ -229,6 +229,7 @@ module top (
 
 
 
+
   ////////////////////////////////////////
   // registers
 
@@ -236,7 +237,6 @@ module top (
 
   wire [32-1:0] reg_direct;
 
-  reg [32-1:0] reg_sr ;
 
 
   // sample aquisition
@@ -255,6 +255,10 @@ module top (
   wire [32-1:0] reg_adc_p_clk_count_aperture_oob;
 
 
+
+
+
+  reg [32-1:0] reg_sr ;
 /*
   // operating mode
   wire [3-1:0 ] cr_mode = reg_cr[ 3-1 : 0 ];
@@ -275,19 +279,19 @@ module top (
 
 
   // adc
-  wire          adc_reset_n;
-  wire          adc_conversion_valid;
+  wire            adc_reset_n;
+  wire            adc_conversion_valid;
 
-  wire [8-1: 0 ] adc_monitor;
+  wire [8-1: 0 ]  adc_monitor;
   // wire [4-1:0]  adc_status;      // TODO
 
 
-  wire [2-1: 0 ] adc_refmux;
-  wire adc_sigmux;
-  wire adc_rstmux;
+  wire [2-1: 0 ]  adc_refmux;
+  wire            adc_sigmux;
+  wire            adc_rstmux;
 
 
-  wire           adc_cmpr_latch_ctl;
+  wire            adc_cmpr_latch_ctl;
 
 
 
@@ -433,8 +437,8 @@ module top (
     .azmux_o (    sequence_acquisition2_azmux  ),
 
 
-    .sample_idx(   sequence_acquisition2_sample_idx),       // careful/tricky - because  will be initialized to 0.  which is the same as if the first reading.
-    .sample_first( sequence_acquisitionr2_sample_first),
+    .sample_idx_o(   sequence_acquisition2_sample_idx),       // careful/tricky - because  will be initialized to 0.  which is the same as if the first reading.
+    .sample_first_o( sequence_acquisitionr2_sample_first),
 
     // control the adc
     .adc_reset_no( sequence_acquisition2_adc_reset_n ),

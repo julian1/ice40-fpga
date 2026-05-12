@@ -76,6 +76,7 @@ module sequence_acquisition (
 
   /* expose in module, not sure.
     for non-intrusive observation
+    consider adding _o .  but it is really an internal state
   */
   output reg [7-1:0]    state,
 
@@ -88,22 +89,21 @@ module sequence_acquisition (
   //////////////
   // control outputs
 
-  output reg [ 2-1: 0]  pc_sw_o,
-  output reg [ 4-1:0 ]  azmux_o,
+  output reg [ 2-1:0]  pc_sw_o,
+  output reg [ 4-1:0]  azmux_o,
 
 
 
   ////////////////
-  // TODO add _o suffix.
 
-  output reg  [3-1: 0] sample_idx,
+  output reg  [3-1: 0] sample_idx_o,
 
   /*
     first sample after trigger assert
     deasserted after sequence cycle complete
     better than count - which is overflow and seeing 0 again.
   */
-  output reg           sample_first,
+  output reg           sample_first_o,
 
 
 
@@ -157,9 +157,9 @@ module sequence_acquisition (
             // hold adc in reset also
             adc_reset_no  <= 0;
 
-            sample_idx    <= 0;
+            sample_idx_o    <= 0;
 
-            sample_first  <= 1;
+            sample_first_o  <= 1;
 
 
             /* during reset - hold the precharge switches lo. to emit BOOT. and protect signal. both cahnnels
@@ -206,7 +206,7 @@ module sequence_acquisition (
             clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
 
 
-            case( sample_idx)
+            case( sample_idx_o)
               0: begin azmux_o   <= p_seq0_i[ 0 +: 4 ]; end
               1: begin azmux_o   <= p_seq1_i[ 0 +: 4]; end
               2: azmux_o   <= p_seq2_i[ 0 +: 4 ];
@@ -229,7 +229,7 @@ module sequence_acquisition (
             state           <= `STATE_PC_SAMPLE;
             clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
 
-            case(sample_idx)
+            case(sample_idx_o)
               0: pc_sw_o <= p_seq0_i[4 +: 2];
               1: pc_sw_o <= p_seq1_i[4 +: 2];
               2: pc_sw_o <= p_seq2_i[4 +: 2];
@@ -265,18 +265,18 @@ module sequence_acquisition (
               */
               if( !p_noaz_i)
 
-                if( sample_idx < p_seq_n_i - 1)
-                  sample_idx  <= sample_idx + 1;
+                if( sample_idx_o < p_seq_n_i - 1)
+                  sample_idx_o  <= sample_idx_o + 1;
                 else
                   begin
-                    sample_idx    <=  0;
+                    sample_idx_o    <=  0;
 
-                    sample_first  <= 0;
+                    sample_first_o  <= 0;
                   end
 
               else
                 // FIXME
-                sample_idx <= 1;
+                sample_idx_o <= 1;
 
               // put adc in reset again
               adc_reset_no <= 0;
