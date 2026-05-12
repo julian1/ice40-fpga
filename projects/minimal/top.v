@@ -16,13 +16,13 @@
 
 
 
-`include "../../common/mux_assign.v"
+// `include "../../common/mux_assign.v"
 
 `include "register_set.v"
 
 
-`include "adc-mock.v"
-`include "refmux-test.v"
+// `include "adc-mock.v"
+// `include "refmux-test.v"
 
 `include "adc_modulation_06.v"
 `include "sequence_acquisition.v"
@@ -249,9 +249,10 @@ module top (
   wire [32-1:0] reg_adc_p_clk_count_aperture_oob;
 
 
-
+/*
   // operating mode
   wire [3-1:0 ] cr_mode = reg_cr[ 3-1 : 0 ];
+*/
 
   // adc, flag to control whether to switch sigmux on
   wire cr_adc_p_active_sigmux = reg_cr[ 3 ];
@@ -290,6 +291,8 @@ logic
 
   ///////////////////////////
 
+/*
+
   // TODO consider rename adc_refmux_test.
   // no. because it is not the adc.
   wire [8-1:0] refmux_test_monitor;
@@ -313,8 +316,8 @@ logic
     . cmpr_val_i( cmpr_val ),
 
     .monitor_o( refmux_test_monitor),
-    /* ie. refmux order pos,neg,source,reset.
-      do we want to change this in main.pcf.. no keep ic sw pinout order.  */
+    //  ie. refmux order pos,neg,source,reset.
+    //   do we want to change this in main.pcf.. no keep ic sw pinout order.
     // .refmux_o ( { refmux_test_refmux[  3  ],  refmux_test_refmux[ 0 +: 2 ]   }  ),
     // .sigmux_o( refmux_test_refmux[ 2] )
 
@@ -325,12 +328,12 @@ logic
 
 
 
-
+*/
 
 
 
   ////////////////////////
-
+/*
   wire          adc_mock_reset_n;
   wire          adc_mock_measure_valid;
   wire [8-1:0 ] adc_mock_monitor;
@@ -349,6 +352,10 @@ logic
     .monitor_o(  adc_mock_monitor )
   );
 
+
+*/
+
+/*
   wire [2-1:0]  sequence_acquisition_pc_sw;
   wire [4-1:0]  sequence_acquisition_azmux;
 
@@ -391,6 +398,7 @@ logic
     .adc_reset_no(  adc_mock_reset_n  )
   );
 
+*/
 
   ////////////////////
 
@@ -761,6 +769,8 @@ logic
     may increase variation in output propagation delay
   */
 
+/*
+
   // mode, alternative function selection
   mux_8to1_assign #( 32  )
   mux_8to1_assign_1  (
@@ -858,6 +868,27 @@ logic
 
   );
 
+  */
+
+
+
+
+    assign adc_reset_n          = sequence_acquisition2_adc_reset_n;  // adc_reset_n      // 25 + 1
+    assign spi_interrupt_ctl_o  = interrupt_valid;                    // spi_interupt     // 23 + 1
+
+    assign adc_cmpr_latch_ctl_o = adc_cmpr_latch_ctl;                 // adc_cmpr_latch   // 22+1
+
+    assign adc_sigmux_o         = adc_sigmux;
+    assign adc_rstmux_o         = adc_rstmux;
+    assign adc_refmux_o         = adc_refmux;                         // adc muxes // 18+4
+
+    assign azmux_o              = sequence_acquisition2_azmux;        // azmux            // 14+4
+    assign pc_sw_o              = sequence_acquisition2_pc_sw;        // precharge            // 12+2
+    assign monitor_o            = { adc_monitor[ 0 +: 6],  sequence_acquisition2_monitor[ 4],  sequence_acquisition2_monitor[ 0] } ;    // 4+8.   eg. hi/lo, if ch1 pc is active
+    // assign leds_o               = sequence_acquisition_leds;           // 0+4
+    assign leds_o               = sequence_acquisition2_leds;           // 0+4
+
+
 
 
   /*
@@ -879,7 +910,7 @@ logic
     .clk(  SCK ),
     .cs_n( spi_register_set_cs),
     .din(  SDI ),
-    .dout( /*dummy */  SDO  )
+    .dout( dummy   /* SDO */ )
 
   );
 
@@ -893,7 +924,7 @@ logic
     .clk(  SCK ),
     .cs_n( spi_register_set_cs),
     .din(  SDI ),
-    .dout( /* SDO */  dummy ),
+    .dout(  SDO /*  dummy*/  ),
 
 
     // inputs
