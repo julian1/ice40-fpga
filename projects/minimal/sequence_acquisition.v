@@ -95,7 +95,7 @@ module sequence_acquisition (
   /*/ now a wire.  output wire [ 2-1:0]  monitor_o       // driven as wire/assign.
   // think it is ok to be a combinatory logic - wire output - although may slow things down.
   */
-  output wire [ 8-1:0]  monitor_o,
+  // output reg [ 8-1:0]  monitor_o,
 
 
   ////////////////
@@ -134,6 +134,11 @@ module sequence_acquisition (
 
       it is up to  top.v to reorganize. the monitor.  if that is what we want.
   */
+
+  // OR don't pass the monitor here....
+  // configure the monitor externally in top.
+
+/*
   assign monitor_o[0] = (azmux_o == `S3);   // (count == 0 ) etc.
   assign monitor_o[1] = (azmux_o == `S7);
   assign monitor_o[2] = (azmux_o == `S1);
@@ -144,7 +149,7 @@ module sequence_acquisition (
 
   assign monitor_o[6] = adc_reset_no;
   assign monitor_o[7] = adc_conversion_valid_i;
-
+*/
 
   /*  extr.
       it should be possible to have a separate state machine. for the different modes
@@ -234,18 +239,13 @@ module sequence_acquisition (
             clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
 
             // FIXME.
-            // leds_o          <= 4'd1 << sample_idx;
+            leds_o          <= 4'd1 << sample_idx;
             // monitor [ 4 +: 4 ] <= 4'd1 << sample_idx;
 
 
             case( sample_idx)
-              0: begin azmux_o   <= p_seq0_i[ 0 +: 4 ];
-                  leds_o = 4'b0001;
-                  end
-
-              1: begin azmux_o   <= p_seq1_i[ 0 +: 4];
-                  leds_o = 4'b0010;
-                  end
+              0: begin azmux_o   <= p_seq0_i[ 0 +: 4 ]; end
+              1: begin azmux_o   <= p_seq1_i[ 0 +: 4]; end
               2: azmux_o   <= p_seq2_i[ 0 +: 4 ];
               3: azmux_o   <= p_seq3_i[ 0 +: 4];
             endcase

@@ -137,6 +137,7 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
 
 );
 
+  reg [ 8-1: 0] dummy;
 
   reg [32-1:0]  in;
   reg [32-1:0]  out;

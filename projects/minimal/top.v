@@ -28,7 +28,7 @@
 `include "sequence_acquisition.v"
 
 // `include "dual_port_ram.v"
-`include "register_set2.v"
+// `include "register_set2.v"
 
 `include "blinker.v"
 
@@ -199,6 +199,10 @@ module top (
 
   assign spi_iso_cs2              = 1;    // unused
 
+
+  wire register_set_sdo;
+
+  assign SDO                      = ! spi_register_set_cs ? register_set_sdo : 0 ;
 
 
   /////////////////////////
@@ -399,7 +403,7 @@ module top (
   wire [4-1:0]  sequence_acquisition2_azmux;
 
   wire [4-1:0]  sequence_acquisition2_leds;
-  wire [8-1:0]  sequence_acquisition2_monitor;
+  // wire [8-1:0]  sequence_acquisition2_monitor;
 
 
   wire [3-1:0]  sequence_acquisition2_sample_idx;
@@ -440,7 +444,7 @@ module top (
     .azmux_o (    sequence_acquisition2_azmux  ),
 
     .leds_o(      sequence_acquisition2_leds  ),
-    .monitor_o(   sequence_acquisition2_monitor  ),    // only pass 2 bit to the az monitor
+    // .monitor_o(   sequence_acquisition2_monitor  ),    // only pass 2 bit to the az monitor
 
 
     .sample_idx(   sequence_acquisition2_sample_idx),       // careful/tricky - because  will be initialized to 0.  which is the same as if the first reading.
@@ -460,6 +464,19 @@ module top (
     */
 
   );
+
+
+  reg [8-1 : 0 ]   monitor;
+
+
+  always @(posedge CLK)
+    begin
+
+      monitor[ 0 ] = sequence_acquisition2_adc_conversion_start;
+
+    end
+
+
 
 
 
@@ -656,7 +673,10 @@ module top (
 
     assign azmux_o              = sequence_acquisition2_azmux;        // azmux            // 14+4
     assign pc_sw_o              = sequence_acquisition2_pc_sw;        // precharge            // 12+2
-    assign monitor_o            = { adc_monitor[ 0 +: 6],  sequence_acquisition2_monitor[ 4],  sequence_acquisition2_monitor[ 0] } ;    // 4+8.   eg. hi/lo, if ch1 pc is active
+
+    // assign monitor_o            = { adc_monitor[ 0 +: 6],  sequence_acquisition2_monitor[ 4],  sequence_acquisition2_monitor[ 0] } ;    // 4+8.   eg. hi/lo, if ch1 pc is active
+    assign monitor_o            = monitor; // { adc_monitor[ 0 +: 6],  sequence_acquisition2_monitor[ 4],  sequence_acquisition2_monitor[ 0] } ;    // 4+8.   eg. hi/lo, if ch1 pc is active
+
     // assign leds_o               = sequence_acquisition_leds;           // 0+4
     assign leds_o               = sequence_acquisition2_leds;           // 0+4
 
@@ -672,6 +692,8 @@ module top (
 
 
   reg [ 8- 1: 0 ] dummy2 ;   // some strange memory alignment issue.
+
+  reg dummy;
 
 /*
 
@@ -701,7 +723,7 @@ module top (
     .clk(  SCK ),
     .cs_n( spi_register_set_cs),
     .din(  SDI ),
-    .dout(  SDO   ),
+    .dout(  register_set_sdo /* SDO  */ ),
 
 
     // inputs
