@@ -228,7 +228,7 @@ module top (
 
   wire [32-1:0] reg_cr;
 
-  wire [32-1:0] reg_direct;
+  // wire [32-1:0] reg_direct;
 
   reg [32-1:0] reg_sr ;
 
@@ -608,6 +608,16 @@ module top (
     /*
       - avoid combinatorial logic after registers on outputs
         less possibility of sub-clk timing variation/issues
+        and makes timing analysis harder
+        ---
+        also the az sequencer - is the place to implement direct control over
+        azmux,pc for slow running tests.
+        rather than using reg_direct.
+        ----
+        just need a register to select the start state/pattern.
+
+        the az-sequencer - can include several patterns.
+        the state-machine can load the required input, at the start of the cycle
     */
 
     assign adc_reset_n          = sequence_acquisition2_adc_reset_n;  // adc_reset_n      // 25 + 1
@@ -667,7 +677,7 @@ module top (
     // inputs
     .reg_4094_oe(    reg_4094_oe ) ,
     .reg_cr(         reg_cr),
-    .reg_direct(     reg_direct),
+    // .reg_direct(     reg_direct),
 
     // outputs
     .reg_sr(     reg_sr ),
