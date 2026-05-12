@@ -85,9 +85,9 @@ module top (
 
 
   ///////////
-  output [ 4-1: 0 ] leds_o,
+  output reg [ 4-1: 0 ] leds_o,
 
-  output [ 8-1: 0]  monitor_o,
+  output reg [ 8-1: 0]  monitor_o,
 
   // input [4-1: 0]    hw_flags_i,
 
@@ -378,18 +378,6 @@ module top (
 
 
 
-
-  reg [ 4-1:0] blinker_out;
-
-  blinker
-  blinker (
-
-    .clk(CLK),
-    // .reset_n( sa_trig
-    .out( blinker_out)
-  );
-
-
   /*
     status_o should be treated/managed generically - just like monitor_o and leds_o.  for each controller (sequence,adc etc).
       like a generic service to a module
@@ -402,7 +390,7 @@ module top (
   wire [2-1:0]  sequence_acquisition2_pc_sw;
   wire [4-1:0]  sequence_acquisition2_azmux;
 
-  wire [4-1:0]  sequence_acquisition2_leds;
+  // wire [4-1:0]  sequence_acquisition2_leds;
   // wire [8-1:0]  sequence_acquisition2_monitor;
 
 
@@ -413,6 +401,8 @@ module top (
   wire          sequence_acquisition2_adc_conversion_start;
 
 
+
+  wire [7-1:0]  sequence_acquisition2_state;
 
 
 
@@ -440,10 +430,13 @@ module top (
 
 
     // outputs
+
+    .state( sequence_acquisition2_state),
+
     .pc_sw_o(     sequence_acquisition2_pc_sw  ),
     .azmux_o (    sequence_acquisition2_azmux  ),
 
-    .leds_o(      sequence_acquisition2_leds  ),
+    // .leds_o(      sequence_acquisition2_leds  ),
     // .monitor_o(   sequence_acquisition2_monitor  ),    // only pass 2 bit to the az monitor
 
 
@@ -452,8 +445,7 @@ module top (
 
     // control the adc
     .adc_reset_no( sequence_acquisition2_adc_reset_n ),
-    .adc_conversion_start_o ( sequence_acquisition2_adc_conversion_start),
-
+    .adc_conversion_start_o ( sequence_acquisition2_adc_conversion_start)
 
 
     /*
@@ -466,15 +458,55 @@ module top (
   );
 
 
-  reg [8-1 : 0 ]   monitor;
+
+
+
+
+  reg [ 4-1:0] blinker_out;
+
+  blinker
+  blinker (
+
+    .clk(CLK),
+    // .reset_n( sa_trig
+    .out( blinker_out)
+  );
+
+
+
+
+
+  // reg [8-1 : 0 ]      monitor;
+
+  // output reg [4-1:0]   leds_o;
+
+  always @(posedge CLK)
+    begin
+
+      monitor_o[ 0 ] = sequence_acquisition2_adc_conversion_start;
+
+    end
+
 
 
   always @(posedge CLK)
     begin
 
-      monitor[ 0 ] = sequence_acquisition2_adc_conversion_start;
+      /* in reset drive leds with blinker pattern
+        note the copy involves a clock propagation delay
+          so this approach - of selecting inputs does not generalize
+      */
+
+      if( sequence_acquisition2_state == 0)
+        leds_o  <= blinker_out;
+
+      else
+        leds_o  <= 4'd1 << sequence_acquisition2_sample_idx;
 
     end
+
+
+
 
 
 
@@ -674,12 +706,13 @@ module top (
     assign azmux_o              = sequence_acquisition2_azmux;        // azmux            // 14+4
     assign pc_sw_o              = sequence_acquisition2_pc_sw;        // precharge            // 12+2
 
+/*
     // assign monitor_o            = { adc_monitor[ 0 +: 6],  sequence_acquisition2_monitor[ 4],  sequence_acquisition2_monitor[ 0] } ;    // 4+8.   eg. hi/lo, if ch1 pc is active
     assign monitor_o            = monitor; // { adc_monitor[ 0 +: 6],  sequence_acquisition2_monitor[ 4],  sequence_acquisition2_monitor[ 0] } ;    // 4+8.   eg. hi/lo, if ch1 pc is active
 
     // assign leds_o               = sequence_acquisition_leds;           // 0+4
     assign leds_o               = sequence_acquisition2_leds;           // 0+4
-
+*/
 
 
 

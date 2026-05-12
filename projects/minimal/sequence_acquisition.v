@@ -78,6 +78,12 @@ module sequence_acquisition (
   // adc outputs
 
 
+  // expose in module, not sure.
+  // reg [7-1:0]           state = 0 ;
+  output reg [7-1:0]    state,
+
+
+
   output reg        adc_reset_no,              // hold adc in reset.
 
   output reg        adc_conversion_start_o,      // one-clock cycle control
@@ -90,7 +96,7 @@ module sequence_acquisition (
 
 
 
-  output reg [4-1:0]   leds_o,
+  // output reg [4-1:0]   leds_o,
 
   /*/ now a wire.  output wire [ 2-1:0]  monitor_o       // driven as wire/assign.
   // think it is ok to be a combinatory logic - wire output - although may slow things down.
@@ -110,17 +116,20 @@ module sequence_acquisition (
   */
   output reg           sample_first,
 
+
+
 );
 
-
-
-  // should expose in module, not sure.
-  reg [7-1:0]   state = 0 ;
 
 
   // clk_count for the current phase. 31 bitss, gives faster timing spec.  v 24 bits. weird. ??? 36MHz v 32MHz
   reg [31:0]    clk_count_down;
 
+
+  initial begin
+      state  = 0;
+
+  end
 
 
 
@@ -197,11 +206,6 @@ module sequence_acquisition (
             azmux_o       <= p_seq0_i[ 0 +: 4 ];
 
 
-            // in reset drive leds with blinker pattern
-            // note the copy involves a clock propagation delay
-            // so this approach - of selecting inputs does not generalize
-            leds_o        <= blinker_i;
-
           end
 
 
@@ -237,10 +241,6 @@ module sequence_acquisition (
           begin
             state           <= `STATE_SIGNAL;
             clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
-
-            // FIXME.
-            leds_o          <= 4'd1 << sample_idx;
-            // monitor [ 4 +: 4 ] <= 4'd1 << sample_idx;
 
 
             case( sample_idx)
