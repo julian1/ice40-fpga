@@ -653,8 +653,9 @@ module top (
     -----
   */
 
-/*
+
   reg dummy;
+  reg dummy2;   // some strange memory alignment issue.
 
   register_set2 // #( 32 )
   register_set2
@@ -669,7 +670,7 @@ module top (
 
   );
 
-*/
+
 
   register_set // #( 32 )
   register_set
