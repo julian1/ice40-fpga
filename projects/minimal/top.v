@@ -261,150 +261,6 @@ module top (
   wire cr_sa_p_noaz = reg_cr[ 4 ];
 
 
-/*
-
-  consider - separate virtual spi device for block ram.
-
-  for( i = 0; i < 12; ++i )
-    spi_write( i , mem[ i] );
-    spi_write( 0 , mem[ i] );   // auto incrementing
-
-    input clk,
-    // Port A: Write
-    input we,
-    input [ADDR_WIDTH-1:0] addr_a,
-    input [DATA_WIDTH-1:0] din_a,
-    // Port B: Read
-    input [ADDR_WIDTH-1:0] addr_b,
-    output reg [DATA_WIDTH-1:0] dout_b
-*/
-
-/*
-
-logic
-
-  dual_port_ram   ram (
-    .clk( CLK),
-
-  );
-*/
-
-  ///////////////////////////
-
-/*
-
-  // TODO consider rename adc_refmux_test.
-  // no. because it is not the adc.
-  wire [8-1:0] refmux_test_monitor;
-
-
-  wire [2-1: 0 ] refmux_test_refmux;
-  wire refmux_test_sigmux;
-  wire refmux_test_rstmux;
-
-
-
-  refmux_test refmux_test (
-
-    .clk(CLK),
-    // JA.   add a reset_n.  and only activate in the corresponding mode.
-    // we don't care about reset here
-
-    . p_clk_count_reset_i( $rtoi(  `CLK_FREQ * 500e-6 )  ), // 500us.
-    . p_clk_count_fix_i(   $rtoi( `CLK_FREQ * 150e-6 )) ,  // 100us. initial but too long
-
-    . cmpr_val_i( cmpr_val ),
-
-    .monitor_o( refmux_test_monitor),
-    //  ie. refmux order pos,neg,source,reset.
-    //   do we want to change this in main.pcf.. no keep ic sw pinout order.
-    // .refmux_o ( { refmux_test_refmux[  3  ],  refmux_test_refmux[ 0 +: 2 ]   }  ),
-    // .sigmux_o( refmux_test_refmux[ 2] )
-
-    .refmux( refmux_test_refmux ),
-    .sigmux( refmux_test_sigmux ),
-    .rstmux( refmux_test_rstmux )
-  );
-
-
-
-*/
-
-
-
-  ////////////////////////
-/*
-  wire          adc_mock_reset_n;
-  wire          adc_mock_measure_valid;
-  wire [8-1:0 ] adc_mock_monitor;
-
-  adc_mock
-  adc_mock (
-
-    .clk(CLK),
-    .reset_n( adc_mock_reset_n ),
-
-    // inputs
-    .p_clk_count_aperture_i( reg_adc_p_clk_count_aperture ),
-
-    // outputs
-    .adc_conversion_valid_o( adc_mock_measure_valid ),
-    .monitor_o(  adc_mock_monitor )
-  );
-
-
-*/
-
-/*
-  wire [2-1:0]  sequence_acquisition_pc_sw;
-  wire [4-1:0]  sequence_acquisition_azmux;
-
-  wire [4-1:0]  sequence_acquisition_leds;
-  wire [8-1:0]  sequence_acquisition_monitor;
-  // wire [4-1:0]  sequence_acquisition_status;
-
-
-  // perhaps rename sequence_acquisition_with_adc_mock
-
-  sequence_acquisition
-  sequence_acquisition (
-
-    .clk(CLK),
-    .reset_n( sa_trig_i ),
-
-    // inputs
-    .adc_conversion_valid_i( adc_mock_measure_valid ),                     // fan-in from adc
-
-    .p_clk_count_trig_delay_i( reg_sa_p_clk_count_trig_delay ),
-    .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]  ),     // done
-
-    .p_seq_n_i( reg_sa_p_seq_n[ 3-1: 0]  ),   // 3 bits
-    .p_seq0_i(  reg_sa_p_seq0[ 6-1: 0]  ),
-    .p_seq1_i(  reg_sa_p_seq1[ 6-1: 0]  ),
-    .p_seq2_i(  reg_sa_p_seq2[ 6-1: 0] ),
-    .p_seq3_i(  reg_sa_p_seq3[ 6-1: 0] ),
-
-    .p_noaz_i(  cr_sa_p_noaz ),
-
-    // outputs
-    .pc_sw_o(   sequence_acquisition_pc_sw  ),
-    .azmux_o (  sequence_acquisition_azmux ),
-
-
-    .leds_o(    sequence_acquisition_leds  ),
-    .monitor_o( sequence_acquisition_monitor  ),    // only pass 2 bit to the az monitor
-    // .status_last_o(  sequence_acquisition_status ),
-
-    .adc_reset_no(  adc_mock_reset_n  )
-  );
-
-*/
-
-  ////////////////////
-
-
-
-
 
 
 
@@ -749,129 +605,6 @@ logic
 
 
 
-  ////////////////////////////
-  // unused. should be able to be wire?
-  reg [32-26- 1:0] dummy_bits_o ;
-
-  reg dummy_bit2_o;   // meas_complete output.  now unused.
-
-
-
-
-
-  /*
-     note - if a controller is unused in a mode - it would be nice to hold it in reset.
-      can do by exposing the reset_n, and only turning it on, if active within the specific mode.
-  */
-
-  /*
-    note - hanging this combinatorial logic on the output registers
-    may increase variation in output propagation delay
-  */
-
-/*
-
-  // mode, alternative function selection
-  mux_8to1_assign #( 32  )
-  mux_8to1_assign_1  (
-
-    .a(  reg_direct  ),                       // mode/AF 0  MODE_DIRECT       note, could also project, spi signals on the monitor, for easier debuggin. no. because want direct to control all outputs for test.
-
-    // unused.
-    .b(  32'b0  ),
-    .c(  32'b0  ),
-    .d(  32'b0  ),
-    .e(  32'b0  ),
-
-    // mode  5. adc refmux test
-    // limited modulation of ref currents, useful when populating pcb, don't need slope-amp/comparator etc.
-    .f( {  { 32 - 22 { 'b0 }},
-                                              // 22
-
-          refmux_test_sigmux,
-          refmux_test_rstmux,
-          refmux_test_refmux,                 // 18+4
-
-          4'b0,    // azmux                   // 14+4
-          2'b0 ,  // precharge                // 12+2
-          refmux_test_monitor,                // 4+8
-          4'b0   // leds                      // 0+4
-        } ),
-
-
-    // mode  6  sample/sequence acquisition with mocked adc.  and better monitor
-    // useful to test precharge/az switching, without needing adc to be populated
-    // and verifying timing sequences, with better monitor
-    // needs trig asserted.  and seq-n. etc.
-    // needs fpga cmos oscillator/xtal populated
-    // eg. set ch2 lts ; set mode 6;  trig ;   works. jan 2026.
-    .g( {  { 32 - 26 { 'b0 }},
-                                              // 26
-          1'b0, // adc_reset_n                // 25 + 1
-          1'b0, // meas_complete              // 24+1
-          1'b0,   // spi_interupt             // 23 + 1
-          1'b0,  // adc_cmpr_latch            // 22+1
-          4'b0,  // adc_refmux                // 18+4
-          sequence_acquisition_azmux,         // 14+4
-          sequence_acquisition_pc_sw,         // 12+2
-          sequence_acquisition_monitor[ 0 +: 8],    // 4+8
-          sequence_acquisition_leds           // 0+1
-        } ),
-
-
-
-    // mode 7. sequence acquisition controller and full adc.
-    // needs trig asserted.
-   .h( {  { 32 - 26 { 'b0 }},
-                                              // 26
-          sequence_acquisition2_adc_reset_n,  // adc_reset_n      // 25 + 1
-
-          1'b0,                               // dummy bit.       // 24+1
-          interrupt_valid,                       // spi_interupt     // 23 + 1
-
-          adc_cmpr_latch_ctl,                 // adc_cmpr_latch   // 22+1
-
-          adc_sigmux,
-          adc_rstmux,
-          adc_refmux,                         // adc muxes // 18+4
-
-          sequence_acquisition2_azmux,        // azmux            // 14+4
-          sequence_acquisition2_pc_sw,        // precharge            // 12+2
-          // adc_monitor[ 0 +: 6], sequence_acquisition2_monitor[ 0 +: 2],    // 4+8
-          adc_monitor[ 0 +: 6],  sequence_acquisition2_monitor[ 4],  sequence_acquisition2_monitor[ 0],    // 4+8.   eg. hi/lo, if ch1 pc is active
-          sequence_acquisition_leds           // 0+4
-        } ),
-
-
-    .sel( cr_mode ),
-
-    // leds and monitor go first, since they are the most generic functionality
-
-    .out( {
-          dummy_bits_o,                       // 26
-
-          adc_reset_n,                        // 25 + 1
-
-          dummy_bit2_o,                       // 24+1     // interupt_ctl *IS* generic so should be at start, and connects straight to adum. so place at beginning. same argument for meas_complete
-          spi_interrupt_ctl_o,                // 23+1     todo rename. drop the 'ctl'.
-          adc_cmpr_latch_ctl_o,               // 22+1
-
-          adc_sigmux_o,
-          adc_rstmux_o,
-          adc_refmux_o,                       // adc muxes 18+4
-
-          azmux_o,                            // 14+4
-          pc_sw_o,                            // 12+2
-          monitor_o,                          // 4+8
-          leds_o                              // 0+4
-        }  )
-
-  );
-
-  */
-
-
-
 
     assign adc_reset_n          = sequence_acquisition2_adc_reset_n;  // adc_reset_n      // 25 + 1
     assign spi_interrupt_ctl_o  = interrupt_valid;                    // spi_interupt     // 23 + 1
@@ -1046,6 +779,122 @@ endmodule
 
             end       // active HI sample
 
-
-
 */
+
+
+
+
+  /*
+     note - if a controller is unused in a mode - it would be nice to hold it in reset.
+      can do by exposing the reset_n, and only turning it on, if active within the specific mode.
+  */
+
+  /*
+    note - hanging this combinatorial logic on the output registers
+    may increase variation in output propagation delay
+  */
+
+/*
+
+  // mode, alternative function selection
+  mux_8to1_assign #( 32  )
+  mux_8to1_assign_1  (
+
+    .a(  reg_direct  ),                       // mode/AF 0  MODE_DIRECT       note, could also project, spi signals on the monitor, for easier debuggin. no. because want direct to control all outputs for test.
+
+    // unused.
+    .b(  32'b0  ),
+    .c(  32'b0  ),
+    .d(  32'b0  ),
+    .e(  32'b0  ),
+
+    // mode  5. adc refmux test
+    // limited modulation of ref currents, useful when populating pcb, don't need slope-amp/comparator etc.
+    .f( {  { 32 - 22 { 'b0 }},
+                                              // 22
+
+          refmux_test_sigmux,
+          refmux_test_rstmux,
+          refmux_test_refmux,                 // 18+4
+
+          4'b0,    // azmux                   // 14+4
+          2'b0 ,  // precharge                // 12+2
+          refmux_test_monitor,                // 4+8
+          4'b0   // leds                      // 0+4
+        } ),
+
+
+    // mode  6  sample/sequence acquisition with mocked adc.  and better monitor
+    // useful to test precharge/az switching, without needing adc to be populated
+    // and verifying timing sequences, with better monitor
+    // needs trig asserted.  and seq-n. etc.
+    // needs fpga cmos oscillator/xtal populated
+    // eg. set ch2 lts ; set mode 6;  trig ;   works. jan 2026.
+    .g( {  { 32 - 26 { 'b0 }},
+                                              // 26
+          1'b0, // adc_reset_n                // 25 + 1
+          1'b0, // meas_complete              // 24+1
+          1'b0,   // spi_interupt             // 23 + 1
+          1'b0,  // adc_cmpr_latch            // 22+1
+          4'b0,  // adc_refmux                // 18+4
+          sequence_acquisition_azmux,         // 14+4
+          sequence_acquisition_pc_sw,         // 12+2
+          sequence_acquisition_monitor[ 0 +: 8],    // 4+8
+          sequence_acquisition_leds           // 0+1
+        } ),
+
+
+
+    // mode 7. sequence acquisition controller and full adc.
+    // needs trig asserted.
+   .h( {  { 32 - 26 { 'b0 }},
+                                              // 26
+          sequence_acquisition2_adc_reset_n,  // adc_reset_n      // 25 + 1
+
+          1'b0,                               // dummy bit.       // 24+1
+          interrupt_valid,                       // spi_interupt     // 23 + 1
+
+          adc_cmpr_latch_ctl,                 // adc_cmpr_latch   // 22+1
+
+          adc_sigmux,
+          adc_rstmux,
+          adc_refmux,                         // adc muxes // 18+4
+
+          sequence_acquisition2_azmux,        // azmux            // 14+4
+          sequence_acquisition2_pc_sw,        // precharge            // 12+2
+          // adc_monitor[ 0 +: 6], sequence_acquisition2_monitor[ 0 +: 2],    // 4+8
+          adc_monitor[ 0 +: 6],  sequence_acquisition2_monitor[ 4],  sequence_acquisition2_monitor[ 0],    // 4+8.   eg. hi/lo, if ch1 pc is active
+          sequence_acquisition_leds           // 0+4
+        } ),
+
+
+    .sel( cr_mode ),
+
+    // leds and monitor go first, since they are the most generic functionality
+
+    .out( {
+          dummy_bits_o,                       // 26
+
+          adc_reset_n,                        // 25 + 1
+
+          dummy_bit2_o,                       // 24+1     // interupt_ctl *IS* generic so should be at start, and connects straight to adum. so place at beginning. same argument for meas_complete
+          spi_interrupt_ctl_o,                // 23+1     todo rename. drop the 'ctl'.
+          adc_cmpr_latch_ctl_o,               // 22+1
+
+          adc_sigmux_o,
+          adc_rstmux_o,
+          adc_refmux_o,                       // adc muxes 18+4
+
+          azmux_o,                            // 14+4
+          pc_sw_o,                            // 12+2
+          monitor_o,                          // 4+8
+          leds_o                              // 0+4
+        }  )
+
+  );
+
+  */
+
+
+
+
