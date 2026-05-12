@@ -80,7 +80,7 @@ module sequence_acquisition (
 
 
 
-  output wire [4-1:0]   leds_o,
+  output reg [4-1:0]   leds_o,
 
   /*/ now a wire.  output wire [ 2-1:0]  monitor_o       // driven as wire/assign.
   // think it is ok to be a combinatory logic - wire output - although may slow things down.
@@ -128,10 +128,16 @@ module sequence_acquisition (
   assign monitor_o[7] = adc_conversion_valid_i;
 
 
-  assign leds_o[0] = (sample_idx == 0);
-  assign leds_o[1] = (sample_idx == 1);
-  assign leds_o[2] = (sample_idx == 2);
-  assign leds_o[3] = (sample_idx == 3);
+
+
+  /////////////
+  localparam BITS = 4;
+  localparam LOG2DELAY = 21;
+  // localparam LOG2DELAY = 19;
+  reg [BITS+LOG2DELAY-1:0] led_counter = 0;
+  reg [BITS-1:0] led_coutcnt;
+
+
 
   always @(posedge clk)
     begin
@@ -164,6 +170,18 @@ module sequence_acquisition (
             */
             pc_sw_o       <= 2'b00;
             azmux_o       <= p_seq0_i[ 0 +: 4 ];
+
+
+
+
+            // always@(posedge clk) begin
+              led_counter   <= led_counter + 1;
+              led_coutcnt   <= led_counter >> LOG2DELAY;
+              leds_o        <= led_coutcnt ^ (led_coutcnt >> 1);
+            // end
+
+
+
           end
 
 
@@ -201,8 +219,13 @@ module sequence_acquisition (
             clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
 
             case( sample_idx)
-              0: azmux_o   <= p_seq0_i[ 0 +: 4 ];
-              1: azmux_o   <= p_seq1_i[ 0 +: 4];
+              0: begin azmux_o   <= p_seq0_i[ 0 +: 4 ];
+                  leds_o = 4'b0001;
+                  end
+
+              1: begin azmux_o   <= p_seq1_i[ 0 +: 4];
+                  leds_o = 4'b0010;
+                  end
               2: azmux_o   <= p_seq2_i[ 0 +: 4 ];
               3: azmux_o   <= p_seq3_i[ 0 +: 4];
             endcase

@@ -228,7 +228,7 @@ module top (
 
   wire [32-1:0] reg_cr;
 
-  // wire [32-1:0] reg_direct;
+  wire [32-1:0] reg_direct;
 
   reg [32-1:0] reg_sr ;
 
@@ -653,7 +653,7 @@ module top (
     -----
   */
 
-
+/*
   reg dummy;
 
   register_set2 // #( 32 )
@@ -665,11 +665,11 @@ module top (
     .clk(  SCK ),
     .cs_n( spi_register_set_cs),
     .din(  SDI ),
-    .dout( dummy   /* SDO */ )
+    .dout( dummy    )
 
   );
 
-
+*/
 
   register_set // #( 32 )
   register_set
@@ -685,7 +685,7 @@ module top (
     // inputs
     .reg_4094_oe(    reg_4094_oe ) ,
     .reg_cr(         reg_cr),
-    // .reg_direct(     reg_direct),
+    .reg_direct(     reg_direct),
 
     // outputs
     .reg_sr(     reg_sr ),
