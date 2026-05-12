@@ -691,14 +691,12 @@ module top (
   */
 
 
-  reg [ 8- 1: 0 ] dummy2 ;   // some strange memory alignment issue.
 
+  // spi fills without this ? memory alignment issue?
+  // does not see the addr properly
   reg dummy;
 
 /*
-
-  reg dummy;
-
 
   register_set2 // #( 32 )
   register_set2
