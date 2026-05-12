@@ -1,17 +1,18 @@
+
 /*
   - the EBR cannot have the SPI CS, in the block sensitivty list, because it is an asynch signal.
   insetad ERB must be put in own synchronous domain, using the system clk
-  and then double flop the control signals.
+  and then double flop the control signals across the CDC.
 
   - there is an issue that spi must be able to load the output shift register in time.
-    this places a limit on spi speed WRT system clock, and the need to double flop
+    this puts a limit on the spi speed WRT system clock, and the need to double flop
     the request/ ack.
 
-  - the spi packet encoding should include some padding spi cycles after the addr is needed
-    to allow this synchronization with the system clk.
+  - the spi packet encoding should include some padding spi cycles after the addr
+    to allow this synchronization.
 
-    put the write flag after the address (instead of at the start of the header) - to free up at least one clock cycle.
-    and remember the write flag is not needed until the last bit.
+    putting the write flag after the address (instead of at the start of the header) - will free at least one clock cycle.
+    and remember the knowledge of the write flag is not needed until the last bit.
 */
 
 
@@ -131,14 +132,12 @@ module register_set2   (
   reg [8-1:0]   count;
 
 
-  // 7 bit address.   eg. 128 addresses
-  // now 8. because did not instantiate
+  // 8 bit address
   reg [8-1:0]   addr;
 
   reg spi_write_flag;
 
 
-  // reg [32-1:0]  rin;   // write tmp.  (rename out1  - to indicate available on second clock ? )
   reg [32-1:0]  rout;   // read tmp
 
 
@@ -149,8 +148,8 @@ module register_set2   (
 
 
   /* change to arrays here
-    to allow interleaving service with more than one reader/writer
-    unroll
+    to interleave multiple reader/writers
+    and unroll the control logic
   */
   reg  write_request;   // master writes
   reg  write_ack;       // slave writes
@@ -196,7 +195,6 @@ module register_set2   (
       if( write_request && ! write_ack)
         begin
 
-          // double flop - for 'addr' and 'in' to be stable
           ram[ addr ]   <= in;
           write_ack     <= 1'b1;
         end
@@ -209,7 +207,6 @@ module register_set2   (
       if( read_request && ! read_ack)
         begin
 
-          // double flop - for 'addr' to be stable
           rout          <= ram[ addr ];
           // rout          <=   addr  ;
           read_ack      <= 1'b1;
@@ -220,21 +217,14 @@ module register_set2   (
     end
 
 
-  /*
-    issue with having multiple drivers/writers .
-    is separate to dealing with CDC meta stable issues.
-
-
-  */
-
 
   always @ (negedge clk or posedge cs_n)
   begin
 
-    /* this wont work.
+    /*
+      spi implemented normally,
+      using DFF/LUT registers for in/out, and that handle async reset.
 
-      because we are not guaranteed any clks. when cs_n is hi.
-      or perhaps the spi device will send a parking clock..
     */
 
     if( cs_n)
