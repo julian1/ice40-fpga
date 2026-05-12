@@ -30,6 +30,7 @@
 // `include "dual_port_ram.v"
 `include "register_set2.v"
 
+`include "blinker.v"
 
 
 
@@ -374,6 +375,17 @@ module top (
 
 
 
+  reg [ 4-1:0] blinker_out;
+
+  blinker
+  blinker (
+
+    .clk(CLK),
+    // .reset_n( sa_trig
+    .out( blinker_out)
+  );
+
+
   /*
     status_o should be treated/managed generically - just like monitor_o and leds_o.  for each controller (sequence,adc etc).
       like a generic service to a module
@@ -420,6 +432,9 @@ module top (
 
     .p_noaz_i( cr_sa_p_noaz ),
 
+    .blinker_i(  blinker_out ),
+
+
     // outputs
     .pc_sw_o(     sequence_acquisition2_pc_sw  ),
     .azmux_o (    sequence_acquisition2_azmux  ),
@@ -433,7 +448,9 @@ module top (
 
     // control the adc
     .adc_reset_no( sequence_acquisition2_adc_reset_n ),
-    .adc_conversion_start_o ( sequence_acquisition2_adc_conversion_start)
+    .adc_conversion_start_o ( sequence_acquisition2_adc_conversion_start),
+
+
 
     /*
 
@@ -654,8 +671,12 @@ module top (
   */
 
 
+  reg [ 8- 1: 0 ] dummy2 ;   // some strange memory alignment issue.
+
+/*
+
   reg dummy;
-  reg dummy2;   // some strange memory alignment issue.
+
 
   register_set2 // #( 32 )
   register_set2
@@ -669,7 +690,7 @@ module top (
     .dout( dummy    )
 
   );
-
+*/
 
 
   register_set // #( 32 )
@@ -680,7 +701,7 @@ module top (
     .clk(  SCK ),
     .cs_n( spi_register_set_cs),
     .din(  SDI ),
-    .dout(  SDO /*  dummy*/  ),
+    .dout(  SDO   ),
 
 
     // inputs

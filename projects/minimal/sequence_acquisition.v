@@ -65,15 +65,22 @@ module sequence_acquisition (
   input             p_noaz_i,
 
 
-  /////////////////////////
-  // adc inputs and outputs
+  input [ 4-1: 0 ]  blinker_i,
+
+
+
+  // adc inputs
 
   input             adc_conversion_valid_i,
+
+
+  /////////////////////////
+  // adc outputs
+
 
   output reg        adc_reset_no,              // hold adc in reset.
 
   output reg        adc_conversion_start_o,      // one-clock cycle control
-
 
   //////////////
   // control outputs
@@ -148,26 +155,11 @@ module sequence_acquisition (
   */
 
 
-  /*
-    instantiate blinker at top level.  and pass it in here.
-    */
-  // EXTR. move this out of here.
-  // instead just assign leds_o  to the output of the bliinker module
-  // but only in the first state.
-  // could even pass the led blinker module into here - to be assigned.
-  /////////////
-  localparam BITS = 4;
-  localparam LOG2DELAY = 21;
-  // localparam LOG2DELAY = 19;
-  reg [BITS+LOG2DELAY-1:0] led_counter = 0;
-  reg [BITS-1:0] led_coutcnt;
-
-
-
   always @(posedge clk)
     begin
 
       // EXTR.
+      // use if/else rather than case
       // if( mode == 0 )
 
       // always decrement clk for the current phase
@@ -200,15 +192,10 @@ module sequence_acquisition (
             azmux_o       <= p_seq0_i[ 0 +: 4 ];
 
 
-
-
-            // always@(posedge clk) begin
-              led_counter   <= led_counter + 1;
-              led_coutcnt   <= led_counter >> LOG2DELAY;
-              leds_o        <= led_coutcnt ^ (led_coutcnt >> 1);
-            // end
-
-
+            // in reset drive leds with blinker pattern
+            // note the copy involves a clock propagation delay
+            // so this approach - of selecting inputs does not generalize
+            leds_o        <= blinker_i;
 
           end
 
