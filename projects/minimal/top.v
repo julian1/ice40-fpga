@@ -764,7 +764,8 @@ module top (
   // does not see the addr properly
   reg dummy;
   reg dummy2;
-  // reg dummy3;
+  reg dummy3;
+  reg dummy4;
 
 /*
 
