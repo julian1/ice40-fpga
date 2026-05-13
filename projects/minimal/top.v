@@ -522,7 +522,14 @@ module top (
 
 
 
+  /*
+    TODO. remove this.
+    the sequencer should take direct responsibility for aperture.
+    if we want to control it.
+    ---
+    not hanging off the the  sample_first state flag.
 
+  */
 
   reg oob_aperture;
 
