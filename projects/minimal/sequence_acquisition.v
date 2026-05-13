@@ -52,6 +52,8 @@ module sequence_acquisition (
   input   clk,
   input   reset_n,
 
+  input [ 3-1: 0 ]  mode_i,       // cr mode
+
   // control inputs
   input [32-1:0]    p_clk_count_trig_delay_i,
   input [24-1:0]    p_clk_count_precharge_i,
@@ -102,6 +104,10 @@ module sequence_acquisition (
     first sample after trigger assert
     deasserted after sequence cycle complete
     better than count - which is overflow and seeing 0 again.
+    ----------
+
+    EXTR. OK. this will not work - with idea of modes.
+    because it is a flag to change the nplc.
   */
   output reg           sample_first_o,
 
@@ -133,170 +139,163 @@ module sequence_acquisition (
 
 
   always @(posedge clk)
-    begin
 
-      // EXTR.
-      // use if/else rather than case
-      // if( mode == 0 )
+    if( mode_i == 0)
+      begin
 
-      // always decrement clk for the current phase
-      clk_count_down          <= clk_count_down - 1;
+        // always decrement clk for the current phase
+        clk_count_down          <= clk_count_down - 1;
 
-      adc_conversion_start_o  <= 1'b0;
+        adc_conversion_start_o  <= 1'b0;
 
+        case (state)
 
-      case (state)
-
-        // reset state
-        `STATE_RESET_START:
-          begin
-
-            state         <= `STATE_TRIG_DELAY;
-            clk_count_down <= p_clk_count_trig_delay_i;
-
-            // hold adc in reset also
-            adc_reset_no  <= 0;
-
-            sample_idx_o    <= 0;
-
-            sample_first_o  <= 1;
-
-
-            /* during reset - hold the precharge switches lo. to emit BOOT. and protect signal. both cahnnels
-            // azmux state should probably also be defined.  can use the first value.
-            */
-            pc_sw_o       <= 2'b00;
-            azmux_o       <= p_seq0_i[ 0 +: 4 ];
-
-
-          end
-
-
-        `STATE_TRIG_DELAY:
-          if(clk_count_down == 0)
-            state         <= `STATE_PC_PROTECT_START;
-
-
-
-        // switch pre-charge switch to boot to protect signal, and pause.
-        `STATE_PC_PROTECT_START:
-          begin
-            state         <= `STATE_PC_PROTECT;
-            clk_count_down <= p_clk_count_precharge_i;
-
-            // keep the pc_sw lo if coming from reset_start/trig_delay
-            // switch to pc_sw lo if coming from wait_adc
-            pc_sw_o       <= 2'b00;
-
-          end
-
-        `STATE_PC_PROTECT:
-          if(clk_count_down == 0)
-            state <= `STATE_SIGNAL_START;
-
-
-
-
-        ////////////////////////////
-        // switch azmux_o to the signal of interest, which may be a low. and pause
-        // precharge phase.
-        `STATE_SIGNAL_START:
-          begin
-            state           <= `STATE_SIGNAL;
-            clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
-
-
-            case( sample_idx_o)
-              0: begin azmux_o   <= p_seq0_i[ 0 +: 4 ]; end
-              1: begin azmux_o   <= p_seq1_i[ 0 +: 4]; end
-              2: azmux_o   <= p_seq2_i[ 0 +: 4 ];
-              3: azmux_o   <= p_seq3_i[ 0 +: 4];
-            endcase
-          end
-
-        `STATE_SIGNAL:
-          if(clk_count_down == 0)
-            state <= `STATE_PC_SAMPLE_START;
-
-
-
-        /////////////////////////
-        // switch pc-switch from BOOT to the signal input if defined (which may be a ground), and pause.
-        // if we are sampling a ground, and pc_val = 0, then this does nothing.
-        // and we could skip it, but probably not unreasonable to keep timing the same.
-        `STATE_PC_SAMPLE_START:
-          begin
-            state           <= `STATE_PC_SAMPLE;
-            clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
-
-            case(sample_idx_o)
-              0: pc_sw_o <= p_seq0_i[4 +: 2];
-              1: pc_sw_o <= p_seq1_i[4 +: 2];
-              2: pc_sw_o <= p_seq2_i[4 +: 2];
-              3: pc_sw_o <= p_seq3_i[4 +: 2];
-            endcase
-          end
-
-        `STATE_PC_SAMPLE:
-          if(clk_count_down == 0)
+          // reset state
+          `STATE_RESET_START:
             begin
-              state         <= `STATE_WAIT_ADC;
-              // adc start
-              adc_reset_no  <= 1'b1;
 
-              adc_conversion_start_o  <= 1'b1;
+              state           <= `STATE_TRIG_DELAY;
+              clk_count_down  <= p_clk_count_trig_delay_i;
+
+              // hold adc in reset also
+              adc_reset_no    <= 0;
+
+              sample_idx_o    <= 0;
+
+              sample_first_o  <= 1;
+
+              /* during reset - hold the precharge switches lo. to emit BOOT. and protect signal. both cahnnels
+              // azmux state should probably also be defined.  can use the first value.
+              */
+              pc_sw_o       <= 2'b00;
+              azmux_o       <= p_seq0_i[ 0 +: 4 ];
+
             end
 
 
-
-        `STATE_WAIT_ADC:
-          // wait for adc to measure
-          if( adc_conversion_valid_i )
-            begin
-
-              // set up next state
+          `STATE_TRIG_DELAY:
+            if(clk_count_down == 0)
               state         <= `STATE_PC_PROTECT_START;
 
 
-              /*
-                avoid modulo
-                https://stackoverflow.com/questions/47425729/verilog-modulus-operator-for-wrapping-around-a-range
-                needs to be >= in case sample_n is reduced in write.
-              */
-              if( !p_noaz_i)
 
-                if( sample_idx_o < p_seq_n_i - 1)
-                  sample_idx_o  <= sample_idx_o + 1;
-                else
-                  begin
-                    sample_idx_o    <=  0;
+          // switch pre-charge switch to boot to protect signal, and pause.
+          `STATE_PC_PROTECT_START:
+            begin
+              state         <= `STATE_PC_PROTECT;
+              clk_count_down <= p_clk_count_precharge_i;
 
-                    sample_first_o  <= 0;
-                  end
+              // keep the pc_sw lo if coming from reset_start/trig_delay
+              // switch to pc_sw lo if coming from wait_adc
+              pc_sw_o       <= 2'b00;
 
-              else
-                // FIXME
-                sample_idx_o <= 1;
-
-              // put adc in reset again
-              adc_reset_no <= 0;
             end
 
-      endcase
+          `STATE_PC_PROTECT:
+            if(clk_count_down == 0)
+              state <= `STATE_SIGNAL_START;
 
 
 
-      // override all states -
-      // if reset_n enabled, then don't advance out-of reset state.
-      if(reset_n == 0)      // in reset
-        begin
 
-            state <= `STATE_RESET_START;
-        end
+          ////////////////////////////
+          // switch azmux_o to the signal of interest, which may be a low. and pause
+          // precharge phase.
+          `STATE_SIGNAL_START:
+            begin
+              state           <= `STATE_SIGNAL;
+              clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
+
+
+              case( sample_idx_o)
+                0: begin azmux_o   <= p_seq0_i[ 0 +: 4 ]; end
+                1: begin azmux_o   <= p_seq1_i[ 0 +: 4]; end
+                2: azmux_o   <= p_seq2_i[ 0 +: 4 ];
+                3: azmux_o   <= p_seq3_i[ 0 +: 4];
+              endcase
+            end
+
+          `STATE_SIGNAL:
+            if(clk_count_down == 0)
+              state <= `STATE_PC_SAMPLE_START;
 
 
 
-    end
+          /////////////////////////
+          // switch pc-switch from BOOT to the signal input if defined (which may be a ground), and pause.
+          // if we are sampling a ground, and pc_val = 0, then this does nothing.
+          // and we could skip it, but probably not unreasonable to keep timing the same.
+          `STATE_PC_SAMPLE_START:
+            begin
+              state           <= `STATE_PC_SAMPLE;
+              clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
+
+              case(sample_idx_o)
+                0: pc_sw_o <= p_seq0_i[4 +: 2];
+                1: pc_sw_o <= p_seq1_i[4 +: 2];
+                2: pc_sw_o <= p_seq2_i[4 +: 2];
+                3: pc_sw_o <= p_seq3_i[4 +: 2];
+              endcase
+            end
+
+          `STATE_PC_SAMPLE:
+            if(clk_count_down == 0)
+              begin
+                state         <= `STATE_WAIT_ADC;
+                // adc start
+                adc_reset_no  <= 1'b1;
+
+                adc_conversion_start_o  <= 1'b1;
+              end
+
+
+
+          `STATE_WAIT_ADC:
+            // wait for adc to measure
+            if( adc_conversion_valid_i )
+              begin
+
+                // set up next state
+                state         <= `STATE_PC_PROTECT_START;
+
+
+                /*
+                  avoid modulo
+                  https://stackoverflow.com/questions/47425729/verilog-modulus-operator-for-wrapping-around-a-range
+                  needs to be >= in case sample_n is reduced in write.
+                */
+                if( !p_noaz_i)
+
+                  if( sample_idx_o < p_seq_n_i - 1)
+                    sample_idx_o  <= sample_idx_o + 1;
+                  else
+                    begin
+                      sample_idx_o    <=  0;
+
+                      sample_first_o  <= 0;
+                    end
+
+                else
+                  // FIXME
+                  sample_idx_o <= 1;
+
+                // put adc in reset again
+                adc_reset_no <= 0;
+              end
+
+        endcase
+
+        // override all states -
+        // if reset_n enabled, then don't advance out-of reset state.
+        if(reset_n == 0)      // in reset
+          begin
+
+              state <= `STATE_RESET_START;
+          end
+
+      end   // end mode == 0
+
+
 endmodule
 
 

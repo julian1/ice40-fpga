@@ -259,10 +259,10 @@ module top (
 
 
   reg [32-1:0] reg_sr ;
-/*
+
   // operating mode
-  wire [3-1:0 ] cr_mode = reg_cr[ 3-1 : 0 ];
-*/
+  wire [3-1:0 ] sa_mode = reg_cr[ 3-1 : 0 ];
+
 
   // adc, flag to control whether to switch sigmux on
   wire cr_adc_p_active_sigmux = reg_cr[ 3 ];
@@ -413,6 +413,8 @@ module top (
 
     .clk(CLK),
     .reset_n( sa_trig_i ),
+
+    .mode_i ( sa_mode),
 
     // inputs
     .adc_conversion_valid_i( adc_conversion_valid ),
