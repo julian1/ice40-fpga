@@ -52,8 +52,11 @@
 
 
 
-// rename sample_sequence_acquisition
-// or sample_acquisition_sequence
+/*
+  consider rename
+  or just sequencer
+  or sample_sequencer or acquisition_sequencer
+*/
 
 module sequence_acquisition (
 
@@ -190,12 +193,44 @@ module sequence_acquisition (
 
           ////////////////////////////////////////////
 
+/*
+          `STATE_INSN_FETCH:
+            begin
+
+              case( sample_idx_o)
+                0: seq_elt  <= p_seq0_i;
+                1: seq_elt  <= p_seq1_i;
+                2: seq_elt  <= p_seq2_i;
+                3: seq_elt  <= p_seq3_i;
+              endcase
+
+              state         <= `STATE_INSN_DECODE;
+            end
+
+          `STATE_INSN_DECODE:   // and execute
+            begin
+
+              if( seq_elt[ `SEQ_CODE_SLICE ] == `INSN_NORMAL)
+                state         <= `STATE_PC_PROTECT_START;
+
+              else if( seq_elt[ `SEQ_CODE_SLICE ] == `INSN_JMP)
+                begin
+
+                  sample_idx_o    <= seq_elt[ `OP_NEXT_IDX_SLICE];
+                  state         <= `STATE_INSN_FETCH;
+                end
+
+            end
+*/
+
+
 
           // switch pre-charge switch to boot to protect signal, and pause.
           `STATE_PC_PROTECT_START:
             begin
 
-
+              // this is equivalent to insn fetch
+              // TODO move to own block..  so fields are available in this state
               case( sample_idx_o)
                 0: seq_elt  <= p_seq0_i;
                 1: seq_elt  <= p_seq1_i;
@@ -298,6 +333,14 @@ module sequence_acquisition (
 
           // instead of passing and using reg_direct here,
           // just load and hold seq0
+
+          /*  EXTR.  can always interpret the p_seq0_i  pattern any way we want.
+              and use a c-union for the data structure on the mcu side.
+              eg. to include direct timing - for aperture,var,fix. or 10 second.
+              can right-shift timing counts - to compress them to fit..
+              --
+              put next_idx.  first.  and all subsequent fields can be interpreted as union.
+          */
 
           pc_sw_o     <= p_seq0_i[ `SEQ_PC_SLICE];
           azmux_o     <= p_seq0_i[ `SEQ_AZMUX_SLICE ];
