@@ -41,6 +41,16 @@
 `define STATE_WAIT_ADC          8
 
 
+
+
+
+`define SEQ_AZMUX_SLICE   0 +: 4
+`define SEQ_PC_SLICE      4 +: 2
+
+
+
+
+
 // rename sample_sequence_acquisition
 // or sample_acquisition_sequence
 
@@ -58,13 +68,14 @@ module sequence_acquisition (
   input [32-1:0]    p_clk_count_trig_delay_i,
   input [24-1:0]    p_clk_count_precharge_i,
 
-  input [ 3-1: 0 ]  p_seq_n_i,    // need at least 3 bits to encode 4.
-  input [ 6-1 : 0 ] p_seq0_i,
-  input [ 6-1 : 0 ] p_seq1_i,
-  input [ 6-1 : 0 ] p_seq2_i,
-  input [ 6-1 : 0 ] p_seq3_i,
+  input [ 3-1: 0]  p_seq_n_i,    // TODO. should be able to remove. need at least 3 bits to encode 4.
 
-  input             p_noaz_i,
+  input [ 32-1:0] p_seq0_i,
+  input [ 32-1:0] p_seq1_i,
+  input [ 32-1:0] p_seq2_i,
+  input [ 32-1:0] p_seq3_i,
+
+  input             p_noaz_i,   // TODO should be able to remove.
 
 
   // adc inputs
@@ -113,11 +124,19 @@ module sequence_acquisition (
       then reg_aperture should be passed to this module
       and it should be set/controlled directly from here.
   */
-  output reg           sample_first_o,
+  output reg           sample_first_o,  // TODO should be able to remove
 
 
+  /* should be in module header
+    so we can copy the details into the output status register
+    --------
 
+    TODO bad name.  should be p_term.  or p_seq_elt;  etc.
+  */
+  output reg   [ 32-1: 0]      p_seq
 );
+
+
 
 
 
@@ -169,10 +188,14 @@ module sequence_acquisition (
               sample_first_o  <= 1;
 
               /* during reset - hold the precharge switches lo. to emit BOOT. and protect signal. both cahnnels
-              // azmux state should probably also be defined.  can use the first value.
+                azmux state should probably also be defined.  can use the first value.
               */
               pc_sw_o       <= 2'b00;
-              azmux_o       <= p_seq0_i[ 0 +: 4 ];
+
+              /* TODO review.  this may not be a lo.
+                we are using the first element here. which may not be
+              */
+              azmux_o       <= p_seq0_i[ `SEQ_AZMUX_SLICE];
 
             end
 
@@ -188,12 +211,14 @@ module sequence_acquisition (
           `STATE_PC_PROTECT_START:
             begin
 
-              if( sample_first_o)
-                begin
-                  // explicitly set the aperture/nplc here...
-                  // and oob. flags
 
-                end
+              case( sample_idx_o)
+                0: p_seq  <= p_seq0_i;
+                1: p_seq  <= p_seq1_i;
+                2: p_seq  <= p_seq2_i;
+                3: p_seq  <= p_seq3_i;
+              endcase
+
 
 
               state         <= `STATE_PC_PROTECT;
@@ -219,14 +244,16 @@ module sequence_acquisition (
             begin
               state           <= `STATE_SIGNAL;
               clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
+              azmux_o         <= p_seq[ `SEQ_AZMUX_SLICE ];
 
-
+              /*
               case( sample_idx_o)
                 0: azmux_o   <= p_seq0_i[ 0 +: 4 ];
                 1: azmux_o   <= p_seq1_i[ 0 +: 4];
                 2: azmux_o   <= p_seq2_i[ 0 +: 4 ];
                 3: azmux_o   <= p_seq3_i[ 0 +: 4];
               endcase
+              */
             end
 
           `STATE_SIGNAL:
@@ -243,21 +270,30 @@ module sequence_acquisition (
             begin
               state           <= `STATE_PC_SAMPLE;
               clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
+              pc_sw_o         <= p_seq[ `SEQ_PC_SLICE ];
 
+              /*
+                why not localize the load of next_pc_sw,next_azmux at the start of the sequence?
+                instead of this index action.
+
+              */
+
+              /*
               case(sample_idx_o)
                 0: pc_sw_o <= p_seq0_i[4 +: 2];
                 1: pc_sw_o <= p_seq1_i[4 +: 2];
                 2: pc_sw_o <= p_seq2_i[4 +: 2];
                 3: pc_sw_o <= p_seq3_i[4 +: 2];
               endcase
+              */
             end
 
           `STATE_PC_SAMPLE:
             if(clk_count_down == 0)
               begin
-                state         <= `STATE_WAIT_ADC;
+                state                   <= `STATE_WAIT_ADC;
                 // adc start
-                adc_reset_no  <= 1'b1;
+                adc_reset_no            <= 1'b1;
 
                 adc_conversion_start_o  <= 1'b1;
               end
@@ -266,12 +302,13 @@ module sequence_acquisition (
 
           `STATE_WAIT_ADC:
             // wait for adc to measure
-            if( adc_conversion_valid_i )
+            if( adc_conversion_valid_i)
               begin
 
                 // set up next state
                 state         <= `STATE_PC_PROTECT_START;
 
+                // just get the next sample idx by indexing into the p_seq;
 
                 /*
                   avoid modulo
@@ -317,9 +354,9 @@ module sequence_acquisition (
           // instead of passing and using reg_direct here,
           // just load and hold seq0
 
-          pc_sw_o     <= p_seq0_i[4 +: 2];
+          pc_sw_o     <= p_seq0_i[ `SEQ_PC_SLICE];
 
-          azmux_o     <= p_seq0_i[ 0 +: 4 ];
+          azmux_o     <= p_seq0_i[ `SEQ_AZMUX_SLICE ];
 
         end
 
@@ -329,9 +366,9 @@ module sequence_acquisition (
           // the same - but should run the adc as well.
           // this kind of needs an NOAZ mode with a single LO first... to watch.
 
-          pc_sw_o     <= p_seq0_i[4 +: 2];
+          pc_sw_o     <= p_seq0_i[ `SEQ_PC_SLICE];
 
-          azmux_o     <= p_seq0_i[ 0 +: 4 ];
+          azmux_o     <= p_seq0_i[ `SEQ_AZMUX_SLICE];
 
         end
 

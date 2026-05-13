@@ -423,12 +423,13 @@ module top (
     .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]),
 
     .p_seq_n_i( reg_sa_p_seq_n[ 3-1: 0]  ),
-    .p_seq0_i( reg_sa_p_seq0[ 6-1: 0]  ),
-    .p_seq1_i( reg_sa_p_seq1[ 6-1: 0]  ),
-    .p_seq2_i( reg_sa_p_seq2[ 6-1: 0] ),
-    .p_seq3_i( reg_sa_p_seq3[ 6-1: 0] ),
 
-    .p_noaz_i( cr_sa_p_noaz ),
+    .p_seq0_i( reg_sa_p_seq0),
+    .p_seq1_i( reg_sa_p_seq1 ),
+    .p_seq2_i( reg_sa_p_seq2),
+    .p_seq3_i( reg_sa_p_seq3),
+
+    .p_noaz_i( cr_sa_p_noaz),
 
 
     // outputs
@@ -566,6 +567,9 @@ module top (
   reg [2-1:0] cmpr_amp_ovld;
   reg [2-1:0] cmpr_amp_unld;
 
+
+  // TODO.  this is all wrong...
+  // whe
 
   // it makes sense to maintain the concept of a hi here
   wire is_hi ;
@@ -740,6 +744,7 @@ module top (
   // does not see the addr properly
   reg dummy;
   reg dummy2;
+  reg dummy3;
 
 /*
 
