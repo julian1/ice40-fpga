@@ -69,14 +69,12 @@ module sequence_acquisition (
   input [32-1:0]    p_clk_count_trig_delay_i,
   input [24-1:0]    p_clk_count_precharge_i,
 
-  // input [ 3-1: 0]  p_seq_n_i,    // TODO. should be able to remove. need at least 3 bits to encode 4.
 
   input [ 32-1:0] p_seq0_i,
   input [ 32-1:0] p_seq1_i,
   input [ 32-1:0] p_seq2_i,
   input [ 32-1:0] p_seq3_i,
 
-  // input             p_noaz_i,   // TODO should be able to remove.
 
 
   // adc inputs
@@ -110,30 +108,10 @@ module sequence_acquisition (
 
   output reg  [3-1: 0] sample_idx_o,
 
+
+
   /*
-    first sample after trigger assert
-    deasserted after sequence cycle complete
-    better than count - which is overflow and seeing 0 again.
-    ----------
-
-    EXTR. OK. this will not work - with idea of modes.
-    because it is a flag to change the nplc.
-    -----------
-
-    EXTR.
-      if we are going to set the aperture.
-      then reg_aperture should be passed to this module
-      and it should be set/controlled directly from here.
-  */
-  // output reg           sample_first_o,  // TODO should be able to remove
-
-
-  /* should be in module header
-    so we can copy the details into the output status register
-    --------
-
     TODO bad name.
-
     rename    p_term.  or p_seq_elt;  etc.
   */
   output reg   [ 32-1: 0]      p_seq
@@ -225,13 +203,12 @@ module sequence_acquisition (
               endcase
 
 
-
-              state         <= `STATE_PC_PROTECT;
-              clk_count_down <= p_clk_count_precharge_i;
+              state           <= `STATE_PC_PROTECT;
+              clk_count_down  <= p_clk_count_precharge_i;
 
               // keep the pc_sw lo if coming from reset_start/trig_delay
               // switch to pc_sw lo if coming from wait_adc
-              pc_sw_o       <= 2'b00;
+              pc_sw_o         <= 2'b00;
 
             end
 
@@ -247,18 +224,10 @@ module sequence_acquisition (
           // precharge phase.
           `STATE_SIGNAL_START:
             begin
+
               state           <= `STATE_SIGNAL;
               clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
               azmux_o         <= p_seq[ `SEQ_AZMUX_SLICE ];
-
-              /*
-              case( sample_idx_o)
-                0: azmux_o   <= p_seq0_i[ 0 +: 4 ];
-                1: azmux_o   <= p_seq1_i[ 0 +: 4];
-                2: azmux_o   <= p_seq2_i[ 0 +: 4 ];
-                3: azmux_o   <= p_seq3_i[ 0 +: 4];
-              endcase
-              */
             end
 
           `STATE_SIGNAL:
@@ -273,29 +242,17 @@ module sequence_acquisition (
           // and we could skip it, but probably not unreasonable to keep timing the same.
           `STATE_PC_SAMPLE_START:
             begin
+
               state           <= `STATE_PC_SAMPLE;
               clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
               pc_sw_o         <= p_seq[ `SEQ_PC_SLICE ];
-
-              /*
-                why not localize the load of next_pc_sw,next_azmux at the start of the sequence?
-                instead of this index action.
-
-              */
-
-              /*
-              case(sample_idx_o)
-                0: pc_sw_o <= p_seq0_i[4 +: 2];
-                1: pc_sw_o <= p_seq1_i[4 +: 2];
-                2: pc_sw_o <= p_seq2_i[4 +: 2];
-                3: pc_sw_o <= p_seq3_i[4 +: 2];
-              endcase
-              */
             end
+
 
           `STATE_PC_SAMPLE:
             if(clk_count_down == 0)
               begin
+
                 state                   <= `STATE_WAIT_ADC;
                 // adc start
                 adc_reset_no            <= 1'b1;
@@ -313,32 +270,9 @@ module sequence_acquisition (
                 // set up next state
                 state         <= `STATE_PC_PROTECT_START;
 
-                // just get the next sample idx by indexing into the p_seq;
-
-                // ok. this worksss.  and sets the next idex...
+                // ok. works
                 sample_idx_o    <= p_seq[ `SEQ_NEXT_IDX_SLICE];
 
-                /*
-                  avoid modulo
-                  https://stackoverflow.com/questions/47425729/verilog-modulus-operator-for-wrapping-around-a-range
-                  needs to be >= in case sample_n is reduced in write.
-                */
-/*
-                if( !p_noaz_i)
-
-                  if( sample_idx_o < p_seq_n_i - 1)
-                    sample_idx_o  <= sample_idx_o + 1;
-                  else
-                    begin
-                      sample_idx_o    <=  0;
-
-                      sample_first_o  <= 0;
-                    end
-
-                else
-                  // FIXME
-                  sample_idx_o <= 1;
-*/
 
                 // put adc in reset again
                 adc_reset_no <= 0;
@@ -365,7 +299,6 @@ module sequence_acquisition (
           // just load and hold seq0
 
           pc_sw_o     <= p_seq0_i[ `SEQ_PC_SLICE];
-
           azmux_o     <= p_seq0_i[ `SEQ_AZMUX_SLICE ];
 
         end
@@ -377,7 +310,6 @@ module sequence_acquisition (
           // this kind of needs an NOAZ mode with a single LO first... to watch.
 
           pc_sw_o     <= p_seq0_i[ `SEQ_PC_SLICE];
-
           azmux_o     <= p_seq0_i[ `SEQ_AZMUX_SLICE];
 
         end
