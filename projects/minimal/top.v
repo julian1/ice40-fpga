@@ -243,7 +243,7 @@ module top (
   wire [32-1:0] reg_sa_p_clk_count_trig_delay;
   wire [32-1:0] reg_sa_p_clk_count_precharge;
 
-  wire [32-1:0] reg_sa_p_seq_n;
+  // wire [32-1:0] reg_sa_p_seq_n;
   wire [32-1:0] reg_sa_p_seq0;
   wire [32-1:0] reg_sa_p_seq1;
   wire [32-1:0] reg_sa_p_seq2;
@@ -268,7 +268,7 @@ module top (
   wire cr_adc_p_active_sigmux = reg_cr[ 3 ];
 
   // sa, noaz flag
-  wire cr_sa_p_noaz = reg_cr[ 4 ];
+  // wire cr_sa_p_noaz = reg_cr[ 4 ];
 
 
 
@@ -397,7 +397,7 @@ module top (
 
 
   wire [3-1:0]  sequence_acquisition2_sample_idx;
-  wire          sequence_acquisitionr2_sample_first;
+  // wire          sequence_acquisitionr2_sample_first;
 
   wire          sequence_acquisition2_adc_reset_n;
   wire          sequence_acquisition2_adc_conversion_start;
@@ -422,14 +422,14 @@ module top (
     .p_clk_count_trig_delay_i( reg_sa_p_clk_count_trig_delay),
     .p_clk_count_precharge_i( reg_sa_p_clk_count_precharge[ 24-1:0]),
 
-    .p_seq_n_i( reg_sa_p_seq_n[ 3-1: 0]  ),
+    // .p_seq_n_i( reg_sa_p_seq_n[ 3-1: 0]  ),
 
     .p_seq0_i( reg_sa_p_seq0),
     .p_seq1_i( reg_sa_p_seq1 ),
     .p_seq2_i( reg_sa_p_seq2),
     .p_seq3_i( reg_sa_p_seq3),
 
-    .p_noaz_i( cr_sa_p_noaz),
+    // .p_noaz_i( cr_sa_p_noaz),
 
 
     // outputs
@@ -440,8 +440,8 @@ module top (
     .azmux_o (    sequence_acquisition2_azmux  ),
 
 
-    .sample_idx_o(   sequence_acquisition2_sample_idx),       // careful/tricky - because  will be initialized to 0.  which is the same as if the first reading.
-    .sample_first_o( sequence_acquisitionr2_sample_first),
+    .sample_idx_o(   sequence_acquisition2_sample_idx),       // careful/tricky - because  will be initialized to 0.
+    // .sample_first_o( sequence_acquisitionr2_sample_first),
 
     // control the adc
     .adc_reset_no( sequence_acquisition2_adc_reset_n ),
@@ -532,6 +532,16 @@ module top (
 
   */
 
+
+  always @(posedge CLK)
+    begin
+
+
+            adc_p_clk_count_aperture  <= reg_adc_p_clk_count_aperture;
+
+    end
+/*
+
   reg oob_aperture;
 
   always @(posedge CLK)
@@ -557,7 +567,7 @@ module top (
             end
         end
     end
-
+*/
 
 
   reg interrupt_valid;
@@ -656,15 +666,15 @@ module top (
             {
                 4'b0,
                 cr_adc_p_active_sigmux,
-                cr_sa_p_noaz,
-                is_hi,            // dynamic
-                oob_aperture      // dynamic
+                1'b0 /*cr_sa_p_noaz */,
+                is_hi,                      // dynamic
+                1'b0 /* oob_aperture  */    // dynamic
             },
             // 24
-            {   1'b0,                                     // 1
-                reg_sa_p_seq_n[ 3-1: 0] ,                 // 3      // this is dumb.  should just record the azmux state in 4 bits.
-                sequence_acquisitionr2_sample_first,      // 1 bit
-                sequence_acquisition2_sample_idx          // 3 bits.
+            {   1'b0,                                             // 1
+                3'b0, /* reg_sa_p_seq_n[ 3-1: 0] */               // 3      // this is dumb.  should just record the azmux state in 4 bits.
+                1'b0, /* sequence_acquisitionr2_sample_first */   // 1 bit
+                sequence_acquisition2_sample_idx                  // 3 bits.
             },
             // 16
             {   //  3'b0,
@@ -787,7 +797,7 @@ module top (
     .reg_sa_p_clk_count_trig_delay(      reg_sa_p_clk_count_trig_delay),
     .reg_sa_p_clk_count_precharge(       reg_sa_p_clk_count_precharge),
 
-    .reg_sa_p_seq_n( reg_sa_p_seq_n),
+    // .reg_sa_p_seq_n( reg_sa_p_seq_n),
     .reg_sa_p_seq0(  reg_sa_p_seq0),
     .reg_sa_p_seq1(  reg_sa_p_seq1),
     .reg_sa_p_seq2(  reg_sa_p_seq2),

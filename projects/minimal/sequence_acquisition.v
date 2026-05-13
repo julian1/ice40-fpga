@@ -69,14 +69,14 @@ module sequence_acquisition (
   input [32-1:0]    p_clk_count_trig_delay_i,
   input [24-1:0]    p_clk_count_precharge_i,
 
-  input [ 3-1: 0]  p_seq_n_i,    // TODO. should be able to remove. need at least 3 bits to encode 4.
+  // input [ 3-1: 0]  p_seq_n_i,    // TODO. should be able to remove. need at least 3 bits to encode 4.
 
   input [ 32-1:0] p_seq0_i,
   input [ 32-1:0] p_seq1_i,
   input [ 32-1:0] p_seq2_i,
   input [ 32-1:0] p_seq3_i,
 
-  input             p_noaz_i,   // TODO should be able to remove.
+  // input             p_noaz_i,   // TODO should be able to remove.
 
 
   // adc inputs
@@ -125,7 +125,7 @@ module sequence_acquisition (
       then reg_aperture should be passed to this module
       and it should be set/controlled directly from here.
   */
-  output reg           sample_first_o,  // TODO should be able to remove
+  // output reg           sample_first_o,  // TODO should be able to remove
 
 
   /* should be in module header
@@ -188,7 +188,7 @@ module sequence_acquisition (
 
               sample_idx_o    <= 0;
 
-              sample_first_o  <= 1;
+              // sample_first_o  <= 1;
 
               /* during reset - hold the precharge switches lo. to emit BOOT. and protect signal. both cahnnels
                 azmux state should probably also be defined.  can use the first value.
