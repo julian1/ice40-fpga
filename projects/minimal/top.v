@@ -392,20 +392,20 @@ module top (
 
   //////////////////
 
+  wire [7-1:0]  sequence_acquisition2_state;
+
+  wire [3-1:0]  sequence_acquisition2_sample_idx;
+  wire [32-1:0] sequence_acquisition2_seq_elt;
+
+
   wire [2-1:0]  sequence_acquisition2_pc_sw;
   wire [4-1:0]  sequence_acquisition2_azmux;
 
-
-  wire [3-1:0]  sequence_acquisition2_sample_idx;
 
   wire          sequence_acquisition2_adc_reset_n;
   wire          sequence_acquisition2_adc_conversion_start;
 
 
-
-  wire [7-1:0]  sequence_acquisition2_state;
-
-  wire [32-1:0] sequence_acquisition2_seq_elt;
 
 
   sequence_acquisition
@@ -434,18 +434,18 @@ module top (
 
     // outputs
 
-    .state(       sequence_acquisition2_state),
-    .seq_elt(     sequence_acquisition2_seq_elt),
+    .state(         sequence_acquisition2_state),
+    .sample_idx_o(  sequence_acquisition2_sample_idx),       // careful/tricky - because  will be initialized to 0.
+    .seq_elt(       sequence_acquisition2_seq_elt),
 
-    .pc_sw_o(     sequence_acquisition2_pc_sw  ),
-    .azmux_o (    sequence_acquisition2_azmux  ),
+    .pc_sw_o(       sequence_acquisition2_pc_sw  ),
+    .azmux_o (      sequence_acquisition2_azmux  ),
 
 
-    .sample_idx_o(   sequence_acquisition2_sample_idx),       // careful/tricky - because  will be initialized to 0.
     // .sample_first_o( sequence_acquisitionr2_sample_first),
 
     // control the adc
-    .adc_reset_no( sequence_acquisition2_adc_reset_n ),
+    .adc_reset_no(  sequence_acquisition2_adc_reset_n ),
     .adc_conversion_start_o ( sequence_acquisition2_adc_conversion_start)
 
 
