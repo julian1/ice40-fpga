@@ -80,13 +80,11 @@ module sequence_acquisition (
     for non-intrusive observation
     consider adding _o .  but it is really an internal state
   */
-  output reg [7-1:0]    state,
+  output reg [7-1:0]  state,
 
+  output reg          adc_reset_no,              // hold adc in reset.
 
-
-  output reg        adc_reset_no,              // hold adc in reset.
-
-  output reg        adc_conversion_start_o,      // one-clock cycle control
+  output reg          adc_conversion_start_o,      // one-clock cycle control
 
   //////////////
   // control outputs
@@ -108,6 +106,12 @@ module sequence_acquisition (
 
     EXTR. OK. this will not work - with idea of modes.
     because it is a flag to change the nplc.
+    -----------
+
+    EXTR.
+      if we are going to set the aperture.
+      then reg_aperture should be passed to this module
+      and it should be set/controlled directly from here.
   */
   output reg           sample_first_o,
 
@@ -177,11 +181,21 @@ module sequence_acquisition (
             if(clk_count_down == 0)
               state         <= `STATE_PC_PROTECT_START;
 
+          ////////////////////////////////////////////
 
 
           // switch pre-charge switch to boot to protect signal, and pause.
           `STATE_PC_PROTECT_START:
             begin
+
+              if( sample_first_o)
+                begin
+                  // explicitly set the aperture/nplc here...
+                  // and oob. flags
+
+                end
+
+
               state         <= `STATE_PC_PROTECT;
               clk_count_down <= p_clk_count_precharge_i;
 
@@ -208,8 +222,8 @@ module sequence_acquisition (
 
 
               case( sample_idx_o)
-                0: begin azmux_o   <= p_seq0_i[ 0 +: 4 ]; end
-                1: begin azmux_o   <= p_seq1_i[ 0 +: 4]; end
+                0: azmux_o   <= p_seq0_i[ 0 +: 4 ];
+                1: azmux_o   <= p_seq1_i[ 0 +: 4];
                 2: azmux_o   <= p_seq2_i[ 0 +: 4 ];
                 3: azmux_o   <= p_seq3_i[ 0 +: 4];
               endcase
@@ -294,6 +308,34 @@ module sequence_acquisition (
           end
 
       end   // end mode == 0
+
+
+
+      else if ( mode_i == 1)
+        begin
+
+          // instead of passing and using reg_direct here,
+          // just load and hold seq0
+
+          pc_sw_o     <= p_seq0_i[4 +: 2];
+
+          azmux_o     <= p_seq0_i[ 0 +: 4 ];
+
+        end
+
+      else if ( mode_i == 2)
+        begin
+
+          // the same - but should run the adc as well.
+          // this kind of needs an NOAZ mode with a single LO first... to watch.
+
+          pc_sw_o     <= p_seq0_i[4 +: 2];
+
+          azmux_o     <= p_seq0_i[ 0 +: 4 ];
+
+        end
+
+
 
 
 endmodule

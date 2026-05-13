@@ -450,6 +450,7 @@ module top (
     /*
 
       pass reg_direct here.  to support a modeal control and register control of outputs.
+      NO.  just seq0  to control and hold the output
 
     .reg_direct( sequence_acquisition2_reg_direct)
     */
@@ -732,7 +733,6 @@ module top (
   // does not see the addr properly
   reg dummy;
   reg dummy2;
-  reg dummy3;
 
 /*
 
