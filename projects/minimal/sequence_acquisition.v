@@ -44,8 +44,9 @@
 
 
 
-`define SEQ_AZMUX_SLICE   0 +: 4
-`define SEQ_PC_SLICE      4 +: 2
+`define SEQ_AZMUX_SLICE       0 +: 4
+`define SEQ_PC_SLICE          4 +: 2
+`define SEQ_NEXT_IDX_SLICE    6 +: 3
 
 
 
@@ -131,7 +132,9 @@ module sequence_acquisition (
     so we can copy the details into the output status register
     --------
 
-    TODO bad name.  should be p_term.  or p_seq_elt;  etc.
+    TODO bad name.
+
+    rename    p_term.  or p_seq_elt;  etc.
   */
   output reg   [ 32-1: 0]      p_seq
 );
@@ -196,6 +199,8 @@ module sequence_acquisition (
                 we are using the first element here. which may not be
               */
               azmux_o       <= p_seq0_i[ `SEQ_AZMUX_SLICE];
+
+
 
             end
 
@@ -310,11 +315,15 @@ module sequence_acquisition (
 
                 // just get the next sample idx by indexing into the p_seq;
 
+                // ok. this worksss.  and sets the next idex...
+                sample_idx_o    <= p_seq[ `SEQ_NEXT_IDX_SLICE];
+
                 /*
                   avoid modulo
                   https://stackoverflow.com/questions/47425729/verilog-modulus-operator-for-wrapping-around-a-range
                   needs to be >= in case sample_n is reduced in write.
                 */
+/*
                 if( !p_noaz_i)
 
                   if( sample_idx_o < p_seq_n_i - 1)
@@ -329,6 +338,7 @@ module sequence_acquisition (
                 else
                   // FIXME
                   sample_idx_o <= 1;
+*/
 
                 // put adc in reset again
                 adc_reset_no <= 0;
