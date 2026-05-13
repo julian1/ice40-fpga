@@ -113,8 +113,9 @@ module sequence_acquisition (
   /*
     TODO bad name.
     rename    p_term.  or p_seq_elt;  etc.
+    it is not a parameter
   */
-  output reg   [ 32-1: 0]      p_seq
+  output reg   [ 32-1: 0]      seq_elt
 );
 
 
@@ -196,10 +197,10 @@ module sequence_acquisition (
 
 
               case( sample_idx_o)
-                0: p_seq  <= p_seq0_i;
-                1: p_seq  <= p_seq1_i;
-                2: p_seq  <= p_seq2_i;
-                3: p_seq  <= p_seq3_i;
+                0: seq_elt  <= p_seq0_i;
+                1: seq_elt  <= p_seq1_i;
+                2: seq_elt  <= p_seq2_i;
+                3: seq_elt  <= p_seq3_i;
               endcase
 
 
@@ -227,7 +228,7 @@ module sequence_acquisition (
 
               state           <= `STATE_SIGNAL;
               clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
-              azmux_o         <= p_seq[ `SEQ_AZMUX_SLICE ];
+              azmux_o         <= seq_elt[ `SEQ_AZMUX_SLICE ];
             end
 
           `STATE_SIGNAL:
@@ -245,7 +246,7 @@ module sequence_acquisition (
 
               state           <= `STATE_PC_SAMPLE;
               clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
-              pc_sw_o         <= p_seq[ `SEQ_PC_SLICE ];
+              pc_sw_o         <= seq_elt[ `SEQ_PC_SLICE ];
             end
 
 
@@ -271,7 +272,7 @@ module sequence_acquisition (
                 state         <= `STATE_PC_PROTECT_START;
 
                 // ok. works
-                sample_idx_o    <= p_seq[ `SEQ_NEXT_IDX_SLICE];
+                sample_idx_o    <= seq_elt[ `SEQ_NEXT_IDX_SLICE];
 
 
                 // put adc in reset again

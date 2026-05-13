@@ -397,7 +397,6 @@ module top (
 
 
   wire [3-1:0]  sequence_acquisition2_sample_idx;
-  // wire          sequence_acquisitionr2_sample_first;
 
   wire          sequence_acquisition2_adc_reset_n;
   wire          sequence_acquisition2_adc_conversion_start;
@@ -406,6 +405,7 @@ module top (
 
   wire [7-1:0]  sequence_acquisition2_state;
 
+  wire [32-1:0] sequence_acquisition2_seq_elt;
 
 
   sequence_acquisition
@@ -435,6 +435,7 @@ module top (
     // outputs
 
     .state(       sequence_acquisition2_state),
+    .seq_elt(     sequence_acquisition2_seq_elt),
 
     .pc_sw_o(     sequence_acquisition2_pc_sw  ),
     .azmux_o (    sequence_acquisition2_azmux  ),
