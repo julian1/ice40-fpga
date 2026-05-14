@@ -20,7 +20,16 @@ mkdir ./build
 # https://www.reddit.com/r/yosys/comments/277kh0/include_directory_syntax_in_read_verilog_command/
 # https://github.com/YosysHQ/yosys/issues/331
 
-yosys -p 'synth_ice40 -top top -json ./build/main.json'  top.v  2>&1 | tee ./build/yosys.txt
+
+# yosys -p 'synth_ice40 -top top -json ./build/main.json'  top.v  2>&1 | tee ./build/yosys.txt
+
+yosys  -p 'synth_ice40 -noabc9 -top top -json ./build/main.json '  top.v  2>&1 | tee ./build/yosys.txt
+
+# run fraig script - works to suppress output error
+# yosys  -p ' abc -script +strash;fraig;scorr;dc2 ;  synth_ice40 -top top -json ./build/main.json '  top.v  2>&1 | tee ./build/yosys.txt
+
+
+
 
 # why doesn't this work??
 # yosys -p "synth_ice40  -top top  -json ./build/main.json  " top.v  2>&1 | tee ./build/yosys.txt
@@ -35,7 +44,7 @@ egrep -i 'warning|error' ./build/yosys.txt  > ./build/yosys-errors.txt
 
 #nextpnr-ice40 --up5k  --package  sg48 --pcf  main.pcf --json ./build/main.json  --asc  ./build/main.asc 2>&1 | tee ./build/nextpnr.txt
 nextpnr-ice40 --hx4k   --package  tq144 --pcf  main.pcf --json ./build/main.json  --asc  ./build/main.asc 2>&1 | tee ./build/nextpnr.txt
-
+# --randomize-seed
 
 icepack ./build/main.asc ./build/main.bin
 
