@@ -220,23 +220,39 @@ module top (
 
 
 
-  /////////////////////////////////////////////
-  // 4094 OE
-  // JA. changed feb 2026. only tested briefly with dmm. not 4094 function.
-  wire [32-1:0] reg_4094_oe;
-  assign spi_4094_oe = reg_4094_oe[ 0 ] ;
-
-
-
-
-
   ////////////////////////////////////////
-  // registers
+  // high level control
 
   wire [32-1:0] reg_cr;
 
+
+  wire [32-1:0] reg_4094_oe;
+  // TODO - remove and use use a define slice
+  assign spi_4094_oe = reg_4094_oe[ 0 ] ;
+
+
   // wire [32-1:0] reg_direct;
 
+
+
+  ////////////////////////
+
+  reg [32-1:0] reg_sr ;
+
+  // operating mode
+  // TODO - remove and use a define slice instead
+  wire [3-1:0 ] sa_mode = reg_cr[ 3-1 : 0 ];
+
+  // adc, flag to control whether to switch sigmux on
+  // TODO - remove and use a define slice instead
+  wire cr_adc_p_active_sigmux = reg_cr[ 3 ];
+
+  // sa, noaz flag
+  // wire cr_sa_p_noaz = reg_cr[ 4 ];
+
+
+
+  /////////////////////////
 
 
   // sample aquisition
@@ -249,29 +265,19 @@ module top (
   wire [32-1:0] reg_sa_p_seq2;
   wire [32-1:0] reg_sa_p_seq3;
 
+
+  // sa output. must be register because snapshot
+  // same as reg_sr
+  reg [32-1:0] reg_sa_seq_elt;
+
+
+
+  /////////
+
   // adc
   wire [32-1:0] reg_adc_p_clk_count_aperture;  // 32/31 bit nice. for long sample.
   wire [32-1:0] reg_adc_p_clk_count_reset;
   wire [32-1:0] reg_adc_p_clk_count_aperture_oob;
-
-
-
-
-
-  reg [32-1:0] reg_sr ;
-
-  // operating mode
-  wire [3-1:0 ] sa_mode = reg_cr[ 3-1 : 0 ];
-
-
-  // adc, flag to control whether to switch sigmux on
-  wire cr_adc_p_active_sigmux = reg_cr[ 3 ];
-
-  // sa, noaz flag
-  // wire cr_sa_p_noaz = reg_cr[ 4 ];
-
-
-
 
 
 
@@ -292,8 +298,6 @@ module top (
 
 
   wire            adc_cmpr_latch_ctl;
-
-
 
 
   // adc input - control
@@ -625,7 +629,7 @@ module top (
 
 
 
-      // only assert interrupt for one clock cycle
+      // assert interrupt one clock cycle only
       interrupt_valid                   <= 1'b0;
       // interrupt_flags <= { 4'b0000 };
 
@@ -637,7 +641,7 @@ module top (
           // snapshot register state after a valid conversion
           // handle padding for 24 bit registers here
 
-          // counts
+          // adc counts
           reg_adc_clk_count_rstmux        <= { 8'b0, adc_clk_count_rstmux };
           reg_adc_clk_count_refmux_neg    <= adc_clk_count_refmux_neg;
           reg_adc_clk_count_refmux_pos    <= adc_clk_count_refmux_pos;
@@ -645,10 +649,13 @@ module top (
           reg_adc_clk_count_sigmux        <= adc_clk_count_sigmux;
           reg_adc_clk_count_aperture      <= adc_clk_count_aperture;
 
-          // stats
+          // adc stats
           reg_adc_stat_count_refmux_pos_up <= { 8'b0, adc_stat_count_refmux_pos_up } ;
           reg_adc_stat_count_refmux_neg_up <= { 8'b0, adc_stat_count_refmux_neg_up } ;
           reg_adc_stat_count_cmpr_cross_up <= { 8'b0, adc_stat_count_cmpr_cross_up } ;
+
+          // sa seq_elt
+          reg_sa_seq_elt                  <= sequence_acquisition2_seq_elt;
 
 
           /*
@@ -764,9 +771,9 @@ module top (
   // does not see the addr properly
   // perturb input
 
-  // reg dummy;
-  // reg dummy2;
-  // reg dummy3;
+  reg dummy;
+  reg dummy2;
+  reg dummy3;
 
 /*
 
@@ -804,6 +811,7 @@ module top (
     // outputs
     .reg_sr(     reg_sr ),
 
+    /////////////
 
     // parameter inputs - sample acquisition.
     .reg_sa_p_clk_count_trig_delay(      reg_sa_p_clk_count_trig_delay),
@@ -814,6 +822,11 @@ module top (
     .reg_sa_p_seq1(  reg_sa_p_seq1),
     .reg_sa_p_seq2(  reg_sa_p_seq2),
     .reg_sa_p_seq3(  reg_sa_p_seq3),
+
+
+    .reg_sa_seq_elt( reg_sa_seq_elt),
+
+    /////////////
 
     // parameter inputs - adc
     .reg_adc_p_clk_count_aperture(       reg_adc_p_clk_count_aperture),

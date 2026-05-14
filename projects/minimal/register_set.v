@@ -39,6 +39,8 @@
 `define REG_SA_P_SEQ3                   25
 
 
+`define REG_SA_SEQ_ELT                  26
+
 
 // adc control parameters
 `define REG_ADC_P_CLK_COUNT_APERTURE    30
@@ -77,15 +79,13 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
   output dout,
 
 
-  // inputs - status, externally driven
-  input wire [32-1:0] reg_sr,
-
-
+  /////////////////////
+  // outputs -  read/write
 
   // output reg [32-1:0] reg_spi_mux,
-  output reg [32-1:0] reg_4094_oe,     // TODO consider place in generic CR control register. encode 4094-OE and trigger.
   output reg [32-1:0] reg_cr,
-  output reg [32-1:0] reg_direct,
+  output reg [32-1:0] reg_4094_oe,     // TODO consider place in generic CR control register. encode 4094-OE and trigger.
+  // output reg [32-1:0] reg_direct,
   // output reg [32-1:0] reg_seq_mode,
 
 
@@ -106,9 +106,6 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
   output reg [32-1:0] reg_sa_p_seq2,
   output reg [32-1:0] reg_sa_p_seq3,
 
-  // output reg [32-1:0] reg_sa_p_trig,
-
-
 
   // outputs adc
   output reg [32-1:0] reg_adc_p_clk_count_aperture,
@@ -119,6 +116,19 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
   output reg [32-1:0] reg_test2,
 
 
+  //////////
+  // inputs - read only, register state managed externally
+  //   generally snapshot
+  /*
+    making these input wires.
+    means we get an error if try to drive/write them here.
+  */
+  // inputs - status, externally driven
+
+  input wire [32-1:0] reg_sr,
+
+  // inputs from sa
+  input wire [32-1:0] reg_sa_seq_elt,
 
 
   // inputs adc
@@ -161,7 +171,7 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
     // control
     reg_4094_oe       = 0;
     reg_cr            = 0;
-    reg_direct        = 0;
+    // reg_direct        = 0;
 
     // signal acquisition
     // it is nice to have sa defaults...
@@ -249,7 +259,7 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
               // general
               `REG_4094_OE:                       out <= reg_4094_oe;
               `REG_CR:                            out <= reg_cr;
-              `REG_DIRECT:                        out <= reg_direct;
+              // `REG_DIRECT:                        out <= reg_direct;
               `REG_SR:                            out <= reg_sr;
 
               ////////
@@ -262,6 +272,9 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
               `REG_SA_P_SEQ1:                     out <= reg_sa_p_seq1;
               `REG_SA_P_SEQ2:                     out <= reg_sa_p_seq2;
               `REG_SA_P_SEQ3:                     out <= reg_sa_p_seq3;
+
+              `REG_SA_SEQ_ELT:                    out <= reg_sa_seq_elt;
+
 
               /////
               // adc
@@ -308,7 +321,7 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
 
             `REG_4094_OE:                   reg_4094_oe   <= { in[ 32 -1 -1: 0], din };
             `REG_CR:                        reg_cr        <= { in[ 32 -1 -1: 0], din };
-            `REG_DIRECT:                    reg_direct    <= { in[ 32 -1 -1: 0], din };
+            // `REG_DIRECT:                    reg_direct    <= { in[ 32 -1 -1: 0], din };
 
             //////////
 
