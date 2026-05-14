@@ -1,8 +1,7 @@
 /*
-  nix-shell  ~/devel/nixos-config/examples/icestorm.nix  -I nixpkgs=/home/me/devel/nixpkgs/
 
+ nix-shell ./shell.nix  -I nixpkgs=/home/me/devel/nixpkgs.master2
 
-  nix-shell -p yosys arachne-pnr icestorm usbutils nextpnr   rhash
 */
 
 
