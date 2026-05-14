@@ -770,10 +770,11 @@ module top (
   // spi fills without this ? memory alignment issue?
   // does not see the addr properly
   // perturb input
-
+/*
   reg dummy;
   reg dummy2;
   reg dummy3;
+*/
 
 /*
 
