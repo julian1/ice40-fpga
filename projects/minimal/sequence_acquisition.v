@@ -22,23 +22,28 @@
 `include "defines.v"
 
 
-// should use one-hot?
+// use one-hot?
 `define STATE_RESET_START       0
 `define STATE_TRIG_DELAY        1
 
-`define STATE_PC_PROTECT_START  2
-`define STATE_PC_PROTECT        3
+
+`define STATE_INSN_FETCH        2
+`define STATE_INSN_DECODE       3
 
 
-`define STATE_SIGNAL_START      4
-`define STATE_SIGNAL            5
+`define STATE_PC_PROTECT_START  4
+`define STATE_PC_PROTECT        5
 
 
-`define STATE_PC_SAMPLE_START   6
-`define STATE_PC_SAMPLE         7
+`define STATE_SIGNAL_START      6
+`define STATE_SIGNAL            7
 
 
-`define STATE_WAIT_ADC          8
+`define STATE_PC_SAMPLE_START   8
+`define STATE_PC_SAMPLE         9
+
+
+`define STATE_WAIT_ADC          10
 
 
 
@@ -116,7 +121,7 @@ module sequence_acquisition (
   /*
     TODO bad name.
     rename    p_term.  or p_seq_elt;  etc.
-    it is not a parameter
+    or insn   or seq_insn
   */
   output reg   [ 32-1: 0]      seq_elt
 );
@@ -189,14 +194,17 @@ module sequence_acquisition (
 
           `STATE_TRIG_DELAY:
             if(clk_count_down == 0)
-              state         <= `STATE_PC_PROTECT_START;
+              state         <= `STATE_INSN_FETCH;
+
+
 
           ////////////////////////////////////////////
 
-/*
+
           `STATE_INSN_FETCH:
             begin
 
+              // do in block..  so fields are available to subsequent bocks
               case( sample_idx_o)
                 0: seq_elt  <= p_seq0_i;
                 1: seq_elt  <= p_seq1_i;
@@ -207,6 +215,17 @@ module sequence_acquisition (
               state         <= `STATE_INSN_DECODE;
             end
 
+
+          `STATE_INSN_DECODE:
+            begin
+
+              // currently - the only action is to advance
+              // else switch on insn code/op
+              state         <= `STATE_PC_PROTECT_START;
+            end
+
+
+/*
           `STATE_INSN_DECODE:   // and execute
             begin
 
@@ -228,16 +247,6 @@ module sequence_acquisition (
           // switch pre-charge switch to boot to protect signal, and pause.
           `STATE_PC_PROTECT_START:
             begin
-
-              // this is equivalent to insn fetch
-              // TODO move to own block..  so fields are available in this state
-              case( sample_idx_o)
-                0: seq_elt  <= p_seq0_i;
-                1: seq_elt  <= p_seq1_i;
-                2: seq_elt  <= p_seq2_i;
-                3: seq_elt  <= p_seq3_i;
-              endcase
-
 
               state           <= `STATE_PC_PROTECT;
               clk_count_down  <= p_clk_count_precharge_i;
@@ -304,11 +313,10 @@ module sequence_acquisition (
               begin
 
                 // set up next state
-                state         <= `STATE_PC_PROTECT_START;
+                state           <= `STATE_INSN_FETCH;
 
                 // ok. works
                 sample_idx_o    <= seq_elt[ `SEQ_NEXT_IDX_SLICE];
-
 
                 // put adc in reset again
                 adc_reset_no <= 0;
@@ -334,27 +342,19 @@ module sequence_acquisition (
           // instead of passing and using reg_direct here,
           // just load and hold seq0
 
-          /*  EXTR.  can always interpret the p_seq0_i  pattern any way we want.
+          /*
+              EXTR.  can load and interpret the insn/p_seq0_i  any way we want.
               and use a c-union for the data structure on the mcu side.
-              eg. to include direct timing - for aperture,var,fix. or 10 second.
-              can right-shift timing counts - to compress them to fit..
+
+              eg. to include direct timing information - for aperture,var,fix. or 10 second wait etc.
+              can right-shift counts to compress them in the 32 bit structure..
               --
-              put next_idx.  first.  and all subsequent fields can be interpreted as union.
+              considder put next_idx.  first.  and all subsequent fields can be interpreted as union.
+              or just have separate op code for a idx jump
           */
 
           pc_sw_o     <= p_seq0_i[ `SEQ_PC_SLICE];
           azmux_o     <= p_seq0_i[ `SEQ_AZMUX_SLICE ];
-
-        end
-
-      else if ( mode_i == 2)
-        begin
-
-          // the same - but should run the adc as well.
-          // this kind of needs an NOAZ mode with a single LO first... to watch.
-
-          pc_sw_o     <= p_seq0_i[ `SEQ_PC_SLICE];
-          azmux_o     <= p_seq0_i[ `SEQ_AZMUX_SLICE];
 
         end
 
