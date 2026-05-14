@@ -1,0 +1,4 @@
+// Reading input .asc file..
+// Reading 8k chipdb file..
+// Creating timing netlist..
+// Timing estimate: 12.10 ns (82.64 MHz)
