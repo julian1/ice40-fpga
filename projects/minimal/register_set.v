@@ -210,13 +210,6 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
       // cs asserted, clock data in and out
       begin
 
-/*
-        if( !addr)
-          addr <= { addr[ 7 - 1 - 1] , din };
-        else
-          in <= { in[32 - 1 - 1], din};
-*/
-
         // shift din into in register
         in <= {in[ 32-2:0], din};
 
@@ -224,10 +217,6 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
         out <= out << 1; // this *is* zero fill operator.
 
         count <= count + 1;
-
-        // blocking so that have the current count and data...
-        // but should not be too slow... because references non-blocking state
-        // bin     = {in[32-2:0], din};
 
 
         if( count == 0)
@@ -256,8 +245,6 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
 
 
             case ( { in[ 7 -1 -1: 0], din } )
-
-              // default:     out <=  in[8 - 1  : 0] ;     // return passed address
 
               // general
               `REG_4094_OE:                       out <= reg_4094_oe;
@@ -301,7 +288,8 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
 
               // if get default back, it likely means the addr was not seen correctly
               // default:                            out <= 32'b00001111000011110000111100001111;
-              default:                            out <= 32'b11001100110011001100110011001100;
+              // default:                            out <= 32'b11001100110011001100110011001100;
+              default:                            out <= { 16'b1100110011001100, 8'b00000000,  in[ 7 -1 -1: 0], din };
 
             endcase
           end // count == 8
