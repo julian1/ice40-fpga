@@ -250,6 +250,10 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
         else if( count == 7)    // this is the 8th bit, din included
           begin
 
+            // I think the issue is that din is metastable at this point - as it is a fpga gpio pin input - that has not gone through any register
+            // AND. because it is used as combinatorially (with no clock dependency) to construct the addr - it corrupts.
+            // EXTR. - The way to fix. is probably to have an additional clk cycle - and lock din in a register on the clock cycle
+            // to freeup /gain this extra clock cycle - pad/place the write_flag after the address.
 
             addr <= { in[ 7 -1 -1: 0], din };       // store for later use by write
 
