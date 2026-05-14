@@ -114,7 +114,7 @@ module sequence_acquisition (
 
   ////////////////
 
-  output reg  [3-1: 0] sample_idx_o,
+  output reg  [3-1: 0] sample_idx,
 
 
 
@@ -173,7 +173,7 @@ module sequence_acquisition (
               // hold adc in reset also
               adc_reset_no    <= 0;
 
-              sample_idx_o    <= 0;
+              sample_idx    <= 0;
 
               // sample_first_o  <= 1;
 
@@ -205,7 +205,7 @@ module sequence_acquisition (
             begin
 
               // do in block..  so fields are available to subsequent bocks
-              case( sample_idx_o)
+              case( sample_idx)
                 0: seq_elt  <= p_seq0_i;
                 1: seq_elt  <= p_seq1_i;
                 2: seq_elt  <= p_seq2_i;
@@ -235,7 +235,7 @@ module sequence_acquisition (
               else if( seq_elt[ `SEQ_CODE_SLICE ] == `INSN_JMP)
                 begin
 
-                  sample_idx_o    <= seq_elt[ `OP_NEXT_IDX_SLICE];
+                  sample_idx    <= seq_elt[ `OP_NEXT_IDX_SLICE];
                   state         <= `STATE_INSN_FETCH;
                 end
 
@@ -316,7 +316,7 @@ module sequence_acquisition (
                 state           <= `STATE_INSN_FETCH;
 
                 // ok. works
-                sample_idx_o    <= seq_elt[ `SEQ_NEXT_IDX_SLICE];
+                sample_idx    <= seq_elt[ `SEQ_NEXT_IDX_SLICE];
 
                 // put adc in reset again
                 adc_reset_no <= 0;

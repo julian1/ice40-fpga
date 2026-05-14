@@ -28,7 +28,7 @@
 `include "sequence_acquisition.v"
 
 // `include "dual_port_ram.v"
-// `include "register_set2.v"
+`include "register_set2.v"
 
 `include "blinker.v"
 
@@ -439,7 +439,7 @@ module top (
     // outputs
 
     .state(         sequence_acquisition2_state),
-    .sample_idx_o(  sequence_acquisition2_sample_idx),       // careful/tricky - because  will be initialized to 0.
+    .sample_idx(    sequence_acquisition2_sample_idx),       // careful/tricky - because  will be initialized to 0.
     .seq_elt(       sequence_acquisition2_seq_elt),
 
     .pc_sw_o(       sequence_acquisition2_pc_sw  ),
