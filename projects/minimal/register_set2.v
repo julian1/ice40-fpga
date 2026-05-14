@@ -108,7 +108,7 @@
 
 `default_nettype none
 
-`include "dual_port_ram.v"
+// `include "dual_port_ram.v"
 
 
 module register_set2   (
