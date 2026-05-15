@@ -683,25 +683,9 @@ module top (
           /*  snapshot sa, adc conversion, and comparator state
           */
           reg_sr <= {
-/*
+
             // 32
             {
-                4'b0,
-                cr_adc_p_active_sigmux,
-                1'b0 /*cr_sa_p_noaz * /,
-                is_hi,                      // dynamic
-                1'b0 /* oob_aperture  * /    // dynamic
-            },
-            // 24
-            {   1'b0,                                             // 1
-                3'b0, /* reg_sa_p_seq_n[ 3-1: 0] * /               // 3      // this is dumb.  should just record the azmux state in 4 bits.
-                1'b0, /* sequence_acquisitionr2_sample_first * /   // 1 bit
-                sequence_acquisition2_sample_idx                  // 3 bits.
-            },
-*/
-            // 32
-            {
-                // sequence_acquisition2_seq_elt[ 0 +: 12 ],         // 12 bits.
                 12'b0,
                 1'b0,                                             // first.  1 bit
                 sequence_acquisition2_sample_idx                  // 3 bits.
@@ -715,6 +699,7 @@ module top (
                 cmpr_amp_ovld,
                 cmpr_amp_zero                             // 2
             },
+
             // 8
             { 4'b0001 },  // interrupt source flags
             { 4'b1010 }   // magic
