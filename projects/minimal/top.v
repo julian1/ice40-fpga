@@ -701,7 +701,8 @@ module top (
 */
             // 32
             {
-                sequence_acquisition2_seq_elt[ 0 +: 12 ],         // 12 bits.
+                // sequence_acquisition2_seq_elt[ 0 +: 12 ],         // 12 bits.
+                12'b0,
                 1'b0,                                             // first.  1 bit
                 sequence_acquisition2_sample_idx                  // 3 bits.
             },
