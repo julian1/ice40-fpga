@@ -178,19 +178,24 @@ module top (
 
 
   // spi lines - silence if active device is the fpga/register set
+  // reduce EMI, when just reading the adc
   assign spi_glb_clk              = spi_cs_vec_i ==  `SPI_CS_VEC_FPGA0 ? 1 : SCK;      // park hi
   assign spi_glb_mosi             = spi_cs_vec_i ==  `SPI_CS_VEC_FPGA0 ? 1 : SDI;      // park hi
 
 
+  // to control the inverter dac
+  // using spi for the moment
+  assign spi_invert_dac_data      = spi_glb_mosi;
+  assign spi_invert_dac_clk       = spi_glb_clk;
 
-  assign spi_invert_dac_data = spi_glb_mosi;
-  assign spi_invert_dac_clk = spi_glb_clk;
 
-
+  /*
+    all of the inputs here are combinatorial.
+    and on  gpio pin inputs that have never been registered/ on clock.
+  */
 
   wire spi_register_set_cs        = spi_cs_vec_i ==  `SPI_CS_VEC_FPGA0 ? 0 : 1;         // active lo, park hi
 
-  // 4094 strobe
   assign spi_4094_strobe          = spi_cs_vec_i == `SPI_CS_VEC_4094;                 // active hi, park lo
 
   assign spi_invert_dac_ss        = spi_cs_vec_i == `SPI_CS_VEC_INVERT_DAC ? 0 : 1;   // active lo, park hi
@@ -507,6 +512,12 @@ module top (
 
 
 
+  /*
+      encode the leds  in the seq_elt - to be set by the sequence_acquistion
+
+      better to do this here rather than in the module.
+      so that we can have the default blinker
+  */
   always @(posedge CLK)
     begin
 
@@ -520,6 +531,8 @@ module top (
 
       else
         leds_o  <= 4'd1 << sequence_acquisition2_sample_idx;
+
+        // leds_o  <= 4'd1 << sequence_acquisition2_seq_elt[  `SEQ_LEDS_SLICE   ]  ;
 
     end
 
