@@ -1,4 +1,8 @@
+/*
+  - the alternative way to manage this could be a rv32 softcore
+  with the sequences constructed based on the channel,noaz,oob control flags.
 
+*/
 /*
 
   supervisor.
