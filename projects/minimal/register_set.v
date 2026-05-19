@@ -226,23 +226,24 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
         count <= count + 1;
 
 
-
         if( count == 7)    // din == 8th bit. so all addr bits are in 'in' register, and now record din as write flag
           begin
 
-            addr        <= in[ 7 -1 : 0];             // faster with truncation?
+            addr        <= in;//[ 7 -1 : 0];             // faster with truncation?
 
 
-            write_flag  <= din ;     // write_flag which is LSB
-                                      // EXTR.  could also pick from in[ 0] on count == 8.
+            write_flag  <= din ;                  // write_flag is now LSB.  which gains a clock cycle to register the addr.
 
             // we could code this as a reverse case....
 
+            /*
+              Verilog case statements are evaluated sequentially in the order they are written.
+              with a linear search from top to bottom
+              The expression is compared against each case item in sequence, and once a match is found,
+              that branch is executed and the rest of the case statement is skipped
+            */
+
             case ( in[ 7 -1 : 0])                // constrain index space of 'in'
-
-
-              `REG_TEST1:                         out <= reg_test1;
-              `REG_TEST2:                         out <= reg_test2;
 
 
               // general
@@ -263,6 +264,10 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
 
               `REG_SA_SEQ_ELT:                    out <= reg_sa_seq_elt;
 
+              // reg_test1 and 2 here works
+
+              `REG_TEST1:                         out <= reg_test1;
+              `REG_TEST2:                         out <= reg_test2;
 
               /////
               // adc
@@ -279,9 +284,15 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
               `REG_ADC_CLK_COUNT_SIGMUX:          out <= reg_adc_clk_count_sigmux;
               `REG_ADC_CLK_COUNT_APERTURE:        out <= reg_adc_clk_count_aperture;
 
+              // reg_test1 and 2 here works
+
               `REG_ADC_STAT_COUNT_REFMUX_POS_UP:  out <= reg_adc_stat_count_refmux_pos_up;
               `REG_ADC_STAT_COUNT_REFMUX_NEG_UP:  out <= reg_adc_stat_count_refmux_neg_up;
               `REG_ADC_STAT_COUNT_CMPR_CROSS_UP:  out <= reg_adc_stat_count_cmpr_cross_up;
+
+
+              // reg_test1 and 2 here has issues here???
+              // but ok. if comment out the above 3 fields.
 
 
 
