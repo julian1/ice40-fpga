@@ -236,8 +236,14 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
             write_flag  <= din ;     // write_flag which is LSB
                                       // EXTR.  could also pick from in[ 0] on count == 8.
 
+            // we could code this as a reverse case....
 
             case ( in[ 7 -1 : 0])                // constrain index space of 'in'
+
+
+              `REG_TEST1:                         out <= reg_test1;
+              `REG_TEST2:                         out <= reg_test2;
+
 
               // general
               `REG_4094_OE:                       out <= reg_4094_oe;
@@ -264,10 +270,6 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
               `REG_ADC_P_CLK_COUNT_RESET:         out <= reg_adc_p_clk_count_reset;
               `REG_ADC_P_CLK_COUNT_APERTURE_OOB:  out <= reg_adc_p_clk_count_aperture_oob;
 
-              `REG_TEST1:                         out <= reg_test1;
-              `REG_TEST2:                         out <= reg_test2;
-
-
               // adc inputs to module, and spi readable outputs
               `REG_ADC_CLK_COUNT_REFMUX_NEG:      out <= reg_adc_clk_count_refmux_neg;
               `REG_ADC_CLK_COUNT_REFMUX_POS:      out <= reg_adc_clk_count_refmux_pos;
@@ -280,6 +282,8 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
               `REG_ADC_STAT_COUNT_REFMUX_POS_UP:  out <= reg_adc_stat_count_refmux_pos_up;
               `REG_ADC_STAT_COUNT_REFMUX_NEG_UP:  out <= reg_adc_stat_count_refmux_neg_up;
               `REG_ADC_STAT_COUNT_CMPR_CROSS_UP:  out <= reg_adc_stat_count_cmpr_cross_up;
+
+
 
               // if get default back, it likely means the addr was not seen correctly
               // default:                            out <= 32'b00001111000011110000111100001111;
