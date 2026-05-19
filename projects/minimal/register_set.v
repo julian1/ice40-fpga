@@ -251,7 +251,8 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
               --------
 
               the other way to speed this up.  would just compress the address bitspace...
-              eg. use values... 1to20.
+              eg. use values... 1 to 20.
+              actually doens't work. perhaps less bit information to build an efficient combinational index
 
             */
 
@@ -292,16 +293,15 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
               `REG_ADC_CLK_COUNT_APERTURE:        out <= reg_adc_clk_count_aperture;
 
               // reg_test1 and 2 here works
-
+/*
               `REG_ADC_STAT_COUNT_REFMUX_POS_UP:  out <= reg_adc_stat_count_refmux_pos_up;
               `REG_ADC_STAT_COUNT_REFMUX_NEG_UP:  out <= reg_adc_stat_count_refmux_neg_up;
               `REG_ADC_STAT_COUNT_CMPR_CROSS_UP:  out <= reg_adc_stat_count_cmpr_cross_up;
 
-
-              // reg_test1 and 2 here has issues here???
+*/
+              /* reg_test1 and 2 here fails/has issues
               // but ok. if comment out the above 3 fields.
-
-              // reg_test1 and 2 here works
+              */
 
               `REG_TEST1:                         out <= reg_test1;
               `REG_TEST2:                         out <= reg_test2;
