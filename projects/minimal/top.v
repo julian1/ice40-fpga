@@ -404,6 +404,8 @@ module top (
   wire [7-1:0]  sequence_acquisition2_state;
 
   wire [3-1:0]  sequence_acquisition2_sample_idx;
+  wire          sequence_acquisitionr2_sample_first;
+
   wire [32-1:0] sequence_acquisition2_seq_elt;
 
 
@@ -445,13 +447,14 @@ module top (
 
     .state(         sequence_acquisition2_state),
     .sample_idx(    sequence_acquisition2_sample_idx),       // careful/tricky - because  will be initialized to 0.
+    .sample_first(  sequence_acquisitionr2_sample_first),
+
     .seq_elt(       sequence_acquisition2_seq_elt),
 
     .pc_sw_o(       sequence_acquisition2_pc_sw  ),
     .azmux_o (      sequence_acquisition2_azmux  ),
 
 
-    // .sample_first_o( sequence_acquisitionr2_sample_first),
 
     // control the adc
     .adc_reset_no(  sequence_acquisition2_adc_reset_n ),
@@ -737,8 +740,8 @@ module top (
 
             // 16
             4'b0,
-            1'b0,                                             // first.  1 bit
-            sequence_acquisition2_sample_idx ,                 // 3 bits.
+            sequence_acquisitionr2_sample_first,              // 1 bit
+            sequence_acquisition2_sample_idx,                 // 3 bits.
 
             // 8
             4'b0001 ,  // interrupt source flags

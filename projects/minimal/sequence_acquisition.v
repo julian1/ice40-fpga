@@ -118,8 +118,9 @@ module sequence_acquisition (
 
   ////////////////
 
-  output reg  [3-1: 0] sample_idx,
+  output reg  [3-1: 0]  sample_idx,
 
+  output reg          sample_first,
 
 
   /*
@@ -179,7 +180,7 @@ module sequence_acquisition (
 
               sample_idx    <= 0;
 
-              // sample_first_o  <= 1;
+              sample_first  <= 1;
 
               /* during reset - hold the precharge switches lo. to emit BOOT. and protect signal. both cahnnels
                 azmux state should probably also be defined.  can use the first value.
@@ -319,11 +320,13 @@ module sequence_acquisition (
                 // set up next state
                 state           <= `STATE_INSN_FETCH;
 
-                // ok. works
-                sample_idx    <= seq_elt[ `SEQ_NEXT_IDX_SLICE];
+                sample_idx      <= seq_elt[ `SEQ_NEXT_IDX_SLICE];
+
+                // clear sample first flag
+                sample_first    <= 1'b0;
 
                 // put adc in reset again
-                adc_reset_no <= 0;
+                adc_reset_no    <= 0;
               end
 
         endcase
