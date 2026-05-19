@@ -255,47 +255,47 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
 
             */
 
-            // case ( in[ 7 -1 : 0])                // constrain index space of 'in'
-            case ( 1'b1 )                // constrain index space of 'in'
+            case ( in[ 7 -1 : 0])                // constrain index space of 'in'
+            // case ( 1'b1 )                // constrain index space of 'in'
 
 
               // general
-              `REG_4094_OE == in[ 7 -1 : 0]:                       out <= reg_4094_oe;
-              `REG_CR == in[ 7 -1 : 0]:                            out <= reg_cr;
-              `REG_SR == in[ 7 -1 : 0]:                            out <= reg_sr;
+              `REG_4094_OE:                       out <= reg_4094_oe;
+              `REG_CR:                            out <= reg_cr;
+              `REG_SR:                            out <= reg_sr;
 
               ////////
               // sa - sample acquisition
-              `REG_SA_P_CLK_COUNT_TRIG_DELAY == in[ 7 -1 : 0]:     out <= reg_sa_p_clk_count_trig_delay;
-              `REG_SA_P_CLK_COUNT_PRECHARGE == in[ 7 -1 : 0]:      out <= reg_sa_p_clk_count_precharge;
+              `REG_SA_P_CLK_COUNT_TRIG_DELAY:     out <= reg_sa_p_clk_count_trig_delay;
+              `REG_SA_P_CLK_COUNT_PRECHARGE :     out <= reg_sa_p_clk_count_precharge;
 
-              `REG_SA_P_SEQ0 == in[ 7 -1 : 0]:                     out <= reg_sa_p_seq0;
-              `REG_SA_P_SEQ1 == in[ 7 -1 : 0]:                     out <= reg_sa_p_seq1;
-              `REG_SA_P_SEQ2 == in[ 7 -1 : 0]:                     out <= reg_sa_p_seq2;
-              `REG_SA_P_SEQ3 == in[ 7 -1 : 0]:                     out <= reg_sa_p_seq3;
+              `REG_SA_P_SEQ0:                     out <= reg_sa_p_seq0;
+              `REG_SA_P_SEQ1:                     out <= reg_sa_p_seq1;
+              `REG_SA_P_SEQ2:                     out <= reg_sa_p_seq2;
+              `REG_SA_P_SEQ3:                     out <= reg_sa_p_seq3;
 
-              `REG_SA_SEQ_ELT == in[ 7 -1 : 0]:                    out <= reg_sa_seq_elt;
+              `REG_SA_SEQ_ELT:                    out <= reg_sa_seq_elt;
 
               /////
               // adc
-              `REG_ADC_P_CLK_COUNT_APERTURE == in[ 7 -1 : 0]:      out <= reg_adc_p_clk_count_aperture;     // clk_count_sample_n clk_time_sample_clksample_time ??
-              `REG_ADC_P_CLK_COUNT_RESET == in[ 7 -1 : 0]:         out <= reg_adc_p_clk_count_reset;
-              `REG_ADC_P_CLK_COUNT_APERTURE_OOB == in[ 7 -1 : 0]:  out <= reg_adc_p_clk_count_aperture_oob;
+              `REG_ADC_P_CLK_COUNT_APERTURE:      out <= reg_adc_p_clk_count_aperture;     // clk_count_sample_n clk_time_sample_clksample_time ??
+              `REG_ADC_P_CLK_COUNT_RESET:         out <= reg_adc_p_clk_count_reset;
+              `REG_ADC_P_CLK_COUNT_APERTURE_OOB:  out <= reg_adc_p_clk_count_aperture_oob;
 
               // adc inputs to module, and spi readable outputs
-              `REG_ADC_CLK_COUNT_REFMUX_NEG == in[ 7 -1 : 0]:      out <= reg_adc_clk_count_refmux_neg;
-              `REG_ADC_CLK_COUNT_REFMUX_POS == in[ 7 -1 : 0]:      out <= reg_adc_clk_count_refmux_pos;
-              `REG_ADC_CLK_COUNT_REFMUX_BOTH == in[ 7 -1 : 0]:     out <= reg_adc_clk_count_refmux_both;
+              `REG_ADC_CLK_COUNT_REFMUX_NEG:      out <= reg_adc_clk_count_refmux_neg;
+              `REG_ADC_CLK_COUNT_REFMUX_POS:      out <= reg_adc_clk_count_refmux_pos;
+              `REG_ADC_CLK_COUNT_REFMUX_BOTH:     out <= reg_adc_clk_count_refmux_both;
 
-              `REG_ADC_CLK_COUNT_RSTMUX == in[ 7 -1 : 0]:          out <= reg_adc_clk_count_rstmux;
-              `REG_ADC_CLK_COUNT_SIGMUX == in[ 7 -1 : 0]:          out <= reg_adc_clk_count_sigmux;
-              `REG_ADC_CLK_COUNT_APERTURE == in[ 7 -1 : 0]:        out <= reg_adc_clk_count_aperture;
+              `REG_ADC_CLK_COUNT_RSTMUX:          out <= reg_adc_clk_count_rstmux;
+              `REG_ADC_CLK_COUNT_SIGMUX:          out <= reg_adc_clk_count_sigmux;
+              `REG_ADC_CLK_COUNT_APERTURE:        out <= reg_adc_clk_count_aperture;
 
               // reg_test1 and 2 here works
 
-              `REG_ADC_STAT_COUNT_REFMUX_POS_UP == in[ 7 -1 : 0]:  out <= reg_adc_stat_count_refmux_pos_up;
-              `REG_ADC_STAT_COUNT_REFMUX_NEG_UP == in[ 7 -1 : 0]:  out <= reg_adc_stat_count_refmux_neg_up;
-              `REG_ADC_STAT_COUNT_CMPR_CROSS_UP == in[ 7 -1 : 0]:  out <= reg_adc_stat_count_cmpr_cross_up;
+              `REG_ADC_STAT_COUNT_REFMUX_POS_UP:  out <= reg_adc_stat_count_refmux_pos_up;
+              `REG_ADC_STAT_COUNT_REFMUX_NEG_UP:  out <= reg_adc_stat_count_refmux_neg_up;
+              `REG_ADC_STAT_COUNT_CMPR_CROSS_UP:  out <= reg_adc_stat_count_cmpr_cross_up;
 
 
               // reg_test1 and 2 here has issues here???
@@ -303,8 +303,8 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
 
               // reg_test1 and 2 here works
 
-              `REG_TEST1 == in[ 7 -1 : 0]:                         out <= reg_test1;
-              `REG_TEST2 == in[ 7 -1 : 0]:                         out <= reg_test2;
+              `REG_TEST1:                         out <= reg_test1;
+              `REG_TEST2:                         out <= reg_test2;
 
 
 
