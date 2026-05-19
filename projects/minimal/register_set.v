@@ -225,47 +225,18 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
 
         count <= count + 1;
 
-        // we have the write flag here as first bit. ??!!!
-/*
-        if( count == 0)
-          begin
 
-            // write flag
-            // it is actually a read_flag... so need the inverse
-            write_flag <=  ! din ;
-          end
-*/
-        /*
-            we have all 8 bits here, with din as last bit.
-          - so load the out register in time, and not miss any bits on the output
-          ---------
-
-          slight timing issues for the read?
-          perhaps signal-integrity with long spi traces
-          and because device reads dout on the trailing/rising clock edge?
-        */
-
-
-        // else if( count ==  7)    // this is the 8th bit, din included
 
         if( count == 7)    // din == 8th bit. so all addr bits are in 'in' register, and now record din as write flag
           begin
 
-            // consider issue - is that din is metastable at this point - as it is a fpga gpio pin input - that has not gone through any register
-            // AND. because it is used as combinatorially (with no clock dependency) to construct the addr - it corrupts.
-            // EXTR. - The way to fix. is probably to have an additional clk cycle - and lock din in a register on the clock cycle
-            // to freeup /gain this extra clock cycle - pad/place the write_flag after the address.
-
-            // addr <= { in[ 7 -1 -1: 0], din };       // store for later use by write
-            addr        <= in[ 7 -1 : 0];             // seems faster? than just truncating???
-            // addr        <= in;                          // record the addr for later
+            addr        <= in[ 7 -1 : 0];             // faster with truncation?
 
 
-            write_flag  <= din ;     // store the write_flag which is LSB
-                                      // EXTR.  could also pick this by copying in[ 0] on count == 8.
+            write_flag  <= din ;     // write_flag which is LSB
+                                      // EXTR.  could also pick from in[ 0] on count == 8.
 
 
-            // case ( { in[ 7 -1 -1: 0], din } )
             case ( in[ 7 -1 : 0])                // constrain index space of 'in'
 
               // general
@@ -320,11 +291,14 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
 
 
         /*
-          we can adjust count and load a new register - for an extended spi operation.
+          multi-register long spi transfer.
+
+          can load the next new register - for an extended spi operation.
 
           else if ( count == 32 + 8 - 1 && !write_flag   )
             count   <= 7;
-            in      <= next_register
+            case addr
+              in      <= next_register
         */
 
         /*
@@ -402,4 +376,36 @@ endmodule
 
 
 
+
+
+        // we have the write flag here as first bit. ??!!!
+/*
+        if( count == 0)
+          begin
+
+            // write flag
+            // it is actually a read_flag... so need the inverse
+            write_flag <=  ! din ;
+          end
+*/
+        /*
+            we have all 8 bits here, with din as last bit.
+          - so load the out register in time, and not miss any bits on the output
+          ---------
+
+          slight timing issues for the read?
+          perhaps signal-integrity with long spi traces
+          and because device reads dout on the trailing/rising clock edge?
+        */
+
+
+        // else if( count ==  7)    // this is the 8th bit, din included
+
+
+            // consider issue - is that din is metastable at this point - as it is a fpga gpio pin input - that has not gone through any register
+            // AND. because it is used as combinatorially (with no clock dependency) to construct the addr - it corrupts.
+            // EXTR. - The way to fix. is probably to have an additional clk cycle - and lock din in a register on the clock cycle
+            // to freeup /gain this extra clock cycle - pad/place the write_flag after the address.
+
+            // addr <= { in[ 7 -1 -1: 0], din };       // store for later use by write
 
