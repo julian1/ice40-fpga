@@ -32,7 +32,6 @@
 `define REG_SA_P_CLK_COUNT_TRIG_DELAY   19
 `define REG_SA_P_CLK_COUNT_PRECHARGE    20
 
-`define REG_SA_P_SEQ_N                  21
 `define REG_SA_P_SEQ0                   22
 `define REG_SA_P_SEQ1                   23
 `define REG_SA_P_SEQ2                   24
@@ -100,7 +99,6 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
     could use higher bits to encode other control eg. to not change/leave the precharge from previous value. etc.
     better than creating a separate controller module
   */
-  output reg [32-1:0] reg_sa_p_seq_n,
   output reg [32-1:0] reg_sa_p_seq0,
   output reg [32-1:0] reg_sa_p_seq1,
   output reg [32-1:0] reg_sa_p_seq2,
@@ -183,7 +181,6 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
     // how can express macro constant. of fixed width? does this work?
     // reg_sa_p_seq0 = { 2'b01, ((4'd1<<3)|(3-1))   };  //  `S3
 
-    reg_sa_p_seq_n    = 2;
     reg_sa_p_seq0     = { 2'b01, 4'd10   };  //  ((1<<3)|(3-1)) =  10          // S3 dcv   TODO fixme. just use the define S3
     reg_sa_p_seq1     = { 2'b00, 4'd14    };   // ((1<<3)|(7-1)) =  14       // S7  star-gnd.  TODO fixme just use the define S7.
     reg_sa_p_seq2     = 0;
@@ -282,7 +279,6 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
               `REG_SA_P_CLK_COUNT_TRIG_DELAY:     out <= reg_sa_p_clk_count_trig_delay;
               `REG_SA_P_CLK_COUNT_PRECHARGE:      out <= reg_sa_p_clk_count_precharge;
 
-              `REG_SA_P_SEQ_N:                    out <= reg_sa_p_seq_n;
               `REG_SA_P_SEQ0:                     out <= reg_sa_p_seq0;
               `REG_SA_P_SEQ1:                     out <= reg_sa_p_seq1;
               `REG_SA_P_SEQ2:                     out <= reg_sa_p_seq2;
@@ -351,7 +347,6 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
             `REG_SA_P_CLK_COUNT_TRIG_DELAY: reg_sa_p_clk_count_trig_delay <= { in[ 32 -1 -1: 0], din };
             `REG_SA_P_CLK_COUNT_PRECHARGE:  reg_sa_p_clk_count_precharge <= { in[ 32 -1 -1: 0], din };
 
-            `REG_SA_P_SEQ_N:                reg_sa_p_seq_n <= { in[ 32 -1 -1: 0], din };
             `REG_SA_P_SEQ0:                 reg_sa_p_seq0 <= { in[ 32 -1 -1: 0], din };
             `REG_SA_P_SEQ1:                 reg_sa_p_seq1 <= { in[ 32 -1 -1: 0], din };
             `REG_SA_P_SEQ2:                 reg_sa_p_seq2 <= { in[ 32 -1 -1: 0], din };
