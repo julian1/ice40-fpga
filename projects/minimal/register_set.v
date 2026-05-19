@@ -317,7 +317,7 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
               // if get default back, it likely means the addr was not seen correctly
               // default:                            out <= 32'b00001111000011110000111100001111;
               // default:                            out <= 32'b11001100110011001100110011001100;
-              default:                            out <= { 16'b1100110011001100, 8'b00000000,  in[ 7 -1 -1: 0], din };
+              default:                            out <= { 16'b1100110011001100, 8'b00000000,  1'b0, in[ 7 -1 : 0] };
 
             endcase
           end // count == 8
