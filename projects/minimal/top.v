@@ -605,6 +605,9 @@ module top (
             || sequence_acquisition2_sample_idx == 3'd2;
 
 
+  // reg dummy;
+  // reg dummy2[ 32-1: 0] ;
+
   always @(posedge CLK)
     begin
 
