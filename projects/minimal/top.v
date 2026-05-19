@@ -599,11 +599,12 @@ module top (
   // TODO.  this is all wrong...
   // whe
 
+/*
   // it makes sense to maintain the concept of a hi here
   wire is_hi ;
   assign is_hi = sequence_acquisition2_sample_idx == 3'b0
             || sequence_acquisition2_sample_idx == 3'd2;
-
+*/
 
   // reg dummy;
   // reg dummy2[ 32-1: 0] ;
@@ -616,7 +617,8 @@ module top (
           no hard code since modulo can be expensive to synthesize if not power of 2.
       */
 
-      if( sequence_acquisition2_adc_reset_n && is_hi)
+
+      if( sequence_acquisition2_adc_reset_n  /* && is_hi */)
         begin
 
           // normal HI sample
@@ -642,12 +644,10 @@ module top (
         end
 
 
-
-
-
       // assert interrupt one clock cycle only
       interrupt_valid                   <= 1'b0;
       // interrupt_flags <= { 4'b0000 };
+
 
 
       // wait for adc conversion
@@ -696,8 +696,14 @@ module top (
 
             // 16
             {   //  3'b0,
-                cmpr_boot_ch2_ovld_i,
-                cmpr_boot_ch1_ovld_i,
+                // cmpr_boot_ch2_ovld_i,
+                // cmpr_boot_ch1_ovld_i,
+                /*
+                    remove non-registered pin IO inputs here, improves spi stability...
+                    rembmer these are being recorded to spi register, under spi clock.
+                */
+                1'b0,
+                1'b0,
                 cmpr_amp_unld,
                 cmpr_amp_ovld,
                 cmpr_amp_zero                             // 2
