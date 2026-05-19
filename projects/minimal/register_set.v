@@ -251,7 +251,7 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
 
         // else if( count ==  7)    // this is the 8th bit, din included
 
-        if( count == 7)    // din == 8th bit. so all addr bits are in 'in' register, and need to store din as the write flag
+        if( count == 7)    // din == 8th bit. so all addr bits are in 'in' register, and now record din as write flag
           begin
 
             // consider issue - is that din is metastable at this point - as it is a fpga gpio pin input - that has not gone through any register
@@ -322,6 +322,14 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
             endcase
           end // count == 8
 
+
+        /*
+          we can adjust count and load a new register - for an extended spi operation.
+
+          else if ( count == 32 + 8 - 1 && !write_flag   )
+            count   <= 7;
+            in      <= next_register
+        */
 
         /*
           may be possible to delay, and use the pos edge of cs to latch values.
