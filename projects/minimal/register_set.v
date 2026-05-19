@@ -22,7 +22,6 @@
 
 `define REG_4094_OE                     9
 `define REG_CR                          12
-`define REG_DIRECT                      14
 `define REG_SR                          17
 
 
@@ -83,7 +82,7 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
 
   // output reg [32-1:0] reg_spi_mux,
   output reg [32-1:0] reg_cr,
-  output reg [32-1:0] reg_4094_oe,     // TODO consider place in generic CR control register. encode 4094-OE and trigger.
+  output reg [32-1:0] reg_4094_oe,
   // output reg [32-1:0] reg_direct,
   // output reg [32-1:0] reg_seq_mode,
 
@@ -237,27 +236,33 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
             // we could code this as a reverse case....
 
             /*
-              Verilog case statements are evaluated sequentially in the order they are written.
-              with a linear search from top to bottom
-              The expression is compared against each case item in sequence, and once a match is found,
-              that branch is executed and the rest of the case statement is skipped
+
+              yosys Standard case: Synthesized into a balanced MUX tree where
+              every condition evaluates in parallel. This provides uniform timing across all
+              branches, equivalent to the propagation delay of a tree of logic gates.
+            --------
+              but clause ordero must still be respected - else would get multiple driver issues for 'out'.
+
             */
-
             /*
-              EXTR. not clear that reverse-case is faster (without one-hot),
-              when still have to evaluate all the complex conditionals
+              EXTR. not clear that using reverse-case expression is faster (without one-hot encoding),
+              because ordinary synthesis/mapping will do something similar.
+              and because clause evaulation order must still be respected, even if it's just binary 0,1 at this point.
 
-              also it slows down reported timing speed ~100MHz.  to 64-72Mhz.
+              also reported timing speed is slowed from ~100MHz.  to 64-72Mhz.
+              marginal improvement only. worked but only with -noabc9
               --------
 
-              the other way to speed this up.  would just compress the address bitspace...
-              eg. use values... 1 to 20.
-              actually doens't work. perhaps less bit information to build an efficient combinational index
-
+              the other way to speed this up.  would just compress the address bitspace...  eg. use values... 1 to 20.
+              actually seems the same. less bits to help distinguish cases, may increase combinational complexity
+            */
+            /*
+              - not clear if issue - is on reading the addr.  or in trying to stuff  a reg_ value into 'out' in time for SDO to be valid.
+              - it looks like addr case matching, because of how the default will match. which is odd.
             */
 
-            case ( in[ 7 -1 : 0])                // constrain index space of 'in'
-            // case ( 1'b1 )                // constrain index space of 'in'
+            case ( in[ 7 -1 : 0])                 // constrain index space of 'in'
+            // case ( 1'b1 )                      // verilog reverse-case expression.
 
 
               // general
@@ -279,7 +284,7 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
 
               /////
               // adc
-              `REG_ADC_P_CLK_COUNT_APERTURE:      out <= reg_adc_p_clk_count_aperture;     // clk_count_sample_n clk_time_sample_clksample_time ??
+              `REG_ADC_P_CLK_COUNT_APERTURE:      out <= reg_adc_p_clk_count_aperture;
               `REG_ADC_P_CLK_COUNT_RESET:         out <= reg_adc_p_clk_count_reset;
               `REG_ADC_P_CLK_COUNT_APERTURE_OOB:  out <= reg_adc_p_clk_count_aperture_oob;
 
