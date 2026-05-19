@@ -26,8 +26,8 @@ set_io SDI              68
 
 #A dual-function clock signal. An output in Master mode and
 #input in Slave mode. iCE40 LM devices have this pin shared with
-# hardened SPI IP SPI_SCK pin.
-set_io SCK              70
+# hardened SPI IP SPI_SPI_CLK pin.
+set_io SPI_CLK              70
 
 
 #An important dual-function, active-low slave select pin. After

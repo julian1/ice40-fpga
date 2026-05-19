@@ -69,8 +69,8 @@ module top (
 
   /*#A dual-function clock signal. An output in Master mode and
   #input in Slave mode. iCE40 LM devices have this pin shared with
-  # hardened SPI IP SPI_SCK pin.*/
-  input SCK,
+  # hardened SPI IP SPI_SPI_CLK pin.*/
+  input SPI_CLK,
 
   /*#An important dual-function, active-low slave select pin. After
   #the device exits POR or CRESET_B is toggled (High-Low-High), it
@@ -179,7 +179,7 @@ module top (
 
   // spi lines - silence if active device is the fpga/register set
   // reduce EMI, when just reading the adc
-  assign spi_glb_clk              = spi_cs_vec_i ==  `SPI_CS_VEC_FPGA0 ? 1 : SCK;      // park hi
+  assign spi_glb_clk              = spi_cs_vec_i ==  `SPI_CS_VEC_FPGA0 ? 1 : SPI_CLK;      // park hi
   assign spi_glb_mosi             = spi_cs_vec_i ==  `SPI_CS_VEC_FPGA0 ? 1 : SDI;      // park hi
 
 
@@ -823,7 +823,7 @@ module top (
     .system_clk( CLK),
 
     // consider prefix fields with spi_
-    .clk(  SCK ),
+    .clk(  SPI_CLK ),
     .cs_n( spi_register_set_cs),
     .din(  SDI ),
     .dout( dummy    )
@@ -837,7 +837,7 @@ module top (
     (
 
     // consider prefix fields with spi_
-    .clk(  SCK ),
+    .clk(  SPI_CLK ),
     .cs_n( spi_register_set_cs),
     .din(  SDI ),
     .dout(  register_set_sdo /* SDO  */ ),
