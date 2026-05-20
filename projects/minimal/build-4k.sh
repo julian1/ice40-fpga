@@ -21,9 +21,9 @@ mkdir ./build
 # https://github.com/YosysHQ/yosys/issues/331
 
 
-# yosys -p 'synth_ice40 -top top -json ./build/main.json'  top.v  2>&1 | tee ./build/yosys.txt
+yosys -p 'synth_ice40 -top top -json ./build/main.json'  top.v  2>&1 | tee ./build/yosys.txt
 
-yosys  -p 'synth_ice40 -noabc9 -top top -json ./build/main.json '  top.v  2>&1 | tee ./build/yosys.txt
+# yosys  -p 'synth_ice40 -noabc9 -top top -json ./build/main.json '  top.v  2>&1 | tee ./build/yosys.txt
 
 # run fraig script - works to suppress output error
 # yosys  -p ' abc -script +strash;fraig;scorr;dc2 ;  synth_ice40 -top top -json ./build/main.json '  top.v  2>&1 | tee ./build/yosys.txt

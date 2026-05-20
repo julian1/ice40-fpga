@@ -302,8 +302,8 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
               `REG_ADC_STAT_COUNT_REFMUX_POS_UP:  out <= reg_adc_stat_count_refmux_pos_up;
               `REG_ADC_STAT_COUNT_REFMUX_NEG_UP:  out <= reg_adc_stat_count_refmux_neg_up;
               `REG_ADC_STAT_COUNT_CMPR_CROSS_UP:  out <= reg_adc_stat_count_cmpr_cross_up;
-
 */
+
               /* reg_test1 and 2 here fails/has issues
               // but ok. if comment out the above 3 fields.
               */
