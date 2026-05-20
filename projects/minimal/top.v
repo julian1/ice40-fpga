@@ -726,14 +726,12 @@ module top (
           */
           reg_sr <= {
 
-            //32
+            // 32
             6'b0,
-
-            // all 2 bit fields2
             cmpr_boot_ch2_ovld,
-            cmpr_boot_ch1_ovld,
 
             // 24
+            cmpr_boot_ch1_ovld,
             cmpr_amp_unld,
             cmpr_amp_ovld,
             cmpr_amp_zero,

@@ -258,7 +258,10 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
             */
             /*
               - not clear if issue - is on reading the addr.  or in trying to stuff  a reg_ value into 'out' in time for SDO to be valid.
-              - it looks like addr case matching, because of how the default will match. which is odd.
+                  on the clk, after roundtrip through the isolator/adum.
+
+              - it looks like input addr case matching since the default will match. which is odd.
+              - or combination of several
             */
 
             case ( in[ 7 -1 : 0])                 // constrain index space of 'in'
