@@ -1,18 +1,14 @@
 /*
-  rewrite. apr. 2026
+  rewrite. apr/ay. 2026
 
-  - it may be better to pack the write flag after the addr.
-    instead of the high bit. like this,
+  - write flag now packed after the addr.
 
   eg. pack    { addr[7-1:0], wr flag,  data }
 
-  this delays knowledge about operation type,
-  but gains a clock cycle, after receiving the address, to perform a 2-cycle port read
-  in order to load the output shift register in time
+  avoids combnation logic of { addr, din } in conditional, and write block on unregistered input of din.
 
-  also knowledge about a decision to write is only needed write after receiving all bytes.
-
-  But a write might also be tricky - and need both the clk cycle and the cs going hi - to work.
+  also gains a spare clock cycle after the address is received, in order to load the output shift register.
+  while knowledge of a write is only needed at the end of the transmission.
 
 */
 
@@ -150,29 +146,26 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
   reg [32-1:0]  out;
   reg [8-1:0]   count;
 
-  // reversing order is problem
   reg [7-1:0]   addr;
 
   reg           write_flag;
 
-  // wire [32-1:0] bin;
 
 
   wire dout = out[ 32- 1];  // last bit
 
 
-  // To use in an inout. the initial block is a driver. so must be placed here.
   initial begin
 
 
     // control
     reg_4094_oe       = 0;
     reg_cr            = 0;
-    // reg_direct        = 0;
+
 
     // signal acquisition
-    // it is nice to have sa defaults...
-    // so can just put in az mode, and have something working.
+    // nice to have reasonable sa defaults...
+    // can just put in az mode, and have something working.
 
     reg_sa_p_clk_count_trig_delay = $rtoi( `CLK_FREQ * 100e-3 );   // 100ms.  3458a. is 30ms ?
     reg_sa_p_clk_count_precharge  = $rtoi( `CLK_FREQ * 500e-6 );   // 500us.
@@ -180,6 +173,7 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
     // how can express macro constant. of fixed width? does this work?
     // reg_sa_p_seq0 = { 2'b01, ((4'd1<<3)|(3-1))   };  //  `S3
 
+    // TODO FIXME review.  fixme.
     reg_sa_p_seq0     = { 2'b01, 4'd10   };  //  ((1<<3)|(3-1)) =  10          // S3 dcv   TODO fixme. just use the define S3
     reg_sa_p_seq1     = { 2'b00, 4'd14    };   // ((1<<3)|(7-1)) =  14       // S7  star-gnd.  TODO fixme just use the define S7.
     reg_sa_p_seq2     = 0;
@@ -228,12 +222,11 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
         if( count == 7)    // din == 8th bit. so all addr bits are in 'in' register, and now record din as write flag
           begin
 
-            addr        <= in;//[ 7 -1 : 0];             // faster with truncation?
+            addr        <= in;//[ 7 -1 : 0];            // faster with truncation?
 
 
-            write_flag  <= din ;                  // write_flag is now LSB.  which gains a clock cycle to register the addr.
+            write_flag  <= din ;                        // write_flag now LSB.  gains a clock cycle to register the addr.
 
-            // we could code this as a reverse case....
 
             /*
 
@@ -247,18 +240,24 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
             /*
               EXTR. not clear that using reverse-case expression is faster (without one-hot encoding),
               because ordinary synthesis/mapping will do something similar.
-              and because clause evaulation order must still be respected, even if it's just binary 0,1 at this point.
+              and because clause evaulation order must still be respected, even if the conditional is only evaluating binary 1'b0,1'b1 at this point.
 
-              also reported timing speed is slowed from ~100MHz.  to 64-72Mhz.
+              also reported fmax is reduced from ~100MHz.  to 64-72Mhz.
               marginal improvement only. worked but only with -noabc9
               --------
 
               the other way to speed this up.  would just compress the address bitspace...  eg. use values... 1 to 20.
-              actually seems the same. less bits to help distinguish cases, may increase combinational complexity
+              - does not work. perhaps having fewer space bits to distinguish cases increases evaluation complexity
             */
             /*
-              - not clear if issue - is on reading the addr.  or in trying to stuff  a reg_ value into 'out' in time for SDO to be valid.
-              - it looks like addr case matching, because of how the default will match. which is odd.
+              - really quite strange that addr misses, because din is now a registered signal (in 'in'/'addr' ), and not an IO pin input.
+              - also clk is delayed due to isolators, but mosi is equally delayed.
+
+              - issue - 1. reading the addr.  or 2. getting a value stuffed into 'out' in time for SDO to be valid.
+                  on the clk, after roundtrip through the isolator/adum.
+                - it appears input addr case matching fails, and default matches.
+
+              - SI.
             */
 
             case ( in[ 7 -1 : 0])                 // constrain index space of 'in'
