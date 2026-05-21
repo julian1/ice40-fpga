@@ -493,6 +493,17 @@ module top (
   /*
       try to make leds and monitor should be non-intrusive  on modules
       means must be instantiated top level
+
+      TODO. monitor_o is wire.  so try to use direct assignment
+            and avoid the clk delay.
+
+      monitor_o[ 0]  = sequence_acquisition2_adc_conversion_start;
+      monitor_o[ 1]  = adc_conversion_valid;
+
+      // intrusive. the adc code the monitor state
+      // note. adc_monitor is also combinatorial/wire....
+      monitor_o[ 2 +: 6]  = adc_monitor;
+
   */
 
 

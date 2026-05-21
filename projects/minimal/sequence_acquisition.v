@@ -58,6 +58,8 @@
 `define SEQ_NEXT_IDX_SLICE    6 +: 3
 // hi, convert, oob
 
+// encode pc state during 'protect' phase
+// ``SEQ_PC_PROTECT_SLICE
 
 
 
@@ -224,6 +226,7 @@ module sequence_acquisition (
           `STATE_INSN_DECODE:
             begin
 
+              // TODO remove. fetch,decode,execute style - should be in the one state
               // currently - the only action is to advance
               // else switch on insn code/op
               state         <= `STATE_PC_PROTECT_START;
@@ -249,7 +252,7 @@ module sequence_acquisition (
 
 
 
-          // switch pre-charge switch to boot to protect signal, and pause.
+          // switch pre-charge switch to input boot/buffer to protect signal, and pause.
           `STATE_PC_PROTECT_START:
             begin
 
@@ -260,6 +263,10 @@ module sequence_acquisition (
               // switch to pc_sw lo if coming from wait_adc
               pc_sw_o         <= 2'b00;
 
+              // normally boot.
+
+              // `SEQ_PC_PROTECT_SLICE ie. PC state during protect phase
+              // pc_sw_o         <= seq_elt[ `SEQ_PC_PROTECT_SLICE ];
             end
 
           `STATE_PC_PROTECT:
@@ -295,6 +302,8 @@ module sequence_acquisition (
 
               state           <= `STATE_PC_SAMPLE;
               clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
+
+              // `SEQ_PC_SAMPLE_SLICE  ie. PC state during sample phase
               pc_sw_o         <= seq_elt[ `SEQ_PC_SLICE ];
             end
 
@@ -325,7 +334,7 @@ module sequence_acquisition (
                 // clear sample first flag
                 sample_first    <= 1'b0;
 
-                // put adc in reset again
+                // put adc back in reset
                 adc_reset_no    <= 0;
               end
 
@@ -341,7 +350,22 @@ module sequence_acquisition (
 
       end   // end mode == 0
 
+      /*
+        - if encode the protection pre-charge state in the sequence element
+            then we can keep both pc and azmux constant through the switching sequence, for leakage test.
+      */
+      /*
 
+        need modes.
+          - for charge-injection - switch pre-charge switch normally. with adc (using an initial zero/noaz).  with input high-z.
+                                    - think just normal noaz operation, with pc switching, . with input held high-z?
+
+          - leakage               - similar. but without pre-charge switching.  adc runs noaz.
+                                    - may be normal noaz operation, with no pc switching. which will need a different mode.
+
+          - remember. can control azmux to connect to gnd (a400-1, S6). to discharge input capacitance - using a sequence-elt.
+
+      */
 
       else if ( mode_i == 1)
         begin
