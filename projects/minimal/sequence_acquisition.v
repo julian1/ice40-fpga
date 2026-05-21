@@ -353,6 +353,10 @@ module sequence_acquisition (
       /*
         - if encode the protection pre-charge state in the sequence element
             then we can keep both pc and azmux constant through the switching sequence, for leakage test.
+            ---------
+            - and off for both steps.  for the high-Z.  electrometer mode.  note that noaz. will work well for this.
+
+            - consider encoding leds - lower two leds. the channell hi/lo.  and uppwer two leds if pc was active.
       */
       /*
 
