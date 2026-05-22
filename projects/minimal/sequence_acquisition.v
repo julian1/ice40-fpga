@@ -91,8 +91,12 @@ module sequence_acquisition (
 
 
 
-  // adc inputs
+  /////////////////////////
+  // adc input
 
+  /* adc inputs - one clock control.
+    consider rename to _done.  because not a _ready,_valid hanshake.
+  */
   input             adc_conversion_valid_i,
 
 
@@ -100,15 +104,15 @@ module sequence_acquisition (
   // adc outputs
 
 
-  /* expose in module, not sure.
-    for non-intrusive observation
-    consider adding _o .  but it is really an internal state
+  /* expose state in module port-list/arguments - for non-intrusive fsm actions
+    do not add _o suffix, but it is more properly considered to be internal state
+    TODO. reorder for clarity, move state. before sample_idx.
   */
   output reg [7-1:0]  state,
 
-  output reg          adc_reset_no,              // hold adc in reset.
+  output reg          adc_reset_no,               // hold adc in reset.
 
-  output reg          adc_conversion_start_o,      // one-clock cycle control
+  output reg          adc_conversion_start_o,    // one-clock cycle control
 
   //////////////
   // control outputs
@@ -351,12 +355,13 @@ module sequence_acquisition (
       end   // end mode == 0
 
       /*
-        - if encode the protection pre-charge state in the sequence element
-            then we can keep both pc and azmux constant through the switching sequence, for leakage test.
+        - if encode the protection pre-charge state for use during azmux change in the sequence element
+            then we can hold pc and azmux constant through the switching sequence for the adc - and to do leakage test.
             ---------
-            - and off for both steps.  for the high-Z.  electrometer mode.  note that noaz. will work well for this.
+            - similarly can keep off in both stages - for the high-Z/ electrometer mode.  note noaz mode will work well for this.
 
-            - consider encoding leds - lower two leds. the channell hi/lo.  and uppwer two leds if pc was active.
+            - consider encoding leds - lower two leds to the azmux_o channell hi/lo.  and upper two leds if sw_pc_o  was active.
+                - do this in top.v
       */
       /*
 
