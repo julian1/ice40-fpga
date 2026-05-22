@@ -563,6 +563,7 @@ module top (
           // leds_o  <= 4'd1 << sequence_acquisition2_sample_idx;
           // leds_o  <= 4'd1 << sequence_acquisition2_seq_elt[  `SEQ_LEDS_SLICE   ]  ;
 
+
           leds_o[ 0] <= azmux_o  == `S1 || azmux_o == `S3;                      // hi
           leds_o[ 1] <= azmux_o  == `S5 || azmux_o == `S7 || azmux_o == `S6;    // lo
           leds_o[ 2] <= pc_sw_o[ 0 ];                                           // channel 1 pc.
