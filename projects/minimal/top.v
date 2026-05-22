@@ -31,6 +31,7 @@
 `include "register_set2.v"
 
 `include "blinker.v"
+`include "defines.v"
 
 
 
@@ -510,8 +511,10 @@ module top (
   always @(posedge CLK)
     begin
 
-      // non-intrusive
-      // note clock delay
+      /* non-intrusive on sequuencing FSM.
+        note clock delay - consider use combinational assignment - for better scope probing.
+        - consider if should put everything that the sequncer controls non-intrustively in own module.
+      */
       monitor_o[ 0]       <= sequence_acquisition2_adc_conversion_start;
       monitor_o[ 1]       <= adc_conversion_valid;
 
@@ -532,6 +535,18 @@ module top (
       better to do this here rather than in the module.
       so that we can have the default blinker
   */
+
+  /*
+    TODO
+    - consider encode leds - lower two leds to the azmux_o channell hi/lo.  and upper two leds if sw_pc_o  was active.
+        - do this in top.v
+
+    // make the leds a wire. since azmux and pc are registered
+    leds_o[ 0] = azmux_o  == S1 || azmux == S3;   // hi
+    leds_o[ 1] = azmux_o  == S5 || azmux == S7 || azmux == s6;   // lo
+    leds_o[ 2] = pc_sw_o[ 0 ];     // channel 1 pc.
+    leds_o[ 3] = pc_sw_o[ 1 ];     // channel
+  */
   always @(posedge CLK)
     begin
 
@@ -541,12 +556,20 @@ module top (
       */
 
       if( sequence_acquisition2_state == 0)
-        leds_o  <= blinker_out;
+          leds_o  <= blinker_out;
 
       else
-        leds_o  <= 4'd1 << sequence_acquisition2_sample_idx;
+        begin
+          // leds_o  <= 4'd1 << sequence_acquisition2_sample_idx;
+          // leds_o  <= 4'd1 << sequence_acquisition2_seq_elt[  `SEQ_LEDS_SLICE   ]  ;
 
-        // leds_o  <= 4'd1 << sequence_acquisition2_seq_elt[  `SEQ_LEDS_SLICE   ]  ;
+          leds_o[ 0] <= azmux_o  == `S1 || azmux_o == `S3;                      // hi
+          leds_o[ 1] <= azmux_o  == `S5 || azmux_o == `S7 || azmux_o == `S6;    // lo
+          leds_o[ 2] <= pc_sw_o[ 0 ];                                           // channel 1 pc.
+          leds_o[ 3] <= pc_sw_o[ 1 ];                                           // channel 2 pc
+
+        end
+
 
     end
 
