@@ -32,15 +32,15 @@
 
 
 `define STATE_INSN_FETCH        2
-`define STATE_INSN_DECODE       3
+// `define STATE_INSN_DECODE       3
 
 
 `define STATE_PC_PROTECT_START  4
 `define STATE_PC_PROTECT        5
 
 
-`define STATE_SIGNAL_START      6
-`define STATE_SIGNAL            7
+`define STATE_SWITCH_START      6
+`define STATE_SWITCH            7
 
 
 `define STATE_PC_SAMPLE_START   8
@@ -275,7 +275,7 @@ module sequence_acquisition (
 
           `STATE_PC_PROTECT:
             if(clk_count_down == 0)
-              state <= `STATE_SIGNAL_START;
+              state <= `STATE_SWITCH_START;
 
 
 
@@ -283,15 +283,15 @@ module sequence_acquisition (
           ////////////////////////////
           // switch azmux_o to the signal of interest, which may be a low. and pause
           // precharge phase.
-          `STATE_SIGNAL_START:
+          `STATE_SWITCH_START:
             begin
 
-              state           <= `STATE_SIGNAL;
+              state           <= `STATE_SWITCH;
               clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
               azmux_o         <= seq_elt[ `SEQ_AZMUX_SLICE ];
             end
 
-          `STATE_SIGNAL:
+          `STATE_SWITCH:
             if(clk_count_down == 0)
               state <= `STATE_PC_SAMPLE_START;
 
