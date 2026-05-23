@@ -52,14 +52,24 @@
 
 
 
+/*
+  uint32_t    code          : 4;  // 4
 
-`define SEQ_AZMUX_SLICE       0 +: 4
-`define SEQ_PC_SLICE          4 +: 2
-`define SEQ_NEXT_IDX_SLICE    6 +: 3
-// hi, convert, oob
+  uint32_t    pc_protect    : 2;  // 6      // rename pc_switch during azmux switch
+  uint32_t    pc_sample     : 2;  // 8
 
-// encode pc state during 'protect' phase
-// ``SEQ_PC_PROTECT_SLICE
+  uint32_t    azmux         : 4;  // 12
+
+  uint32_t    next_idx      : 3;   // 15
+*/
+
+`define SEQ_CODE_SLICE        0 +: 4
+`define SEQ_PC_PROTECT_SLICE  4 +: 2
+`define SEQ_PC_SAMPLE_SLICE   6 +: 2
+
+`define SEQ_AZMUX_SLICE       8 +: 4
+
+`define SEQ_NEXT_IDX_SLICE    12 +: 3
 
 
 
@@ -211,7 +221,7 @@ module sequence_acquisition (
 
           ////////////////////////////////////////////
 
-
+          // get the next sequence state
           `STATE_INSN_FETCH:
             begin
 
@@ -223,18 +233,9 @@ module sequence_acquisition (
                 3: seq_elt  <= p_seq3_i;
               endcase
 
-              state         <= `STATE_INSN_DECODE;
-            end
-
-
-          `STATE_INSN_DECODE:
-            begin
-
-              // TODO remove. fetch,decode,execute style - should be in the one state
-              // currently - the only action is to advance
-              // else switch on insn code/op
               state         <= `STATE_PC_PROTECT_START;
             end
+
 
 
 /*
@@ -256,21 +257,17 @@ module sequence_acquisition (
 
 
 
-          // switch pre-charge switch to input boot/buffer to protect signal, and pause.
+          // switch protect phase - switch pre-charge to lo/input boot/buffer to protect signal, and pause
           `STATE_PC_PROTECT_START:
             begin
 
               state           <= `STATE_PC_PROTECT;
               clk_count_down  <= p_clk_count_precharge_i;
 
-              // keep the pc_sw lo if coming from reset_start/trig_delay
-              // switch to pc_sw lo if coming from wait_adc
-              pc_sw_o         <= 2'b00;
-
-              // normally boot.
-
-              // `SEQ_PC_PROTECT_SLICE ie. PC state during protect phase
-              // pc_sw_o         <= seq_elt[ `SEQ_PC_PROTECT_SLICE ];
+              // pc_sw_o         <= 2'b00;
+              // use variable. to support disabling for high-impedance/electrometer mode.
+              // and testing input leakage.
+              pc_sw_o         <= seq_elt[ `SEQ_PC_PROTECT_SLICE ];
             end
 
           `STATE_PC_PROTECT:
@@ -308,7 +305,7 @@ module sequence_acquisition (
               clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
 
               // `SEQ_PC_SAMPLE_SLICE  ie. PC state during sample phase
-              pc_sw_o         <= seq_elt[ `SEQ_PC_SLICE ];
+              pc_sw_o         <= seq_elt[ `SEQ_PC_SAMPLE_SLICE ];
             end
 
 
@@ -393,7 +390,7 @@ module sequence_acquisition (
               or just have separate op code for a idx jump
           */
 
-          pc_sw_o     <= p_seq0_i[ `SEQ_PC_SLICE];
+          pc_sw_o     <= p_seq0_i[ `SEQ_PC_SAMPLE_SLICE];
           azmux_o     <= p_seq0_i[ `SEQ_AZMUX_SLICE ];
 
         end
