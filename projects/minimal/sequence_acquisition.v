@@ -30,7 +30,7 @@
 `define STATE_RESET_START       0
 `define STATE_TRIG_DELAY        1
 
-
+// rename seq-elt-fetch
 `define STATE_INSN_FETCH        2
 // `define STATE_INSN_DECODE       3
 
@@ -47,7 +47,8 @@
 `define STATE_PC_SAMPLE         9
 
 
-`define STATE_WAIT_ADC          10
+`define STATE_ADC_START         11
+`define STATE_ADC_WAIT          12
 
 
 
@@ -292,13 +293,15 @@ module sequence_acquisition (
             end
 
 
-          // consider factor the state_adc_start into separate state.
-          // easier to key off. for non-intrusive actions
           `STATE_PC_SAMPLE:
             if(clk_count_down == 0)
+              state           <= `STATE_ADC_START;
+
+
+          `STATE_ADC_START:
               begin
 
-                state                   <= `STATE_WAIT_ADC;
+                state                   <= `STATE_ADC_WAIT;
                 // adc start
                 adc_reset_no            <= 1'b1;
 
@@ -306,8 +309,7 @@ module sequence_acquisition (
               end
 
 
-
-          `STATE_WAIT_ADC:
+          `STATE_ADC_WAIT:
             // wait for adc to measure
             if( adc_conversion_valid_i)
               begin

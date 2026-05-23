@@ -571,7 +571,7 @@ module top (
     begin
 
 
-      if( sequence_acquisition2_state == `STATE_PC_SAMPLE_START)
+      if( sequence_acquisition2_state == `STATE_ADC_START)
 
         // set adc aperture.
         adc_p_clk_count_aperture  <= sequence_acquisition2_seq_elt[ `SEQ_OOB_APERTURE ]
