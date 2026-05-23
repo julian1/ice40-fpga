@@ -648,31 +648,11 @@ module top (
 
 
 
-
-      // cmpr_boot_ch2_ovld_i,
-                // cmpr_boot_ch1_ovld_i,
-
-
-  // TODO.  this is all wrong...
-  // whe
-
-/*
-  // it makes sense to maintain the concept of a hi here
-  wire is_hi ;
-  assign is_hi = sequence_acquisition2_sample_idx == 3'b0
-            || sequence_acquisition2_sample_idx == 3'd2;
-*/
-
   // reg dummy;
   // reg dummy2[ 32-1: 0] ;
 
   always @(posedge CLK)
     begin
-
-      /* HI is even by convention.
-          consider change  this to idx modulo 2 == 0
-          no hard code since modulo can be expensive to synthesize if not power of 2.
-      */
 
 
       // assert interrupt one clock cycle only
