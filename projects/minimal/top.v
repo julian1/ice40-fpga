@@ -532,8 +532,8 @@ module top (
   /*
       encode the leds  in the seq_elt - to be set by the sequence_acquistion
 
-      do this here rather than in the module.
-      so that we can have the default blinker
+      do this here in top.c instead of in the module.
+      to avoid passing the blinker generator
   */
 
   always @(posedge CLK)
@@ -559,8 +559,6 @@ module top (
           leds_o[ 3] <= pc_sw_o[ 1 ];                                           // channel 2 pc
 
         end
-
-
     end
 
 
@@ -568,53 +566,21 @@ module top (
 
 
 
-  /*
-    TODO. remove this.
-    the sequencer should take direct responsibility for aperture.
-    if we want to control it.
-    ---
-    not sure non-intrusive keeps it simpler.
-
-    consider putting in the same module/ or associated module.
-
-  */
-
-
+  // consider whether to move this control behavior to the sequenzer
   always @(posedge CLK)
     begin
 
 
-      adc_p_clk_count_aperture  <= reg_adc_p_clk_count_aperture;
+      if( sequence_acquisition2_state == `STATE_PC_SAMPLE_START)
+
+        // set adc aperture.
+        adc_p_clk_count_aperture  <= sequence_acquisition2_seq_elt[ `SEQ_OOB_APERTURE ]
+                                      ? reg_adc_p_clk_count_aperture_oob
+                                      : reg_adc_p_clk_count_aperture;
 
     end
-/*
-
-  reg oob_aperture;
-
-  always @(posedge CLK)
-    begin
 
 
-      // adc conversion start
-      if( sequence_acquisition2_adc_conversion_start)
-        begin
-
-          // set adc aperture.
-          if( sequence_acquisitionr2_sample_first)
-            begin
-
-            adc_p_clk_count_aperture  <= reg_adc_p_clk_count_aperture_oob;
-            oob_aperture              <= 1'b1;
-            end
-          else
-            begin
-
-            adc_p_clk_count_aperture  <= reg_adc_p_clk_count_aperture;
-            oob_aperture              <= 1'b0;
-            end
-        end
-    end
-*/
 
 
   reg interrupt_valid;

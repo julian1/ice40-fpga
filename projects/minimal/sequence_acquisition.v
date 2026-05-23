@@ -52,25 +52,6 @@
 
 
 
-/*
-  uint32_t    code          : 4;  // 4
-
-  uint32_t    pc_protect    : 2;  // 6      // rename pc_switch during azmux switch
-  uint32_t    pc_sample     : 2;  // 8
-
-  uint32_t    azmux         : 4;  // 12
-
-  uint32_t    next_idx      : 3;   // 15
-*/
-
-`define SEQ_CODE_SLICE        0 +: 4
-`define SEQ_PC_PROTECT_SLICE  4 +: 2
-`define SEQ_PC_SAMPLE_SLICE   6 +: 2
-
-`define SEQ_AZMUX_SLICE       8 +: 4
-
-`define SEQ_NEXT_IDX_SLICE    12 +: 3
-
 
 
 /*
@@ -311,6 +292,8 @@ module sequence_acquisition (
             end
 
 
+          // consider factor the state_adc_start into separate state.
+          // easier to key off. for non-intrusive actions
           `STATE_PC_SAMPLE:
             if(clk_count_down == 0)
               begin
