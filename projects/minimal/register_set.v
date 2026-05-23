@@ -287,6 +287,13 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
               `REG_ADC_P_CLK_COUNT_RESET:         out <= reg_adc_p_clk_count_reset;
               `REG_ADC_P_CLK_COUNT_APERTURE_OOB:  out <= reg_adc_p_clk_count_aperture_oob;
 
+
+              /* TODO . consider organize - move REG_SR and REG_SA_SEQ_ELT here...
+                - because they are P registers and outputs only.
+                - easier support of chaining, if register order/reg_idx is sequential
+                - because read of P parameters not particularly needed. and could be commented out.
+              */
+
               // adc inputs to module, and spi readable outputs
               `REG_ADC_CLK_COUNT_REFMUX_NEG:      out <= reg_adc_clk_count_refmux_neg;
               `REG_ADC_CLK_COUNT_REFMUX_POS:      out <= reg_adc_clk_count_refmux_pos;
