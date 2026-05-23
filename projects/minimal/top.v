@@ -532,21 +532,10 @@ module top (
   /*
       encode the leds  in the seq_elt - to be set by the sequence_acquistion
 
-      better to do this here rather than in the module.
+      do this here rather than in the module.
       so that we can have the default blinker
   */
 
-  /*
-    TODO
-    - consider encode leds - lower two leds to the azmux_o channell hi/lo.  and upper two leds if sw_pc_o  was active.
-        - do this in top.v
-
-    // make the leds a wire. since azmux and pc are registered
-    leds_o[ 0] = azmux_o  == S1 || azmux == S3;   // hi
-    leds_o[ 1] = azmux_o  == S5 || azmux == S7 || azmux == s6;   // lo
-    leds_o[ 2] = pc_sw_o[ 0 ];     // channel 1 pc.
-    leds_o[ 3] = pc_sw_o[ 1 ];     // channel
-  */
   always @(posedge CLK)
     begin
 
@@ -584,7 +573,9 @@ module top (
     the sequencer should take direct responsibility for aperture.
     if we want to control it.
     ---
-    not hanging off the the  sample_first state flag.
+    not sure non-intrusive keeps it simpler.
+
+    consider putting in the same module/ or associated module.
 
   */
 
@@ -593,7 +584,7 @@ module top (
     begin
 
 
-            adc_p_clk_count_aperture  <= reg_adc_p_clk_count_aperture;
+      adc_p_clk_count_aperture  <= reg_adc_p_clk_count_aperture;
 
     end
 /*
