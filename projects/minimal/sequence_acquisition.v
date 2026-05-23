@@ -114,12 +114,6 @@ module sequence_acquisition (
   // adc outputs
 
 
-  /* expose state in module port-list/arguments - for non-intrusive fsm actions
-    do not add _o suffix, but it is more properly considered to be internal state
-    TODO. reorder for clarity, move state. before sample_idx.
-  */
-  output reg [7-1:0]  state,
-
   output reg          adc_reset_no,               // hold adc in reset.
 
   output reg          adc_conversion_start_o,    // one-clock cycle control
@@ -132,7 +126,16 @@ module sequence_acquisition (
 
 
 
+
   ////////////////
+
+
+  /* expose state in module port-list/arguments - for non-intrusive fsm actions
+    do not add _o suffix, but it is more properly considered to be internal state
+  */
+  output reg [7-1:0]  state,
+
+
 
   output reg  [3-1: 0]  sample_idx,
 
@@ -304,7 +307,6 @@ module sequence_acquisition (
               state           <= `STATE_PC_SAMPLE;
               clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
 
-              // `SEQ_PC_SAMPLE_SLICE  ie. PC state during sample phase
               pc_sw_o         <= seq_elt[ `SEQ_PC_SAMPLE_SLICE ];
             end
 
