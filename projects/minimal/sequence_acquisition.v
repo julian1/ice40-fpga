@@ -125,8 +125,8 @@ module sequence_acquisition (
 
 
   /*
-    TODO bad name.
-    rename    p_term.  or p_seq_elt;  etc.
+    TODO consider name.
+    rename    term.  or seq_term.
     or insn   or seq_insn
   */
   output reg   [ 32-1: 0]      seq_elt
@@ -338,27 +338,6 @@ module sequence_acquisition (
 
       end   // end mode == 0
 
-      /*
-        - if encode the protection pre-charge state for use during azmux change in the sequence element
-            then we can hold pc and azmux constant through the switching sequence for the adc - and to do leakage test.
-            ---------
-            - similarly can keep off in both stages - for the high-Z/ electrometer mode.  note noaz mode will work well for this.
-
-            - consider encoding leds - lower two leds to the azmux_o channell hi/lo.  and upper two leds if sw_pc_o  was active.
-                - do this in top.v
-      */
-      /*
-
-        need modes.
-          - for charge-injection - switch pre-charge switch normally. with adc (using an initial zero/noaz).  with input high-z.
-                                    - think just normal noaz operation, with pc switching, . with input held high-z?
-
-          - leakage               - similar. but without pre-charge switching.  adc runs noaz.
-                                    - may be normal noaz operation, with no pc switching. which will need a different mode.
-
-          - remember. can control azmux to connect to gnd (a400-1, S6). to discharge input capacitance - using a sequence-elt.
-
-      */
 
       else if ( mode_i == 1)
         begin
@@ -389,5 +368,26 @@ endmodule
 
 
 
+      /*
+        - if encode the protection pre-charge state for use during azmux change in the sequence element
+            then we can hold pc and azmux constant through the switching sequence for the adc - and to do leakage test.
+            ---------
+            - similarly can keep off in both stages - for the high-Z/ electrometer mode.  note noaz mode will work well for this.
+
+            - consider encoding leds - lower two leds to the azmux_o channell hi/lo.  and upper two leds if sw_pc_o  was active.
+                - do this in top.v
+      */
+      /*
+
+        need modes.
+          - for charge-injection - switch pre-charge switch normally. with adc (using an initial zero/noaz).  with input high-z.
+                                    - think just normal noaz operation, with pc switching, . with input held high-z?
+
+          - leakage               - similar. but without pre-charge switching.  adc runs noaz.
+                                    - may be normal noaz operation, with no pc switching. which will need a different mode.
+
+          - remember. can control azmux to connect to gnd (a400-1, S6). to discharge input capacitance - using a sequence-elt.
+
+      */
 
 
