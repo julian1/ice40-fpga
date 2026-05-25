@@ -84,6 +84,7 @@
 
 
 `define SEQ_OOB_APERTURE      24
+`define SEQ_ZGJC              25
 
 
 
