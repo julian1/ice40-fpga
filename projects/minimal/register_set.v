@@ -27,13 +27,13 @@
 `define REG_SA_P_CLK_COUNT_TRIG_DELAY   19
 `define REG_SA_P_CLK_COUNT_PRECHARGE    20
 
-`define REG_SA_P_SEQ0                   22
-`define REG_SA_P_SEQ1                   23
-`define REG_SA_P_SEQ2                   24
-`define REG_SA_P_SEQ3                   25
+`define REG_SA_P_TERM0                   22
+`define REG_SA_P_TERM1                   23
+`define REG_SA_P_TERM2                   24
+`define REG_SA_P_TERM3                   25
 
 
-`define REG_SA_SEQ_ELT                  26
+`define REG_SA_TERM_ELT                  26
 
 
 // adc control parameters
@@ -274,12 +274,12 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
               `REG_SA_P_CLK_COUNT_TRIG_DELAY:     out <= reg_sa_p_clk_count_trig_delay;
               `REG_SA_P_CLK_COUNT_PRECHARGE :     out <= reg_sa_p_clk_count_precharge;
 
-              `REG_SA_P_SEQ0:                     out <= reg_sa_p_seq0;
-              `REG_SA_P_SEQ1:                     out <= reg_sa_p_seq1;
-              `REG_SA_P_SEQ2:                     out <= reg_sa_p_seq2;
-              `REG_SA_P_SEQ3:                     out <= reg_sa_p_seq3;
+              `REG_SA_P_TERM0:                     out <= reg_sa_p_seq0;
+              `REG_SA_P_TERM1:                     out <= reg_sa_p_seq1;
+              `REG_SA_P_TERM2:                     out <= reg_sa_p_seq2;
+              `REG_SA_P_TERM3:                     out <= reg_sa_p_seq3;
 
-              `REG_SA_SEQ_ELT:                    out <= reg_sa_seq_elt;
+              `REG_SA_TERM_ELT:                    out <= reg_sa_seq_elt;
 
               /////
               // adc
@@ -288,7 +288,7 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
               `REG_ADC_P_CLK_COUNT_APERTURE_OOB:  out <= reg_adc_p_clk_count_aperture_oob;
 
 
-              /* TODO . consider organize - move REG_SR and REG_SA_SEQ_ELT here...
+              /* TODO . consider organize - move REG_SR and REG_SA_TERM_ELT here...
                 - because they are P registers and outputs only.
                 - easier support of chaining, if register order/reg_idx is sequential
                 - because read of P parameters not particularly needed. and could be commented out.
@@ -359,10 +359,10 @@ module register_set   (   // 1 byte address, and write flag,   4 bytes data.
             `REG_SA_P_CLK_COUNT_TRIG_DELAY: reg_sa_p_clk_count_trig_delay <= { in[ 32 -1 -1: 0], din };
             `REG_SA_P_CLK_COUNT_PRECHARGE:  reg_sa_p_clk_count_precharge <= { in[ 32 -1 -1: 0], din };
 
-            `REG_SA_P_SEQ0:                 reg_sa_p_seq0 <= { in[ 32 -1 -1: 0], din };
-            `REG_SA_P_SEQ1:                 reg_sa_p_seq1 <= { in[ 32 -1 -1: 0], din };
-            `REG_SA_P_SEQ2:                 reg_sa_p_seq2 <= { in[ 32 -1 -1: 0], din };
-            `REG_SA_P_SEQ3:                 reg_sa_p_seq3 <= { in[ 32 -1 -1: 0], din };
+            `REG_SA_P_TERM0:                 reg_sa_p_seq0 <= { in[ 32 -1 -1: 0], din };
+            `REG_SA_P_TERM1:                 reg_sa_p_seq1 <= { in[ 32 -1 -1: 0], din };
+            `REG_SA_P_TERM2:                 reg_sa_p_seq2 <= { in[ 32 -1 -1: 0], din };
+            `REG_SA_P_TERM3:                 reg_sa_p_seq3 <= { in[ 32 -1 -1: 0], din };
 
             // `REG_SA_P_TRIG:                 reg_sa_p_trig <= { in[ 32 -1 -1: 0], din };
 

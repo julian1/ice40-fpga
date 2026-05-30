@@ -74,17 +74,17 @@
 
 */
 
-`define SEQ_CODE_SLICE        0 +: 4
-`define SEQ_PC_PROTECT_SLICE  4 +: 2
-`define SEQ_PC_SAMPLE_SLICE   6 +: 2
+`define TERM_CODE_SLICE        0 +: 4
+`define TERM_PC_PROTECT_SLICE  4 +: 2
+`define TERM_PC_SAMPLE_SLICE   6 +: 2
 
-`define SEQ_AZMUX_SLICE       8 +: 4
+`define TERM_AZMUX_SLICE       8 +: 4
 
-`define SEQ_NEXT_IDX_SLICE    12 +: 3
+`define TERM_NEXT_IDX_SLICE    12 +: 3
 
 
-`define SEQ_OOB_APERTURE      24
-`define SEQ_ZGJC              25
+`define TERM_OOB_APERTURE      24
+`define TERM_ZGJC              25
 
 
 

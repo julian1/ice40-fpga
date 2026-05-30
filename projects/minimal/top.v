@@ -550,7 +550,7 @@ module top (
       else
         begin
           // leds_o  <= 4'd1 << sequence_acquisition2_sample_idx;
-          // leds_o  <= 4'd1 << sequence_acquisition2_seq_elt[  `SEQ_LEDS_SLICE   ]  ;
+          // leds_o  <= 4'd1 << sequence_acquisition2_seq_elt[  `TERM_LEDS_SLICE   ]  ;
 
 
           leds_o[ 0] <= azmux_o  == `S1 || azmux_o == `S3;                      // hi
@@ -574,7 +574,7 @@ module top (
       if( sequence_acquisition2_state == `STATE_ADC_START)
 
         // set adc aperture.
-        adc_p_clk_count_aperture  <= sequence_acquisition2_seq_elt[ `SEQ_OOB_APERTURE ]
+        adc_p_clk_count_aperture  <= sequence_acquisition2_seq_elt[ `TERM_OOB_APERTURE ]
                                       ? reg_adc_p_clk_count_aperture_oob
                                       : reg_adc_p_clk_count_aperture;
 

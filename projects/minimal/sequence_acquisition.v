@@ -191,7 +191,7 @@ module sequence_acquisition (
               /* TODO review.  this may not be a lo.
                 we are using the first element here. which may not be
               */
-              azmux_o       <= p_seq0_i[ `SEQ_AZMUX_SLICE];
+              azmux_o       <= p_seq0_i[ `TERM_AZMUX_SLICE];
 
 
 
@@ -227,10 +227,10 @@ module sequence_acquisition (
           `STATE_INSN_DECODE:   // and execute
             begin
 
-              if( seq_elt[ `SEQ_CODE_SLICE ] == `INSN_NORMAL)
+              if( seq_elt[ `TERM_CODE_SLICE ] == `INSN_NORMAL)
                 state         <= `STATE_PC_PROTECT_START;
 
-              else if( seq_elt[ `SEQ_CODE_SLICE ] == `INSN_JMP)
+              else if( seq_elt[ `TERM_CODE_SLICE ] == `INSN_JMP)
                 begin
 
                   sample_idx    <= seq_elt[ `OP_NEXT_IDX_SLICE];
@@ -252,7 +252,7 @@ module sequence_acquisition (
               // pc_sw_o         <= 2'b00;
               // use variable. to support disabling for high-impedance/electrometer mode.
               // and testing input leakage.
-              pc_sw_o         <= seq_elt[ `SEQ_PC_PROTECT_SLICE ];
+              pc_sw_o         <= seq_elt[ `TERM_PC_PROTECT_SLICE ];
             end
 
           `STATE_PC_PROTECT:
@@ -270,7 +270,7 @@ module sequence_acquisition (
 
               state           <= `STATE_SWITCH;
               clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
-              azmux_o         <= seq_elt[ `SEQ_AZMUX_SLICE ];
+              azmux_o         <= seq_elt[ `TERM_AZMUX_SLICE ];
             end
 
           `STATE_SWITCH:
@@ -289,7 +289,7 @@ module sequence_acquisition (
               state           <= `STATE_PC_SAMPLE;
               clk_count_down  <= p_clk_count_precharge_i;  // normally pin s1
 
-              pc_sw_o         <= seq_elt[ `SEQ_PC_SAMPLE_SLICE ];
+              pc_sw_o         <= seq_elt[ `TERM_PC_SAMPLE_SLICE ];
             end
 
 
@@ -317,7 +317,7 @@ module sequence_acquisition (
                 // set up next state
                 state           <= `STATE_INSN_FETCH;
 
-                sample_idx      <= seq_elt[ `SEQ_NEXT_IDX_SLICE];
+                sample_idx      <= seq_elt[ `TERM_NEXT_IDX_SLICE];
 
                 // clear sample first flag
                 sample_first    <= 1'b0;
@@ -356,8 +356,8 @@ module sequence_acquisition (
               or just have separate op code for a idx jump
           */
 
-          pc_sw_o     <= p_seq0_i[ `SEQ_PC_SAMPLE_SLICE];
-          azmux_o     <= p_seq0_i[ `SEQ_AZMUX_SLICE ];
+          pc_sw_o     <= p_seq0_i[ `TERM_PC_SAMPLE_SLICE];
+          azmux_o     <= p_seq0_i[ `TERM_AZMUX_SLICE ];
 
         end
 
