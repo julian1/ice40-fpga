@@ -82,9 +82,10 @@
 
 `define TERM_NEXT_IDX_SLICE    12 +: 3
 
-
+// consider separate the oob and aperture flags. as distinct concepts.
 `define TERM_OOB_APERTURE      24
-`define TERM_ZGJC              25
+`define TERM_SECOND            25
+`define TERM_ZGJC              26
 
 
 
