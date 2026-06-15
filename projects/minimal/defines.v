@@ -82,6 +82,11 @@
 
 `define TERM_NEXT_IDX_SLICE    12 +: 3
 
+/*  unused bit.
+//  current mux.
+`define TERM_CMUX            16 +: 4
+*/
+
 // distinguish oob flags, from actual aperture control
 // to support other oob actions
 `define TERM_OOB                24
