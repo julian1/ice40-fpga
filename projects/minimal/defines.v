@@ -85,6 +85,10 @@
 /*  unused bit.
 //  current mux.
 `define TERM_CMUX            16 +: 4
+
+
+// only apply on the modulo count. else immediately cycle next
+`define TERM_MODULO
 */
 
 // distinguish oob flags, from actual aperture control
